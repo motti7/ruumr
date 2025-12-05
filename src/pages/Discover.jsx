@@ -1,0 +1,189 @@
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Profile, Swipe, Match } from "@/entities/all";
+import { User } from "@/entities/User";
+import { motion, AnimatePresence } from "framer-motion";
+import ProfileCard from "../components/discover/ProfileCard";
+import ActionButtons from "../components/discover/ActionButtons";
+import MatchAnimation from "../components/discover/MatchAnimation";
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from "@/components/ui/button";
+import { Heart, X } from "lucide-react";
+
+export default function DiscoverPage() {
+  const navigate = useNavigate();
+  const [profiles, setProfiles] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [userProfile, setUserProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastSwipes, setLastSwipes] = useState([]);
+  const [matchData, setMatchData] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState(null);
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const user = await User.me();
+      const userProfiles = await Profile.filter({ user_id: user.id });
+
+      if (userProfiles.length === 0) {
+        navigate(createPageUrl('Onboarding'));
+        return;
+      }
+      const currentUserProfile = userProfiles[0];
+      setUserProfile(currentUserProfile);
+      
+      const allProfiles = await Profile.list("-created_date", 100);
+      const userSwipes = await Swipe.filter({ swiper_id: user.id });
+      const swipedIds = userSwipes.map(s => s.swiped_id);
+      
+      const likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
+      const likedMeIds = likedMeSwipes.map(s => s.swiper_id);
+
+      const availableProfiles = allProfiles.filter(p => {
+        if (p.user_id === user.id || swipedIds.includes(p.user_id)) return false;
+        
+        const lookingForMyGender = (p.looking_for_gender === 'any' || p.looking_for_gender === currentUserProfile.gender);
+        const iAmLookingForTheirGender = (currentUserProfile.looking_for_gender === 'any' || currentUserProfile.looking_for_gender === p.gender);
+        
+        if (likedMeIds.includes(p.user_id) && !iAmLookingForTheirGender) {
+            return false;
+        }
+        
+        const budgetOverlap = (
+          (p.budget_min <= currentUserProfile.budget_max && p.budget_max >= currentUserProfile.budget_min) ||
+          (currentUserProfile.budget_min <= p.budget_max && currentUserProfile.budget_max >= p.budget_min)
+        );
+
+        return lookingForMyGender && iAmLookingForTheirGender && budgetOverlap;
+      });
+      
+      setProfiles(availableProfiles);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      navigate(createPageUrl('Home'));
+    }
+    setIsLoading(false);
+  }, [navigate]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+  
+  const handleSwipe = async (action) => {
+    if (currentIndex >= profiles.length || !userProfile) return;
+
+    const swipedProfile = profiles[currentIndex];
+    
+    setActionFeedback(action);
+    setTimeout(() => setActionFeedback(null), 600);
+    
+    try {
+      const swipeData = { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action };
+      await Swipe.create(swipeData);
+      setLastSwipes(prev => [...prev, swipeData]);
+
+      if (action === "like") {
+        const otherUserSwipe = await Swipe.filter({ swiper_id: swipedProfile.user_id, swiped_id: userProfile.user_id, action: "like" }, "", 1);
+
+        if (otherUserSwipe.length > 0) {
+          await Match.create({ user1_id: userProfile.user_id, user2_id: swipedProfile.user_id });
+          setMatchData({ profile1: userProfile, profile2: swipedProfile });
+        }
+      }
+      setCurrentIndex(prev => prev + 1);
+    } catch (error) { console.error("Error recording swipe:", error); }
+  };
+  
+  const handleRewind = () => {
+    if (currentIndex > 0 && lastSwipes.length > 0) {
+      setLastSwipes(prev => prev.slice(0, -1));
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const hasProfiles = profiles.length > 0 && currentIndex < profiles.length;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
+        <motion.div
+            className="w-12 h-12 rounded-full gradient-orange flex items-center justify-center"
+            animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+            <div className="w-6 h-6 bg-white rounded-full" />
+        </motion.div>
+        <p className="text-gray-500 font-medium mt-4">...מחפש שותפים</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 w-full bg-white overflow-hidden">
+      <AnimatePresence>
+        {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {actionFeedback && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
+                actionFeedback === 'like' 
+                  ? 'bg-green-500' 
+                  : 'bg-red-500'
+              }`}
+            >
+              {actionFeedback === 'like' ? (
+                <Heart className="w-16 h-16 text-white" fill="white" />
+              ) : (
+                <X className="w-16 h-16 text-white" strokeWidth={4} />
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="absolute w-full flex items-start justify-center px-3 pt-20">
+        <div style={{ height: 'calc(100vh - 200px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+          <AnimatePresence mode="wait">
+            {hasProfiles ? (
+              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index) => (
+                <ProfileCard
+                  key={`${profile.id}-${currentIndex}-${index}`}
+                  profile={profile}
+                  onSwipe={handleSwipe}
+                  isActive={index === 1}
+                />
+              ))
+            ) : (
+              <motion.div 
+                key="no-profiles"
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                className="flex flex-col items-center justify-center h-full text-center px-8"
+              >
+                <h2 className="text-2xl font-black text-gray-800 mb-3">זה הכל לעכשיו!</h2>
+                <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
+                <Button onClick={loadData} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+      
+      {hasProfiles && (
+        <div className="fixed w-full flex justify-center z-30" style={{ bottom: '85px' }}>
+          <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
+        </div>
+      )}
+    </div>
+  );
+}
