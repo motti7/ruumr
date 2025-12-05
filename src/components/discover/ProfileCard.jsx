@@ -204,12 +204,10 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
         return null;
     };
 
-    if (!isActive) return null;
-
     return (
         <>
             <motion.div
-                drag="x"
+                drag={isActive ? "x" : false}
                 dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                 dragElastic={0.7}
                 onDragEnd={handleDragEnd}

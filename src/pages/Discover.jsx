@@ -160,12 +160,12 @@ export default function DiscoverPage() {
         <div style={{ height: 'calc(100vh - 200px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
-              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index) => (
+              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => (
                 <ProfileCard
                   key={`${profile.id}-${currentIndex}-${index}`}
                   profile={profile}
                   onSwipe={handleSwipe}
-                  isActive={index === 1}
+                  isActive={index === arr.length - 1}
                 />
               ))
             ) : (
