@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -219,7 +218,7 @@ export default function ProfilePage() {
                         background: `linear-gradient(to right, #FF5722 0%, #FF5722 ${((formData.vibe_level - 1) / 4) * 100}%, #e5e7eb ${((formData.vibe_level - 1) / 4) * 100}%, #e5e7eb 100%)`
                       }}
                     />
-                    <style jsx>{`
+                    <style>{`
                       input[type="range"]::-webkit-slider-thumb {
                         appearance: none;
                         width: 24px;
