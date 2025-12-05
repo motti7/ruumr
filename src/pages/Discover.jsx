@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -44,19 +43,19 @@ export default function DiscoverPage() {
       const availableProfiles = allProfiles.filter(p => {
         if (p.user_id === user.id || swipedIds.includes(p.user_id)) return false;
         
-        const lookingForMyGender = (p.looking_for_gender === 'any' || p.looking_for_gender === currentUserProfile.gender);
-        const iAmLookingForTheirGender = (currentUserProfile.looking_for_gender === 'any' || currentUserProfile.looking_for_gender === p.gender);
-        
-        if (likedMeIds.includes(p.user_id) && !iAmLookingForTheirGender) {
-            return false;
-        }
-        
+        // Strict gender matching
+        const theyWantMe = (p.looking_for_gender === 'any' || p.looking_for_gender === currentUserProfile.gender);
+        const iWantThem = (currentUserProfile.looking_for_gender === 'any' || currentUserProfile.looking_for_gender === p.gender);
+
+        if (!theyWantMe || !iWantThem) return false;
+
         const budgetOverlap = (
           (p.budget_min <= currentUserProfile.budget_max && p.budget_max >= currentUserProfile.budget_min) ||
           (currentUserProfile.budget_min <= p.budget_max && currentUserProfile.budget_max >= p.budget_min)
         );
 
-        return lookingForMyGender && iAmLookingForTheirGender && budgetOverlap;
+        // Optional: filter by area match if needed, currently strict on gender and budget
+        return budgetOverlap;
       });
       
       setProfiles(availableProfiles);

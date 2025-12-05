@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -174,6 +174,49 @@ export default function ProfilePage() {
         </div>
         
         <div className="space-y-4">
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <h3 className="font-bold text-gray-800 mb-3 text-right">העדפות דת ומסורת</h3>
+              <div className="space-y-3">
+                  <div>
+                      <label className="block text-right text-sm font-medium text-gray-600 mb-1">זיקה לדת</label>
+                      <Select disabled={!isEditing} value={formData.religion} onValueChange={(v) => setFormField('religion', v)}>
+                          <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue placeholder="בחר..."/></SelectTrigger>
+                          <SelectContent className="bg-white">
+                              <SelectItem value="secular">חילוני/ת</SelectItem>
+                              <SelectItem value="traditional">מסורתי/ת</SelectItem>
+                              <SelectItem value="national_religious">דתי/ה לאומי/ת</SelectItem>
+                              <SelectItem value="religious">דתי/ה</SelectItem>
+                              <SelectItem value="haredi">חרדי/ת</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                      <div>
+                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">כשרות</label>
+                          <Select disabled={!isEditing} value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)}>
+                              <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue placeholder="בחר..."/></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                  <SelectItem value="for">בעד</SelectItem>
+                                  <SelectItem value="against">נגד</SelectItem>
+                                  <SelectItem value="flow">זורם/ת</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div>
+                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">שמירת שבת</label>
+                          <Select disabled={!isEditing} value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)}>
+                              <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue placeholder="בחר..."/></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                  <SelectItem value="for">בעד</SelectItem>
+                                  <SelectItem value="against">נגד</SelectItem>
+                                  <SelectItem value="flow">זורם/ת</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                  </div>
+              </div>
+            </div>
+
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
               <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
@@ -266,35 +309,51 @@ export default function ProfilePage() {
             </div>
 
             {formData.current_status === 'has_apartment' && (
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2 text-right">
-                        תמונות הדירה
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                        {[...Array(4)].map((_, i) => (
-                            <div 
-                              key={i} 
-                              className={`aspect-video rounded-xl border-2 border-dashed border-gray-300 overflow-hidden relative ${isEditing ? 'cursor-pointer hover:border-[--theme-orange]' : ''} transition-all`} 
-                              onClick={(e) => {
-                                if (isEditing) {
-                                  triggerApartmentFileInput(i);
-                                } else if (formData.apartment_photos?.[i]) {
-                                  setSelectedApartmentPhoto(formData.apartment_photos[i]);
-                                }
-                              }}
-                            >
-                                {(formData.apartment_photos?.length > i && formData.apartment_photos[i]) ? (
-                                    <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover"/>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                      {isEditing && <Plus className="w-4 h-4 text-gray-400"/>}
-                                    </div>
-                                )}
-                                {uploadingApartmentIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
-                            </div>
-                        ))}
-                    </div>
+            <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+            <div className="flex items-center mb-3">
+                <div className="p-2 bg-[--theme-orange] rounded-full text-white ml-2">
+                     <Home className="w-4 h-4" />
                 </div>
+                <label className="block text-lg font-bold text-gray-800">
+                    הדירה שלי
+                </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                {[...Array(4)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`aspect-[4/3] rounded-xl border-2 border-dashed ${isEditing ? 'border-[--theme-orange]/50 cursor-pointer hover:bg-orange-100' : 'border-gray-200'} bg-white overflow-hidden relative transition-all shadow-sm`} 
+                      onClick={(e) => {
+                        if (isEditing) {
+                          triggerApartmentFileInput(i);
+                        } else if (formData.apartment_photos?.[i]) {
+                          setSelectedApartmentPhoto(formData.apartment_photos[i]);
+                        }
+                      }}
+                    >
+                        {(formData.apartment_photos?.length > i && formData.apartment_photos[i]) ? (
+                            <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover"/>
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                              {isEditing ? (
+                                  <>
+                                      <Plus className="w-8 h-8 mb-1 text-[--theme-orange]"/>
+                                      <span className="text-xs text-[--theme-orange]">הוסף תמונה</span>
+                                  </>
+                              ) : (
+                                  <Home className="w-6 h-6 opacity-20"/>
+                              )}
+                            </div>
+                        )}
+                        {uploadingApartmentIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
+                    </div>
+                ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+                {isEditing ? 'יש להעלות תמונות ברורות של החללים המשותפים והחדר הפנוי' : 'לחץ על תמונה להגדלה'}
+            </p>
+            </div>
             )}
 
             <div>

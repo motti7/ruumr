@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '@/entities/User';
@@ -6,7 +5,7 @@ import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
-import { ArrowLeft, Camera, Dog, Cat, X, Plus, Loader2, PawPrint } from 'lucide-react';
+import { ArrowLeft, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -95,16 +94,17 @@ export default function OnboardingPage() {
       case 6:
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
       case 7:
-        // אם יש דירה, חייב לפחות 3 תמונות דירה
+        // If has apartment, MUST have at least 3 photos
         if (formData.current_status === 'has_apartment') {
           const apartmentPhotoCount = formData.apartment_photos?.filter(p => p).length || 0;
+          // Must have photos, roommates count (can be 0), and budget > 0
           return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
-        return formData.current_status !== '';
+        return formData.current_status === 'seeking_apartment';
       default:
         return true;
-    }
-  };
+      }
+      };
 
   const nextStep = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));

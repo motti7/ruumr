@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, MessageCircle, User, Settings, Home } from "lucide-react";
+import { Compass, MessageCircle, User, Settings, Home, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Layout({ children, currentPageName }) {
@@ -18,11 +18,22 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
         <meta name="theme-color" content="#FF5722" />
-        
-        <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-gradient-to-br from-orange-500 to-amber-500 z-[1000] text-white p-8 text-center">
-            <Home className="w-24 h-24 mb-6" />
-            <h1 className="text-3xl font-bold mb-4">Roomi מיועדת למובייל בלבד</h1>
-            <p className="text-lg">לחוויה הטובה ביותר, אנא פתח את האפליקציה במכשיר הנייד שלך.</p>
+
+        <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
+            <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg transform rotate-3">
+                    <Home className="w-10 h-10 text-white" />
+                </div>
+                <h1 className="text-4xl font-black mb-4 text-gray-900" style={{fontFamily: 'Pacifico, cursive'}}>Roomi</h1>
+                <h2 className="text-2xl font-bold mb-6">חווית המובייל המושלמת מחכה לך</h2>
+                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                    פיתחנו את Roomi במיוחד עבור הטלפון הנייד שלך, כדי לספק לך את חווית המשתמש הטובה, האישית והנוחה ביותר.
+                </p>
+                <div className="flex items-center gap-3 text-orange-600 font-semibold bg-white px-6 py-3 rounded-full shadow-sm border border-orange-100">
+                    <Smartphone className="w-5 h-5" />
+                    <span>אנא פתח/י דרך הנייד</span>
+                </div>
+            </div>
         </div>
 
         <div className="sm:hidden">
