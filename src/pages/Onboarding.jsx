@@ -112,7 +112,11 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      const finalData = { ...formData, photos: formData.photos.filter(p => p) };
+      const finalData = { 
+          ...formData, 
+          photos: formData.photos.filter(p => p),
+          apartment_photos: formData.apartment_photos ? formData.apartment_photos.filter(p => p) : []
+      };
       await Profile.create(finalData);
       navigate(createPageUrl('Discover'));
     } catch (error) {

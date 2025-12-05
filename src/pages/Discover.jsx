@@ -54,7 +54,13 @@ export default function DiscoverPage() {
           (currentUserProfile.budget_min <= p.budget_max && currentUserProfile.budget_max >= p.budget_min)
         );
 
-        // Optional: filter by area match if needed, currently strict on gender and budget
+        // Smart status matching:
+        // If I have an apartment, I'm looking for someone seeking one.
+        // If I'm seeking, I can match with anyone (someone with apt, or partner to search with).
+        if (currentUserProfile.current_status === 'has_apartment' && p.current_status === 'has_apartment') {
+            return false;
+        }
+
         return budgetOverlap;
       });
       
