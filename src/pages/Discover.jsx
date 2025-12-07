@@ -60,6 +60,9 @@ export default function DiscoverPage() {
         if (currentUserProfile.current_status === 'has_apartment' && p.current_status === 'has_apartment') {
             return false;
         }
+        
+        // Visibility Check
+        if (p.is_visible === false) return false;
 
         return budgetOverlap;
       });

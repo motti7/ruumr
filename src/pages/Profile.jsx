@@ -141,6 +141,16 @@ export default function ProfilePage() {
                     {isEditing && <Plus className="w-6 h-6 text-gray-400"/>}
                   </div>
                 )}
+                {/* Click handler for Lightbox when NOT editing */}
+                {!isEditing && formData.photos?.[i] && (
+                  <div 
+                    className="absolute inset-0 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApartmentPhoto(formData.photos[i]);
+                    }}
+                  />
+                )}
                 {uploadingIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
               </div>
             ))}

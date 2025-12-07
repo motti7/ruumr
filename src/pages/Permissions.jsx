@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import { User } from "@/entities/User";
+import { Profile } from "@/entities/Profile";
 
 const PermissionItem = ({ title, subtitle, checked, onChange }) => (
     <Card className="shadow-sm border-0">
@@ -42,20 +43,22 @@ export default function PermissionsPage() {
     const handleDiscoveryChange = async (checked) => {
         setShowInDiscovery(checked);
         await User.updateMyUserData({ show_in_discovery: checked });
+        
+        // Update profile visibility as well for easier filtering
+        try {
+            const user = await User.me();
+            const profiles = await Profile.filter({ user_id: user.id });
+            if (profiles.length > 0) {
+                await Profile.update(profiles[0].id, { is_visible: checked });
+            }
+        } catch (e) {
+            console.error("Failed to update profile visibility", e);
+        }
     };
 
     const handleActiveStatusChange = async (checked) => {
         setShowActiveStatus(checked);
         await User.updateMyUserData({ show_active_status: checked });
-    };
-
-    const handleNotificationsChange = async (checked) => {
-        setEnableNotifications(checked);
-        await User.updateMyUserData({ enable_notifications: checked });
-        // Simulating requesting permission in browser if supported
-        if (checked && 'Notification' in window && Notification.permission !== 'granted') {
-             Notification.requestPermission();
-        }
     };
 
     return (
@@ -75,16 +78,10 @@ export default function PermissionsPage() {
                     onChange={handleDiscoveryChange}
                 />
                 <PermissionItem 
-                    title="הצג סטטוס 'פעיל לאחרונה'" 
-                    subtitle="שתף מתי היית פעיל/ה לאחרונה באפליקציה." 
+                    title="הצג סטטוס 'פעיל כעת'" 
+                    subtitle="אנשים יוכלו לראות מתי אתה מחובר לאפליקציה." 
                     checked={showActiveStatus} 
                     onChange={handleActiveStatusChange}
-                />
-                <PermissionItem 
-                    title="קבלת התראות" 
-                    subtitle="קבל עדכונים על התאמות והודעות חדשות." 
-                    checked={enableNotifications} 
-                    onChange={handleNotificationsChange}
                 />
             </div>
         </div>
