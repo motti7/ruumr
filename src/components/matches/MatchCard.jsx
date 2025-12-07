@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin } from "lucide-react";
 
-export default function MatchCard({ match, onClickProfile, onClickChat }) {
+export default function MatchCard({ match, isOnline, onClickProfile, onClickChat }) {
   const handleProfileClick = (e) => {
     e.stopPropagation();
     onClickProfile();
@@ -28,7 +28,9 @@ export default function MatchCard({ match, onClickProfile, onClickChat }) {
             alt={match.name}
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
           />
-          <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white" />
+          {isOnline && (
+            <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm" />
+          )}
         </div>
         
         <div className="flex-1 min-w-0">
