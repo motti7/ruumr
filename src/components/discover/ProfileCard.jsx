@@ -62,6 +62,21 @@ const ProfileDetail = ({ profile, onClose }) => {
                     </div>
                 </div>
 
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl flex items-center justify-between">
+                     <div>
+                        <h4 className="font-bold text-white text-lg mb-1">בעלי חיים</h4>
+                        <span className="text-white/90">
+                            {{'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': profile.pet_other_description || 'אחר'}[profile.pet_type] || 'לא צוין'}
+                        </span>
+                     </div>
+                     <div className="bg-white/20 p-2 rounded-full">
+                        {profile.pet_type === 'dog' && <Dog className="w-6 h-6 text-white"/>}
+                        {profile.pet_type === 'cat' && <Cat className="w-6 h-6 text-white"/>}
+                        {profile.pet_type === 'other' && <PawPrint className="w-6 h-6 text-white"/>}
+                        {profile.pet_type === 'none' && <div className="w-6 h-6 text-white/50 text-xs flex items-center justify-center">אין</div>}
+                     </div>
+                </div>
+
                 {profile.current_status === 'has_apartment' && (
                     <div className="bg-gradient-to-r from-[--theme-orange] to-[--theme-orange-dark] backdrop-blur-sm p-5 rounded-2xl">
                         <h4 className="font-bold text-white mb-3 flex items-center text-lg">
@@ -175,12 +190,13 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 וייב: {vibeText[profile.vibe_level - 1]}
                             </div>
                         </div>
-                        {profile.about_me && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
-                                <h3 className="text-xl font-bold text-white mb-2">קצת עליי</h3>
-                                <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.about_me}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                            <h3 className="text-xl font-bold text-white mb-2">התקציב שלי</h3>
+                            <div className="text-white/95 text-4xl font-black">
+                                ₪{profile.budget_max?.toLocaleString()}
+                                <span className="text-lg font-normal opacity-80 mr-2">לחודש</span>
                             </div>
-                        )}
+                        </div>
                     </>
                 );
             } else if (index === 2) {

@@ -175,6 +175,34 @@ export default function ProfilePage() {
         
         <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <h3 className="font-bold text-gray-800 mb-3 text-right">בעלי חיים</h3>
+              <div className="space-y-3 mb-4">
+                  <div className="grid grid-cols-2 gap-3">
+                      {['none', 'dog', 'cat', 'other'].map(type => (
+                          <button 
+                              key={type} 
+                              disabled={!isEditing}
+                              onClick={() => setFormField('pet_type', type)} 
+                              className={`p-2 border rounded-lg flex flex-col items-center justify-center transition-colors ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]' : 'border-gray-200 text-gray-600'} ${!isEditing && formData.pet_type !== type ? 'opacity-50' : ''}`}
+                          >
+                              <span className="text-sm font-medium">{
+                                  {'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]
+                              }</span>
+                          </button>
+                      ))}
+                  </div>
+                  {formData.pet_type === 'other' && (
+                       <Input 
+                          disabled={!isEditing} 
+                          value={formData.pet_other_description || ''} 
+                          onChange={(e) => setFormField('pet_other_description', e.target.value)} 
+                          placeholder="איזו חיה?" 
+                          className="bg-white border-gray-300 text-right" 
+                          dir="rtl"
+                       />
+                  )}
+              </div>
+
               <h3 className="font-bold text-gray-800 mb-3 text-right">העדפות דת ומסורת</h3>
               <div className="space-y-3">
                   <div>

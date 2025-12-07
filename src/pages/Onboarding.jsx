@@ -5,17 +5,20 @@ import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
-import { ArrowLeft, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint } from 'lucide-react';
+import { ArrowLeft, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Progress } from '@/components/ui/progress';
+import CitySelect from '@/components/shared/CitySelect';
+import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 7; // Now 7 content steps, the last one being the "status" step before finishing.
+// Total steps adjusted for better flow
+const TOTAL_STEPS = 8; 
 
-const Step = ({ children, step, currentStep }) => (
+const Step = ({ children, step, currentStep, title }) => (
   <AnimatePresence mode="wait">
     {currentStep === step && (
       <motion.div
@@ -23,10 +26,13 @@ const Step = ({ children, step, currentStep }) => (
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -50 }}
-        transition={{ duration: 0.3 }}
-        className="w-full"
+        transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
+        className="w-full flex flex-col h-full"
       >
-        {children}
+        {title && <h2 className="text-3xl font-black text-center mb-2 text-gray-800">{title}</h2>}
+        <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
+            {children}
+        </div>
       </motion.div>
     )}
   </AnimatePresence>
@@ -35,7 +41,6 @@ const Step = ({ children, step, currentStep }) => (
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     age: 25,
@@ -43,9 +48,9 @@ export default function OnboardingPage() {
     about_me: '',
     looking_for_description: '',
     photos: Array(6).fill(null),
-    location: '', // Changed from 'תל אביב' to ''
-    search_area: 'מרכז', // Added
-    // budget_min removed
+    location: '', 
+    search_cities: [],
+    search_area: 'מרכז',
     budget_max: 3500,
     vibe_level: 3,
     pet_type: 'none',
@@ -54,23 +59,23 @@ export default function OnboardingPage() {
     religion: 'secular',
     kosher_preference: 'flow',
     shabbat_preference: 'flow',
-    current_status: 'seeking_apartment',
-    // Kept apartment related fields as they are used in the last step's UI and validation
-    apartment_photos: [],
+    current_status: '',
+    apartment_photos: Array(6).fill(null),
     existing_roommates: 0,
     apartment_total_budget: 5000,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const fileInputRef = useRef(null);
+  const apartmentFileInputRef = useRef(null);
   const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const userData = await User.me();
-        setUser(userData);
-        // Pre-fill name with first name only
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
       } catch (e) {
         navigate(createPageUrl('Home'));
@@ -81,32 +86,40 @@ export default function OnboardingPage() {
   
   const canProceed = () => {
     switch(step) {
-      case 1:
+      case 1: // Basic Info
         return formData.name.trim() && formData.age >= 18 && formData.gender;
-      case 2:
-        return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 3:
+      case 2: // Status (moved earlier)
+        return formData.current_status !== '';
+      case 3: // Photos
         return formData.photos.filter(p => p).length >= 2;
-      case 4:
-        return formData.search_area.trim() !== '';
-      case 5:
+      case 4: // About
+        return formData.about_me.trim() && formData.looking_for_description.trim();
+      case 5: // Location & Budget
+        return formData.search_cities.length > 0 && formData.budget_max > 0;
+      case 6: // Vibe & Pets
         return formData.vibe_level && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 6:
+      case 7: // Preferences
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
-      case 7:
-        // If has apartment, MUST have at least 3 photos
+      case 8: // Apartment Details (Conditional)
         if (formData.current_status === 'has_apartment') {
-          const apartmentPhotoCount = formData.apartment_photos?.filter(p => p).length || 0;
-          // Must have photos, roommates count (can be 0), and budget > 0
-          return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
+            const apartmentPhotoCount = formData.apartment_photos?.filter(p => p).length || 0;
+            return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
-        return formData.current_status === 'seeking_apartment';
+        return true;
       default:
         return true;
       }
-      };
+  };
 
-  const nextStep = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
+  const nextStep = () => {
+    if (step === 7 && formData.current_status === 'seeking_apartment') {
+        // Skip apartment details if seeking
+        handleFinish();
+    } else {
+        setStep(s => Math.min(s + 1, TOTAL_STEPS));
+    }
+  };
+  
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
   const handleFinish = async () => {
@@ -115,7 +128,11 @@ export default function OnboardingPage() {
       const finalData = { 
           ...formData, 
           photos: formData.photos.filter(p => p),
-          apartment_photos: formData.apartment_photos ? formData.apartment_photos.filter(p => p) : []
+          apartment_photos: formData.apartment_photos ? formData.apartment_photos.filter(p => p) : [],
+          // Convert array to string for search_area for now to keep compatibility if needed, 
+          // but we added search_cities field. We'll keep search_area as general region or derived.
+          // For now just taking the first city or keeping as is if not used.
+          location: formData.search_cities[0] || ''
       };
       await Profile.create(finalData);
       navigate(createPageUrl('Discover'));
@@ -129,93 +146,96 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = async (e, index) => {
+  const handleImageUpload = async (e, index, isApartment = false) => {
     const file = e.target.files[0];
-    if (!file) {
-      setUploadingIndex(null);
-      return;
-    }
+    if (!file) return;
 
-    setUploadingIndex(index);
+    if (isApartment) setUploadingApartmentIndex(index);
+    else setUploadingIndex(index);
+
     try {
       const { file_url } = await UploadFile({ file });
       setFormData(prev => {
-        const newPhotos = [...prev.photos];
+        const key = isApartment ? 'apartment_photos' : 'photos';
+        const newPhotos = [...(prev[key] || [])];
         newPhotos[index] = file_url;
-        return { ...prev, photos: newPhotos };
+        
+        // Dynamic expansion for apartment photos if last slot filled
+        if (isApartment && index === newPhotos.length - 1 && newPhotos.length < 12) {
+             newPhotos.push(null, null);
+        }
+        
+        return { ...prev, [key]: newPhotos };
       });
     } catch (error) {
       console.error("Upload failed", error);
     } finally {
       setUploadingIndex(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setUploadingApartmentIndex(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (apartmentFileInputRef.current) apartmentFileInputRef.current.value = '';
     }
   };
   
-  const triggerFileInput = (index) => {
-    fileInputRef.current.onchange = (e) => handleImageUpload(e, index);
-    fileInputRef.current.click();
-  };
-
-  const handleApartmentImageUpload = async (e, index) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const { file_url } = await UploadFile({ file });
-      setFormData(prev => {
-        const newPhotos = [...(prev.apartment_photos || [])];
-        newPhotos[index] = file_url;
-        return { ...prev, apartment_photos: newPhotos };
-      });
-    } catch (error) {
-      console.error("Upload failed", error);
+  const triggerFileInput = (index, isApartment = false) => {
+    if (isApartment) {
+        apartmentFileInputRef.current.onclick = () => {
+            apartmentFileInputRef.current.onchange = (e) => handleImageUpload(e, index, true);
+        };
+        apartmentFileInputRef.current.click();
+    } else {
+        fileInputRef.current.onclick = () => {
+            fileInputRef.current.onchange = (e) => handleImageUpload(e, index, false);
+        };
+        fileInputRef.current.click();
     }
-  };
-  
-  const triggerApartmentFileInput = (index) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => handleApartmentImageUpload(e, index);
-    input.click();
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4" dir="rtl">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-4">
-          {step > 1 ? (
-            <Button variant="ghost" size="icon" onClick={prevStep}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          ) : (
-            <div className="w-10"></div>
-          )}
-          <div className="flex-grow text-center text-sm text-gray-500">
-            שלב {step} מתוך {TOTAL_STEPS}
-          </div>
-          <div className="w-10"></div>
-        </div>
-        <Progress value={(step / TOTAL_STEPS) * 100} className="w-full mb-8 h-2" />
-        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl">
+      <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+      <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
-        <div className="flex items-center justify-center min-h-[50vh]">
-            <Step step={1} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">ברוך הבא ל-Roomi!</h2>
-                <p className="text-center text-gray-600 mb-8">בוא ניצור את הפרופיל שלך. זה ייקח רק כמה דקות.</p>
-                <div className="space-y-4">
-                    <div>
-                        <label className="font-medium">שם פרטי</label>
-                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} />
+      <div className="w-full max-w-md flex flex-col h-[85vh]">
+        {/* Progress Bar */}
+        <div className="mb-6">
+             <div className="flex justify-between items-center mb-2">
+                 {step > 1 ? (
+                   <Button variant="ghost" size="icon" onClick={prevStep} className="hover:bg-orange-50 text-gray-500">
+                     <ArrowLeft className="h-6 w-6" />
+                   </Button>
+                 ) : <div className="w-10"/>}
+                 <span className="font-bold text-[--theme-orange]">שלב {step}</span>
+                 <div className="w-10"/>
+             </div>
+             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                 <motion.div 
+                    className="h-full gradient-orange"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                 />
+             </div>
+        </div>
+
+        <div className="flex-1 relative">
+            <Step step={1} currentStep={step} title="נעים להכיר!">
+                <p className="text-center text-gray-500 mb-8">ספר לנו קצת על עצמך בשביל ההתחלה</p>
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">שם פרטי</label>
+                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-12 text-lg bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="font-medium">מגדר</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">גיל</label>
+                            <Input type="number" value={formData.age} onChange={(e) => setFormField('age', parseInt(e.target.value) || 0)} className="h-12 text-lg bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">מגדר</label>
                             <Select value={formData.gender} onValueChange={(v) => setFormField('gender', v)}>
-                                <SelectTrigger><SelectValue/></SelectTrigger>
+                                <SelectTrigger className="h-12 text-lg bg-gray-50 border-gray-200"><SelectValue/></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="male">זכר</SelectItem>
                                     <SelectItem value="female">נקבה</SelectItem>
@@ -223,124 +243,171 @@ export default function OnboardingPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                         <div>
-                            <label className="font-medium">גיל</label>
-                            <Input type="number" value={formData.age} onChange={(e) => setFormField('age', parseInt(e.target.value) || 0)} />
-                        </div>
-                    </div>
-                </div>
-            </Step>
-            
-            <Step step={2} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">ספר/י על עצמך</h2>
-                <div className="space-y-4">
-                    <div>
-                        <label className="font-medium">קצת עליי (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..."/>
-                    </div>
-                    <div>
-                        <label className="font-medium">מה אני מחפש/ת (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?"/>
                     </div>
                 </div>
             </Step>
 
-            <Step step={3} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">העלה/י את התמונות שלך</h2>
-                <p className="text-center text-gray-500 mb-6">צריך לפחות 2 תמונות. תמונה טובה שווה אלף מילים!</p>
+            <Step step={2} currentStep={step} title="מה הסטטוס?">
+                <div className="space-y-4 mt-4">
+                    <button type="button" onClick={() => { setFormField('current_status', 'seeking_apartment'); nextStep(); }} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-black text-gray-800">מחפש/ת דירה</h3>
+                            <Search className={`w-6 h-6 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                        </div>
+                        <p className="text-gray-500">אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
+                    </button>
+
+                    <button type="button" onClick={() => { setFormField('current_status', 'has_apartment'); nextStep(); }} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-black text-gray-800">יש לי דירה</h3>
+                            <Home className={`w-6 h-6 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                        </div>
+                        <p className="text-gray-500">יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
+                    </button>
+                </div>
+            </Step>
+            
+            <Step step={3} currentStep={step} title="התמונות שלי">
+                <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="aspect-square rounded-2xl border-2 border-dashed border-gray-300 overflow-hidden" onClick={() => triggerFileInput(i)}>
+                        <div key={i} className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm hover:shadow-md transition-all bg-gray-50 group">
                              {formData.photos[i] ? (
-                                 <img src={formData.photos[i]} alt={`Uploaded ${i+1}`} className="w-full h-full object-cover" />
+                                 <>
+                                    <img 
+                                        src={formData.photos[i]} 
+                                        alt={`Uploaded ${i+1}`} 
+                                        className="w-full h-full object-cover cursor-pointer" 
+                                        onClick={() => setLightboxSrc(formData.photos[i])}
+                                    />
+                                    <button 
+                                        className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => { e.stopPropagation(); triggerFileInput(i); }}
+                                    >
+                                        <Camera className="w-4 h-4 text-gray-600"/>
+                                    </button>
+                                 </>
                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-100 cursor-pointer">
-                                    {uploadingIndex === i ? <Loader2 className="w-6 h-6 animate-spin text-gray-400"/> : <Plus className="w-6 h-6 text-gray-400"/>}
+                                <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => triggerFileInput(i)}>
+                                    {uploadingIndex === i ? <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]"/> : <Plus className="w-8 h-8 text-gray-300"/>}
                                 </div>
                              )}
+                             <div className="absolute bottom-1 right-1 bg-black/50 text-white text-[10px] px-1.5 rounded-md pointer-events-none">
+                                {i + 1}
+                             </div>
                         </div>
                     ))}
                 </div>
             </Step>
-            
-            <Step step={4} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">איפה נחפש?</h2>
-                 <div className="space-y-4">
-                    <div>
-                        <label className="font-medium">אזור חיפוש מועדף</label>
-                        <Select value={formData.search_area} onValueChange={(v) => setFormField('search_area', v)}>
-                            <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="צפון">צפון</SelectItem>
-                                <SelectItem value="מרכז">מרכז</SelectItem>
-                                <SelectItem value="דרום">דרום</SelectItem>
-                                <SelectItem value="שפלה">שפלה</SelectItem>
-                                <SelectItem value="ירושלים">ירושלים והסביבה</SelectItem>
-                            </SelectContent>
-                        </Select>
+
+            <Step step={4} currentStep={step} title="ספר/י על עצמך">
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
-                    <div>
-                        <label className="font-medium">עיר (אופציונלי)</label>
-                        <Input value={formData.location} onChange={(e) => setFormField('location', e.target.value)} placeholder="לדוגמה: תל אביב"/>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
                 </div>
             </Step>
 
-            <Step step={5} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">סגנון חיים</h2>
+            <Step step={5} currentStep={step} title="לוקיישן ותקציב">
                 <div className="space-y-8">
-                     <div>
-                        <label className="font-medium block text-center mb-2">איפה את/ה על הסקאלה?</label>
-                        <Slider dir="ltr" value={[formData.vibe_level]} onValueChange={(v) => setFormField('vibe_level', v[0])} max={5} min={1} step={1} />
-                        <div className="flex justify-between text-sm text-gray-500 mt-2">
-                            <span>שקט וביתי</span>
-                            <span>חברותי ופעיל</span>
-                            <span>תוסס ומסיבתי</span>
-                        </div>
+                    <div className="space-y-2">
+                        <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <MapPin className="text-[--theme-orange]"/>
+                            איפה נחפש?
+                        </label>
+                        <p className="text-sm text-gray-500 mb-2">אפשר לבחור מספר ערים</p>
+                        <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
-                    <div>
-                        <label className="font-medium block text-center mb-4">יש לך חיית מחמד?</label>
-                        <div className="grid grid-cols-2 gap-3">
-                            {['none', 'dog', 'cat', 'other'].map(type => (
-                                <button type="button" key={type} onClick={() => setFormField('pet_type', type)} className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center transition-colors ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50' : 'border-gray-200'}`}>
-                                    {type === 'none' && <X className="w-8 h-8 mb-2" />}
-                                    {type === 'dog' && <Dog className="w-8 h-8 mb-2" />}
-                                    {type === 'cat' && <Cat className="w-8 h-8 mb-2" />}
-                                    {type === 'other' && <PawPrint className="w-8 h-8 mb-2" />}
-                                    <span className="font-semibold">{
-                                        {'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]
-                                    }</span>
-                                </button>
-                            ))}
+                    
+                    <div className="space-y-4">
+                        <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <DollarSign className="text-[--theme-orange]"/>
+                            מה התקציב שלך?
+                        </label>
+                        <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 text-center">
+                            <span className="text-4xl font-black text-[--theme-orange]">₪{formData.budget_max}</span>
+                            <span className="text-sm text-gray-500 mr-2">לחודש</span>
                         </div>
-                         {formData.pet_type === 'other' && (
-                            <motion.div initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} className="mt-4">
-                                <label className="font-medium">איזו חיה?</label>
-                                <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="לדוגמה: תוכי, ארנב..."/>
-                            </motion.div>
-                         )}
+                        <Slider 
+                            value={[formData.budget_max]} 
+                            min={1000} 
+                            max={10000} 
+                            step={100} 
+                            onValueChange={(v) => setFormField('budget_max', v[0])}
+                            className="py-4"
+                        />
                     </div>
                 </div>
             </Step>
-            
-            <Step step={6} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">העדפות ודת</h2>
-                 <div className="space-y-4">
-                    <div>
-                        <label className="font-medium">אני מחפש/ת</label>
-                        <Select value={formData.looking_for_gender} onValueChange={(v) => setFormField('looking_for_gender', v)}>
-                            <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="male">שותף</SelectItem>
-                                <SelectItem value="female">שותפה</SelectItem>
-                                <SelectItem value="any">לא משנה</SelectItem>
-                            </SelectContent>
-                        </Select>
+
+            <Step step={6} currentStep={step} title="וייב וחיות מחמד">
+                 <div className="space-y-8">
+                      <div>
+                          <label className="font-bold text-lg block text-center mb-4">איפה את/ה על הסקאלה?</label>
+                          <div className="px-4">
+                              <Slider dir="ltr" value={[formData.vibe_level]} onValueChange={(v) => setFormField('vibe_level', v[0])} max={5} min={1} step={1} />
+                              <div className="flex justify-between text-xs font-bold text-gray-500 mt-3">
+                                  <span>שקט וביתי</span>
+                                  <span>מאוזן</span>
+                                  <span>תוסס ומסיבתי</span>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div>
+                          <label className="font-bold text-lg block text-center mb-4">יש לך חיית מחמד?</label>
+                          <div className="grid grid-cols-2 gap-3">
+                              {['none', 'dog', 'cat', 'other'].map(type => (
+                                  <button type="button" key={type} onClick={() => setFormField('pet_type', type)} className={`p-4 border-2 rounded-2xl flex flex-col items-center justify-center transition-all ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-md' : 'border-gray-100 bg-gray-50 text-gray-400'}`}>
+                                      {type === 'none' && <X className="w-8 h-8 mb-2" />}
+                                      {type === 'dog' && <Dog className="w-8 h-8 mb-2" />}
+                                      {type === 'cat' && <Cat className="w-8 h-8 mb-2" />}
+                                      {type === 'other' && <PawPrint className="w-8 h-8 mb-2" />}
+                                      <span className="font-bold">{
+                                          {'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]
+                                      }</span>
+                                  </button>
+                              ))}
+                          </div>
+                           {formData.pet_type === 'other' && (
+                              <motion.div initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} className="mt-4">
+                                  <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="text-center bg-gray-50 border-gray-200"/>
+                              </motion.div>
+                           )}
+                      </div>
+                  </div>
+            </Step>
+
+            <Step step={7} currentStep={step} title="העדפות ודת">
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="font-bold block mb-1">אני מחפש/ת</label>
+                        <div className="flex bg-gray-100 p-1 rounded-xl">
+                            {[
+                                {v: 'male', l: 'שותף'}, 
+                                {v: 'female', l: 'שותפה'}, 
+                                {v: 'any', l: 'לא משנה'}
+                            ].map(opt => (
+                                <button
+                                    key={opt.v}
+                                    onClick={() => setFormField('looking_for_gender', opt.v)}
+                                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
+                                >
+                                    {opt.l}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                     <div>
-                        <label className="font-medium">זיקה לדת</label>
+                    
+                    <div className="space-y-2">
+                        <label className="font-bold block mb-1">זיקה לדת</label>
                         <Select value={formData.religion} onValueChange={(v) => setFormField('religion', v)}>
-                            <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
+                            <SelectTrigger className="h-12 bg-gray-50 border-gray-200"><SelectValue/></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="secular">חילוני/ת</SelectItem>
                                 <SelectItem value="traditional">מסורתי/ת</SelectItem>
@@ -350,89 +417,85 @@ export default function OnboardingPage() {
                             </SelectContent>
                         </Select>
                     </div>
-                     <div>
-                        <label className="font-medium">כשרות במטבח</label>
-                        <Select value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)}>
-                            <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="for">בעד</SelectItem>
-                                <SelectItem value="against">נגד</SelectItem>
-                                <SelectItem value="flow">יכול/ה לזרום</SelectItem>
-                            </SelectContent>
-                        </Select>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="font-bold block mb-1 text-sm">כשרות</label>
+                            <Select value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)}>
+                                <SelectTrigger className="h-10 bg-gray-50 border-gray-200"><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="for">בעד</SelectItem>
+                                    <SelectItem value="against">נגד</SelectItem>
+                                    <SelectItem value="flow">זורם</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="font-bold block mb-1 text-sm">שבת</label>
+                            <Select value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)}>
+                                <SelectTrigger className="h-10 bg-gray-50 border-gray-200"><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="for">בעד</SelectItem>
+                                    <SelectItem value="against">נגד</SelectItem>
+                                    <SelectItem value="flow">זורם</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                      <div>
-                        <label className="font-medium">שבת במרחב הציבורי</label>
-                        <Select value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)}>
-                            <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="for">בעד שמירה</SelectItem>
-                                <SelectItem value="against">נגד שמירה</SelectItem>
-                                <SelectItem value="flow">יכול/ה לזרום</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                 </div>
+                </div>
             </Step>
 
-            <Step step={7} currentStep={step}>
-                <h2 className="text-2xl font-bold text-center mb-6">מה הסטטוס שלך?</h2>
-                <div className="space-y-4">
-                    <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full p-4 border-2 rounded-lg text-right transition-colors ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50' : 'border-gray-200'}`}>
-                        <h3 className="font-bold">מחפש/ת דירה ושותפים</h3>
-                        <p className="text-sm text-gray-500">אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
-                    </button>
-                    <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full p-4 border-2 rounded-lg text-right transition-colors ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50' : 'border-gray-200'}`}>
-                        <h3 className="font-bold">יש לי כבר דירה</h3>
-                        <p className="text-sm text-gray-500">אני מחפש/ת שותף/ה שיצטרף/תצטרף לדירה קיימת.</p>
-                    </button>
-                </div>
-                <AnimatePresence>
-                {formData.current_status === 'has_apartment' && (
-                    <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} exit={{opacity: 0, height: 0}} className="mt-6 space-y-4">
-                        <div>
-                            <label className="font-medium">מספר שותפים נוכחי</label>
-                            <Input type="number" value={formData.existing_roommates} onChange={e => setFormField('existing_roommates', parseInt(e.target.value) || 0)} />
-                        </div>
-                        <div>
-                            <label className="font-medium">שכירות חודשית כוללת לדירה</label>
-                            <Input type="number" value={formData.apartment_total_budget} onChange={e => setFormField('apartment_total_budget', parseInt(e.target.value) || 0)} />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold pt-2 mb-2">תמונות הדירה (לפחות 3 תמונות)</h3>
-                            <div className="grid grid-cols-3 gap-3">
-                                {[...Array(4)].map((_, i) => (
-                                    <div 
-                                        key={i} 
-                                        className="aspect-square bg-gray-100 rounded-2xl flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-300 overflow-hidden"
-                                        onClick={() => triggerApartmentFileInput(i)}
-                                    >
-                                        {formData.apartment_photos?.[i] ? (
-                                            <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Camera className="w-6 h-6 text-gray-400" />
-                                        )}
-                                    </div>
-                                ))}
+            <Step step={8} currentStep={step} title="פרטי הדירה">
+                <div className="space-y-6">
+                    <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                        <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
+                            <Home className="w-5 h-5"/>
+                            הדירה שלך
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">שותפים קיימים</label>
+                                <Input type="number" value={formData.existing_roommates} onChange={e => setFormField('existing_roommates', parseInt(e.target.value) || 0)} className="bg-white border-orange-200"/>
                             </div>
-                            {formData.apartment_photos?.filter(p => p).length < 3 && (
-                                <p className="text-red-500 text-sm mt-2">יש להעלות לפחות 3 תמונות של הדירה</p>
-                            )}
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">שכירות (סה"כ)</label>
+                                <Input type="number" value={formData.apartment_total_budget} onChange={e => setFormField('apartment_total_budget', parseInt(e.target.value) || 0)} className="bg-white border-orange-200"/>
+                            </div>
                         </div>
-                    </motion.div>
-                )}
-                </AnimatePresence>
+                        
+                        <label className="text-sm font-bold text-gray-700 mb-3 block">תמונות (מינימום 3)</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {formData.apartment_photos.map((_, i) => (
+                                <div 
+                                    key={i} 
+                                    className="aspect-square bg-white rounded-xl flex items-center justify-center cursor-pointer border border-dashed border-orange-200 overflow-hidden relative"
+                                    onClick={() => triggerFileInput(i, true)}
+                                >
+                                    {formData.apartment_photos?.[i] ? (
+                                        <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover" />
+                                    ) : (
+                                        uploadingApartmentIndex === i ? 
+                                            <Loader2 className="w-5 h-5 animate-spin text-[--theme-orange]" /> :
+                                            <Plus className="w-5 h-5 text-orange-300" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </Step>
         </div>
 
-        <div className="mt-8">
-          {step < TOTAL_STEPS ? (
-            <Button onClick={nextStep} className="w-full gradient-orange text-white" disabled={!canProceed()}>המשך</Button>
-          ) : (
-            <Button onClick={handleFinish} className="w-full bg-green-500 hover:bg-green-600" disabled={isSubmitting || !canProceed()}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin"/> : 'יאללה, נתחיל!'}
+        {/* Action Button */}
+        <div className="mt-6">
+            <Button 
+                onClick={step === TOTAL_STEPS || (step === 7 && formData.current_status === 'seeking_apartment') ? handleFinish : nextStep} 
+                className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`} 
+                disabled={!canProceed() || isSubmitting}
+            >
+                {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin"/> : 
+                 (step === TOTAL_STEPS || (step === 7 && formData.current_status === 'seeking_apartment') ? 'סיימנו! בוא נתחיל' : 'המשך')}
             </Button>
-          )}
         </div>
       </div>
     </div>
