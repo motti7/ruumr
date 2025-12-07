@@ -13,23 +13,6 @@ export default function Layout({ children, currentPageName }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-       // Update meta tags for brand color
-       let themeMeta = document.querySelector("meta[name='theme-color']");
-       if (!themeMeta) {
-           themeMeta = document.createElement("meta");
-           themeMeta.name = "theme-color";
-           document.head.appendChild(themeMeta);
-       }
-       themeMeta.content = "#FF5722";
-
-       let appleMeta = document.querySelector("meta[name='apple-mobile-web-app-status-bar-style']");
-       if (!appleMeta) {
-           appleMeta = document.createElement("meta");
-           appleMeta.name = "apple-mobile-web-app-status-bar-style";
-           document.head.appendChild(appleMeta);
-       }
-       appleMeta.content = "black-translucent";
-
        const checkNotifications = async () => {
            try {
                const user = await UserEntity.me();
@@ -58,6 +41,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
+        <meta name="theme-color" content="#FF5722" />
 
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
             <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
