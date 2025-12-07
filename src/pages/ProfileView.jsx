@@ -3,6 +3,7 @@ import { Profile } from "@/entities/all";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
@@ -61,7 +62,8 @@ export default function ProfileViewPage() {
 
   const regularPhotos = profile.photos?.filter(p => p) || [];
   const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
-  const allPhotos = [...regularPhotos, ...apartmentPhotos];
+  // Deduplicate photos to prevent "seeing the same photo twice"
+  const allPhotos = Array.from(new Set([...regularPhotos, ...apartmentPhotos]));
   const photos = allPhotos.length > 0 ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
 
   return (
@@ -76,6 +78,7 @@ export default function ProfileViewPage() {
       <div className="relative">
         <div className="aspect-[3/4] bg-gray-200 relative">
           <img
+            key={photos[currentPhotoIndex]} // Key ensures re-render on change
             src={photos[currentPhotoIndex]}
             alt={profile.name}
             className="w-full h-full object-cover"
@@ -93,6 +96,9 @@ export default function ProfileViewPage() {
           </div>
         </div>
       </div>
+      
+      {/* Lightbox for full size viewing */}
+      {/* (Optional: could add ImageLightbox here too if requested, but user asked for it in Onboarding specifically. Adding it here is a bonus) */}
 
       <div className="p-4 space-y-4">
         <div className="bg-white p-4 rounded-xl shadow-sm">
