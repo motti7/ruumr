@@ -25,6 +25,7 @@ const PermissionItem = ({ title, subtitle, checked, onChange }) => (
 export default function PermissionsPage() {
     const [showInDiscovery, setShowInDiscovery] = useState(true);
     const [showActiveStatus, setShowActiveStatus] = useState(true);
+    const [enableNotifications, setEnableNotifications] = useState(true);
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -33,6 +34,7 @@ export default function PermissionsPage() {
             setUser(userData);
             setShowInDiscovery(userData.show_in_discovery !== false);
             setShowActiveStatus(userData.show_active_status !== false);
+            setEnableNotifications(userData.enable_notifications !== false);
         };
         loadUser();
     }, []);
@@ -45,6 +47,15 @@ export default function PermissionsPage() {
     const handleActiveStatusChange = async (checked) => {
         setShowActiveStatus(checked);
         await User.updateMyUserData({ show_active_status: checked });
+    };
+
+    const handleNotificationsChange = async (checked) => {
+        setEnableNotifications(checked);
+        await User.updateMyUserData({ enable_notifications: checked });
+        // Simulating requesting permission in browser if supported
+        if (checked && 'Notification' in window && Notification.permission !== 'granted') {
+             Notification.requestPermission();
+        }
     };
 
     return (
@@ -68,6 +79,12 @@ export default function PermissionsPage() {
                     subtitle="שתף מתי היית פעיל/ה לאחרונה באפליקציה." 
                     checked={showActiveStatus} 
                     onChange={handleActiveStatusChange}
+                />
+                <PermissionItem 
+                    title="קבלת התראות" 
+                    subtitle="קבל עדכונים על התאמות והודעות חדשות." 
+                    checked={enableNotifications} 
+                    onChange={handleNotificationsChange}
                 />
             </div>
         </div>

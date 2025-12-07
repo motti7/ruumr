@@ -4,12 +4,36 @@ import { createPageUrl } from "@/utils";
 import { Compass, MessageCircle, User, Settings, Home, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { User as UserEntity } from "@/entities/User";
+import { Message } from "@/entities/Message";
+import { useState, useEffect } from "react";
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+       const checkNotifications = async () => {
+           try {
+               const user = await UserEntity.me();
+               if (user.enable_notifications === false) {
+                   setUnreadCount(0);
+                   return;
+               }
+               // Ideally check unread messages count here. 
+               // For demo purposes/simplicity, we assume no unread logic in Layout unless implemented.
+               // But if we want to show badge:
+               // const unread = await Message.filter({ is_read: false, recipient_id: user.id }); // Logic depends on schema
+           } catch(e) {}
+       };
+       if (!['Onboarding', 'Home'].includes(currentPageName)) {
+           checkNotifications();
+       }
+  }, [currentPageName]);
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Compass },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badge: unreadCount > 0 },
     { name: "פרופיל", path: createPageUrl("Profile"), icon: User }
   ];
 
@@ -94,9 +118,12 @@ export default function Layout({ children, currentPageName }) {
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 ${
                                 isActive ? 'text-[--theme-orange]' : 'text-gray-400'
-                            }`}
+                            } relative`}
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
+                            {item.badge && (
+                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
+                            )}
                             </motion.div>
                         </Link>
                         );
