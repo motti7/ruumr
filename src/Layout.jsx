@@ -12,24 +12,40 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    // Force theme color for Android
-    let metaThemeColor = document.querySelector("meta[name=theme-color]");
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement("meta");
-      metaThemeColor.name = "theme-color";
-      document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.content = "#FF5722";
+  React.useLayoutEffect(() => {
+    // Aggressively force theme color for Android/Chrome
+    const setThemeColor = () => {
+        let metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (!metaThemeColor) {
+            metaThemeColor = document.createElement("meta");
+            metaThemeColor.name = "theme-color";
+            document.head.appendChild(metaThemeColor);
+        }
+        // Set it and ensure it sticks
+        metaThemeColor.setAttribute('content', '#FF5722');
+        
+        // Also try MS and Apple specific
+        let metaNav = document.querySelector("meta[name=msapplication-navbutton-color]");
+        if (!metaNav) {
+            metaNav = document.createElement("meta");
+            metaNav.name = "msapplication-navbutton-color";
+            document.head.appendChild(metaNav);
+        }
+        metaNav.content = "#FF5722";
 
-    // Force status bar style for iOS
-    let metaApple = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
-    if (!metaApple) {
-      metaApple = document.createElement("meta");
-      metaApple.name = "apple-mobile-web-app-status-bar-style";
-      document.head.appendChild(metaApple);
-    }
-    metaApple.content = "black-translucent";
+        let metaApple = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
+        if (!metaApple) {
+            metaApple = document.createElement("meta");
+            metaApple.name = "apple-mobile-web-app-status-bar-style";
+            document.head.appendChild(metaApple);
+        }
+        metaApple.content = "black-translucent";
+    };
+
+    setThemeColor();
+    // Retry a few times in case head was overwritten
+    const interval = setInterval(setThemeColor, 1000);
+    setTimeout(() => clearInterval(interval), 5000);
   }, []);
 
   useEffect(() => {
@@ -61,6 +77,8 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
+        {/* Fallback meta tag in body for parsers that look here */}
+        <meta name="theme-color" content="#FF5722" />
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
             <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg transform rotate-3">
