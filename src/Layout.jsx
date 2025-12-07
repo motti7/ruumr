@@ -13,6 +13,17 @@ export default function Layout({ children, currentPageName }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    // Force theme color to orange for browser chrome (status bar)
+    let metaThemeColor = document.querySelector("meta[name=theme-color]");
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement("meta");
+      metaThemeColor.name = "theme-color";
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.content = "#FF5722";
+  }, []);
+
+  useEffect(() => {
        const checkNotifications = async () => {
            try {
                const user = await UserEntity.me();
