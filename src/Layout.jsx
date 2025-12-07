@@ -13,7 +13,7 @@ export default function Layout({ children, currentPageName }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    // Force theme color to orange for browser chrome (status bar)
+    // Force theme color for Android
     let metaThemeColor = document.querySelector("meta[name=theme-color]");
     if (!metaThemeColor) {
       metaThemeColor = document.createElement("meta");
@@ -21,6 +21,15 @@ export default function Layout({ children, currentPageName }) {
       document.head.appendChild(metaThemeColor);
     }
     metaThemeColor.content = "#FF5722";
+
+    // Force status bar style for iOS
+    let metaApple = document.querySelector("meta[name=apple-mobile-web-app-status-bar-style]");
+    if (!metaApple) {
+      metaApple = document.createElement("meta");
+      metaApple.name = "apple-mobile-web-app-status-bar-style";
+      document.head.appendChild(metaApple);
+    }
+    metaApple.content = "black-translucent";
   }, []);
 
   useEffect(() => {
@@ -52,8 +61,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
-        <meta name="theme-color" content="#FF5722" />
-
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
             <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg transform rotate-3">
