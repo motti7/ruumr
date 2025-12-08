@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 
 const ProfileDetail = ({ profile, onClose }) => {
@@ -168,7 +168,14 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
-                            <h2 className="text-4xl font-bold text-white mb-2">{profile.name}</h2>
+                            <div className="flex items-center gap-2 mb-2">
+                                <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
+                                {profile.is_verified && (
+                                    <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
+                                        <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex items-center text-white/90 text-base mb-3">
                                 <MapPin className="w-5 h-5 ml-1" />
                                 <span>{profile.location} • {profile.search_area}</span>

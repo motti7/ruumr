@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -129,6 +129,37 @@ export default function ProfilePage() {
               {isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
           </Button>
         </div>
+
+        {!profile.is_verified && (
+            <div className="px-4 mt-2">
+                <div 
+                    onClick={() => window.location.href = createPageUrl('Verification')}
+                    className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center justify-between cursor-pointer active:scale-95 transition-transform"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white p-2 rounded-full">
+                            <AlertCircle className="w-5 h-5 text-orange-500" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-gray-900 text-sm">הפרופיל לא מאומת</p>
+                            <p className="text-xs text-gray-500">אמת את זהותך כדי לקבל יותר פניות</p>
+                        </div>
+                    </div>
+                    <div className="bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                        אמת עכשיו
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {profile.is_verified && (
+            <div className="px-4 mt-2">
+                 <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
+                    <p className="font-bold text-green-700 text-sm">פרופיל מאומת</p>
+                 </div>
+            </div>
+        )}
         
         <div className="px-2 pt-2 pb-2">
           <div className="grid grid-cols-3 gap-1">

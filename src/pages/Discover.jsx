@@ -41,30 +41,43 @@ export default function DiscoverPage() {
       const likedMeIds = likedMeSwipes.map(s => s.swiper_id);
 
       const availableProfiles = allProfiles.filter(p => {
+        // 1. Filter out self and already swiped
         if (p.user_id === user.id || swipedIds.includes(p.user_id)) return false;
         
-        // Strict gender matching
-        const theyWantMe = (p.looking_for_gender === 'any' || p.looking_for_gender === currentUserProfile.gender);
-        const iWantThem = (currentUserProfile.looking_for_gender === 'any' || currentUserProfile.looking_for_gender === p.gender);
+        // 2. Visibility Check (Default to true if undefined)
+        if (p.is_visible === false) return false;
+
+        // 3. Gender Matching (Safe check)
+        // If data is missing, we assume match to not hide profiles unnecessarily in early stage
+        const myGender = currentUserProfile.gender || 'male'; 
+        const myPreference = currentUserProfile.looking_for_gender || 'any';
+        
+        const theirGender = p.gender || 'male';
+        const theirPreference = p.looking_for_gender || 'any';
+
+        const theyWantMe = (theirPreference === 'any' || theirPreference === myGender);
+        const iWantThem = (myPreference === 'any' || myPreference === theirGender);
 
         if (!theyWantMe || !iWantThem) return false;
 
-        const budgetOverlap = (
-          (p.budget_min <= currentUserProfile.budget_max && p.budget_max >= currentUserProfile.budget_min) ||
-          (currentUserProfile.budget_min <= p.budget_max && currentUserProfile.budget_max >= p.budget_min)
-        );
-
-        // Smart status matching:
-        // If I have an apartment, I'm looking for someone seeking one.
-        // If I'm seeking, I can match with anyone (someone with apt, or partner to search with).
+        // 4. Status Matching
+        // Only block if BOTH clearly have an apartment (searching for roommate for THEIR apartment)
+        // If data is missing, allow.
         if (currentUserProfile.current_status === 'has_apartment' && p.current_status === 'has_apartment') {
             return false;
         }
-        
-        // Visibility Check
-        if (p.is_visible === false) return false;
 
-        return budgetOverlap;
+        // 5. Budget Overlap (Safe check)
+        // If anyone doesn't have budget set, we assume overlap.
+        const myMin = currentUserProfile.budget_min || 0;
+        const myMax = currentUserProfile.budget_max || 100000;
+        
+        const theirMin = p.budget_min || 0;
+        const theirMax = p.budget_max || 100000;
+
+        const overlap = (theirMin <= myMax && theirMax >= myMin);
+        
+        return overlap;
       });
       
       setProfiles(availableProfiles);

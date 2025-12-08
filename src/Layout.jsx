@@ -42,6 +42,8 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
         <meta name="theme-color" content="#FF5722" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
 
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
             <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
