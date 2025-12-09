@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, MessageCircle, User, Settings, Home, Smartphone } from "lucide-react";
+import { Compass, MessageCircle, User, Settings, Home, Smartphone, Heart } from "lucide-react";
+import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -10,20 +11,17 @@ import { useState, useEffect } from "react";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [matchesCount, setMatchesCount] = useState(0);
 
   useEffect(() => {
        const checkNotifications = async () => {
            try {
                const user = await UserEntity.me();
-               if (user.enable_notifications === false) {
-                   setUnreadCount(0);
-                   return;
-               }
-               // Ideally check unread messages count here. 
-               // For demo purposes/simplicity, we assume no unread logic in Layout unless implemented.
-               // But if we want to show badge:
-               // const unread = await Message.filter({ is_read: false, recipient_id: user.id }); // Logic depends on schema
+               const matches = await Match.filter({ user1_id: user.id }); // basic filter
+               const matches2 = await Match.filter({ user2_id: user.id });
+               // Simplified count of total matches as "notification" for now, or new ones if we tracked it.
+               // User asked for "small numbers on the button... depending on how many matches".
+               setMatchesCount(matches.length + matches2.length);
            } catch(e) {}
        };
        if (!['Onboarding', 'Home'].includes(currentPageName)) {
@@ -32,9 +30,9 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   const navigationItems = [
-    { name: "גלה", path: createPageUrl("Discover"), icon: Compass },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badge: unreadCount > 0 },
-    { name: "פרופיל", path: createPageUrl("Profile"), icon: User }
+    { name: "גלה", path: createPageUrl("Discover"), icon: Home },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: matchesCount },
+    { name: "לייקים", path: createPageUrl("LikesYou"), icon: Heart }
   ];
 
   const shouldShowNav = !['Onboarding', 'Home', 'Chat'].includes(currentPageName);
@@ -124,8 +122,10 @@ export default function Layout({ children, currentPageName }) {
                             } relative`}
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
-                            {item.badge && (
-                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
+                            {item.badgeCount > 0 && (
+                                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-1">
+                                    {item.badgeCount}
+                                </span>
                             )}
                             </motion.div>
                         </Link>

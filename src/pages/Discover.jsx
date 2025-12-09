@@ -90,13 +90,15 @@ export default function DiscoverPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
   
-  // Prefetch next profile image
+  // Prefetch next 3 profile images
   useEffect(() => {
-    if (profiles.length > currentIndex + 1) {
-        const nextProfile = profiles[currentIndex + 1];
-        if (nextProfile.photos?.[0]) {
-            const img = new Image();
-            img.src = nextProfile.photos[0];
+    for (let i = 1; i <= 3; i++) {
+        if (profiles.length > currentIndex + i) {
+            const nextProfile = profiles[currentIndex + i];
+            if (nextProfile.photos?.[0]) {
+                const img = new Image();
+                img.src = nextProfile.photos[0];
+            }
         }
     }
   }, [currentIndex, profiles]);
@@ -169,8 +171,8 @@ export default function DiscoverPage() {
               transition={{ duration: 0.5 }}
               className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
                 actionFeedback === 'like' 
-                  ? 'bg-green-500' 
-                  : 'bg-red-500'
+                  ? 'bg-red-500' 
+                  : 'bg-black'
               }`}
             >
               {actionFeedback === 'like' ? (

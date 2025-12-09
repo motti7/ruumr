@@ -20,7 +20,7 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onDislike}
-        className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center text-red-500 border-2 border-gray-200"
+        className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center text-black border-2 border-gray-200"
       >
         <X className="w-10 h-10" strokeWidth={3} />
       </motion.button>
@@ -44,7 +44,7 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onLike}
-        className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center text-green-500 border-2 border-gray-200"
+        className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center text-red-500 border-2 border-gray-200"
       >
         <Heart className="w-10 h-10" fill="currentColor" />
       </motion.button>

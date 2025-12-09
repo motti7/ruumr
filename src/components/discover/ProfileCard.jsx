@@ -255,6 +255,8 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         alt={profile.name}
                         className="absolute w-full h-full object-cover pointer-events-none"
                         draggable={false}
+                        loading="eager"
+                        decoding="async"
                     />
 
                     <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
@@ -282,7 +284,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         style={{ opacity: likeOpacity }}
                         className="absolute top-10 right-10 pointer-events-none z-30 transform rotate-12"
                     >
-                        <div className="border-4 border-green-500 text-green-500 text-4xl font-black px-4 py-2 rounded-xl bg-black/20 backdrop-blur-sm">
+                        <div className="border-4 border-red-500 text-red-500 text-4xl font-black px-4 py-2 rounded-xl bg-black/20 backdrop-blur-sm">
                             LIKE
                         </div>
                     </motion.div>
@@ -291,7 +293,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         style={{ opacity: nopeOpacity }}
                         className="absolute top-10 left-10 pointer-events-none z-30 transform -rotate-12"
                     >
-                        <div className="border-4 border-red-500 text-red-500 text-4xl font-black px-4 py-2 rounded-xl bg-black/20 backdrop-blur-sm">
+                        <div className="border-4 border-black text-black text-4xl font-black px-4 py-2 rounded-xl bg-white/40 backdrop-blur-sm">
                             NOPE
                         </div>
                     </motion.div>
