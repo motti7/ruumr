@@ -4,7 +4,7 @@ import { User } from "@/entities/User";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import { Heart } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
 
 export default function MatchesPage() {
@@ -86,7 +86,7 @@ export default function MatchesPage() {
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-            <Heart className="w-6 h-6 text-white" />
+            <MessageCircle className="w-6 h-6 text-white" />
         </motion.div>
       </div>
     );

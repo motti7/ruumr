@@ -43,7 +43,13 @@ export default function LikesYouPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
+                <motion.div
+                    className="w-12 h-12 rounded-full gradient-orange flex items-center justify-center"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                    <ThumbsUp className="w-6 h-6 text-white" />
+                </motion.div>
             </div>
         );
     }
@@ -75,11 +81,7 @@ export default function LikesYouPage() {
                             transition={{ delay: i * 0.1 }}
                             className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 relative group cursor-pointer"
                             onClick={() => {
-                                // Navigate to a profile view or show modal. 
-                                // For now, let's go to profile view if it exists or just show basic info
-                                // We can use the existing ProfileView page logic if we had one exposed, 
-                                // but ProfileView is in "file summaries" as pages/ProfileView.
-                                window.location.href = createPageUrl(`ProfileView?userId=${profile.user_id}`);
+                                navigate(createPageUrl(`ProfileView?userId=${profile.user_id}`));
                             }}
                         >
                              <div className="aspect-[3/4] relative">

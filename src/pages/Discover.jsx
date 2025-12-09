@@ -8,7 +8,7 @@ import MatchAnimation from "../components/discover/MatchAnimation";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Heart, X } from "lucide-react";
+import { Heart, X, Home } from "lucide-react";
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -142,10 +142,10 @@ export default function DiscoverPage() {
       <div className="flex flex-col items-center justify-center h-screen bg-white">
         <motion.div
             className="w-12 h-12 rounded-full gradient-orange flex items-center justify-center"
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+            animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-            <div className="w-6 h-6 bg-white rounded-full" />
+            <Home className="w-6 h-6 text-white" />
         </motion.div>
         <p className="text-gray-500 font-medium mt-4">...מחפש שותפים</p>
       </div>

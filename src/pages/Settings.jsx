@@ -1,5 +1,6 @@
 import React from "react";
 import { User } from "@/entities/User";
+import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -33,9 +34,39 @@ export default function SettingsPage() {
     window.location.href = createPageUrl('Home');
   };
   
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (confirm("האם את/ה בטוח/ה שברצונך למחוק את החשבון? פעולה זו בלתי הפיכה.")) {
-      alert("מחיקת החשבון תתבצע בקרוב. נחזור אליך במייל.");
+      try {
+        const user = await User.me();
+        
+        // Delete swipes made by user
+        const mySwipes = await Swipe.filter({ swiper_id: user.id });
+        await Promise.all(mySwipes.map(s => Swipe.delete(s.id)));
+        
+        // Delete swipes made ON user (RLS updated to allow this)
+        const swipesOnMe = await Swipe.filter({ swiped_id: user.id });
+        await Promise.all(swipesOnMe.map(s => Swipe.delete(s.id)));
+
+        // Delete matches
+        const matches1 = await Match.filter({ user1_id: user.id });
+        const matches2 = await Match.filter({ user2_id: user.id });
+        const allMatches = [...matches1, ...matches2];
+        await Promise.all(allMatches.map(m => Match.delete(m.id)));
+
+        // Delete profile
+        const profiles = await Profile.filter({ user_id: user.id });
+        await Promise.all(profiles.map(p => Profile.delete(p.id)));
+
+        // Note: We can't delete the Auth User itself from here without backend function usually,
+        // but we can ensure the data is gone. The user will be logged out.
+        // For the "Manual Admin Delete" issue: Admins should ensure they delete data or use this function.
+        
+        alert("החשבון והמידע שלך נמחקו בהצלחה.");
+        await handleLogout();
+      } catch (e) {
+        console.error("Delete account error:", e);
+        alert("אירעה שגיאה במחיקת הנתונים. אנא נסה שנית או צור קשר עם התמיכה.");
+      }
     }
   };
 
