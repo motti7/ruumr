@@ -176,14 +176,20 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center text-white/90 text-base mb-3">
-                                <MapPin className="w-5 h-5 ml-1" />
-                                <span>{profile.location} • {profile.search_area}</span>
-                            </div>
+                            {profile.current_status === 'has_apartment' ? (
+                                <div className="text-white/90 text-base mb-3 font-medium">
+                                    ₪{profile.apartment_total_budget?.toLocaleString()} • {profile.existing_roommates} שותפים
+                                </div>
+                            ) : (
+                                <div className="flex items-center text-white/90 text-base mb-3">
+                                    <MapPin className="w-5 h-5 ml-1" />
+                                    <span>{profile.location} • {profile.search_area}</span>
+                                </div>
+                            )}
                             {profile.current_status === 'has_apartment' && (
                                 <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
                                     <Home className="w-4 h-4 ml-1" />
-                                    יש לי דירה
+                                    {profile.location}
                                 </div>
                             )}
                         </div>

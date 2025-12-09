@@ -139,6 +139,9 @@ export default function VerificationPage() {
                             placeholder="050-0000000" 
                             className="text-center text-2xl h-16 tracking-widest bg-gray-50 border-gray-200"
                             autoFocus
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                         />
                         <Button 
                             onClick={handlePhoneSubmit} 
@@ -165,6 +168,9 @@ export default function VerificationPage() {
                                     onChange={(e) => handleOtpChange(i, e.target.value)}
                                     className="w-14 h-16 text-center text-2xl font-bold bg-gray-50 border-gray-200"
                                     maxLength={1}
+                                    type="tel"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                 />
                             ))}
                         </div>

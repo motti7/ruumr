@@ -152,11 +152,21 @@ export default function OnboardingPage() {
     else setUploadingIndex(index);
 
     try {
-      const { file_url } = await UploadFile({ file });
+      // Optimistic preview
+      const objectUrl = URL.createObjectURL(file);
       setFormData(prev => {
         const key = isApartment ? 'apartment_photos' : 'photos';
         const newPhotos = [...(prev[key] || [])];
-        newPhotos[index] = file_url;
+        newPhotos[index] = objectUrl; // Show local preview
+        return { ...prev, [key]: newPhotos };
+      });
+
+      const { file_url } = await UploadFile({ file });
+      
+      setFormData(prev => {
+        const key = isApartment ? 'apartment_photos' : 'photos';
+        const newPhotos = [...(prev[key] || [])];
+        newPhotos[index] = file_url; // Replace with real URL
         
         if (isApartment && index === newPhotos.length - 1 && newPhotos.length < 12) {
              newPhotos.push(null, null);
@@ -362,9 +372,9 @@ export default function OnboardingPage() {
                       <div className="w-full px-4">
                           <Slider dir="ltr" value={[formData.vibe_level]} onValueChange={(v) => setFormField('vibe_level', v[0])} max={5} min={1} step={1} className="py-4" />
                           <div className="flex justify-between text-sm font-bold text-gray-600 mt-4 w-full">
-                              <span className="text-blue-500">שקט וביתי</span>
-                              <span className="text-yellow-500">מאוזן</span>
                               <span className="text-red-500">תוסס ומסיבתי</span>
+                              <span className="text-yellow-500">מאוזן</span>
+                              <span className="text-blue-500">שקט וביתי</span>
                           </div>
                       </div>
                       

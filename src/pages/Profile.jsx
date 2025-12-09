@@ -145,7 +145,7 @@ export default function ProfilePage() {
                             <p className="text-xs text-gray-500">אמת את זהותך כדי לקבל יותר פניות</p>
                         </div>
                     </div>
-                    <div className="bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                    <div className="bg-[--theme-orange] text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap min-w-fit">
                         אמת עכשיו
                     </div>
                 </div>

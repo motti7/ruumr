@@ -90,6 +90,17 @@ export default function DiscoverPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
   
+  // Prefetch next profile image
+  useEffect(() => {
+    if (profiles.length > currentIndex + 1) {
+        const nextProfile = profiles[currentIndex + 1];
+        if (nextProfile.photos?.[0]) {
+            const img = new Image();
+            img.src = nextProfile.photos[0];
+        }
+    }
+  }, [currentIndex, profiles]);
+
   const handleSwipe = async (action) => {
     if (currentIndex >= profiles.length || !userProfile) return;
 
@@ -201,7 +212,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-30" style={{ bottom: '85px' }}>
+        <div className="fixed w-full flex justify-center z-30" style={{ bottom: '70px' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}
