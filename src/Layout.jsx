@@ -123,7 +123,7 @@ export default function Layout({ children, currentPageName }) {
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
                             {item.badgeCount > 0 && (
-                                <span className="absolute top-0 right-1 min-w-[18px] h-[18px] bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-1 transform translate-x-1/4 -translate-y-1/4">
+                                <span className="absolute top-1 right-2 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5">
                                     {item.badgeCount}
                                 </span>
                             )}

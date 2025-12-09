@@ -90,13 +90,13 @@ export default function OnboardingPage() {
         return formData.current_status !== '';
       case 3: // Photos
         return formData.photos.filter(p => p).length >= 2;
-      case 4: // Location & Budget (Moved from 5)
+      case 4: // Location & Budget
         return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 5: // Vibe (Moved from 6)
+      case 5: // Vibe
         return formData.vibe_level;
-      case 6: // Pets (Moved from 7)
+      case 6: // Pets
         return formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 7: // About (Moved from 4)
+      case 7: // About
         return formData.about_me.trim() && formData.looking_for_description.trim();
       case 8: // Preferences
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
@@ -113,7 +113,7 @@ export default function OnboardingPage() {
 
   const nextStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
-        // Skip apartment details if seeking
+        // Skip apartment details if seeking (step 9)
         handleFinish();
     } else {
         setStep(s => Math.min(s + 1, TOTAL_STEPS));
@@ -144,24 +144,56 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Image compression utility
+  const compressImage = async (file) => {
+    if (file.size < 1024 * 1024) return file; // Skip if smaller than 1MB
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 1200;
+          if (img.width <= maxWidth) { resolve(file); return; }
+          const scaleSize = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.canvas.toBlob((blob) => {
+            if (!blob) { resolve(file); return; }
+            const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+            resolve(newFile);
+          }, 'image/jpeg', 0.8);
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
   const handleImageUpload = async (e, index, isApartment = false) => {
-    const file = e.target.files[0];
+    let file = e.target.files[0];
     if (!file) return;
 
     if (isApartment) setUploadingApartmentIndex(index);
     else setUploadingIndex(index);
 
     try {
-      // Optimistic preview
+      // Optimistic preview (use original file for speed)
       const objectUrl = URL.createObjectURL(file);
       setFormData(prev => {
         const key = isApartment ? 'apartment_photos' : 'photos';
         const newPhotos = [...(prev[key] || [])];
-        newPhotos[index] = objectUrl; // Show local preview
+        newPhotos[index] = objectUrl; 
         return { ...prev, [key]: newPhotos };
       });
 
-      const { file_url } = await UploadFile({ file });
+      // Compress before upload
+      const compressedFile = await compressImage(file);
+      const { file_url } = await UploadFile({ file: compressedFile });
       
       setFormData(prev => {
         const key = isApartment ? 'apartment_photos' : 'photos';

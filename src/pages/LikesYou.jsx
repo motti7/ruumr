@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
-import { Loader2, Heart, ArrowRight } from "lucide-react";
+import { Loader2, ThumbsUp, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
@@ -61,7 +61,7 @@ export default function LikesYouPage() {
                 {profiles.length === 0 ? (
                     <div className="col-span-2 text-center py-20">
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Heart className="w-10 h-10 text-gray-300" />
+                            <ThumbsUp className="w-10 h-10 text-gray-300" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-700 mb-2">עדיין אין לייקים</h3>
                         <p className="text-gray-500">המשך/י להחליק ולעדכן את הפרופיל שלך</p>

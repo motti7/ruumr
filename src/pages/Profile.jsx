@@ -50,11 +50,42 @@ export default function ProfilePage() {
     } catch (error) { console.error("Error saving profile:", error); }
   };
 
+  // Image compression utility
+  const compressImage = async (file) => {
+    if (file.size < 1024 * 1024) return file; // Skip if smaller than 1MB
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 1200;
+          if (img.width <= maxWidth) { resolve(file); return; }
+          const scaleSize = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.canvas.toBlob((blob) => {
+            if (!blob) { resolve(file); return; }
+            const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+            resolve(newFile);
+          }, 'image/jpeg', 0.8);
+        };
+        img.onerror = () => resolve(file);
+      };
+      reader.onerror = () => resolve(file);
+    });
+  };
+
   const handleImageUpload = async (e, index) => {
-    const file = e.target.files[0];
+    let file = e.target.files[0];
     if (!file) return;
     setUploadingIndex(index);
     try {
+        file = await compressImage(file);
         const { file_url } = await UploadFile({ file });
         const newPhotos = [...(formData.photos || Array(6).fill(null))];
         newPhotos[index] = file_url;
@@ -64,10 +95,11 @@ export default function ProfilePage() {
   };
 
   const handleApartmentImageUpload = async (e, index) => {
-    const file = e.target.files[0];
+    let file = e.target.files[0];
     if (!file) return;
     setUploadingApartmentIndex(index);
     try {
+        file = await compressImage(file);
         const { file_url } = await UploadFile({ file });
         const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];
         newPhotos[index] = file_url;
