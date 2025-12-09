@@ -90,14 +90,14 @@ export default function OnboardingPage() {
         return formData.current_status !== '';
       case 3: // Photos
         return formData.photos.filter(p => p).length >= 2;
-      case 4: // About
-        return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 5: // Location & Budget
+      case 4: // Location & Budget (Moved from 5)
         return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 6: // Vibe
+      case 5: // Vibe (Moved from 6)
         return formData.vibe_level;
-      case 7: // Pets
+      case 6: // Pets (Moved from 7)
         return formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
+      case 7: // About (Moved from 4)
+        return formData.about_me.trim() && formData.looking_for_description.trim();
       case 8: // Preferences
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
       case 9: // Apartment Details
@@ -302,6 +302,8 @@ export default function OnboardingPage() {
                                         alt={`Uploaded ${i+1}`} 
                                         className="w-full h-full object-cover cursor-pointer" 
                                         onClick={() => setLightboxSrc(formData.photos[i])}
+                                        loading="eager"
+                                        decoding="sync"
                                     />
                                     <button 
                                         className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -320,20 +322,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={4} currentStep={step} title="ספר/י על עצמך">
-                <div className="space-y-6 text-right">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
-                    </div>
-                </div>
-            </Step>
-
-            <Step step={5} currentStep={step} title="לוקיישן ותקציב">
+            <Step step={4} currentStep={step} title="לוקיישן ותקציב">
                 <div className="space-y-8 text-right">
                     <div className="space-y-2">
                         <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -365,7 +354,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={6} currentStep={step} title="מה הוייב שלך?">
+            <Step step={5} currentStep={step} title="מה הוייב שלך?">
                  <div className="flex flex-col items-center justify-center h-full space-y-8">
                       <VibeIcon level={formData.vibe_level} />
                       
@@ -390,7 +379,7 @@ export default function OnboardingPage() {
                   </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="חיות מחמד">
+            <Step step={6} currentStep={step} title="חיות מחמד">
                  <div className="space-y-8 text-right">
                       <div>
                           <label className="font-bold text-lg block text-center mb-6 text-gray-600">יש לך חיית מחמד שמצטרפת?</label>
@@ -414,6 +403,19 @@ export default function OnboardingPage() {
                            )}
                       </div>
                   </div>
+            </Step>
+
+            <Step step={7} currentStep={step} title="ספר/י על עצמך">
+                <div className="space-y-6 text-right">
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
+                    </div>
+                </div>
             </Step>
 
             <Step step={8} currentStep={step} title="העדפות ודת">

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, MessageCircle, User, Settings, Home, Smartphone, Heart } from "lucide-react";
+import { Compass, MessageCircle, User, Settings, Home, Smartphone, ThumbsUp } from "lucide-react";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
@@ -32,7 +32,7 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: matchesCount },
-    { name: "לייקים", path: createPageUrl("LikesYou"), icon: Heart }
+    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
   const shouldShowNav = !['Onboarding', 'Home', 'Chat'].includes(currentPageName);
@@ -123,7 +123,7 @@ export default function Layout({ children, currentPageName }) {
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
                             {item.badgeCount > 0 && (
-                                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-1">
+                                <span className="absolute top-0 right-1 min-w-[18px] h-[18px] bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-1 transform translate-x-1/4 -translate-y-1/4">
                                     {item.badgeCount}
                                 </span>
                             )}
