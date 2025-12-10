@@ -49,6 +49,12 @@ export default function ProfileViewPage() {
     );
   }
 
+  // Optimize image loading by preloading the first image
+  if (profile && profile.photos && profile.photos[0]) {
+      const img = new Image();
+      img.src = profile.photos[0];
+  }
+
   if (!profile) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">

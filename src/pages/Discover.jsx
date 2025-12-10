@@ -147,7 +147,7 @@ export default function DiscoverPage() {
         >
             <Home className="w-6 h-6 text-white" />
         </motion.div>
-        <p className="text-gray-500 font-medium mt-4" dir="ltr">מחפש שותפים...</p>
+        <p className="text-gray-500 font-medium mt-4">מחפש שותפים...</p>
       </div>
     );
   }

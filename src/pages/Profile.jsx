@@ -61,8 +61,8 @@ export default function ProfilePage() {
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxWidth = 1200;
-          if (img.width <= maxWidth) { resolve(file); return; }
+          const maxWidth = 800;
+          if (img.width <= maxWidth && file.size < 300000) { resolve(file); return; }
           const scaleSize = maxWidth / img.width;
           canvas.width = maxWidth;
           canvas.height = img.height * scaleSize;
@@ -72,7 +72,7 @@ export default function ProfilePage() {
             if (!blob) { resolve(file); return; }
             const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
             resolve(newFile);
-          }, 'image/jpeg', 0.8);
+          }, 'image/jpeg', 0.6);
         };
         img.onerror = () => resolve(file);
       };
