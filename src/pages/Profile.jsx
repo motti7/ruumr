@@ -198,7 +198,14 @@ export default function ProfilePage() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className={`aspect-square rounded-lg overflow-hidden relative ${isEditing ? 'cursor-pointer border-2 border-gray-200 hover:border-[--theme-orange]' : ''} transition-all`} onClick={() => triggerFileInput(i)}>
                 {(formData.photos?.length > i && formData.photos[i]) ? (
-                  <img src={formData.photos[i]} alt={`תמונה ${i+1}`} className="w-full h-full object-cover" loading="eager" decoding="sync"/>
+                  <img 
+                    src={formData.photos[i]} 
+                    alt={`תמונה ${i+1}`} 
+                    className="w-full h-full object-cover" 
+                    loading="eager" 
+                    decoding="sync"
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
                     {isEditing && <Plus className="w-6 h-6 text-gray-400"/>}

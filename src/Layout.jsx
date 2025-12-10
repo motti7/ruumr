@@ -90,14 +90,14 @@ export default function Layout({ children, currentPageName }) {
             {shouldShowNav && (
                 <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
                     <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
-                        <Link to={createPageUrl("Profile")}>
-                            <User className="w-6 h-6 text-gray-400"/>
+                        <Link to={createPageUrl("Settings")}>
+                            <Settings className="w-6 h-6 text-gray-400"/>
                         </Link>
                         <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                              <h1 className="text-3xl logo-font">Roomi</h1>
                         </Link>
-                        <Link to={createPageUrl("Settings")}>
-                            <Settings className="w-6 h-6 text-gray-400"/>
+                        <Link to={createPageUrl("Profile")}>
+                            <User className="w-6 h-6 text-gray-400"/>
                         </Link>
                     </div>
                 </header>
@@ -123,7 +123,7 @@ export default function Layout({ children, currentPageName }) {
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
                             {item.badgeCount > 0 && (
-                                <span className="absolute top-0 right-1 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5">
+                                <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
                                     {item.badgeCount}
                                 </span>
                             )}

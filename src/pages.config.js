@@ -11,6 +11,7 @@ import Chat from './pages/Chat';
 import ProfileView from './pages/ProfileView';
 import Verification from './pages/Verification';
 import LikesYou from './pages/LikesYou';
+import LikesSent from './pages/LikesSent';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +29,7 @@ export const PAGES = {
     "ProfileView": ProfileView,
     "Verification": Verification,
     "LikesYou": LikesYou,
+    "LikesSent": LikesSent,
 }
 
 export const pagesConfig = {

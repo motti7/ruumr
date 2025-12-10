@@ -256,7 +256,8 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         className="absolute w-full h-full object-cover pointer-events-none"
                         draggable={false}
                         loading="eager"
-                        decoding="async"
+                        fetchPriority="high"
+                        decoding="sync"
                     />
 
                     <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">

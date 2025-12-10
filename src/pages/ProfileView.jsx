@@ -79,10 +79,13 @@ export default function ProfileViewPage() {
       <div className="relative">
         <div className="aspect-[3/4] bg-gray-200 relative">
           <img
-            key={photos[currentPhotoIndex]} // Key ensures re-render on change
+            key={photos[currentPhotoIndex]}
             src={photos[currentPhotoIndex]}
             alt={profile.name}
             className="w-full h-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
           />
           <div className="absolute top-4 left-4 right-4 flex gap-1.5">
             {photos.map((_, i) => (

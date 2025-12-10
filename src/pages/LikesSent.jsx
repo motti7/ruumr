@@ -1,34 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
-import { Loader2, ThumbsUp, ArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Loader2, ArrowRight, ThumbsUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 
-export default function LikesYouPage() {
+export default function LikesSentPage() {
     const [profiles, setProfiles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loadLikes = async () => {
+        const loadSentLikes = async () => {
             setIsLoading(true);
             try {
                 const user = await User.me();
-                // Find swipes where swiped_id is me and action is like
-                const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-                const swiperIds = likes.map(l => l.swiper_id);
+                // Find swipes where swiper_id is me and action is like
+                const myLikes = await Swipe.filter({ swiper_id: user.id, action: "like" });
+                const swipedIds = myLikes.map(l => l.swiped_id);
                 
-                if (swiperIds.length > 0) {
-                    // Fetch profiles for these users
-                    // We can't use 'in' operator easily with current SDK maybe? 
-                    // Let's try Promise.all or filter if supported. 
-                    // SDK filter usually supports exact match. 
-                    // I'll fetch all profiles and filter in memory if list is small, or fetch one by one.
-                    // Given the constraints, fetching one by one is safer for specific IDs.
+                if (swipedIds.length > 0) {
                     const profilesData = await Promise.all(
-                        swiperIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
+                        swipedIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
                     );
                     setProfiles(profilesData.filter(p => p));
                 }
@@ -37,33 +31,24 @@ export default function LikesYouPage() {
             }
             setIsLoading(false);
         };
-        loadLikes();
+        loadSentLikes();
     }, []);
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <motion.div
-                    className="w-12 h-12 rounded-full gradient-orange flex items-center justify-center"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                    <ThumbsUp className="w-6 h-6 text-white" />
-                </motion.div>
+                <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
-            <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center justify-between">
-                <h1 className="text-2xl font-black text-gray-900">לייקים שקיבלתי</h1>
-                <button 
-                    onClick={() => navigate(createPageUrl('LikesSent'))}
-                    className="text-sm font-bold text-[--theme-orange] hover:underline"
-                >
-                    לייקים ששלחתי
+            <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center gap-3">
+                 <button onClick={() => navigate(-1)}>
+                    <ArrowRight className="w-6 h-6 text-gray-600" />
                 </button>
+                <h1 className="text-2xl font-black text-gray-900">לייקים ששלחתי</h1>
             </div>
 
             <div className="p-4 grid grid-cols-2 gap-4">
@@ -72,8 +57,8 @@ export default function LikesYouPage() {
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ThumbsUp className="w-10 h-10 text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-700 mb-2">עדיין אין לייקים</h3>
-                        <p className="text-gray-500">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
+                        <h3 className="text-xl font-bold text-gray-700 mb-2">לא שלחת לייקים עדיין</h3>
+                        <p className="text-gray-500">כנס לעמוד הגילוי והתחל להחליק!</p>
                     </div>
                 ) : (
                     profiles.map((profile, i) => (
@@ -99,7 +84,6 @@ export default function LikesYouPage() {
                                     <p className="text-white/80 text-xs">{profile.location}</p>
                                 </div>
                              </div>
-                             {/* Blur effect if not premium? Na, let's show them. */}
                         </motion.div>
                     ))
                 )}

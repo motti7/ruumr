@@ -268,7 +268,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="נעים להכיר!">
-                <p className="text-center text-gray-500 mb-8">ספר לנו קצת על עצמך בשביל ההתחלה</p>
+                <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
                 <div className="space-y-6">
                     <div className="space-y-2 text-right">
                         <label className="text-sm font-bold text-gray-700">שם פרטי</label>

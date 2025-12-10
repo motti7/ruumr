@@ -30,6 +30,8 @@ export default function VerificationPage() {
         setIsLoading(true);
         await sendMockSMS(phone);
         setIsLoading(false);
+        // Simulate SMS reception
+        setTimeout(() => alert("הודעת מערכת: קוד האימות שלך הוא 1234"), 1000);
         setStep(3);
     };
 
