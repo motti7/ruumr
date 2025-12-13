@@ -86,7 +86,9 @@ const ProfileDetail = ({ profile, onClose }) => {
                         {profile.apartment_photos && profile.apartment_photos.length > 0 && (
                             <div className="grid grid-cols-3 gap-2 mt-3">
                                 {profile.apartment_photos.filter(p=>p).map((photo, i) => (
-                                    <img key={i} src={photo} alt="דירה" className="w-full aspect-square object-cover rounded-lg" />
+                                    <div key={i} className="w-full aspect-square rounded-lg overflow-hidden">
+                                        <SmartImage src={photo} alt="דירה" className="w-full h-full" priority={false} />
+                                    </div>
                                 ))}
                             </div>
                         )}

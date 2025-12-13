@@ -23,11 +23,14 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
     >
       <div className="flex items-center p-4" dir="rtl">
         <div className="relative ml-4">
-          <img
-            src={match.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"}
-            alt={match.name}
-            className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
-          />
+          <div className="w-16 h-16 rounded-full border-2 border-gray-100 overflow-hidden">
+            <SmartImage
+              src={match.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"}
+              alt={match.name}
+              className="w-full h-full"
+              priority={false}
+            />
+          </div>
           {isOnline && (
             <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm" />
           )}

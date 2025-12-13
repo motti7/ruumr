@@ -49,11 +49,21 @@ export default function ProfileViewPage() {
     );
   }
 
-  // Optimize image loading by preloading the first image
-  if (profile && profile.photos && profile.photos[0]) {
-      const img = new Image();
-      img.src = profile.photos[0];
-  }
+  // Prefetch next and prev photos
+  useEffect(() => {
+    if (!photos || photos.length === 0) return;
+    
+    // Preload next
+    if (currentPhotoIndex < photos.length - 1) {
+        const img = new Image();
+        img.src = photos[currentPhotoIndex + 1];
+    }
+    // Preload prev (if navigating back)
+    if (currentPhotoIndex > 0) {
+        const img = new Image();
+        img.src = photos[currentPhotoIndex - 1];
+    }
+  }, [currentPhotoIndex, photos]);
 
   if (!profile) {
     return (
@@ -84,25 +94,23 @@ export default function ProfileViewPage() {
 
       <div className="relative">
         <div className="aspect-[3/4] bg-gray-200 relative">
-          <img
+          <SmartImage
             key={photos[currentPhotoIndex]}
             src={photos[currentPhotoIndex]}
             alt={profile.name}
-            className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
+            className="w-full h-full"
+            priority={true}
           />
-          <div className="absolute top-4 left-4 right-4 flex gap-1.5">
+          <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10">
             {photos.map((_, i) => (
               <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
               </div>
             ))}
           </div>
-          <div className="absolute inset-0 flex">
-            <div className="w-1/2 h-full" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length)} />
-            <div className="w-1/2 h-full" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % photos.length)} />
+          <div className="absolute inset-0 flex z-0">
+            <div className="w-1/2 h-full cursor-w-resize" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length)} />
+            <div className="w-1/2 h-full cursor-e-resize" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % photos.length)} />
           </div>
         </div>
       </div>
