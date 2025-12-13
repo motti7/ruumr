@@ -90,17 +90,36 @@ export default function DiscoverPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
   
-  // Prefetch next 3 profile images
+  // Aggressive Prefetch: Next 5 profiles
   useEffect(() => {
-    for (let i = 1; i <= 3; i++) {
-        if (profiles.length > currentIndex + i) {
-            const nextProfile = profiles[currentIndex + i];
+    if (!profiles || profiles.length === 0) return;
+
+    // Prefetch main photo for next 5 profiles
+    for (let i = 1; i <= 5; i++) {
+        const nextIndex = currentIndex + i;
+        if (profiles.length > nextIndex) {
+            const nextProfile = profiles[nextIndex];
             if (nextProfile.photos?.[0]) {
                 const img = new Image();
                 img.src = nextProfile.photos[0];
+                img.fetchPriority = "low"; // Background prefetch
             }
         }
     }
+
+    // Also prefetch the SECOND photo of the CURRENT and NEXT profile (for carousel users)
+    const currentProfile = profiles[currentIndex];
+    if (currentProfile?.photos?.[1]) {
+        const img = new Image();
+        img.src = currentProfile.photos[1];
+    }
+    
+    const nextProfile = profiles[currentIndex + 1];
+    if (nextProfile?.photos?.[1]) {
+        const img = new Image();
+        img.src = nextProfile.photos[1];
+    }
+
   }, [currentIndex, profiles]);
 
   const handleSwipe = async (action) => {

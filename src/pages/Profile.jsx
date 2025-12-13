@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
+import SmartImage from '@/components/shared/SmartImage';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -198,13 +199,11 @@ export default function ProfilePage() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className={`aspect-square rounded-lg overflow-hidden relative ${isEditing ? 'cursor-pointer border-2 border-gray-200 hover:border-[--theme-orange]' : ''} transition-all`} onClick={() => triggerFileInput(i)}>
                 {(formData.photos?.length > i && formData.photos[i]) ? (
-                  <img 
+                  <SmartImage 
                     src={formData.photos[i]} 
                     alt={`תמונה ${i+1}`} 
-                    className="w-full h-full object-cover" 
-                    loading="eager" 
-                    decoding="sync"
-                    fetchPriority={i === 0 ? "high" : "auto"}
+                    className="w-full h-full" 
+                    priority={true}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -441,7 +440,12 @@ export default function ProfilePage() {
                       }}
                     >
                         {(formData.apartment_photos?.length > i && formData.apartment_photos[i]) ? (
-                            <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover" loading="eager" decoding="sync"/>
+                            <SmartImage 
+                              src={formData.apartment_photos[i]} 
+                              alt={`דירה ${i+1}`} 
+                              className="w-full h-full"
+                              priority={false}
+                            />
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                               {isEditing ? (

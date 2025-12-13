@@ -5,6 +5,7 @@ import { Loader2, ArrowRight, ThumbsUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import SmartImage from '@/components/shared/SmartImage';
 
 export default function LikesSentPage() {
     const [profiles, setProfiles] = useState([]);
@@ -73,11 +74,11 @@ export default function LikesSentPage() {
                             }}
                         >
                              <div className="aspect-[3/4] relative">
-                                <img 
-                                    src={profile.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop"} 
-                                    className="w-full h-full object-cover" 
+                                <SmartImage 
+                                    src={profile.photos?.[0]} 
+                                    className="w-full h-full" 
                                     alt={profile.name}
-                                    loading="lazy"
+                                    priority={false}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
                                     <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>

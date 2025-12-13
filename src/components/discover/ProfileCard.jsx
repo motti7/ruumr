@@ -249,16 +249,15 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     className={`relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
-                    <img
-                        key={currentPhotoIndex}
-                        src={photos[currentPhotoIndex]}
-                        alt={profile.name}
-                        className="absolute w-full h-full object-cover pointer-events-none"
-                        draggable={false}
-                        loading="eager"
-                        fetchPriority="high"
-                        decoding="sync"
-                    />
+                    <div className="absolute inset-0 pointer-events-none">
+                        <SmartImage
+                            key={currentPhotoIndex}
+                            src={photos[currentPhotoIndex]}
+                            alt={profile.name}
+                            className="w-full h-full"
+                            priority={true}
+                        />
+                    </div>
 
                     <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
                         {photos.map((_, i) => (
