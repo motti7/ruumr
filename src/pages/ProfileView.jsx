@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Profile } from "@/entities/all";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2 } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 

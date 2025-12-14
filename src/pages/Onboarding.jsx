@@ -5,7 +5,7 @@ import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book } from 'lucide-react';
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,6 +44,7 @@ export default function OnboardingPage() {
     age: 25,
     gender: 'male',
     about_me: '',
+    social_link: '',
     looking_for_description: '',
     photos: Array(6).fill(null),
     location: '', 
@@ -88,39 +89,49 @@ export default function OnboardingPage() {
         return formData.name.trim() && formData.age >= 18 && formData.gender;
       case 2: // Status
         return formData.current_status !== '';
-      case 3: // Photos
-        return formData.photos.filter(p => p).length >= 2;
-      case 4: // Location & Budget
+      case 3: // Location & Budget (was 4)
         return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 5: // Vibe
+      case 4: // Vibe (was 5)
         return formData.vibe_level;
-      case 6: // Pets
+      case 5: // Pets (was 6)
         return formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 7: // About
-        return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 8: // Preferences
+      case 6: // Preferences (was 8)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
-      case 9: // Apartment Details
+      case 7: // Apartment Details (was 9) - Conditional
         if (formData.current_status === 'has_apartment') {
             const apartmentPhotoCount = formData.apartment_photos?.filter(p => p).length || 0;
             return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
-        return true;
+        return true; // Should ideally skip if seeking
+      case 8: // About (was 7)
+        return formData.about_me.trim() && formData.looking_for_description.trim();
+      case 9: // Photos (was 3)
+        return formData.photos.filter(p => p).length >= 2;
       default:
         return true;
       }
   };
 
   const nextStep = () => {
-    if (step === 8 && formData.current_status === 'seeking_apartment') {
-        // Skip apartment details if seeking (step 9)
-        handleFinish();
+    if (step === 2 && formData.current_status === 'seeking_apartment') {
+         // Proceed normally to step 3
+         setStep(s => s + 1);
+    } else if (step === 6 && formData.current_status === 'seeking_apartment') {
+         // Skip apartment details (step 7) if seeking
+         setStep(8);
     } else {
-        setStep(s => Math.min(s + 1, TOTAL_STEPS));
+         setStep(s => Math.min(s + 1, TOTAL_STEPS));
     }
   };
   
-  const prevStep = () => setStep(s => Math.max(s - 1, 1));
+  const prevStep = () => {
+    if (step === 8 && formData.current_status === 'seeking_apartment') {
+        // Go back to preferences (step 6), skipping apartment details (step 7)
+        setStep(6);
+    } else {
+        setStep(s => Math.max(s - 1, 1));
+    }
+  };
 
   const handleFinish = async () => {
     setIsSubmitting(true);
@@ -322,39 +333,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
             
-            <Step step={3} currentStep={step} title="התמונות שלי">
-                <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
-                <div className="grid grid-cols-3 gap-3">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm hover:shadow-md transition-all bg-gray-50 group">
-                             {formData.photos[i] ? (
-                                 <>
-                                    <img 
-                                        src={formData.photos[i]} 
-                                        alt={`Uploaded ${i+1}`} 
-                                        className="w-full h-full object-cover cursor-pointer" 
-                                        onClick={() => setLightboxSrc(formData.photos[i])}
-                                        loading="eager"
-                                        decoding="sync"
-                                    />
-                                    <button 
-                                        className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={(e) => { e.stopPropagation(); triggerFileInput(i); }}
-                                    >
-                                        <Camera className="w-4 h-4 text-gray-600"/>
-                                    </button>
-                                 </>
-                             ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => triggerFileInput(i)}>
-                                    {uploadingIndex === i ? <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]"/> : <Plus className="w-8 h-8 text-gray-300"/>}
-                                </div>
-                             )}
-                        </div>
-                    ))}
-                </div>
-            </Step>
-
-            <Step step={4} currentStep={step} title="לוקיישן ותקציב">
+            <Step step={3} currentStep={step} title="לוקיישן ותקציב">
                 <div className="space-y-8 text-right">
                     <div className="space-y-2">
                         <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -386,7 +365,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={5} currentStep={step} title="מה הוייב שלך?">
+            <Step step={4} currentStep={step} title="מה הוייב שלך?">
                  <div className="flex flex-col items-center justify-center h-full space-y-8">
                       <VibeIcon level={formData.vibe_level} />
                       
@@ -411,7 +390,7 @@ export default function OnboardingPage() {
                   </div>
             </Step>
 
-            <Step step={6} currentStep={step} title="חיות מחמד">
+            <Step step={5} currentStep={step} title="חיות מחמד">
                  <div className="space-y-8 text-right">
                       <div>
                           <label className="font-bold text-lg block text-center mb-6 text-gray-600">יש לך חיית מחמד שמצטרפת?</label>
@@ -437,20 +416,7 @@ export default function OnboardingPage() {
                   </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="ספר/י על עצמך">
-                <div className="space-y-6 text-right">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
-                    </div>
-                </div>
-            </Step>
-
-            <Step step={8} currentStep={step} title="העדפות ודת">
+            <Step step={6} currentStep={step} title="העדפות ודת">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
                         <label className="font-bold block mb-1">אני מחפש/ת</label>
@@ -512,7 +478,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="פרטי הדירה">
+            <Step step={7} currentStep={step} title="פרטי הדירה">
                 <div className="space-y-6 text-right">
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
@@ -551,17 +517,75 @@ export default function OnboardingPage() {
                     </div>
                 </div>
             </Step>
+
+            <Step step={8} currentStep={step} title="ספר/י על עצמך">
+                <div className="space-y-6 text-right">
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <Instagram className="w-4 h-4 text-[--theme-orange]"/>
+                            קישור לרשת חברתית
+                        </label>
+                        <Input 
+                            value={formData.social_link} 
+                            onChange={(e) => setFormField('social_link', e.target.value)} 
+                            placeholder="https://instagram.com/..." 
+                            className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
+                            dir="ltr"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
+                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
+                    </div>
+                </div>
+            </Step>
+
+            <Step step={9} currentStep={step} title="התמונות שלי">
+                <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
+                <div className="grid grid-cols-3 gap-3">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm hover:shadow-md transition-all bg-gray-50 group">
+                             {formData.photos[i] ? (
+                                 <>
+                                    <img 
+                                        src={formData.photos[i]} 
+                                        alt={`Uploaded ${i+1}`} 
+                                        className="w-full h-full object-cover cursor-pointer" 
+                                        onClick={() => setLightboxSrc(formData.photos[i])}
+                                        loading="eager"
+                                        decoding="sync"
+                                    />
+                                    <button 
+                                        className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => { e.stopPropagation(); triggerFileInput(i); }}
+                                    >
+                                        <Camera className="w-4 h-4 text-gray-600"/>
+                                    </button>
+                                 </>
+                             ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => triggerFileInput(i)}>
+                                    {uploadingIndex === i ? <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]"/> : <Plus className="w-8 h-8 text-gray-300"/>}
+                                </div>
+                             )}
+                        </div>
+                    ))}
+                </div>
+            </Step>
         </div>
 
         {/* Action Button */}
         <div className="mt-6">
             <Button 
-                onClick={step === TOTAL_STEPS || (step === 8 && formData.current_status === 'seeking_apartment') ? handleFinish : nextStep} 
+                onClick={step === TOTAL_STEPS ? handleFinish : nextStep} 
                 className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`} 
                 disabled={!canProceed() || isSubmitting}
             >
                 {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin"/> : 
-                 (step === TOTAL_STEPS || (step === 8 && formData.current_status === 'seeking_apartment') ? 'סיימנו! בוא נתחיל' : 'המשך')}
+                 (step === TOTAL_STEPS ? 'סיימנו! בוא נתחיל' : 'המשך')}
             </Button>
         </div>
       </div>

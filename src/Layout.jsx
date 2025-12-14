@@ -42,6 +42,8 @@ export default function Layout({ children, currentPageName }) {
         <meta name="theme-color" content="#FF5722" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
