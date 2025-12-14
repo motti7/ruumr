@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2 } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -36,7 +36,18 @@ const ProfileDetail = ({ profile, onClose }) => {
 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                     <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
-                    <p className="text-base text-white/95 leading-relaxed">{profile.about_me}</p>
+                    <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
+                    {profile.social_link && (
+                        <a 
+                          href={profile.social_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-white font-bold bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-colors text-sm"
+                        >
+                          {profile.social_link.includes('instagram') ? <Instagram className="w-4 h-4"/> : <LinkIcon className="w-4 h-4"/>}
+                          בואו להכיר אותי
+                        </a>
+                    )}
                 </div>
                 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">

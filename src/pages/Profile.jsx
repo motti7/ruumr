@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
@@ -327,6 +327,21 @@ export default function ProfilePage() {
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
               <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+            </div>
+
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Instagram className="w-4 h-4 text-[--theme-orange]" />
+                  קישור לרשת חברתית
+              </label>
+              <Input 
+                  disabled={!isEditing} 
+                  value={formData.social_link || ""} 
+                  onChange={(e) => setFormField('social_link', e.target.value)} 
+                  placeholder="https://instagram.com/..." 
+                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
+                  dir="ltr" 
+              />
             </div>
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>

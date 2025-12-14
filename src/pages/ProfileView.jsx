@@ -136,7 +136,18 @@ export default function ProfileViewPage() {
 
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-2">קצת עליי</h4>
-          <p className="text-gray-700 leading-relaxed">{profile.about_me}</p>
+          <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
+          {profile.social_link && (
+            <a 
+              href={profile.social_link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[--theme-orange] font-bold bg-orange-50 px-4 py-2 rounded-full hover:bg-orange-100 transition-colors"
+            >
+              {profile.social_link.includes('instagram') ? <Instagram className="w-5 h-5"/> : <LinkIcon className="w-5 h-5"/>}
+              בואו להכיר אותי
+            </a>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm">
