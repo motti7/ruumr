@@ -20,7 +20,7 @@ export default function MatchAnimation({ profile1, profile2, onDismiss }) {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="text-5xl font-black mb-12 tinder-gradient-text"
+        className="text-5xl font-black mb-12 text-[--theme-orange] drop-shadow-lg"
       >
         IT'S A MATCH!
       </motion.h1>
