@@ -123,6 +123,11 @@ export default function OnboardingPage() {
          setStep(s => Math.min(s + 1, TOTAL_STEPS));
     }
   };
+
+  const isSeeking = formData.current_status === 'seeking_apartment';
+  // If seeking, step 7 is skipped. So if step is 8 or 9, we visually subtract 1.
+  const displayStep = isSeeking && step > 6 ? step - 1 : step;
+  const displayTotal = isSeeking ? 8 : 9;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
@@ -264,14 +269,14 @@ export default function OnboardingPage() {
                      <ArrowRight className="h-6 w-6" />
                    </Button>
                  ) : <div className="w-10"/>}
-                 <span className="font-bold text-[--theme-orange]">שלב {step}</span>
+                 <span className="font-bold text-[--theme-orange]">שלב {displayStep} מתוך {displayTotal}</span>
                  <div className="w-10"/>
              </div>
              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                  <motion.div 
                     className="h-full gradient-orange"
                     initial={{ width: 0 }}
-                    animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+                    animate={{ width: `${(displayStep / displayTotal) * 100}%` }}
                     transition={{ duration: 0.5 }}
                  />
              </div>

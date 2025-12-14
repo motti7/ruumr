@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Profile } from "@/entities/all";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -84,6 +84,16 @@ export default function ProfileViewPage() {
   const allPhotos = Array.from(new Set([...regularPhotos, ...apartmentPhotos]));
   const photos = allPhotos.length > 0 ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
 
+  const getSocialIcon = (link) => {
+      if (!link) return null;
+      const l = link.toLowerCase();
+      if (l.includes('facebook')) return <Facebook className="w-4 h-4 text-white" />;
+      if (l.includes('instagram')) return <Instagram className="w-4 h-4 text-white" />;
+      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-4 h-4 text-white" />;
+      if (l.includes('linkedin')) return <Linkedin className="w-4 h-4 text-white" />;
+      return <LinkIcon className="w-4 h-4 text-white" />;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20" dir="rtl">
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10">
@@ -102,6 +112,17 @@ export default function ProfileViewPage() {
             className="w-full h-full"
             priority={true}
           />
+          {currentPhotoIndex === 0 && profile.social_link && (
+             <a 
+                 href={profile.social_link}
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 onClick={(e) => e.stopPropagation()}
+                 className="absolute top-8 left-4 z-20 bg-[--theme-orange] p-2 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+             >
+                 {getSocialIcon(profile.social_link)}
+             </a>
+          )}
           <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10">
             {photos.map((_, i) => (
               <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">

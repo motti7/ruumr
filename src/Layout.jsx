@@ -44,21 +44,24 @@ export default function Layout({ children, currentPageName }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:title" content="Roomi - למצוא שותפים בכיף" />
+        <meta property="og:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
-        <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 bg-white z-[1000] text-gray-800 p-8 text-center">
-            <div className="max-w-md w-full bg-orange-50 p-12 rounded-3xl border border-orange-100 shadow-2xl flex flex-col items-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg transform rotate-3">
-                    <Home className="w-10 h-10 text-white" />
+        <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 gradient-orange z-[1000] text-white p-8 text-center">
+            <div className="flex flex-col items-center max-w-lg">
+                <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 shadow-xl">
+                    <Home className="w-12 h-12 text-white" />
                 </div>
-                <h1 className="text-4xl font-black mb-4 text-gray-900" style={{fontFamily: 'Pacifico, cursive'}}>Roomi</h1>
-                <h2 className="text-2xl font-bold mb-6">חווית המובייל המושלמת מחכה לך</h2>
-                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                    פיתחנו את Roomi במיוחד עבור הטלפון הנייד שלך, כדי לספק לך את חווית המשתמש הטובה, האישית והנוחה ביותר.
+                <h1 className="text-6xl mb-6 logo-font drop-shadow-md">Roomi</h1>
+                <h2 className="text-2xl font-bold mb-4 opacity-95">חווית המובייל המושלמת מחכה לך</h2>
+                <p className="text-lg opacity-90 mb-10 leading-relaxed max-w-md">
+                    האפליקציה זמינה כרגע לשימוש בטלפון הנייד בלבד, כדי להבטיח לך את החוויה הטובה ביותר.
                 </p>
-                <div className="flex items-center gap-3 text-orange-600 font-semibold bg-white px-6 py-3 rounded-full shadow-sm border border-orange-100">
-                    <Smartphone className="w-5 h-5" />
-                    <span>אנא פתח/י דרך הנייד</span>
+                <div className="flex items-center gap-3 bg-white text-[--theme-orange] px-8 py-4 rounded-full shadow-lg font-bold text-lg hover:scale-105 transition-transform cursor-default">
+                    <Smartphone className="w-6 h-6" />
+                    <span>נא לפתוח דרך הנייד</span>
                 </div>
             </div>
         </div>

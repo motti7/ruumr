@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -168,6 +168,16 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
+    const getSocialIcon = (link) => {
+        if (!link) return null;
+        const l = link.toLowerCase();
+        if (l.includes('facebook')) return <Facebook className="w-4 h-4 text-white" />;
+        if (l.includes('instagram')) return <Instagram className="w-4 h-4 text-white" />;
+        if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-4 h-4 text-white" />;
+        if (l.includes('linkedin')) return <Linkedin className="w-4 h-4 text-white" />;
+        return <LinkIcon className="w-4 h-4 text-white" />;
+    };
+
     const getPhotoContent = (index) => {
         const currentPhotoIsRegular = index < regularPhotos.length;
         const actualPhotoIndex = currentPhotoIsRegular ? index : index - regularPhotos.length;
@@ -181,6 +191,18 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 גיל: {profile.age}
                             </div>
                         </div>
+
+                        {profile.social_link && (
+                            <a 
+                                href={profile.social_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute top-4 right-24 z-20 bg-[--theme-orange] p-2 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                            >
+                                {getSocialIcon(profile.social_link)}
+                            </a>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
