@@ -87,11 +87,11 @@ export default function ProfileViewPage() {
   const getSocialIcon = (link) => {
       if (!link) return null;
       const l = link.toLowerCase();
-      if (l.includes('facebook')) return <Facebook className="w-4 h-4 text-white" />;
-      if (l.includes('instagram')) return <Instagram className="w-4 h-4 text-white" />;
-      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-4 h-4 text-white" />;
-      if (l.includes('linkedin')) return <Linkedin className="w-4 h-4 text-white" />;
-      return <LinkIcon className="w-4 h-4 text-white" />;
+      if (l.includes('facebook')) return <Facebook />;
+      if (l.includes('instagram')) return <Instagram />;
+      if (l.includes('twitter') || l.includes('x.com')) return <Twitter />;
+      if (l.includes('linkedin')) return <Linkedin />;
+      return <LinkIcon />;
   };
 
   return (
@@ -118,9 +118,11 @@ export default function ProfileViewPage() {
                  target="_blank"
                  rel="noopener noreferrer"
                  onClick={(e) => e.stopPropagation()}
-                 className="absolute top-8 left-4 z-20 bg-[--theme-orange] p-2 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                 className="absolute bottom-20 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform border border-gray-100 group/social"
              >
-                 {getSocialIcon(profile.social_link)}
+                 <div className="text-[--theme-orange] group-hover/social:scale-110 transition-transform">
+                     {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-6 h-6", color: "#FF5722", fill: "currentColor" })}
+                 </div>
              </a>
           )}
           <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10">

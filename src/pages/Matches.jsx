@@ -140,10 +140,10 @@ export default function MatchesPage() {
                   match={match.profile}
                   isOnline={match.isOnline}
                   onClickProfile={() => {
-                    window.location.href = createPageUrl(`ProfileView?userId=${match.profile.user_id}`);
+                    window.location.href = createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`;
                   }}
                   onClickChat={() => {
-                    window.location.href = createPageUrl(`Chat?matchId=${match.id}`);
+                    window.location.href = createPageUrl('Chat') + `?matchId=${match.id}`;
                   }}
                 />
               </motion.div>

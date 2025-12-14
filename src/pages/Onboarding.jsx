@@ -114,20 +114,22 @@ export default function OnboardingPage() {
 
   const nextStep = () => {
     if (step === 2 && formData.current_status === 'seeking_apartment') {
-         // Proceed normally to step 3
          setStep(s => s + 1);
     } else if (step === 6 && formData.current_status === 'seeking_apartment') {
-         // Skip apartment details (step 7) if seeking
-         setStep(8);
+         setStep(8); // Skip apartment details
     } else {
-         setStep(s => Math.min(s + 1, TOTAL_STEPS));
+         setStep(s => Math.min(s + 1, TOTAL_STEPS + 1)); // Allow going to step 10
     }
   };
 
   const isSeeking = formData.current_status === 'seeking_apartment';
-  // If seeking, step 7 is skipped. So if step is 8 or 9, we visually subtract 1.
-  const displayStep = isSeeking && step > 6 ? step - 1 : step;
-  const displayTotal = isSeeking ? 8 : 9;
+  // Adjust progress bar logic
+  // Steps: 1, 2, 3, 4, 5, 6, [7 skipped if seeking], 8, 9, 10
+  // Total steps including verification is 10. 
+  // If seeking, effectively 9 steps.
+  let displayStep = step;
+  if (isSeeking && step > 6) displayStep = step - 1;
+  const displayTotal = isSeeking ? 9 : 10;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
@@ -138,7 +140,7 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleFinish = async () => {
+  const handleFinish = async (shouldVerify = false) => {
     setIsSubmitting(true);
     try {
       const finalData = { 
@@ -149,7 +151,11 @@ export default function OnboardingPage() {
           is_visible: true
       };
       await Profile.create(finalData);
-      navigate(createPageUrl('Discover'));
+      if (shouldVerify) {
+        navigate(createPageUrl('Verification'));
+      } else {
+        navigate(createPageUrl('Discover'));
+      }
     } catch (error) {
       console.error("Failed to create profile:", error);
       setIsSubmitting(false);
@@ -580,19 +586,50 @@ export default function OnboardingPage() {
                     ))}
                 </div>
             </Step>
+
+            <Step step={10} currentStep={step} title="אימות פרופיל">
+                <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                    <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
+                        <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
+                        <Check className="w-16 h-16 text-blue-500" />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-bold mb-2">אמת/י את הפרופיל שלך</h3>
+                        <p className="text-gray-500 max-w-xs mx-auto">
+                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
+                        </p>
+                    </div>
+                    
+                    <div className="w-full space-y-4">
+                         <Button 
+                            onClick={() => handleFinish(true)}
+                            className="w-full h-14 rounded-full text-lg font-bold shadow-lg gradient-orange text-white hover:brightness-110"
+                        >
+                            אמת עכשיו (מומלץ)
+                        </Button>
+                        <button 
+                            onClick={() => handleFinish(false)}
+                            className="text-gray-400 font-medium hover:text-gray-600 transition-colors"
+                        >
+                            אולי אחר כך
+                        </button>
+                    </div>
+                </div>
+            </Step>
         </div>
 
         {/* Action Button */}
-        <div className="mt-6">
-            <Button 
-                onClick={step === TOTAL_STEPS ? handleFinish : nextStep} 
-                className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`} 
-                disabled={!canProceed() || isSubmitting}
-            >
-                {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin"/> : 
-                 (step === TOTAL_STEPS ? 'סיימנו! בוא נתחיל' : 'המשך')}
-            </Button>
-        </div>
+        {step < 10 && (
+            <div className="mt-6">
+                <Button 
+                    onClick={nextStep} 
+                    className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`} 
+                    disabled={!canProceed() || isSubmitting}
+                >
+                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin"/> : 'המשך'}
+                </Button>
+            </div>
+        )}
       </div>
     </div>
   );

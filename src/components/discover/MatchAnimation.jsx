@@ -21,6 +21,7 @@ export default function MatchAnimation({ profile1, profile2, onDismiss }) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
         className="text-5xl font-black mb-12 text-[--theme-orange] drop-shadow-lg"
+        dir="ltr"
       >
         IT'S A MATCH!
       </motion.h1>

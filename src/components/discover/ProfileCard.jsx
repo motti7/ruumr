@@ -171,11 +171,12 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     const getSocialIcon = (link) => {
         if (!link) return null;
         const l = link.toLowerCase();
-        if (l.includes('facebook')) return <Facebook className="w-4 h-4 text-white" />;
-        if (l.includes('instagram')) return <Instagram className="w-4 h-4 text-white" />;
-        if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-4 h-4 text-white" />;
-        if (l.includes('linkedin')) return <Linkedin className="w-4 h-4 text-white" />;
-        return <LinkIcon className="w-4 h-4 text-white" />;
+        // Return icon component only, styling handled in usage
+        if (l.includes('facebook')) return <Facebook />;
+        if (l.includes('instagram')) return <Instagram />;
+        if (l.includes('twitter') || l.includes('x.com')) return <Twitter />;
+        if (l.includes('linkedin')) return <Linkedin />;
+        return <LinkIcon />;
     };
 
     const getPhotoContent = (index) => {
@@ -198,9 +199,11 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute top-4 right-24 z-20 bg-[--theme-orange] p-2 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                                className="absolute bottom-28 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform border border-gray-100 group/social"
                             >
-                                {getSocialIcon(profile.social_link)}
+                                <div className="text-[--theme-orange] group-hover/social:scale-110 transition-transform">
+                                    {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-5 h-5", color: "#FF5722", fill: "currentColor" })}
+                                </div>
                             </a>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">

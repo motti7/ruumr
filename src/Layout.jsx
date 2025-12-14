@@ -17,17 +17,34 @@ export default function Layout({ children, currentPageName }) {
        const checkNotifications = async () => {
            try {
                const user = await UserEntity.me();
-               const matches = await Match.filter({ user1_id: user.id }); // basic filter
+               const matches = await Match.filter({ user1_id: user.id }); 
                const matches2 = await Match.filter({ user2_id: user.id });
-               // Simplified count of total matches as "notification" for now, or new ones if we tracked it.
-               // User asked for "small numbers on the button... depending on how many matches".
-               setMatchesCount(matches.length + matches2.length);
+               const total = matches.length + matches2.length;
+               
+               if (total > matchesCount && matchesCount !== 0) {
+                   // New match detected!
+                   if (Notification.permission === 'granted') {
+                       new Notification('Roomi', {
+                           body: 'יש לך התאמה חדשה!',
+                           icon: 'https://cdn-icons-png.flaticon.com/512/3405/3405802.png'
+                       });
+                   }
+               }
+               setMatchesCount(total);
+               
+               // Request permissions if not denied/granted yet
+               if (user.enable_notifications !== false && Notification.permission === 'default') {
+                   Notification.requestPermission();
+               }
+
            } catch(e) {}
        };
        if (!['Onboarding', 'Home'].includes(currentPageName)) {
            checkNotifications();
+           const interval = setInterval(checkNotifications, 10000); // Poll every 10s
+           return () => clearInterval(interval);
        }
-  }, [currentPageName]);
+  }, [currentPageName, matchesCount]);
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
