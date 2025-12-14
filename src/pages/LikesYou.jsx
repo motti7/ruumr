@@ -5,6 +5,7 @@ import { Loader2, ThumbsUp, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import SmartImage from '@/components/shared/SmartImage';
 
 export default function LikesYouPage() {
     const [profiles, setProfiles] = useState([]);

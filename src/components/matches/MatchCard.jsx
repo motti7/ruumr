@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin } from "lucide-react";
+import SmartImage from '@/components/shared/SmartImage';
 
 export default function MatchCard({ match, isOnline, onClickProfile, onClickChat }) {
   const handleProfileClick = (e) => {

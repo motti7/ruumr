@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import SmartImage from '@/components/shared/SmartImage';
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
