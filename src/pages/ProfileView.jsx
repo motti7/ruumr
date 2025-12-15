@@ -15,29 +15,32 @@ export default function ProfileViewPage() {
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [location.search]); // Reload when URL changes
 
   const loadProfile = async () => {
     setIsLoading(true);
     try {
-      const urlParams = new URLSearchParams(window.location.search);
+      // Use location.search from the hook for reliability in SPA
+      const urlParams = new URLSearchParams(location.search);
       const userId = urlParams.get("userId");
 
       if (!userId) {
+        console.error("No userId in URL");
         navigate(createPageUrl("Matches"));
         return;
       }
 
       const profiles = await Profile.filter({ user_id: userId });
-      if (profiles.length === 0) {
-        navigate(createPageUrl("Matches"));
+      if (!profiles || profiles.length === 0) {
+        console.error("Profile not found");
+        // Don't auto-navigate away immediately to avoid loops, just show error
+        setIsLoading(false);
         return;
       }
 
       setProfile(profiles[0]);
     } catch (error) {
       console.error("Error loading profile:", error);
-      navigate(createPageUrl("Matches"));
     }
     setIsLoading(false);
   };
@@ -87,11 +90,19 @@ export default function ProfileViewPage() {
   const getSocialIcon = (link) => {
       if (!link) return null;
       const l = link.toLowerCase();
-      if (l.includes('facebook')) return <Facebook />;
-      if (l.includes('instagram')) return <Instagram />;
-      if (l.includes('twitter') || l.includes('x.com')) return <Twitter />;
-      if (l.includes('linkedin')) return <Linkedin />;
-      return <LinkIcon />;
+      if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
+      if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
+      if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
+      return <LinkIcon className="w-5 h-5 text-white" />;
+  };
+
+  const ensureProtocol = (url) => {
+      if (!url) return '';
+      if (!/^https?:\/\//i.test(url)) {
+          return `https://${url}`;
+      }
+      return url;
   };
 
   return (
@@ -114,15 +125,13 @@ export default function ProfileViewPage() {
           />
           {currentPhotoIndex === 0 && profile.social_link && (
              <a 
-                 href={profile.social_link}
+                 href={ensureProtocol(profile.social_link)}
                  target="_blank"
                  rel="noopener noreferrer"
                  onClick={(e) => e.stopPropagation()}
-                 className="absolute bottom-20 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform border border-gray-100 group/social"
+                 className="absolute bottom-20 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
              >
-                 <div className="text-[--theme-orange] group-hover/social:scale-110 transition-transform">
-                     {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-6 h-6", color: "#FF5722", fill: "currentColor" })}
-                 </div>
+                 {getSocialIcon(profile.social_link)}
              </a>
           )}
           <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10">
@@ -173,12 +182,12 @@ export default function ProfileViewPage() {
           <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
           {profile.social_link && (
             <a 
-              href={profile.social_link} 
+              href={ensureProtocol(profile.social_link)} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[--theme-orange] font-bold bg-orange-50 px-4 py-2 rounded-full hover:bg-orange-100 transition-colors"
+              className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-4 py-2 rounded-full hover:brightness-110 transition-colors shadow-sm"
             >
-              {profile.social_link.includes('instagram') ? <Instagram className="w-5 h-5"/> : <LinkIcon className="w-5 h-5"/>}
+              {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-5 h-5" })}
               בואו להכיר אותי
             </a>
           )}

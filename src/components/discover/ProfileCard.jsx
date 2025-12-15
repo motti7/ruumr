@@ -195,15 +195,20 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
                         {profile.social_link && (
                             <a 
-                                href={profile.social_link}
+                                href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-28 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform border border-gray-100 group/social"
+                                className="absolute bottom-28 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                             >
-                                <div className="text-[--theme-orange] group-hover/social:scale-110 transition-transform">
-                                    {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-5 h-5", color: "#FF5722", fill: "currentColor" })}
-                                </div>
+                                {(() => {
+                                    const l = profile.social_link.toLowerCase();
+                                    if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
+                                    if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+                                    if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
+                                    if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
+                                    return <LinkIcon className="w-5 h-5 text-white" />;
+                                })()}
                             </a>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">

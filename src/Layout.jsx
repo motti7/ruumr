@@ -12,10 +12,24 @@ import { useState, useEffect } from "react";
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
+  const navigate = useNavigate(); // Import this hook if not imported!
 
   useEffect(() => {
+       const checkBanned = async () => {
+           try {
+               const user = await UserEntity.me();
+               // Check if banned
+               const { base44 } = require('@/api/base44Client');
+               const banned = await base44.entities.BannedUser.filter({ email: user.email });
+               if (banned.length > 0) {
+                   window.location.href = createPageUrl('Banned');
+               }
+           } catch(e) {}
+       };
+
        const checkNotifications = async () => {
            try {
+               await checkBanned();
                const user = await UserEntity.me();
                const matches = await Match.filter({ user1_id: user.id }); 
                const matches2 = await Match.filter({ user2_id: user.id });
@@ -65,9 +79,12 @@ export default function Layout({ children, currentPageName }) {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף" />
         <meta property="og:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
-        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <meta property="og:image:width" content="512" />
-        <meta property="og:image:height" content="512" />
+        <meta property="og:image" content="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
+        <meta property="og:image:width" content="626" />
+        <meta property="og:image:height" content="626" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <link rel="image_src" href="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
+        <meta name="thumbnail" content="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
         <meta name="twitter:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />

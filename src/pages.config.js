@@ -12,6 +12,7 @@ import ProfileView from './pages/ProfileView';
 import Verification from './pages/Verification';
 import LikesYou from './pages/LikesYou';
 import LikesSent from './pages/LikesSent';
+import Banned from './pages/Banned';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "Verification": Verification,
     "LikesYou": LikesYou,
     "LikesSent": LikesSent,
+    "Banned": Banned,
 }
 
 export const pagesConfig = {
