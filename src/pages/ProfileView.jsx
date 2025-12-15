@@ -145,9 +145,20 @@ export default function ProfileViewPage() {
       <div className="p-4 space-y-4">
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
-          <div className="flex items-center text-gray-600 mb-3">
-            <MapPin className="w-4 h-4 ml-1" />
-            <span>{profile.location} • {profile.search_area}</span>
+          <div className="flex items-start text-gray-600 mb-3">
+            <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
+            <div className="flex flex-col">
+                 {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
+                    <>
+                        <span>{profile.search_cities[0]}</span>
+                        {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
+                        {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">ועוד...</span>}
+                    </>
+                 ) : (
+                    <span>{profile.location}</span>
+                 )}
+                 <span className="text-sm text-gray-500 mt-0.5">• {profile.search_area}</span>
+            </div>
           </div>
           {profile.current_status === 'has_apartment' && (
             <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">

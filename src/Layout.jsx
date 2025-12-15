@@ -61,9 +61,17 @@ export default function Layout({ children, currentPageName }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:site_name" content="Roomi" />
+        <meta property="og:type" content="website" />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף" />
         <meta property="og:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
+        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:image:width" content="512" />
+        <meta property="og:image:height" content="512" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
+        <meta name="twitter:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
+        <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 gradient-orange z-[1000] text-white p-8 text-center">

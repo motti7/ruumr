@@ -220,9 +220,20 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                     ₪{profile.apartment_total_budget?.toLocaleString()} • {profile.existing_roommates} שותפים
                                 </div>
                             ) : (
-                                <div className="flex items-center text-white/90 text-base mb-3">
-                                    <MapPin className="w-5 h-5 ml-1" />
-                                    <span>{profile.location} • {profile.search_area}</span>
+                                <div className="flex items-start text-white/90 text-base mb-3">
+                                    <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
+                                    <div className="flex flex-col">
+                                        {profile.search_cities && profile.search_cities.length > 0 ? (
+                                            <>
+                                                <span>{profile.search_cities[0]}</span>
+                                                {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
+                                                {profile.search_cities.length > 2 && <span className="text-xs opacity-90">ועוד...</span>}
+                                            </>
+                                        ) : (
+                                            <span>{profile.location}</span>
+                                        )}
+                                        <span className="text-sm opacity-80 mt-1">• {profile.search_area}</span>
+                                    </div>
                                 </div>
                             )}
                             {profile.current_status === 'has_apartment' && (

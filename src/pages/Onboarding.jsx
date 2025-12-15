@@ -122,14 +122,12 @@ export default function OnboardingPage() {
     }
   };
 
-  const isSeeking = formData.current_status === 'seeking_apartment';
+  const isHasApartment = formData.current_status === 'has_apartment';
   // Adjust progress bar logic
-  // Steps: 1, 2, 3, 4, 5, 6, [7 skipped if seeking], 8, 9, 10
-  // Total steps including verification is 10. 
-  // If seeking, effectively 9 steps.
+  // Default to 9 steps (seeking), only show 10 if "has_apartment" is explicitly selected
   let displayStep = step;
-  if (isSeeking && step > 6) displayStep = step - 1;
-  const displayTotal = isSeeking ? 9 : 10;
+  if (!isHasApartment && step > 6) displayStep = step - 1;
+  const displayTotal = isHasApartment ? 10 : 9;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
