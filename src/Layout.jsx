@@ -79,12 +79,12 @@ export default function Layout({ children, currentPageName }) {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף" />
         <meta property="og:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
-        <meta property="og:image" content="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
-        <meta property="og:image:width" content="626" />
-        <meta property="og:image:height" content="626" />
-        <meta property="og:image:type" content="image/jpeg" />
-        <link rel="image_src" href="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
-        <meta name="thumbnail" content="https://img.freepik.com/free-vector/colorful-letter-r-icon-design_1017-33671.jpg" />
+        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:image:width" content="512" />
+        <meta property="og:image:height" content="512" />
+        <meta property="og:image:type" content="image/png" />
+        <link rel="image_src" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta name="thumbnail" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
         <meta name="twitter:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />

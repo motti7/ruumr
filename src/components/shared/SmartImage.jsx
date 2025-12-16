@@ -27,14 +27,14 @@ export default function SmartImage({
         >
             {/* Loading Skeleton */}
             {status === 'loading' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse z-10">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse z-0">
                     <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
                 </div>
             )}
 
             {/* Error State */}
             {status === 'error' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-0">
                     <ImageOff className="w-8 h-8 text-gray-300" />
                 </div>
             )}
