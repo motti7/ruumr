@@ -9,6 +9,22 @@ const ProfileDetail = ({ profile, onClose }) => {
     const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
     const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
+    const ensureProtocol = (url) => {
+        if (!url) return '';
+        if (!/^https?:\/\//i.test(url)) return `https://${url}`;
+        return url;
+    };
+
+    const getSocialIcon = (link) => {
+        if (!link) return null;
+        const l = link.toLowerCase();
+        if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
+        if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+        if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
+        if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
+        return <LinkIcon className="w-5 h-5 text-white" />;
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: "100%" }}
@@ -30,7 +46,18 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <h3 className="text-3xl font-bold">{profile.name}, {profile.age}</h3>
                     <div className="flex items-center justify-center text-white/90 mt-3 text-base">
                         <MapPin className="w-5 h-5 ml-1" />
-                        <span className="font-medium">{profile.location} • {profile.search_area}</span>
+                        <div className="flex flex-col items-center">
+                             {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
+                                <div className="flex flex-wrap justify-center gap-1">
+                                    <span>{profile.search_cities[0]}</span>
+                                    {profile.search_cities[1] && <span>• {profile.search_cities[1]}</span>}
+                                    {profile.search_cities.length > 2 && <span className="text-white/70">• ועוד...</span>}
+                                </div>
+                             ) : (
+                                <span>{profile.location}</span>
+                             )}
+                             <span className="text-sm opacity-80">{profile.search_area}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -39,12 +66,12 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
                     {profile.social_link && (
                         <a 
-                          href={profile.social_link} 
+                          href={ensureProtocol(profile.social_link)} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-white font-bold bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-colors text-sm"
+                          className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-6 py-3 rounded-full hover:brightness-110 transition-colors shadow-lg mt-2"
                         >
-                          {profile.social_link.includes('instagram') ? <Instagram className="w-4 h-4"/> : <LinkIcon className="w-4 h-4"/>}
+                          {getSocialIcon(profile.social_link)}
                           בואו להכיר אותי
                         </a>
                     )}
