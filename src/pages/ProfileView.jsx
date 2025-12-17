@@ -5,6 +5,7 @@ import { createPageUrl } from "@/utils";
 import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+import AudioPlayer from '@/components/shared/AudioPlayer';
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
