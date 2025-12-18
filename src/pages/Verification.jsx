@@ -30,6 +30,8 @@ export default function VerificationPage() {
         setIsLoading(true);
         await sendMockSMS(phone);
         setIsLoading(false);
+        // DEMO MODE: Show code to user
+        alert("הודעת מערכת (דמו): קוד האימות שלך הוא 1234");
         setStep(3);
     };
 
@@ -46,6 +48,12 @@ export default function VerificationPage() {
     const handleOtpSubmit = () => {
         if (otp.join('').length >= 4) {
             setIsLoading(true);
+            // Simulate verification check
+            if (otp.join('') !== '1234' && otp.join('') !== '0000') {
+                 alert("קוד שגוי. נסה 1234 (דמו)");
+                 setIsLoading(false);
+                 return;
+            }
             setTimeout(() => {
                 setIsLoading(false);
                 setStep(4);

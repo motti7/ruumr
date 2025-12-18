@@ -203,19 +203,19 @@ export default function ProfileViewPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className="text-gray-500 text-sm block mb-1">דת</span>
-              <span className="font-semibold text-gray-900">{religionText[profile.religion]}</span>
+              <span className="font-semibold text-gray-900">{profile.religion ? religionText[profile.religion] : '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 text-sm block mb-1">וייב</span>
-              <span className="font-semibold text-gray-900">{vibeText[profile.vibe_level - 1]}</span>
+              <span className="font-semibold text-gray-900">{profile.vibe_level ? vibeText[profile.vibe_level - 1] : '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 text-sm block mb-1">כשרות</span>
-              <span className="font-semibold text-gray-900">{preferenceText[profile.kosher_preference]}</span>
+              <span className="font-semibold text-gray-900">{profile.kosher_preference ? preferenceText[profile.kosher_preference] : '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 text-sm block mb-1">שבת</span>
-              <span className="font-semibold text-gray-900">{preferenceText[profile.shabbat_preference]}</span>
+              <span className="font-semibold text-gray-900">{profile.shabbat_preference ? preferenceText[profile.shabbat_preference] : '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 text-sm block mb-1">תקציב</span>

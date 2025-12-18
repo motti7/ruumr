@@ -140,10 +140,14 @@ export default function MatchesPage() {
                   match={match.profile}
                   isOnline={match.isOnline}
                   onClickProfile={() => {
-                    window.location.href = createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`;
+                    // Use standard navigation to prevent full reload white screens
+                    const url = createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`;
+                    // Fallback to window.location if router fails, but try safe nav first
+                    window.location.assign(url);
                   }}
                   onClickChat={() => {
-                    window.location.href = createPageUrl('Chat') + `?matchId=${match.id}`;
+                     const url = createPageUrl('Chat') + `?matchId=${match.id}`;
+                     window.location.assign(url);
                   }}
                 />
               </motion.div>
