@@ -96,11 +96,12 @@ export default function ProfileViewPage() {
   const getSocialIcon = (link) => {
       if (!link) return null;
       const l = link.toLowerCase();
-      if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
-      if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
-      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
-      if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
-      return <LinkIcon className="w-5 h-5 text-white" />;
+      // Only return icon, color handled by parent
+      if (l.includes('facebook')) return <Facebook className="w-5 h-5" />;
+      if (l.includes('instagram')) return <Instagram className="w-5 h-5" />;
+      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5" />;
+      if (l.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
+      return <LinkIcon className="w-5 h-5" />;
   };
 
   const ensureProtocol = (url) => {
@@ -135,7 +136,7 @@ export default function ProfileViewPage() {
                  target="_blank"
                  rel="noopener noreferrer"
                  onClick={(e) => e.stopPropagation()}
-                 className="absolute bottom-20 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                 className="absolute bottom-24 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform text-[--theme-orange]"
              >
                  {getSocialIcon(profile.social_link)}
              </a>

@@ -40,9 +40,29 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
+        alert("אנא המתן לסיום העלאת התמונות");
+        return;
+    }
+
+    // Clean social link
+    let cleanSocial = formData.social_link || "";
+    // If user entered full URL, keep it. If they entered "instagram.com/user", ensure protocol. 
+    // If they just entered "user", we might want to leave it or assume instagram? 
+    // For now, just ensure it doesn't have double protocols if they copy-pasted.
+    
+    // Check for blob URLs
+    const hasBlobPhotos = formData.photos.some(p => p && p.startsWith('blob:'));
+    const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
+    
+    if (hasBlobPhotos || hasBlobApartment) {
+        alert("חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.");
+        return;
+    }
+
     try {
       if (profile) {
-        const dataToSave = {...formData};
+        const dataToSave = {...formData, social_link: cleanSocial};
         if(!dataToSave.budget_min) dataToSave.budget_min = 0;
         await ProfileEntity.update(profile.id, dataToSave);
       }
@@ -338,7 +358,7 @@ export default function ProfilePage() {
                   disabled={!isEditing} 
                   value={formData.social_link || ""} 
                   onChange={(e) => setFormField('social_link', e.target.value)} 
-                  placeholder="https://instagram.com/..." 
+                  placeholder="" 
                   className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
                   dir="ltr" 
               />

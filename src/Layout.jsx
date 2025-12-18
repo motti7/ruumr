@@ -67,9 +67,60 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   const shouldShowNav = !['Onboarding', 'Home', 'Chat'].includes(currentPageName);
+  
+  // Check for bad photos (blob URLs) and prompt user
+  const [showPhotoError, setShowPhotoError] = useState(false);
+  useEffect(() => {
+      const checkPhotos = async () => {
+          try {
+              const user = await UserEntity.me();
+              const profiles = await require('@/api/base44Client').base44.entities.Profile.filter({user_id: user.id});
+              if (profiles.length > 0) {
+                  const p = profiles[0];
+                  const hasBadPhotos = (p.photos && p.photos.some(ph => ph && ph.startsWith('blob:'))) ||
+                                       (p.apartment_photos && p.apartment_photos.some(ph => ph && ph.startsWith('blob:')));
+                  if (hasBadPhotos) {
+                      setShowPhotoError(true);
+                  }
+              }
+          } catch(e) {}
+      };
+      // Only check once on mount if we are not in Onboarding (to avoid annoying new users)
+      if (currentPageName !== 'Onboarding') {
+          checkPhotos();
+      }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
+        {showPhotoError && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-2xl p-6 max-w-sm text-center shadow-2xl">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Smartphone className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">אופס! יש בעיה עם התמונות</h3>
+                    <p className="text-gray-600 mb-6">
+                        חלק מהתמונות בפרופיל שלך לא עלו כראוי ולא ניתן לראות אותן. אנא העלה אותן מחדש כדי שכולם יוכלו לראות אותך.
+                    </p>
+                    <button 
+                        onClick={() => {
+                            setShowPhotoError(false);
+                            window.location.href = createPageUrl('Profile');
+                        }}
+                        className="w-full py-3 rounded-full gradient-orange text-white font-bold shadow-lg"
+                    >
+                        תיקון תמונות
+                    </button>
+                    <button 
+                        onClick={() => setShowPhotoError(false)}
+                        className="mt-3 text-gray-400 text-sm font-medium"
+                    >
+                        אזכיר לי אחר כך
+                    </button>
+                </div>
+            </div>
+        )}
         <meta name="theme-color" content="#FF5722" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

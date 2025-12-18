@@ -139,6 +139,20 @@ export default function OnboardingPage() {
   };
 
   const handleFinish = async (shouldVerify = false) => {
+    if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
+        alert("אנא המתן לסיום העלאת התמונות");
+        return;
+    }
+    
+    // Safety check for blob URLs
+    const hasBlobPhotos = formData.photos.some(p => p && p.startsWith('blob:'));
+    const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
+    
+    if (hasBlobPhotos || hasBlobApartment) {
+        alert("חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.");
+        return;
+    }
+
     setIsSubmitting(true);
     try {
       const finalData = { 
