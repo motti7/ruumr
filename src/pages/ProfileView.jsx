@@ -5,7 +5,6 @@ import { createPageUrl } from "@/utils";
 import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
-import AudioPlayer from '@/components/shared/AudioPlayer';
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
@@ -153,33 +152,23 @@ export default function ProfileViewPage() {
       {/* (Optional: could add ImageLightbox here too if requested, but user asked for it in Onboarding specifically. Adding it here is a bonus) */}
 
       <div className="p-4 space-y-4">
-        <div className="bg-white p-4 rounded-xl shadow-sm relative overflow-hidden">
-          <div className="flex justify-between items-start">
-              <div>
-                  <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
-                  <div className="flex items-start text-gray-600 mb-3">
-                    <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
-                    <div className="flex flex-col">
-                         {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
-                            <>
-                                <span>{profile.search_cities[0]}</span>
-                                {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
-                                {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">ועוד...</span>}
-                            </>
-                         ) : (
-                            <span>{profile.location}</span>
-                         )}
-                         <span className="text-sm text-gray-500 mt-0.5">• {profile.search_area}</span>
-                    </div>
-                  </div>
-              </div>
-              {profile.theme_song && (
-                  <div className="absolute top-4 left-4 z-10">
-                      <AudioPlayer track={profile.theme_song} autoPlay={true} />
-                  </div>
-              )}
+        <div className="bg-white p-4 rounded-xl shadow-sm">
+          <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
+          <div className="flex items-start text-gray-600 mb-3">
+            <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
+            <div className="flex flex-col">
+                 {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
+                    <>
+                        <span>{profile.search_cities[0]}</span>
+                        {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
+                        {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">ועוד...</span>}
+                    </>
+                 ) : (
+                    <span>{profile.location}</span>
+                 )}
+                 <span className="text-sm text-gray-500 mt-0.5">• {profile.search_area}</span>
+            </div>
           </div>
-
           {profile.current_status === 'has_apartment' && (
             <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
               <Home className="w-4 h-4 ml-1" />

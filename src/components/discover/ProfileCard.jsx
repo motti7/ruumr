@@ -3,7 +3,6 @@ import { motion, useMotionValue, useTransform, useAnimation } from "framer-motio
 import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
-import AudioPlayer from '@/components/shared/AudioPlayer';
 
 const ProfileDetail = ({ profile, onClose }) => {
     const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
@@ -62,14 +61,8 @@ const ProfileDetail = ({ profile, onClose }) => {
                     </div>
                     </div>
 
-                    {profile.theme_song && (
-                    <div className="flex justify-center w-full">
-                      <AudioPlayer track={profile.theme_song} autoPlay={true} />
-                    </div>
-                    )}
-
                     <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                    <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
+                        <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
                     <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
                     {profile.social_link && (
                         <a 
@@ -226,13 +219,6 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 גיל: {profile.age}
                             </div>
                         </div>
-
-                        {/* Song Player on Card Face */}
-                        {profile.theme_song && (
-                            <div className="absolute top-16 right-4 z-10">
-                                <AudioPlayer track={profile.theme_song} autoPlay={false} />
-                            </div>
-                        )}
 
                         {profile.social_link && (
                             <a 

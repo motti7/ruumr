@@ -13,9 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
-import SongSelector from '@/components/onboarding/SongSelector';
 
-const TOTAL_STEPS = 10; 
+const TOTAL_STEPS = 9; 
 
 const Step = ({ children, step, currentStep, title }) => (
   <AnimatePresence mode="wait">
@@ -63,7 +62,6 @@ export default function OnboardingPage() {
     apartment_photos: Array(6).fill(null),
     existing_roommates: 0,
     apartment_total_budget: 5000,
-    theme_song: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -107,9 +105,7 @@ export default function OnboardingPage() {
         return true; // Should ideally skip if seeking
       case 8: // About (was 7)
         return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 9: // Song (New)
-        return formData.theme_song !== null;
-      case 10: // Photos (was 9)
+      case 9: // Photos (was 3)
         return formData.photos.filter(p => p).length >= 2;
       default:
         return true;
@@ -122,16 +118,16 @@ export default function OnboardingPage() {
     } else if (step === 6 && formData.current_status === 'seeking_apartment') {
          setStep(8); // Skip apartment details
     } else {
-         setStep(s => Math.min(s + 1, TOTAL_STEPS + 1)); // Allow going to step 11
+         setStep(s => Math.min(s + 1, TOTAL_STEPS + 1)); // Allow going to step 10
     }
   };
 
   const isHasApartment = formData.current_status === 'has_apartment';
   // Adjust progress bar logic
-  // Default to 10 steps (seeking), only show 11 if "has_apartment" is explicitly selected
+  // Default to 9 steps (seeking), only show 10 if "has_apartment" is explicitly selected
   let displayStep = step;
   if (!isHasApartment && step > 6) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 11 : 10;
+  const displayTotal = isHasApartment ? 10 : 9;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
@@ -545,7 +541,7 @@ export default function OnboardingPage() {
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="https://instagram.com/..." 
+                            placeholder="" 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -557,17 +553,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר...">
-                <div className="h-full flex flex-col">
-                    <p className="text-center text-gray-500 mb-6">איזה שיר הכי מייצג אותך? הוא יופיע בפרופיל שלך</p>
-                    <SongSelector 
-                        selectedSong={formData.theme_song} 
-                        onSelect={(song) => setFormField('theme_song', song)} 
-                    />
-                </div>
-            </Step>
-
-            <Step step={10} currentStep={step} title="התמונות שלי">
+            <Step step={9} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
@@ -599,7 +585,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={11} currentStep={step} title="אימות פרופיל">
+            <Step step={10} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -631,7 +617,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 11 && (
+        {step < 10 && (
             <div className="mt-6">
                 <Button 
                     onClick={nextStep} 
