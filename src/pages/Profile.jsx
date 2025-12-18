@@ -20,8 +20,8 @@ export default function ProfilePage() {
   const [selectedApartmentPhoto, setSelectedApartmentPhoto] = useState(null);
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
-  const [uploadingIndex, setUploadingIndex] = useState(null);
-  const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
+  const [uploadingPhotos, setUploadingPhotos] = useState(new Set());
+  const [uploadingApartmentPhotos, setUploadingApartmentPhotos] = useState(new Set());
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
 
@@ -43,7 +43,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
+    if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {
         alert("אנא המתן לסיום העלאת התמונות");
         return;
     }
@@ -107,13 +107,26 @@ export default function ProfilePage() {
   const handleImageUpload = async (e, index) => {
     let file = e.target.files[0];
     if (!file) return;
-    setUploadingIndex(index);
+    
+    setUploadingPhotos(prev => new Set(prev).add(index));
     try {
-        file = await compressImage(file);
-        const { file_url } = await UploadFile({ file });
-        const newPhotos = [...(formData.photos || Array(6).fill(null))];
-        newPhotos[index] = file_url;
-        setFormData(prev => ({...prev, photos: newPhotos}));
+        // Optimistic preview
+        const objectUrl = URL.createObjectURL(file);
+        setFormData(prev => {
+            const newPhotos = [...(prev.photos || Array(6).fill(null))];
+            newPhotos[index] = objectUrl;
+            return {...prev, photos: newPhotos};
+        });
+
+        const compressedFile = await compressImage(file);
+        const { file_url } = await UploadFile({ file: compressedFile });
+        
+        // Update with REAL URL
+        setFormData(prev => {
+            const newPhotos = [...(prev.photos || Array(6).fill(null))];
+            newPhotos[index] = file_url;
+            return {...prev, photos: newPhotos};
+        });
     } catch (error) { 
         console.error("Upload failed", error);
         setFormData(prev => {
@@ -122,20 +135,39 @@ export default function ProfilePage() {
             return {...prev, photos: newPhotos};
         });
         alert("העלאת התמונה נכשלה");
+    } finally {
+        setUploadingPhotos(prev => {
+            const next = new Set(prev);
+            next.delete(index);
+            return next;
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
     }
-    setUploadingIndex(null);
   };
 
   const handleApartmentImageUpload = async (e, index) => {
     let file = e.target.files[0];
     if (!file) return;
-    setUploadingApartmentIndex(index);
+
+    setUploadingApartmentPhotos(prev => new Set(prev).add(index));
     try {
-        file = await compressImage(file);
-        const { file_url } = await UploadFile({ file });
-        const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];
-        newPhotos[index] = file_url;
-        setFormData(prev => ({...prev, apartment_photos: newPhotos}));
+        // Optimistic preview
+        const objectUrl = URL.createObjectURL(file);
+        setFormData(prev => {
+            const newPhotos = [...(prev.apartment_photos || Array(4).fill(null))];
+            newPhotos[index] = objectUrl;
+            return {...prev, apartment_photos: newPhotos};
+        });
+
+        const compressedFile = await compressImage(file);
+        const { file_url } = await UploadFile({ file: compressedFile });
+        
+        // Update with REAL URL
+        setFormData(prev => {
+            const newPhotos = [...(prev.apartment_photos || Array(4).fill(null))];
+            newPhotos[index] = file_url;
+            return {...prev, apartment_photos: newPhotos};
+        });
     } catch (error) { 
         console.error("Upload failed", error);
         setFormData(prev => {
@@ -144,8 +176,14 @@ export default function ProfilePage() {
             return {...prev, apartment_photos: newPhotos};
         });
         alert("העלאת התמונה נכשלה");
+    } finally {
+        setUploadingApartmentPhotos(prev => {
+            const next = new Set(prev);
+            next.delete(index);
+            return next;
+        });
+        if (apartmentFileInputRef.current) apartmentFileInputRef.current.value = '';
     }
-    setUploadingApartmentIndex(null);
   };
   
   const triggerFileInput = (index) => {
@@ -285,7 +323,7 @@ export default function ProfilePage() {
                     }}
                   />
                 )}
-                {uploadingIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
+                {uploadingPhotos.has(i) && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
               </div>
             ))}
           </div>
@@ -599,7 +637,7 @@ export default function ProfilePage() {
                               )}
                             </div>
                         )}
-                        {uploadingApartmentIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
+                        {uploadingApartmentPhotos.has(i) && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
                     </div>
                 ))}
             </div>
