@@ -111,7 +111,15 @@ export default function ProfilePage() {
         const newPhotos = [...(formData.photos || Array(6).fill(null))];
         newPhotos[index] = file_url;
         setFormData(prev => ({...prev, photos: newPhotos}));
-    } catch (error) { console.error("Upload failed", error); }
+    } catch (error) { 
+        console.error("Upload failed", error);
+        setFormData(prev => {
+            const newPhotos = [...(prev.photos || [])];
+            newPhotos[index] = null;
+            return {...prev, photos: newPhotos};
+        });
+        alert("העלאת התמונה נכשלה");
+    }
     setUploadingIndex(null);
   };
 
@@ -125,7 +133,15 @@ export default function ProfilePage() {
         const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];
         newPhotos[index] = file_url;
         setFormData(prev => ({...prev, apartment_photos: newPhotos}));
-    } catch (error) { console.error("Upload failed", error); }
+    } catch (error) { 
+        console.error("Upload failed", error);
+        setFormData(prev => {
+            const newPhotos = [...(prev.apartment_photos || [])];
+            newPhotos[index] = null;
+            return {...prev, apartment_photos: newPhotos};
+        });
+        alert("העלאת התמונה נכשלה");
+    }
     setUploadingApartmentIndex(null);
   };
   

@@ -260,7 +260,14 @@ export default function OnboardingPage() {
       });
     } catch (error) {
       console.error("Upload failed", error);
-      // Revert if failed (optional, or just leave blob and let finish handler catch it)
+      // Revert if failed
+      setFormData(prev => {
+        const key = isApartment ? 'apartment_photos' : 'photos';
+        const newPhotos = [...(prev[key] || [])];
+        newPhotos[index] = null;
+        return { ...prev, [key]: newPhotos };
+      });
+      alert("העלאת התמונה נכשלה. אנא נסה שנית.");
     } finally {
       // Untrack upload
       if (isApartment) {
