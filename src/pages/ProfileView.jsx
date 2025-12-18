@@ -130,29 +130,29 @@ export default function ProfileViewPage() {
   const regularPhotos = profile.photos?.filter(p => p) || [];
   const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
   
-  // Combine but prefer user's order. 
-  let photos = [...regularPhotos, ...apartmentPhotos];
-  
-  // Only use placeholder if ABSOLUTELY no photos exist
-  if (photos.length === 0) {
-      photos = ["https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"];
+  let allMedia = [...regularPhotos];
+  if (profile.video_url) {
+      allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
   }
+  allMedia = [...allMedia, ...apartmentPhotos];
+  
+  const media = allMedia.length > 0 ? allMedia.map(m => typeof m === 'string' ? { type: 'image', url: m } : m) : [{ type: 'image', url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
 
   // Prefetch next and prev photos
   useEffect(() => {
-    if (!photos || photos.length === 0) return;
+    if (!media || media.length === 0) return;
     
     // Preload next
-    if (currentPhotoIndex < photos.length - 1) {
+    if (currentPhotoIndex < media.length - 1 && media[currentPhotoIndex + 1].type === 'image') {
         const img = new Image();
-        img.src = photos[currentPhotoIndex + 1];
+        img.src = media[currentPhotoIndex + 1].url;
     }
-    // Preload prev (if navigating back)
-    if (currentPhotoIndex > 0) {
+    // Preload prev
+    if (currentPhotoIndex > 0 && media[currentPhotoIndex - 1].type === 'image') {
         const img = new Image();
-        img.src = photos[currentPhotoIndex - 1];
+        img.src = media[currentPhotoIndex - 1].url;
     }
-  }, [currentPhotoIndex, photos]);
+  }, [currentPhotoIndex, media]);
 
   const getSocialIcon = (link) => {
       if (!link) return null;
@@ -184,13 +184,24 @@ export default function ProfileViewPage() {
 
       <div className="relative">
         <div className="aspect-[3/4] bg-gray-200 relative">
-          <SmartImage
-            key={photos[currentPhotoIndex]}
-            src={photos[currentPhotoIndex]}
-            alt={profile.name}
-            className="w-full h-full"
-            priority={true}
-          />
+          {media[currentPhotoIndex].type === 'video' ? (
+              <video
+                  key={currentPhotoIndex}
+                  src={media[currentPhotoIndex].url}
+                  className="w-full h-full object-cover"
+                  controls
+                  playsInline
+              />
+          ) : (
+              <SmartImage
+                key={currentPhotoIndex}
+                src={media[currentPhotoIndex].url}
+                alt={profile.name}
+                className="w-full h-full"
+                priority={true}
+              />
+          )}
+          
           {currentPhotoIndex === 0 && profile.social_link && (
              <a 
                  href={ensureProtocol(profile.social_link)}
@@ -202,16 +213,21 @@ export default function ProfileViewPage() {
                  {getSocialIcon(profile.social_link)}
              </a>
           )}
-          <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10">
-            {photos.map((_, i) => (
+          <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
+            {media.map((_, i) => (
               <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
               </div>
             ))}
           </div>
           <div className="absolute inset-0 flex z-0">
-            <div className="w-1/2 h-full cursor-w-resize" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length)} />
-            <div className="w-1/2 h-full cursor-e-resize" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % photos.length)} />
+            {/* If video, give it some space to be clicked for controls, but preserve edge tapping for navigation if possible, or use custom controls. 
+                For simplicity in MVP, let's keep navigation areas but maybe shrink them or expect user to tap edges. 
+                Video controls overlay usually eats clicks. 
+            */}
+            <div className="w-1/6 h-full cursor-w-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length)} />
+            <div className="w-4/6 h-full" /> {/* Dead zone for video interaction if needed */}
+            <div className="w-1/6 h-full cursor-e-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % media.length)} />
           </div>
         </div>
       </div>

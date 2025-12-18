@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const videoInputRef = useRef(null);
 
   useEffect(() => { loadProfile(); }, []);
 
@@ -158,6 +160,46 @@ export default function ProfilePage() {
     if (!isEditing) return;
     apartmentFileInputRef.current.onchange = (e) => handleApartmentImageUpload(e, index);
     apartmentFileInputRef.current.click();
+  };
+
+  const handleVideoUpload = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Basic validation
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+          alert("הקובץ גדול מדי. אנא העלה סרטון קטן יותר (עד 50MB)");
+          return;
+      }
+
+      setIsUploadingVideo(true);
+      try {
+          // Create video element to check duration
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          video.onloadedmetadata = async () => {
+              window.URL.revokeObjectURL(video.src);
+              if (video.duration > 16) { // Allow slightly over 15s for margin
+                  alert("הסרטון ארוך מדי. אנא העלה סרטון של עד 15 שניות.");
+                  setIsUploadingVideo(false);
+                  return;
+              }
+
+              try {
+                  const { file_url } = await UploadFile({ file });
+                  setFormData(prev => ({ ...prev, video_url: file_url }));
+              } catch (error) {
+                  console.error("Video upload failed", error);
+                  alert("העלאת הסרטון נכשלה. אנא נסה שוב.");
+              }
+              setIsUploadingVideo(false);
+          };
+          video.src = URL.createObjectURL(file);
+      } catch (error) {
+          console.error("Video handling failed", error);
+          setIsUploadingVideo(false);
+      }
+      e.target.value = '';
   };
 
   const searchSong = async () => {
@@ -411,6 +453,56 @@ export default function ProfilePage() {
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>
               <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+            </div>
+
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Video className="w-4 h-4 text-[--theme-orange]" />
+                  סרטון פרופיל (עד 15 שניות)
+              </label>
+              
+              <div className="bg-white p-4 rounded-2xl border border-gray-200">
+                  {formData.video_url ? (
+                      <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
+                          <video 
+                              src={formData.video_url} 
+                              className="w-full h-full object-cover" 
+                              controls
+                          />
+                          {isEditing && (
+                              <button 
+                                  onClick={() => setFormData(prev => ({ ...prev, video_url: null }))}
+                                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-md hover:bg-red-600"
+                              >
+                                  <X className="w-4 h-4" />
+                              </button>
+                          )}
+                      </div>
+                  ) : (
+                      <div 
+                          onClick={() => isEditing && videoInputRef.current?.click()}
+                          className={`border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 gap-2 transition-colors ${isEditing ? 'cursor-pointer hover:bg-gray-50 hover:border-[--theme-orange]' : 'opacity-50'}`}
+                      >
+                          {isUploadingVideo ? (
+                              <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
+                          ) : (
+                              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                  <Video className="w-6 h-6 text-gray-400" />
+                              </div>
+                          )}
+                          <span className="text-sm font-medium">
+                              {isUploadingVideo ? 'מעלה...' : isEditing ? 'לחץ להעלאת סרטון' : 'אין סרטון'}
+                          </span>
+                      </div>
+                  )}
+                  <input 
+                      type="file" 
+                      ref={videoInputRef} 
+                      className="hidden" 
+                      accept="video/*" 
+                      onChange={handleVideoUpload}
+                  />
+              </div>
             </div>
 
             <div>

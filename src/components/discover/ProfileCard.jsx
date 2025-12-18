@@ -157,8 +157,16 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
-    const allPhotos = [...regularPhotos, ...apartmentPhotos];
-    const photos = allPhotos.length > 0 ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
+    // Insert video at index 1 if it exists, otherwise just photos
+    let allMedia = [...regularPhotos];
+    if (profile.video_url) {
+        allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
+    }
+    // Add apartment photos at the end
+    allMedia = [...allMedia, ...apartmentPhotos];
+    
+    // Normalize string photos to objects for consistent handling
+    const media = allMedia.length > 0 ? allMedia.map(m => typeof m === 'string' ? { type: 'image', url: m } : m) : [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
 
     const handleDragEnd = async (event, info) => {
         const offset = info.offset.x;
@@ -179,6 +187,9 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
         // Ignore tap if expanded or not active
         if (!isActive || isExpanded) return;
 
+        // Don't change photo if tapping on video controls
+        if (e.target.tagName === 'VIDEO') return;
+
         const rect = e.target.getBoundingClientRect();
         const tapX = e.clientX - rect.left;
         const width = rect.width;
@@ -187,9 +198,9 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
         if (tapX < 60 && e.clientY - rect.top < 60) return;
 
         if (tapX < width / 2) {
-            setCurrentPhotoIndex(prev => (prev - 1 + photos.length) % photos.length);
+            setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length);
         } else {
-            setCurrentPhotoIndex(prev => (prev + 1) % photos.length);
+            setCurrentPhotoIndex(prev => (prev + 1) % media.length);
         }
     };
 
@@ -331,18 +342,32 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     className={`relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
-                    <div className="absolute inset-0 pointer-events-none">
-                        <SmartImage
-                            key={currentPhotoIndex}
-                            src={photos[currentPhotoIndex]}
-                            alt={profile.name}
-                            className="w-full h-full"
-                            priority={true}
-                        />
+                    <div className="absolute inset-0">
+                        {media[currentPhotoIndex].type === 'video' ? (
+                            <video
+                                key={currentPhotoIndex}
+                                src={media[currentPhotoIndex].url}
+                                className="w-full h-full object-cover"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                            />
+                        ) : (
+                            <div className="w-full h-full pointer-events-none">
+                                <SmartImage
+                                    key={currentPhotoIndex}
+                                    src={media[currentPhotoIndex].url}
+                                    alt={profile.name}
+                                    className="w-full h-full"
+                                    priority={true}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
-                        {photos.map((_, i) => (
+                        {media.map((_, i) => (
                             <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                                 <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
                             </div>
