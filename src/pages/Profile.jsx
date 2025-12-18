@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
@@ -21,6 +22,8 @@ export default function ProfilePage() {
   const apartmentFileInputRef = useRef(null);
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
+  const [spotifySearch, setSpotifySearch] = useState("");
+  const [isSearchingSong, setIsSearchingSong] = useState(false);
 
   useEffect(() => { loadProfile(); }, []);
 
@@ -155,6 +158,32 @@ export default function ProfilePage() {
     if (!isEditing) return;
     apartmentFileInputRef.current.onchange = (e) => handleApartmentImageUpload(e, index);
     apartmentFileInputRef.current.click();
+  };
+
+  const searchSong = async () => {
+      if (!spotifySearch.trim()) return;
+      setIsSearchingSong(true);
+      try {
+          const res = await base44.functions.searchSong({ query: spotifySearch });
+          
+          if (res?.spotify_id) {
+              setFormData(prev => ({
+                  ...prev,
+                  spotify_track_id: res.spotify_id,
+                  song_preview_url: res.preview_url,
+                  song_name: res.name,
+                  song_artist: res.artist,
+                  song_image: res.image_url
+              }));
+              setSpotifySearch("");
+          } else {
+              alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
+          }
+      } catch (e) {
+          console.error(e);
+          alert("שגיאה בחיפוש השיר");
+      }
+      setIsSearchingSong(false);
   };
 
   const setFormField = (field, value) => {
@@ -382,6 +411,67 @@ export default function ProfilePage() {
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>
               <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+            </div>
+
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Music className="w-4 h-4 text-[--theme-orange]" />
+                  השיר שלי
+              </label>
+              
+              {isEditing && !formData.song_name && (
+                  <div className="flex gap-2 mb-3">
+                      <Input 
+                          value={spotifySearch} 
+                          onChange={(e) => setSpotifySearch(e.target.value)} 
+                          placeholder="חפש שיר או אמן..." 
+                          className="bg-white border-gray-300 text-right"
+                          dir="rtl"
+                          onKeyDown={(e) => e.key === 'Enter' && searchSong()}
+                      />
+                      <Button onClick={searchSong} disabled={isSearchingSong || !spotifySearch.trim()} className="bg-green-500 hover:bg-green-600 text-white">
+                          {isSearchingSong ? <Loader2 className="animate-spin w-4 h-4"/> : <Search className="w-4 h-4"/>}
+                      </Button>
+                  </div>
+              )}
+
+              {formData.song_name ? (
+                  <div className="bg-gray-900 p-3 rounded-xl shadow-sm border border-gray-800 relative text-white text-right flex items-center gap-3">
+                      <img src={formData.song_image} className="w-12 h-12 rounded-lg object-cover" />
+                      <div className="flex-1 min-w-0">
+                          <div className="font-bold truncate text-sm">{formData.song_name}</div>
+                          <div className="text-xs text-gray-400 truncate">{formData.song_artist}</div>
+                      </div>
+                      {isEditing && (
+                          <button 
+                              onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                              className="bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 flex-shrink-0"
+                          >
+                              <X className="w-3 h-3" />
+                          </button>
+                      )}
+                  </div>
+              ) : formData.spotify_track_id && (
+                  <div className="relative">
+                      <iframe 
+                          src={`https://open.spotify.com/embed/track/${formData.spotify_track_id}?utm_source=generator&theme=0`} 
+                          width="100%" 
+                          height="80" 
+                          frameBorder="0" 
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                          loading="lazy"
+                          className="rounded-xl"
+                      ></iframe>
+                      {isEditing && (
+                          <button 
+                              onClick={() => setFormData(prev => ({...prev, spotify_track_id: ''}))}
+                              className="absolute -top-2 -left-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                          >
+                              <X className="w-3 h-3" />
+                          </button>
+                      )}
+                  </div>
+              )}
             </div>
         </div>
         
