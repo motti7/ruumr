@@ -102,22 +102,10 @@ export default function SettingsPage() {
           </div>
         
         <div className="pt-6 space-y-4">
-             <Button onClick={handleLogout} variant="ghost" className="w-full text-center text-gray-500 font-bold text-lg">
-                <LogOut className="w-5 h-5 ml-2" />
-                התנתק
-            </Button>
              <Button onClick={handleDeleteAccount} variant="ghost" className="w-full text-center text-red-500 font-bold text-lg">
                 <Trash2 className="w-5 h-5 ml-2" />
                 מחק חשבון
             </Button>
-            
-            <div className="pt-4 opacity-30 hover:opacity-100 transition-opacity flex justify-center">
-                <Link to={createPageUrl('AdminTools')}>
-                    <Button variant="link" className="text-xs text-gray-400">
-                        Admin Tools
-                    </Button>
-                </Link>
-            </div>
         </div>
       </div>
     </div>

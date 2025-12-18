@@ -13,7 +13,6 @@ import Verification from './pages/Verification';
 import LikesYou from './pages/LikesYou';
 import LikesSent from './pages/LikesSent';
 import Banned from './pages/Banned';
-import AdminTools from './pages/AdminTools';
 import __Layout from './Layout.jsx';
 
 
@@ -33,7 +32,6 @@ export const PAGES = {
     "LikesYou": LikesYou,
     "LikesSent": LikesSent,
     "Banned": Banned,
-    "AdminTools": AdminTools,
 }
 
 export const pagesConfig = {
