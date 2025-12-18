@@ -158,8 +158,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
     const allPhotos = [...regularPhotos, ...apartmentPhotos];
-    const hasUserPhotos = allPhotos.length > 0;
-    const photos = hasUserPhotos ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
+    const photos = allPhotos.length > 0 ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
 
     const handleDragEnd = async (event, info) => {
         const offset = info.offset.x;
@@ -208,9 +207,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     };
 
     const getPhotoContent = (index) => {
-        // Treat fallback photo (index 0 when no user photos) as a regular photo for overlay purposes
-        const isFallback = !hasUserPhotos && index === 0;
-        const currentPhotoIsRegular = index < regularPhotos.length || isFallback;
+        const currentPhotoIsRegular = index < regularPhotos.length;
         const actualPhotoIndex = currentPhotoIsRegular ? index : index - regularPhotos.length;
 
         if (currentPhotoIsRegular) {
