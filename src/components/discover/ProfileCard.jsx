@@ -232,102 +232,118 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     };
 
     const getPhotoContent = (index) => {
-        const currentPhotoIsRegular = index < regularPhotos.length;
-        const actualPhotoIndex = currentPhotoIsRegular ? index : index - regularPhotos.length;
-
-        if (currentPhotoIsRegular) {
-            if (index === 0) {
-                return (
-                    <>
-                        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
-                            <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                גיל: {profile.age}
-                            </div>
+        // ALWAYS Show Info Overlay on First Slide (Index 0)
+        if (index === 0) {
+            return (
+                <>
+                    <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+                        <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
+                            גיל: {profile.age}
                         </div>
-
-                        {profile.social_link && (
-                            <a 
-                                href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-28 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-                            >
-                                {(() => {
-                                    const l = String(profile.social_link).toLowerCase();
-                                    if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
-                                    if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
-                                    if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
-                                    if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
-                                    return <LinkIcon className="w-5 h-5 text-white" />;
-                                })()}
-                            </a>
+                        {hasVideo && (
+                            <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold flex items-center gap-1">
+                                <Video className="w-3 h-3" />
+                                יש סרטון
+                            </div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
-                            <div className="flex items-center gap-2 mb-2">
-                                <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
-                                {profile.is_verified && (
-                                    <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
-                                        <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
-                                    </div>
-                                )}
-                            </div>
-                            {profile.current_status === 'has_apartment' ? (
-                                <div className="text-white/90 text-base mb-3 font-medium">
-                                    ₪{profile.apartment_total_budget?.toLocaleString()} • {profile.existing_roommates} שותפים
-                                </div>
-                            ) : (
-                                <div className="flex items-start text-white/90 text-base mb-3">
-                                    <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
-                                    <div className="flex flex-col">
-                                        {profile.search_cities && profile.search_cities.length > 0 ? (
-                                            <>
-                                                <span>{profile.search_cities[0]}</span>
-                                                {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
-                                                {profile.search_cities.length > 2 && <span className="text-xs opacity-90">ועוד...</span>}
-                                            </>
-                                        ) : (
-                                            <span>{profile.location}</span>
-                                        )}
-                                        <span className="text-sm opacity-80 mt-1">• {profile.search_area}</span>
-                                    </div>
-                                </div>
-                            )}
-                            {profile.current_status === 'has_apartment' && (
-                                <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
-                                    <Home className="w-4 h-4 ml-1" />
-                                    {profile.location}
-                                </div>
-                            )}
-                        </div>
-                    </>
-                );
-            } else if (index === 1) {
-                return (
-                    <>
-                        <div className="absolute top-4 right-4 z-10">
-                            <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
-                            </div>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
-                            <h3 className="text-xl font-bold text-white mb-2">התקציב שלי</h3>
-                            <div className="text-white/95 text-4xl font-black">
-                                ₪{profile.budget_max?.toLocaleString()}
-                                <span className="text-lg font-normal opacity-80 mr-2">לחודש</span>
-                            </div>
-                        </div>
-                    </>
-                );
-            } else if (index === 2) {
-                return (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
-                        <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
-                        <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
                     </div>
-                );
-            }
-        } else if (profile.current_status === 'has_apartment') {
+
+                    {profile.social_link && (
+                        <a 
+                            href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute bottom-28 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                        >
+                            {(() => {
+                                const l = String(profile.social_link).toLowerCase();
+                                if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
+                                if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+                                if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
+                                if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
+                                    return <LinkIcon className="w-5 h-5 text-white" />;
+                            })()}
+                        </a>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                        <div className="flex items-center gap-2 mb-2">
+                            <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
+                            {profile.is_verified && (
+                                <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
+                                    <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
+                                </div>
+                            )}
+                        </div>
+                        {profile.current_status === 'has_apartment' ? (
+                            <div className="text-white/90 text-base mb-3 font-medium">
+                                ₪{profile.apartment_total_budget?.toLocaleString()} • {profile.existing_roommates} שותפים
+                            </div>
+                        ) : (
+                            <div className="flex items-start text-white/90 text-base mb-3">
+                                <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
+                                <div className="flex flex-col">
+                                    {profile.search_cities && profile.search_cities.length > 0 ? (
+                                        <>
+                                            <span>{profile.search_cities[0]}</span>
+                                            {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
+                                            {profile.search_cities.length > 2 && <span className="text-xs opacity-90">ועוד...</span>}
+                                        </>
+                                    ) : (
+                                        <span>{profile.location}</span>
+                                    )}
+                                    <span className="text-sm opacity-80 mt-1">• {profile.search_area}</span>
+                                </div>
+                            </div>
+                        )}
+                        {profile.current_status === 'has_apartment' && (
+                            <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
+                                <Home className="w-4 h-4 ml-1" />
+                                {profile.location}
+                            </div>
+                        )}
+                    </div>
+                </>
+            );
+        }
+
+        // Calculate logical slots for overlays (Budget, Looking For)
+        // If hasVideo is true, index 1 is video, so shift overlay indices by 1
+        const budgetIndex = hasVideo ? 2 : 1;
+        const lookingForIndex = hasVideo ? 3 : 2;
+
+        if (index === budgetIndex) {
+            return (
+                <>
+                    <div className="absolute top-4 right-4 z-10">
+                        <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
+                            וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
+                        </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                        <h3 className="text-xl font-bold text-white mb-2">התקציב שלי</h3>
+                        <div className="text-white/95 text-4xl font-black">
+                            ₪{profile.budget_max?.toLocaleString()}
+                            <span className="text-lg font-normal opacity-80 mr-2">לחודש</span>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+        
+        if (index === lookingForIndex) {
+            return (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                    <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
+                    <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
+                </div>
+            );
+        }
+
+        // Apartment Photos check
+        // If we are past the user photos/video, show apartment overlay
+        const userMediaCount = (regularPhotos.length || 0) + (hasVideo ? 1 : 0);
+        if (index >= userMediaCount && profile.current_status === 'has_apartment') {
              return (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                     <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
@@ -337,6 +353,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                 </div>
             );
         }
+
         return null;
     };
 
