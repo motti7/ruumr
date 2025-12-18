@@ -286,9 +286,9 @@ export default function OnboardingPage() {
       if (!spotifySearch.trim()) return;
       setIsSearchingSong(true);
       try {
-          // Use Backend Function!
+          const { base44 } = require('@/api/base44Client');
           const res = await base44.functions.searchSong({ query: spotifySearch });
-          
+
           if (res?.spotify_id) {
               setFormData(prev => ({
                   ...prev,
@@ -299,11 +299,11 @@ export default function OnboardingPage() {
                   song_image: res.image_url
               }));
           } else {
-              alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
+              alert("לא נמצא שיר. נסה לדייק בשם השיר והאמן (למשל: 'Omer Adam Tel Aviv')");
           }
       } catch (e) {
           console.error(e);
-          alert("שגיאה בחיפוש השיר (וודא שיש לך אינטרנט או נסה שנית)");
+          alert("שגיאה בחיפוש השיר. אנא נסה שוב.");
       }
       setIsSearchingSong(false);
   };
