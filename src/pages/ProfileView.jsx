@@ -81,11 +81,17 @@ export default function ProfileViewPage() {
   const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
   const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
+  // Show user's photos as is, without aggressive deduplication or stock fallbacks that might confuse the user
   const regularPhotos = profile.photos?.filter(p => p) || [];
   const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
-  // Deduplicate photos to prevent "seeing the same photo twice"
-  const allPhotos = Array.from(new Set([...regularPhotos, ...apartmentPhotos]));
-  const photos = allPhotos.length > 0 ? allPhotos : ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face"];
+  
+  // Combine but prefer user's order. 
+  let photos = [...regularPhotos, ...apartmentPhotos];
+  
+  // Only use placeholder if ABSOLUTELY no photos exist
+  if (photos.length === 0) {
+      photos = ["https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"];
+  }
 
   const getSocialIcon = (link) => {
       if (!link) return null;
