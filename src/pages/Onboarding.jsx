@@ -654,8 +654,27 @@ export default function OnboardingPage() {
                             </Button>
                         </div>
 
-                        {formData.spotify_track_id && (
+                        {formData.song_name ? (
                             <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-gray-900 p-4 rounded-2xl shadow-lg border border-gray-800 relative text-white text-right flex items-center gap-4"
+                            >
+                                <img src={formData.song_image} className="w-16 h-16 rounded-lg object-cover" />
+                                <div className="flex-1">
+                                    <div className="font-bold">{formData.song_name}</div>
+                                    <div className="text-sm text-gray-400">{formData.song_artist}</div>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                                    className="absolute -top-2 -left-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </motion.div>
+                        ) : formData.spotify_track_id && (
+                             <motion.div 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-white p-2 rounded-2xl shadow-lg border border-green-100 relative"
@@ -678,7 +697,7 @@ export default function OnboardingPage() {
                             </motion.div>
                         )}
                         
-                        {!formData.spotify_track_id && (
+                        {!formData.spotify_track_id && !formData.song_name && (
                             <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-50">
                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Arctic Monkeys</span>
                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">טונה</span>
