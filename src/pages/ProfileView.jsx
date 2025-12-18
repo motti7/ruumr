@@ -53,22 +53,6 @@ export default function ProfileViewPage() {
     );
   }
 
-  // Prefetch next and prev photos
-  useEffect(() => {
-    if (!photos || photos.length === 0) return;
-    
-    // Preload next
-    if (currentPhotoIndex < photos.length - 1) {
-        const img = new Image();
-        img.src = photos[currentPhotoIndex + 1];
-    }
-    // Preload prev (if navigating back)
-    if (currentPhotoIndex > 0) {
-        const img = new Image();
-        img.src = photos[currentPhotoIndex - 1];
-    }
-  }, [currentPhotoIndex, photos]);
-
   if (!profile) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -92,6 +76,22 @@ export default function ProfileViewPage() {
   if (photos.length === 0) {
       photos = ["https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"];
   }
+
+  // Prefetch next and prev photos
+  useEffect(() => {
+    if (!photos || photos.length === 0) return;
+    
+    // Preload next
+    if (currentPhotoIndex < photos.length - 1) {
+        const img = new Image();
+        img.src = photos[currentPhotoIndex + 1];
+    }
+    // Preload prev (if navigating back)
+    if (currentPhotoIndex > 0) {
+        const img = new Image();
+        img.src = photos[currentPhotoIndex - 1];
+    }
+  }, [currentPhotoIndex, photos]);
 
   const getSocialIcon = (link) => {
       if (!link) return null;

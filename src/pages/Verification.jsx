@@ -4,7 +4,7 @@ import { Profile } from '@/entities/Profile';
 import { User } from '@/entities/User';
 import { createPageUrl } from '@/utils';
 import { UploadFile } from "@/integrations/Core";
-import { ArrowRight, Camera, Check, Shield, Smartphone, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowRight, Camera, Check, Shield, Mail, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,15 +39,7 @@ export default function VerificationPage() {
     const canvasRef = useRef(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
 
-    const handlePhoneSubmit = async () => {
-        if (phone.length < 9) return;
-        setIsLoading(true);
-        await sendMockSMS(phone);
-        setIsLoading(false);
-        // DEMO MODE: Show code to user
-        alert("הודעת מערכת (דמו): קוד האימות שלך הוא 1234");
-        setStep(3);
-    };
+
 
     const handleOtpChange = (index, value) => {
         if (value.length > 1) return;
@@ -134,7 +126,7 @@ export default function VerificationPage() {
                         </div>
                         <ul className="text-right space-y-4 bg-gray-50 p-6 rounded-2xl">
                             <li className="flex items-center gap-3">
-                                <div className="bg-white p-2 rounded-full shadow-sm"><Smartphone className="w-5 h-5 text-gray-700"/></div>
+                                <div className="bg-white p-2 rounded-full shadow-sm"><Mail className="w-5 h-5 text-gray-700"/></div>
                                 <span className="font-bold text-gray-700">אימות אימייל</span>
                             </li>
                             <li className="flex items-center gap-3">
