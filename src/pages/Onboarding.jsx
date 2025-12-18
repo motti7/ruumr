@@ -5,7 +5,8 @@ import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram } from 'lucide-react';
+import { base44 } from "@/api/base44Client";
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +15,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 9; 
+const TOTAL_STEPS = 10; 
 
 const Step = ({ children, step, currentStep, title }) => (
   <AnimatePresence mode="wait">
@@ -107,9 +108,11 @@ export default function OnboardingPage() {
             return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
         return true; // Should ideally skip if seeking
-      case 8: // About (was 7)
+      case 8: // About
         return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 9: // Photos (was 3)
+      case 9: // Spotify
+        return true; // Optional
+      case 10: // Photos
         return formData.photos.filter(p => p).length >= 2;
       default:
         return true;
@@ -122,20 +125,17 @@ export default function OnboardingPage() {
     } else if (step === 6 && formData.current_status === 'seeking_apartment') {
          setStep(8); // Skip apartment details
     } else {
-         setStep(s => Math.min(s + 1, TOTAL_STEPS + 1)); // Allow going to step 10
+         setStep(s => Math.min(s + 1, TOTAL_STEPS + 1));
     }
   };
 
   const isHasApartment = formData.current_status === 'has_apartment';
-  // Adjust progress bar logic
-  // Default to 9 steps (seeking), only show 10 if "has_apartment" is explicitly selected
   let displayStep = step;
   if (!isHasApartment && step > 6) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 10 : 9;
+  const displayTotal = isHasApartment ? 11 : 10;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
-        // Go back to preferences (step 6), skipping apartment details (step 7)
         setStep(6);
     } else {
         setStep(s => Math.max(s - 1, 1));
@@ -277,7 +277,7 @@ export default function OnboardingPage() {
       if (!spotifySearch.trim()) return;
       setIsSearchingSong(true);
       try {
-          const { base44 } = require('@/api/base44Client');
+          // Use base44 from outer scope (imported) or require if needed safely
           const res = await base44.integrations.Core.InvokeLLM({
               prompt: `Find the Spotify Track ID for the song: "${spotifySearch}". 
               Return ONLY the JSON object: {"id": "..."}. 
@@ -299,7 +299,7 @@ export default function OnboardingPage() {
           }
       } catch (e) {
           console.error(e);
-          alert("שגיאה בחיפוש השיר");
+          alert("שגיאה בחיפוש השיר (שים לב: נדרש Backend Functions פעיל)");
       }
       setIsSearchingSong(false);
   };
@@ -598,42 +598,6 @@ export default function OnboardingPage() {
             <Step step={8} currentStep={step} title="ספר/י על עצמך">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                            <Music className="w-4 h-4 text-[--theme-orange]"/>
-                            שיר הנושא שלי
-                        </label>
-                        <div className="flex gap-2">
-                            <Input 
-                                value={spotifySearch} 
-                                onChange={(e) => setSpotifySearch(e.target.value)} 
-                                placeholder="חפש שיר..." 
-                                className="bg-gray-50 border-gray-200"
-                            />
-                            <Button onClick={searchSong} disabled={isSearchingSong} size="icon" className="bg-[--theme-orange]">
-                                {isSearchingSong ? <Loader2 className="animate-spin w-4 h-4"/> : <Search className="w-4 h-4"/>}
-                            </Button>
-                        </div>
-                        {formData.spotify_track_id && (
-                            <div className="mt-2 rounded-xl overflow-hidden border border-gray-200">
-                                <iframe 
-                                    src={`https://open.spotify.com/embed/track/${formData.spotify_track_id}?utm_source=generator&theme=0`} 
-                                    width="100%" 
-                                    height="80" 
-                                    frameBorder="0" 
-                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                                    loading="lazy"
-                                ></iframe>
-                                <button 
-                                    onClick={() => setFormField('spotify_track_id', '')}
-                                    className="text-xs text-red-500 w-full text-center py-1 hover:bg-red-50"
-                                >
-                                    הסר שיר
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
@@ -657,7 +621,72 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="התמונות שלי">
+            <Step step={9} currentStep={step} title="אם היית שיר...">
+                <div className="flex flex-col items-center justify-center h-full space-y-6 text-center">
+                    <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                        <Music className="w-12 h-12 text-green-600" />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900">איזה שיר היית?</h2>
+                    <p className="text-gray-500 max-w-xs">
+                        מוזיקה מחברת בין אנשים. בחר/י שיר שמתאר אותך או את הווייב שלך.
+                    </p>
+
+                    <div className="w-full max-w-sm space-y-4">
+                        <div className="relative">
+                            <Input 
+                                value={spotifySearch} 
+                                onChange={(e) => setSpotifySearch(e.target.value)} 
+                                placeholder="חפש שיר או אמן..." 
+                                className="h-14 text-lg pr-12 rounded-full border-2 border-gray-200 focus:border-green-500 focus:ring-green-500"
+                                onKeyDown={(e) => e.key === 'Enter' && searchSong()}
+                            />
+                            <Button 
+                                onClick={searchSong} 
+                                disabled={isSearchingSong || !spotifySearch.trim()} 
+                                size="icon" 
+                                className="absolute top-2 right-2 h-10 w-10 rounded-full bg-green-500 hover:bg-green-600"
+                            >
+                                {isSearchingSong ? <Loader2 className="animate-spin w-5 h-5 text-white"/> : <Search className="w-5 h-5 text-white"/>}
+                            </Button>
+                        </div>
+
+                        {formData.spotify_track_id && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white p-2 rounded-2xl shadow-lg border border-green-100 relative"
+                            >
+                                <iframe 
+                                    src={`https://open.spotify.com/embed/track/${formData.spotify_track_id}?utm_source=generator&theme=0`} 
+                                    width="100%" 
+                                    height="152" 
+                                    frameBorder="0" 
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                    loading="lazy"
+                                    className="rounded-xl"
+                                ></iframe>
+                                <button 
+                                    onClick={() => setFormField('spotify_track_id', '')}
+                                    className="absolute -top-2 -left-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </motion.div>
+                        )}
+                        
+                        {!formData.spotify_track_id && (
+                            <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-50">
+                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Arctic Monkeys</span>
+                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">טונה</span>
+                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Full Trunk</span>
+                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Omer Adam</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </Step>
+
+            <Step step={10} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
@@ -689,7 +718,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={10} currentStep={step} title="אימות פרופיל">
+            <Step step={11} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -721,7 +750,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 10 && (
+        {step < 11 && (
             <div className="mt-6">
                 <Button 
                     onClick={nextStep} 

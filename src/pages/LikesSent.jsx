@@ -70,7 +70,7 @@ export default function LikesSentPage() {
                             transition={{ delay: i * 0.1 }}
                             className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 relative group cursor-pointer"
                             onClick={() => {
-                                navigate(createPageUrl(`ProfileView?userId=${profile.user_id}`));
+                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}`);
                             }}
                         >
                              <div className="aspect-[3/4] relative">

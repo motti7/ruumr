@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Match, Profile } from "@/entities/all";
 import { User } from "@/entities/User";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
 
 export default function MatchesPage() {
+  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,14 +141,14 @@ export default function MatchesPage() {
                   match={match.profile}
                   isOnline={match.isOnline}
                   onClickProfile={() => {
-                    // Use standard navigation to prevent full reload white screens
+                    // Use router navigation for SPA feel
                     const url = createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`;
-                    // Fallback to window.location if router fails, but try safe nav first
-                    window.location.assign(url);
+                    // Extract path for navigate
+                    const path = url.replace(window.location.origin, '');
+                    navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
                   }}
                   onClickChat={() => {
-                     const url = createPageUrl('Chat') + `?matchId=${match.id}`;
-                     window.location.assign(url);
+                     navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
                 />
               </motion.div>
