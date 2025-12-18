@@ -63,7 +63,12 @@ export default function OnboardingPage() {
     apartment_photos: Array(6).fill(null),
     existing_roommates: 0,
     apartment_total_budget: 5000,
+    // Song Info
     spotify_track_id: '',
+    song_preview_url: null,
+    song_name: '',
+    song_artist: '',
+    song_image: ''
     });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -152,7 +157,6 @@ export default function OnboardingPage() {
     const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
     
     if (hasBlobPhotos || hasBlobApartment) {
-        // Wait a bit and try again? No, just alert
         alert("עדיין מעלה תמונות... נסה שוב בעוד רגע");
         return;
     }
@@ -164,7 +168,12 @@ export default function OnboardingPage() {
           photos: formData.photos.filter(p => p),
           apartment_photos: formData.apartment_photos ? formData.apartment_photos.filter(p => p) : [],
           location: formData.search_cities[0] || '',
-          is_visible: true
+          is_visible: true,
+          // Ensure nulls are handled
+          song_preview_url: formData.song_preview_url || null,
+          song_name: formData.song_name || null,
+          song_artist: formData.song_artist || null,
+          song_image: formData.song_image || null
       };
       await Profile.create(finalData);
       if (shouldVerify) {
@@ -277,29 +286,24 @@ export default function OnboardingPage() {
       if (!spotifySearch.trim()) return;
       setIsSearchingSong(true);
       try {
-          // Use base44 from outer scope (imported) or require if needed safely
-          const res = await base44.integrations.Core.InvokeLLM({
-              prompt: `Find the Spotify Track ID for the song: "${spotifySearch}". 
-              Return ONLY the JSON object: {"id": "..."}. 
-              If not found, return {"id": null}. 
-              Example: {"id": "4cOdK2wGLETKBW3PvgPWqT"}`,
-              add_context_from_internet: true,
-              response_json_schema: {
-                  type: "object",
-                  properties: {
-                      id: { type: ["string", "null"] }
-                  }
-              }
-          });
+          // Use Backend Function!
+          const res = await base44.functions.searchSong({ query: spotifySearch });
           
-          if (res?.id) {
-              setFormField('spotify_track_id', res.id);
+          if (res?.spotify_id) {
+              setFormData(prev => ({
+                  ...prev,
+                  spotify_track_id: res.spotify_id,
+                  song_preview_url: res.preview_url,
+                  song_name: res.name,
+                  song_artist: res.artist,
+                  song_image: res.image_url
+              }));
           } else {
               alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
           }
       } catch (e) {
           console.error(e);
-          alert("שגיאה בחיפוש השיר (שים לב: נדרש Backend Functions פעיל)");
+          alert("שגיאה בחיפוש השיר (וודא שיש לך אינטרנט או נסה שנית)");
       }
       setIsSearchingSong(false);
   };
