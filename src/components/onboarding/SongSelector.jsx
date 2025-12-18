@@ -26,15 +26,17 @@ export default function SongSelector({ selectedSong, onSelect }) {
             // Using InvokeLLM to simulate Spotify Search since we don't have direct backend access to Spotify API in this environment yet.
             // In a full production env, this would call a backend function that uses the Spotify Web API.
             const response = await base44.integrations.Core.InvokeLLM({
-                prompt: `Search for songs matching "${query}". Return a JSON object with a "tracks" array. 
-                Each track object MUST have: 
-                - id (string)
-                - name (string)
-                - artist (string)
-                - image (album cover url)
-                - preview_url (valid mp3 preview url if available, otherwise null). 
+                prompt: `Search for songs matching "${query}" on Spotify/Apple Music. 
+                Return a JSON object with a "tracks" array containing exactly 10 best matching songs.
                 
-                Try to find real data. Limit to 5 results.`,
+                Each track object MUST have:
+                - id (unique string)
+                - name (song title)
+                - artist (artist name)
+                - image (URL to the album artwork - MUST BE A VALID IMAGE URL from a reliable source like spotify cdn or similar)
+                - preview_url (URL to a 30s mp3 preview if available, otherwise null)
+
+                CRITICAL: ensure image URLs are real and working.`,
                 response_json_schema: {
                     type: "object",
                     properties: {
@@ -110,12 +112,11 @@ export default function SongSelector({ selectedSong, onSelect }) {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="חפש שיר או אמן..."
-                    className="pl-10 h-12 text-lg bg-gray-50 border-gray-200 focus:ring-[--theme-orange]"
+                    className="pl-20 h-12 text-lg bg-gray-50 border-gray-200 focus:ring-[--theme-orange]"
                 />
-                <Search className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
                 <Button 
                     onClick={handleSearch}
-                    className="absolute left-1 top-1 bottom-1 rounded-lg bg-[--theme-orange] hover:bg-orange-600 text-white px-4 h-auto"
+                    className="absolute left-1 top-1 bottom-1 rounded-lg bg-[--theme-orange] hover:bg-orange-600 text-white px-6 h-auto shadow-sm"
                     disabled={isLoading}
                 >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "חפש"}

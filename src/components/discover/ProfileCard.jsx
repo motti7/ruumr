@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform, useAnimation } from "framer-motio
 import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+import AudioPlayer from '@/components/shared/AudioPlayer';
 
 const ProfileDetail = ({ profile, onClose }) => {
     const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
@@ -59,9 +60,15 @@ const ProfileDetail = ({ profile, onClose }) => {
                              <span className="text-sm opacity-80">{profile.search_area}</span>
                         </div>
                     </div>
-                </div>
+                    </div>
 
-                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
+                    {profile.theme_song && (
+                    <div className="flex justify-center w-full">
+                      <AudioPlayer track={profile.theme_song} autoPlay={true} />
+                    </div>
+                    )}
+
+                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                     <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
                     <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
                     {profile.social_link && (
@@ -214,11 +221,18 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
             if (index === 0) {
                 return (
                     <>
-                        <div className="absolute top-4 right-4 z-10">
+                        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
                         </div>
+
+                        {/* Song Player on Card Face */}
+                        {profile.theme_song && (
+                            <div className="absolute top-16 right-4 z-10">
+                                <AudioPlayer track={profile.theme_song} autoPlay={false} />
+                            </div>
+                        )}
 
                         {profile.social_link && (
                             <a 
