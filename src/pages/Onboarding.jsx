@@ -584,7 +584,7 @@ export default function OnboardingPage() {
                                     {formData.apartment_photos?.[i] ? (
                                         <img src={formData.apartment_photos[i]} alt={`דירה ${i+1}`} className="w-full h-full object-cover" />
                                     ) : (
-                                        uploadingApartmentIndex === i ? 
+                                        uploadingApartmentPhotos.has(i) ? 
                                             <Loader2 className="w-5 h-5 animate-spin text-[--theme-orange]" /> :
                                             <Plus className="w-5 h-5 text-orange-300" />
                                     )}
