@@ -1,10 +1,71 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Profile } from "@/entities/all";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music } from "lucide-react";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+
+// Custom Audio Player Component with Fade In
+const AudioPlayer = ({ src }) => {
+    const audioRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        audio.volume = 0; // Start at 0
+        
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                setIsPlaying(true);
+                // Fade In
+                let vol = 0;
+                const interval = setInterval(() => {
+                    if (vol < 0.8) { // Max volume 0.8
+                        vol += 0.05;
+                        audio.volume = vol;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 200); // Gradual fade in over ~3 seconds
+            }).catch(error => {
+                console.log("Auto-play prevented");
+                setIsPlaying(false);
+            });
+        }
+
+        return () => {
+            if (audio) {
+                audio.pause();
+                audio.src = "";
+            }
+        };
+    }, [src]);
+
+    const toggleMute = () => {
+        if (audioRef.current) {
+            audioRef.current.muted = !isMuted;
+            setIsMuted(!isMuted);
+        }
+    };
+
+    return (
+        <div className="flex items-center">
+            <audio ref={audioRef} src={src} loop />
+            <button 
+                onClick={toggleMute}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+        </div>
+    );
+};
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
@@ -187,8 +248,23 @@ export default function ProfileViewPage() {
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-2">קצת עליי</h4>
           <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
-          
-          {profile.spotify_track_id && (
+
+          {/* Custom Audio Player with Fade In */}
+          {profile.song_preview_url ? (
+              <div className="mb-4 bg-gray-900 rounded-xl p-3 flex items-center gap-3 shadow-md">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <img src={profile.song_image || "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"} alt="Album" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                          <div className="bar-loader"></div>
+                      </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                      <div className="text-white font-bold truncate text-sm">{profile.song_name}</div>
+                      <div className="text-gray-400 text-xs truncate">{profile.song_artist}</div>
+                  </div>
+                  <AudioPlayer src={profile.song_preview_url} />
+              </div>
+          ) : profile.spotify_track_id && (
               <div className="mb-4 rounded-xl overflow-hidden shadow-sm border border-gray-100">
                   <iframe 
                       src={`https://open.spotify.com/embed/track/${profile.spotify_track_id}?utm_source=generator&theme=0`} 
