@@ -110,6 +110,14 @@ export default function SettingsPage() {
                 <Trash2 className="w-5 h-5 ml-2" />
                 מחק חשבון
             </Button>
+            
+            <div className="pt-4 opacity-30 hover:opacity-100 transition-opacity flex justify-center">
+                <Link to={createPageUrl('AdminTools')}>
+                    <Button variant="link" className="text-xs text-gray-400">
+                        Admin Tools
+                    </Button>
+                </Link>
+            </div>
         </div>
       </div>
     </div>
