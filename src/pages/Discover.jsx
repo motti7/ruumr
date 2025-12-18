@@ -99,9 +99,10 @@ export default function DiscoverPage() {
         const nextIndex = currentIndex + i;
         if (profiles.length > nextIndex) {
             const nextProfile = profiles[nextIndex];
-            if (nextProfile.photos?.[0]) {
+            const photoUrl = nextProfile.photos?.[0];
+            if (photoUrl && photoUrl.startsWith('http')) {
                 const img = new Image();
-                img.src = nextProfile.photos[0];
+                img.src = photoUrl;
                 img.fetchPriority = "low"; // Background prefetch
             }
         }
@@ -109,13 +110,13 @@ export default function DiscoverPage() {
 
     // Also prefetch the SECOND photo of the CURRENT and NEXT profile (for carousel users)
     const currentProfile = profiles[currentIndex];
-    if (currentProfile?.photos?.[1]) {
+    if (currentProfile?.photos?.[1] && currentProfile.photos[1].startsWith('http')) {
         const img = new Image();
         img.src = currentProfile.photos[1];
     }
     
     const nextProfile = profiles[currentIndex + 1];
-    if (nextProfile?.photos?.[1]) {
+    if (nextProfile?.photos?.[1] && nextProfile.photos[1].startsWith('http')) {
         const img = new Image();
         img.src = nextProfile.photos[1];
     }
