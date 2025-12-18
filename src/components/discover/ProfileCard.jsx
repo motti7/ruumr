@@ -197,7 +197,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const getSocialIcon = (link) => {
         if (!link) return null;
-        const l = link.toLowerCase();
+        const l = String(link).toLowerCase();
         // Return icon component only, styling handled in usage
         if (l.includes('facebook')) return <Facebook />;
         if (l.includes('instagram')) return <Instagram />;
@@ -229,7 +229,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 className="absolute bottom-28 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                             >
                                 {(() => {
-                                    const l = profile.social_link.toLowerCase();
+                                    const l = String(profile.social_link).toLowerCase();
                                     if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
                                     if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
                                     if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
@@ -282,7 +282,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     <>
                         <div className="absolute top-4 right-4 z-10">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                וייב: {vibeText[profile.vibe_level - 1]}
+                                וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
