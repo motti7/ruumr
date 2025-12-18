@@ -187,6 +187,20 @@ export default function ProfileViewPage() {
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-2">קצת עליי</h4>
           <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
+          
+          {profile.spotify_track_id && (
+              <div className="mb-4 rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                  <iframe 
+                      src={`https://open.spotify.com/embed/track/${profile.spotify_track_id}?utm_source=generator&theme=0`} 
+                      width="100%" 
+                      height="80" 
+                      frameBorder="0" 
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                      loading="lazy"
+                  ></iframe>
+              </div>
+          )}
+
           {profile.social_link && (
             <a 
               href={ensureProtocol(profile.social_link)} 

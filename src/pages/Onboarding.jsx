@@ -62,14 +62,18 @@ export default function OnboardingPage() {
     apartment_photos: Array(6).fill(null),
     existing_roommates: 0,
     apartment_total_budget: 5000,
-  });
+    spotify_track_id: '',
+    });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
-  const [uploadingIndex, setUploadingIndex] = useState(null);
-  const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
+  // Use Sets to track multiple concurrent uploads
+  const [uploadingPhotos, setUploadingPhotos] = useState(new Set());
+  const [uploadingApartmentPhotos, setUploadingApartmentPhotos] = useState(new Set());
+  const [spotifySearch, setSpotifySearch] = useState("");
+  const [isSearchingSong, setIsSearchingSong] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -139,17 +143,17 @@ export default function OnboardingPage() {
   };
 
   const handleFinish = async (shouldVerify = false) => {
-    if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
+    if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {
         alert("אנא המתן לסיום העלאת התמונות");
         return;
     }
     
-    // Safety check for blob URLs
     const hasBlobPhotos = formData.photos.some(p => p && p.startsWith('blob:'));
     const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
     
     if (hasBlobPhotos || hasBlobApartment) {
-        alert("חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.");
+        // Wait a bit and try again? No, just alert
+        alert("עדיין מעלה תמונות... נסה שוב בעוד רגע");
         return;
     }
 
@@ -212,11 +216,15 @@ export default function OnboardingPage() {
     let file = e.target.files[0];
     if (!file) return;
 
-    if (isApartment) setUploadingApartmentIndex(index);
-    else setUploadingIndex(index);
+    // Track upload
+    if (isApartment) {
+        setUploadingApartmentPhotos(prev => new Set(prev).add(index));
+    } else {
+        setUploadingPhotos(prev => new Set(prev).add(index));
+    }
 
     try {
-      // Optimistic preview (use original file for speed)
+      // Optimistic preview
       const objectUrl = URL.createObjectURL(file);
       setFormData(prev => {
         const key = isApartment ? 'apartment_photos' : 'photos';
@@ -225,14 +233,15 @@ export default function OnboardingPage() {
         return { ...prev, [key]: newPhotos };
       });
 
-      // Compress before upload
+      // Compress and upload
       const compressedFile = await compressImage(file);
       const { file_url } = await UploadFile({ file: compressedFile });
       
+      // Update with REAL URL
       setFormData(prev => {
         const key = isApartment ? 'apartment_photos' : 'photos';
         const newPhotos = [...(prev[key] || [])];
-        newPhotos[index] = file_url; // Replace with real URL
+        newPhotos[index] = file_url;
         
         if (isApartment && index === newPhotos.length - 1 && newPhotos.length < 12) {
              newPhotos.push(null, null);
@@ -242,12 +251,57 @@ export default function OnboardingPage() {
       });
     } catch (error) {
       console.error("Upload failed", error);
+      // Revert if failed (optional, or just leave blob and let finish handler catch it)
     } finally {
-      setUploadingIndex(null);
-      setUploadingApartmentIndex(null);
+      // Untrack upload
+      if (isApartment) {
+          setUploadingApartmentPhotos(prev => {
+              const next = new Set(prev);
+              next.delete(index);
+              return next;
+          });
+      } else {
+          setUploadingPhotos(prev => {
+              const next = new Set(prev);
+              next.delete(index);
+              return next;
+          });
+      }
+      
       if (fileInputRef.current) fileInputRef.current.value = '';
       if (apartmentFileInputRef.current) apartmentFileInputRef.current.value = '';
     }
+  };
+
+  const searchSong = async () => {
+      if (!spotifySearch.trim()) return;
+      setIsSearchingSong(true);
+      try {
+          const { base44 } = require('@/api/base44Client');
+          const res = await base44.integrations.Core.InvokeLLM({
+              prompt: `Find the Spotify Track ID for the song: "${spotifySearch}". 
+              Return ONLY the JSON object: {"id": "..."}. 
+              If not found, return {"id": null}. 
+              Example: {"id": "4cOdK2wGLETKBW3PvgPWqT"}`,
+              add_context_from_internet: true,
+              response_json_schema: {
+                  type: "object",
+                  properties: {
+                      id: { type: ["string", "null"] }
+                  }
+              }
+          });
+          
+          if (res?.id) {
+              setFormField('spotify_track_id', res.id);
+          } else {
+              alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
+          }
+      } catch (e) {
+          console.error(e);
+          alert("שגיאה בחיפוש השיר");
+      }
+      setIsSearchingSong(false);
   };
   
   const triggerFileInput = (index, isApartment = false) => {
@@ -544,6 +598,42 @@ export default function OnboardingPage() {
             <Step step={8} currentStep={step} title="ספר/י על עצמך">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <Music className="w-4 h-4 text-[--theme-orange]"/>
+                            שיר הנושא שלי
+                        </label>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={spotifySearch} 
+                                onChange={(e) => setSpotifySearch(e.target.value)} 
+                                placeholder="חפש שיר..." 
+                                className="bg-gray-50 border-gray-200"
+                            />
+                            <Button onClick={searchSong} disabled={isSearchingSong} size="icon" className="bg-[--theme-orange]">
+                                {isSearchingSong ? <Loader2 className="animate-spin w-4 h-4"/> : <Search className="w-4 h-4"/>}
+                            </Button>
+                        </div>
+                        {formData.spotify_track_id && (
+                            <div className="mt-2 rounded-xl overflow-hidden border border-gray-200">
+                                <iframe 
+                                    src={`https://open.spotify.com/embed/track/${formData.spotify_track_id}?utm_source=generator&theme=0`} 
+                                    width="100%" 
+                                    height="80" 
+                                    frameBorder="0" 
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                    loading="lazy"
+                                ></iframe>
+                                <button 
+                                    onClick={() => setFormField('spotify_track_id', '')}
+                                    className="text-xs text-red-500 w-full text-center py-1 hover:bg-red-50"
+                                >
+                                    הסר שיר
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
@@ -591,7 +681,7 @@ export default function OnboardingPage() {
                                  </>
                              ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => triggerFileInput(i)}>
-                                    {uploadingIndex === i ? <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]"/> : <Plus className="w-8 h-8 text-gray-300"/>}
+                                    {uploadingPhotos.has(i) ? <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]"/> : <Plus className="w-8 h-8 text-gray-300"/>}
                                 </div>
                              )}
                         </div>

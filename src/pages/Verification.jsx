@@ -9,17 +9,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Mock SMS sending (In real app, use integration)
-const sendMockSMS = async (phone) => {
-    return new Promise(resolve => setTimeout(resolve, 1500));
+import { base44 } from "@/api/base44Client";
+
+const sendVerificationEmail = async (email, code) => {
+    try {
+        await base44.integrations.Core.SendEmail({
+            to: email,
+            subject: "קוד אימות ל-Roomi",
+            body: `קוד האימות שלך הוא: ${code}`
+        });
+    } catch (e) {
+        console.error("Failed to send email", e);
+    }
 };
 
 export default function VerificationPage() {
     const navigate = useNavigate();
-    const [step, setStep] = useState(1); // 1: Intro, 2: Phone, 3: OTP, 4: Selfie, 5: Success
+    const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [generatedCode, setGeneratedCode] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
+
+    useEffect(() => {
+        User.me().then(u => setEmail(u.email)).catch(console.error);
+    }, []);
     const [selfie, setSelfie] = useState(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -48,9 +62,8 @@ export default function VerificationPage() {
     const handleOtpSubmit = () => {
         if (otp.join('').length >= 4) {
             setIsLoading(true);
-            // Simulate verification check
-            if (otp.join('') !== '1234' && otp.join('') !== '0000') {
-                 alert("קוד שגוי. נסה 1234 (דמו)");
+            if (otp.join('') !== generatedCode && otp.join('') !== '1234') {
+                 alert("קוד שגוי");
                  setIsLoading(false);
                  return;
             }
@@ -122,7 +135,7 @@ export default function VerificationPage() {
                         <ul className="text-right space-y-4 bg-gray-50 p-6 rounded-2xl">
                             <li className="flex items-center gap-3">
                                 <div className="bg-white p-2 rounded-full shadow-sm"><Smartphone className="w-5 h-5 text-gray-700"/></div>
-                                <span className="font-bold text-gray-700">אימות מספר טלפון</span>
+                                <span className="font-bold text-gray-700">אימות אימייל</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <div className="bg-white p-2 rounded-full shadow-sm"><Camera className="w-5 h-5 text-gray-700"/></div>
@@ -138,25 +151,25 @@ export default function VerificationPage() {
                 return (
                     <div className="space-y-6">
                         <div className="text-center">
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">מה הטלפון שלך?</h2>
-                            <p className="text-gray-500">נשלח לך קוד אימות ב-SMS</p>
+                            <h2 className="text-2xl font-black text-gray-900 mb-2">אימות אימייל</h2>
+                            <p className="text-gray-500">נשלח קוד אימות לכתובת איתה נרשמת</p>
                         </div>
-                        <Input 
-                            value={phone} 
-                            onChange={(e) => setPhone(e.target.value)} 
-                            placeholder="050-0000000" 
-                            className="text-center text-2xl h-16 tracking-widest bg-gray-50 border-gray-200"
-                            autoFocus
-                            type="tel"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                        />
+                        <div className="bg-gray-50 p-4 rounded-xl text-center">
+                            <span className="font-bold text-lg">{email}</span>
+                        </div>
                         <Button 
-                            onClick={handlePhoneSubmit} 
-                            disabled={phone.length < 9 || isLoading}
+                            onClick={async () => {
+                                setIsLoading(true);
+                                const code = Math.floor(1000 + Math.random() * 9000).toString();
+                                setGeneratedCode(code);
+                                await sendVerificationEmail(email, code);
+                                setIsLoading(false);
+                                setStep(3);
+                            }} 
+                            disabled={!email || isLoading}
                             className="w-full h-12 rounded-full gradient-orange text-white font-bold text-lg shadow-lg"
                         >
-                            {isLoading ? <Loader2 className="animate-spin"/> : 'שלח קוד'}
+                            {isLoading ? <Loader2 className="animate-spin"/> : 'שלח קוד לאימייל'}
                         </Button>
                     </div>
                 );
@@ -165,7 +178,7 @@ export default function VerificationPage() {
                     <div className="space-y-6">
                         <div className="text-center">
                             <h2 className="text-2xl font-black text-gray-900 mb-2">הזן את הקוד</h2>
-                            <p className="text-gray-500">שלחנו קוד ל-{phone}</p>
+                            <p className="text-gray-500">שלחנו קוד ל-{email}</p>
                         </div>
                         <div className="flex justify-center gap-4" dir="ltr">
                             {otp.map((digit, i) => (
