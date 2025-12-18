@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Video } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -157,16 +157,30 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
-    // Insert video at index 1 if it exists, otherwise just photos
-    let allMedia = [...regularPhotos];
-    if (profile.video_url) {
-        allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
-    }
-    // Add apartment photos at the end
-    allMedia = [...allMedia, ...apartmentPhotos];
     
-    // Normalize string photos to objects for consistent handling
-    const media = allMedia.length > 0 ? allMedia.map(m => typeof m === 'string' ? { type: 'image', url: m } : m) : [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
+    const hasVideo = !!profile.video_url;
+    
+    // Build media array carefully
+    let media = regularPhotos.map(url => ({ type: 'image', url }));
+    
+    if (hasVideo) {
+        // Insert video at index 1 if possible, else at 0
+        if (media.length > 0) {
+            media.splice(1, 0, { type: 'video', url: profile.video_url });
+        } else {
+            media.push({ type: 'video', url: profile.video_url });
+        }
+    }
+    
+    // Add apartment photos
+    if (apartmentPhotos.length > 0) {
+        media = [...media, ...apartmentPhotos.map(url => ({ type: 'image', url }))];
+    }
+    
+    // Fallback
+    if (media.length === 0) {
+        media = [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
+    }
 
     const handleDragEnd = async (event, info) => {
         const offset = info.offset.x;
