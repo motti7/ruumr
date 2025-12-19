@@ -353,9 +353,9 @@ export default function ProfilePage() {
       </div>
 
       <div className="p-4 space-y-6">
-        {/* SONG SECTION MOVED HERE */}
-        <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
-            {(formData.song_name || formData.spotify_track_id || isEditing) ? (
+        {/* SONG SECTION */}
+        {(formData.song_name || formData.spotify_track_id || isEditing) && (
+            <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
                 <div className={`w-full h-full rounded-[2.5rem] bg-gradient-to-br from-gray-900 to-black p-6 shadow-2xl relative overflow-hidden border border-gray-800 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing ? 'hover:scale-[1.02]' : ''}`}>
                     
                     {/* Vinyl Record Animation */}
@@ -423,8 +423,8 @@ export default function ProfilePage() {
                         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:20px_20px] opacity-50"></div>
                     </div>
                 </div>
-            ) : null}
-        </div>
+            </div>
+        )}
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
             <div className="grid grid-cols-2 gap-4">
