@@ -218,11 +218,33 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     };
 
     const getPhotoContent = (index) => {
-        const currentPhotoIsRegular = index < regularPhotos.length;
-        const actualPhotoIndex = currentPhotoIsRegular ? index : index - regularPhotos.length;
+        // Find which photo logic to use based on media type
+        const isVideo = media[index].type === 'video';
+        
+        // If it's a video, we might want to show specific video overlays or nothing
+        if (isVideo) {
+             return null; // For now, no overlays on video to keep it clean
+        }
 
-        if (currentPhotoIsRegular) {
-            if (index === 0) {
+        // It's a photo. Is it regular or apartment?
+        // We need to map 'index' back to the source arrays.
+        // If video exists, it's at index 1.
+        // So indices 0 is regularPhotos[0].
+        // indices 2+ are regularPhotos[1+] or apartmentPhotos.
+        
+        let logicalPhotoIndex = index;
+        let isRegular = true;
+
+        if (profile.video_url) {
+            if (index > 0) logicalPhotoIndex = index - 1; // Skip video
+        }
+
+        if (logicalPhotoIndex >= regularPhotos.length) {
+            isRegular = false;
+        }
+
+        if (isRegular) {
+            if (index === 0) { // Always show Name on first card (which is index 0)
                 return (
                     <>
                         <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
@@ -288,7 +310,11 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         </div>
                     </>
                 );
-            } else if (index === 1) {
+            }
+            
+            // Logic for subsequent regular photos
+            // We use logicalPhotoIndex to decide content
+            if (logicalPhotoIndex === 1) {
                 return (
                     <>
                         <div className="absolute top-4 right-4 z-10">
@@ -305,7 +331,9 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         </div>
                     </>
                 );
-            } else if (index === 2) {
+            } 
+            
+            if (logicalPhotoIndex === 2) {
                 return (
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                         <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
