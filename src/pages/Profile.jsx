@@ -499,20 +499,39 @@ export default function ProfilePage() {
               )}
 
               {formData.song_name ? (
-                  <div className="bg-gray-900 p-3 rounded-xl shadow-sm border border-gray-800 relative text-white text-right flex items-center gap-3">
-                      <img src={formData.song_image} className="w-12 h-12 rounded-lg object-cover" />
-                      <div className="flex-1 min-w-0">
-                          <div className="font-bold truncate text-sm">{formData.song_name}</div>
-                          <div className="text-xs text-gray-400 truncate">{formData.song_artist}</div>
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black p-5 text-white shadow-xl border border-gray-800">
+                      <div className="absolute -top-4 -left-4 opacity-10">
+                          <Music className="w-32 h-32 text-white" />
                       </div>
-                      {isEditing && (
-                          <button 
-                              onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
-                              className="bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 flex-shrink-0"
-                          >
-                              <X className="w-3 h-3" />
-                          </button>
-                      )}
+                      <div className="relative z-10 flex items-center gap-5">
+                           <div className="relative flex-shrink-0">
+                               <img 
+                                  src={formData.song_image} 
+                                  className="w-20 h-20 rounded-full object-cover border-4 border-gray-800 shadow-2xl" 
+                                  style={{ animation: 'spin 10s linear infinite' }}
+                               />
+                               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div className="w-3 h-3 bg-black rounded-full border border-gray-700 shadow-inner"></div>
+                               </div>
+                               <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+                           </div>
+                           <div className="flex-1 min-w-0">
+                               <div className="flex items-center gap-2 mb-1">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                  <p className="text-[10px] font-bold text-green-400 tracking-wider uppercase">השיר שלי</p>
+                               </div>
+                               <h3 className="text-xl font-black leading-tight mb-1 truncate">{formData.song_name}</h3>
+                               <p className="text-sm text-gray-400 truncate font-medium">{formData.song_artist}</p>
+                           </div>
+                           {isEditing && (
+                              <button 
+                                  onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                                  className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full backdrop-blur-sm transition-colors"
+                              >
+                                  <X className="w-4 h-4" />
+                              </button>
+                           )}
+                      </div>
                   </div>
               ) : formData.spotify_track_id && (
                   <div className="relative">

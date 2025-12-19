@@ -69,7 +69,8 @@ export default function LikesSentPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
                             className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 relative group cursor-pointer"
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}`);
                             }}
                         >
