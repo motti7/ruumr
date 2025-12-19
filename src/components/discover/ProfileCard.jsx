@@ -178,7 +178,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     // Add apartment photos (always images)
     allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
     
-    const media = allMedia.length > 0 ? allMedia : [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
+    const media = allMedia.length > 0 ? allMedia : []; // No fallback images
 
     const handleDragEnd = async (event, info) => {
         const offset = info.offset.x;
@@ -358,49 +358,69 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     className={`relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
-                    <div className="absolute inset-0">
-                        {media[currentPhotoIndex].type === 'video' ? (
-                            <video
-                                key={currentPhotoIndex}
-                                src={media[currentPhotoIndex].url}
-                                className="w-full h-full object-cover pointer-events-none"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                            />
-                        ) : (
-                            <div className="w-full h-full pointer-events-none">
-                                <SmartImage
+                    <div className="absolute inset-0 bg-gray-100">
+                        {media.length > 0 ? (
+                            media[currentPhotoIndex].type === 'video' ? (
+                                <video
                                     key={currentPhotoIndex}
                                     src={media[currentPhotoIndex].url}
-                                    alt={profile.name}
-                                    className="w-full h-full"
-                                    priority={true}
+                                    className="w-full h-full object-cover pointer-events-none"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
                                 />
+                            ) : (
+                                <div className="w-full h-full pointer-events-none">
+                                    <SmartImage
+                                        key={currentPhotoIndex}
+                                        src={media[currentPhotoIndex].url}
+                                        alt={profile.name}
+                                        className="w-full h-full"
+                                        priority={true}
+                                    />
+                                </div>
+                            )
+                        ) : (
+                            // Empty State
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-200">
+                                <div className="bg-white p-4 rounded-full mb-4 shadow-sm opacity-50">
+                                    <div className="w-12 h-12 rounded-full border-4 border-gray-300"></div>
+                                </div>
+                                <p className="text-gray-400 font-bold">אין תמונה</p>
                             </div>
                         )}
                     </div>
 
-                    <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
-                        {media.map((_, i) => (
-                            <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
-                            </div>
-                        ))}
-                    </div>
+                    {media.length > 0 && (
+                        <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
+                            {media.map((_, i) => (
+                                <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors"
+                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-4 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95"
                     >
-                        <Info className="w-5 h-5 text-[--theme-orange]" />
+                        <Info className="w-6 h-6 text-[--theme-orange]" />
                     </button>
 
-                    {getPhotoContent(currentPhotoIndex)}
+                    {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
+                         // Fallback content when no media
+                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-5 pb-8 pointer-events-none">
+                              <h2 className="text-4xl font-bold text-white mb-1">{profile.name}</h2>
+                              <div className="text-white/90 text-base mb-3 font-medium">
+                                  {profile.age} • {profile.location}
+                              </div>
+                         </div>
+                    )}
 
                     {/* Like / Nope Badges */}
                     <motion.div 

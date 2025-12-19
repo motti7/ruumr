@@ -4,7 +4,8 @@ import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2 } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Mail } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 
 const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onClick }) => {
@@ -70,6 +71,18 @@ export default function SettingsPage() {
     }
   };
 
+  const handleAdminEmail = async () => {
+      if (confirm("האם לשלוח מייל תזכורת לכל המשתמשים ללא תמונות?")) {
+          try {
+              const res = await base44.functions.send_reminders({});
+              alert(`נשלחו ${res.sent_count} מיילים.`);
+          } catch (e) {
+              console.error(e);
+              alert("שגיאה בשליחה");
+          }
+      }
+  };
+
   return (
     <div className="p-4 pb-24 bg-gray-50 min-h-screen" dir="rtl">
       <div className="mb-6">
@@ -105,6 +118,11 @@ export default function SettingsPage() {
              <Button onClick={handleDeleteAccount} variant="ghost" className="w-full text-center text-red-500 font-bold text-lg">
                 <Trash2 className="w-5 h-5 ml-2" />
                 מחק חשבון
+            </Button>
+            
+             <Button onClick={handleAdminEmail} variant="outline" className="w-full mt-8 border-dashed border-gray-300 text-gray-400 text-xs">
+                <Mail className="w-3 h-3 ml-2" />
+                Admin: Send Photo Reminders
             </Button>
         </div>
       </div>

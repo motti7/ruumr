@@ -142,12 +142,12 @@ export default function Layout({ children, currentPageName }) {
         <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
-        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden w-[375px] h-[812px] border-8 border-gray-900 relative">
+        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden w-[375px] h-[750px] max-h-[90vh] border-8 border-gray-900 relative shrink-0">
                 <div className="absolute top-0 left-0 right-0 h-6 bg-gray-900 z-50 flex justify-center">
                     <div className="w-32 h-4 bg-black rounded-b-xl"></div>
                 </div>
-                <div className="h-full overflow-y-auto no-scrollbar bg-gray-50">
+                <div className="h-full overflow-y-auto no-scrollbar bg-gray-50 relative">
                     <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
                     :root {
