@@ -17,7 +17,7 @@ const ProfileDetail = ({ profile, onClose }) => {
 
     const getSocialIcon = (link) => {
         if (!link) return null;
-        const l = link.toLowerCase();
+        const l = String(link).toLowerCase();
         if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
         if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
         if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
@@ -59,10 +59,10 @@ const ProfileDetail = ({ profile, onClose }) => {
                              <span className="text-sm opacity-80">{profile.search_area}</span>
                         </div>
                     </div>
-                    </div>
+                </div>
 
-                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                        <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
+                    <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
                     <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
                     {profile.social_link && (
                         <a 
@@ -157,6 +157,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
+    
     // Insert video at index 1 if it exists, otherwise just photos
     let allMedia = [...regularPhotos];
     if (profile.video_url) {
@@ -187,9 +188,6 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
         // Ignore tap if expanded or not active
         if (!isActive || isExpanded) return;
 
-        // Don't change photo if tapping on video controls
-        if (e.target.tagName === 'VIDEO') return;
-
         const rect = e.target.getBoundingClientRect();
         const tapX = e.clientX - rect.left;
         const width = rect.width;
@@ -206,37 +204,18 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
     const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
-    const getSocialIcon = (link) => {
-        if (!link) return null;
-        const l = String(link).toLowerCase();
-        // Return icon component only, styling handled in usage
-        if (l.includes('facebook')) return <Facebook />;
-        if (l.includes('instagram')) return <Instagram />;
-        if (l.includes('twitter') || l.includes('x.com')) return <Twitter />;
-        if (l.includes('linkedin')) return <Linkedin />;
-        return <LinkIcon />;
-    };
-
     const getPhotoContent = (index) => {
-        // Find which photo logic to use based on media type
         const isVideo = media[index].type === 'video';
         
-        // If it's a video, we might want to show specific video overlays or nothing
         if (isVideo) {
-             return null; // For now, no overlays on video to keep it clean
+             return null; 
         }
 
-        // It's a photo. Is it regular or apartment?
-        // We need to map 'index' back to the source arrays.
-        // If video exists, it's at index 1.
-        // So indices 0 is regularPhotos[0].
-        // indices 2+ are regularPhotos[1+] or apartmentPhotos.
-        
         let logicalPhotoIndex = index;
         let isRegular = true;
 
         if (profile.video_url) {
-            if (index > 0) logicalPhotoIndex = index - 1; // Skip video
+            if (index > 0) logicalPhotoIndex = index - 1;
         }
 
         if (logicalPhotoIndex >= regularPhotos.length) {
@@ -244,7 +223,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
         }
 
         if (isRegular) {
-            if (index === 0) { // Always show Name on first card (which is index 0)
+            if (index === 0) {
                 return (
                     <>
                         <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
@@ -310,10 +289,8 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         </div>
                     </>
                 );
-            }
+            } 
             
-            // Logic for subsequent regular photos
-            // We use logicalPhotoIndex to decide content
             if (logicalPhotoIndex === 1) {
                 return (
                     <>
@@ -375,7 +352,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             <video
                                 key={currentPhotoIndex}
                                 src={media[currentPhotoIndex].url}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover pointer-events-none"
                                 autoPlay
                                 loop
                                 muted
