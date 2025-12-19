@@ -118,28 +118,55 @@ export default function VerificationPage() {
         switch (step) {
             case 1:
                 return (
-                    <div className="text-center space-y-6">
-                        <div className="bg-orange-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto">
-                            <Shield className="w-12 h-12 text-[--theme-orange]" />
-                        </div>
+                    <div className="text-center space-y-8 py-4">
+                        <motion.div 
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                            className="w-32 h-32 mx-auto relative"
+                        >
+                            <div className="absolute inset-0 bg-orange-100 rounded-full animate-pulse opacity-50"></div>
+                            <div className="absolute inset-2 bg-gradient-to-br from-[--theme-orange] to-[--theme-orange-dark] rounded-full flex items-center justify-center shadow-xl">
+                                <Shield className="w-16 h-16 text-white" />
+                            </div>
+                            <div className="absolute -top-2 -right-2 bg-green-500 p-2 rounded-full border-4 border-white shadow-lg">
+                                <Check className="w-6 h-6 text-white" strokeWidth={3} />
+                            </div>
+                        </motion.div>
+                        
                         <div>
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">בוא נאמת את הפרופיל שלך</h2>
-                            <p className="text-gray-500 px-4">
-                                קהילה בטוחה היא קהילה טובה. אמת את הפרופיל שלך כדי לקבל תג "מאומת" ולהגדיל את הסיכויים שלך למצוא שותפים.
+                            <h2 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">אימות פרופיל</h2>
+                            <p className="text-gray-500 text-lg leading-relaxed px-2">
+                                קבל/י את הוי הכחול! <br/>
+                                פרופילים מאומתים מקבלים <span className="font-bold text-[--theme-orange]">פי 3 יותר פניות</span>.
                             </p>
                         </div>
-                        <ul className="text-right space-y-4 bg-gray-50 p-6 rounded-2xl">
-                            <li className="flex items-center gap-3">
-                                <div className="bg-white p-2 rounded-full shadow-sm"><Mail className="w-5 h-5 text-gray-700"/></div>
-                                <span className="font-bold text-gray-700">אימות אימייל</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <div className="bg-white p-2 rounded-full shadow-sm"><Camera className="w-5 h-5 text-gray-700"/></div>
-                                <span className="font-bold text-gray-700">אימות פנים (סלפי)</span>
-                            </li>
-                        </ul>
-                        <Button onClick={() => setStep(2)} className="w-full h-12 rounded-full gradient-orange text-white font-bold text-lg shadow-lg">
-                            מתחילים
+
+                        <div className="bg-white border border-gray-100 shadow-xl rounded-3xl p-6 space-y-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-blue-50 p-3 rounded-2xl"><Mail className="w-6 h-6 text-blue-500"/></div>
+                                <div className="text-right flex-1">
+                                    <h4 className="font-bold text-gray-900">אימות אימייל</h4>
+                                    <p className="text-sm text-gray-500">קוד קצר שנשלח אלייך</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full border-2 border-gray-200"></div>
+                            </div>
+                            <div className="w-full h-[1px] bg-gray-100"></div>
+                            <div className="flex items-center gap-4">
+                                <div className="bg-purple-50 p-3 rounded-2xl"><Camera className="w-6 h-6 text-purple-500"/></div>
+                                <div className="text-right flex-1">
+                                    <h4 className="font-bold text-gray-900">סלפי מהיר</h4>
+                                    <p className="text-sm text-gray-500">כדי לוודא שזה באמת את/ה</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full border-2 border-gray-200"></div>
+                            </div>
+                        </div>
+
+                        <Button 
+                            onClick={() => setStep(2)} 
+                            className="w-full h-14 rounded-2xl gradient-orange text-white font-bold text-xl shadow-lg hover:shadow-orange-200 hover:scale-[1.02] transition-all"
+                        >
+                            יאללה, בוא נתקתק את זה
                         </Button>
                     </div>
                 );

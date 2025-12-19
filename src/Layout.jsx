@@ -142,21 +142,92 @@ export default function Layout({ children, currentPageName }) {
         <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
-        <div className="hidden sm:flex flex-col items-center justify-center fixed inset-0 gradient-orange z-[1000] text-white p-8 text-center">
-            <div className="flex flex-col items-center max-w-lg">
-                <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 shadow-xl">
-                    <Home className="w-12 h-12 text-white" />
+        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden w-[375px] h-[812px] border-8 border-gray-900 relative">
+                <div className="absolute top-0 left-0 right-0 h-6 bg-gray-900 z-50 flex justify-center">
+                    <div className="w-32 h-4 bg-black rounded-b-xl"></div>
                 </div>
-                <h1 className="text-6xl mb-6 logo-font drop-shadow-md">Roomi</h1>
-                <h2 className="text-2xl font-bold mb-4 opacity-95">חווית המובייל המושלמת מחכה לך</h2>
-                <p className="text-lg opacity-90 mb-10 leading-relaxed max-w-md">
-                    האפליקציה זמינה כרגע לשימוש בטלפון הנייד בלבד, כדי להבטיח לך את החוויה הטובה ביותר.
-                </p>
-                <div className="flex items-center gap-3 bg-white text-[--theme-orange] px-8 py-4 rounded-full shadow-lg font-bold text-lg hover:scale-105 transition-transform cursor-default">
-                    <Smartphone className="w-6 h-6" />
-                    <span>נא לפתוח דרך הנייד</span>
+                <div className="h-full overflow-y-auto no-scrollbar bg-gray-50">
+                    <style>{`
+                    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+                    :root {
+                        --theme-orange: #FF5722;
+                        --theme-orange-dark: #E64A19;
+                    }
+                    .logo-font {
+                        font-family: 'Pacifico', cursive;
+                        color: var(--theme-orange);
+                        font-weight: 400;
+                    }
+                    .gradient-orange {
+                        background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
+                    }
+                    .components-slider-thumb {
+                        background-color: var(--theme-orange) !important;
+                        border-color: var(--theme-orange) !important;
+                    }
+                    .components-slider-range, .components-progress-indicator {
+                        background-color: var(--theme-orange) !important;
+                    }
+                    .no-scrollbar::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .no-scrollbar {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+                    `}</style>
+                    
+                    {shouldShowNav && (
+                        <header className="bg-white sticky top-0 z-40 border-b border-gray-200">
+                            <div className="px-4 h-16 flex items-center justify-between">
+                                <Link to={createPageUrl("Settings")}>
+                                    <Settings className="w-6 h-6 text-gray-400"/>
+                                </Link>
+                                <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
+                                     <h1 className="text-3xl logo-font">Roomi</h1>
+                                </Link>
+                                <Link to={createPageUrl("Profile")}>
+                                    <User className="w-6 h-6 text-gray-400"/>
+                                </Link>
+                            </div>
+                        </header>
+                    )}
+
+                    <main className={`bg-gray-50 ${shouldShowNav ? 'pb-20' : ''}`}>
+                        {children}
+                    </main>
+
+                    {shouldShowNav && (
+                        <nav className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-40">
+                            <div className="flex items-center justify-around py-2">
+                            {navigationItems.map((item) => {
+                                const isActive = location.pathname === item.path;
+                                const Icon = item.icon;
+                                return (
+                                <Link key={item.name} to={item.path} className="flex-1">
+                                    <motion.div
+                                    whileTap={{ scale: 0.9 }}
+                                    className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 ${
+                                        isActive ? 'text-[--theme-orange]' : 'text-gray-400'
+                                    } relative`}
+                                    >
+                                    <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
+                                    {item.badgeCount > 0 && (
+                                        <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
+                                            {item.badgeCount}
+                                        </span>
+                                    )}
+                                    </motion.div>
+                                </Link>
+                                );
+                            })}
+                            </div>
+                        </nav>
+                    )}
                 </div>
             </div>
+            <p className="mt-6 text-gray-400 font-medium">תצוגה מקדימה במצב מובייל</p>
         </div>
 
         <div className="sm:hidden">
