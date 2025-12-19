@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { base44 } from "@/api/base44Client";
-
 const sendVerificationEmail = async (email, code) => {
     try {
         await base44.integrations.Core.SendEmail({
