@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ProfileCard from "../components/discover/ProfileCard";
 import ActionButtons from "../components/discover/ActionButtons";
 import MatchAnimation from "../components/discover/MatchAnimation";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -33,16 +34,16 @@ export default function DiscoverPage() {
       const currentUserProfile = userProfiles[0];
       setUserProfile(currentUserProfile);
       
-      const allProfiles = await Profile.list("-created_date", 100);
+      const allProfiles = await Profile.list("-created_date", 500);
       const userSwipes = await Swipe.filter({ swiper_id: user.id });
-      const swipedIds = userSwipes.map(s => s.swiped_id);
+      const swipedIds = userSwipes.map(s => String(s.swiped_id));
       
       const likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-      const likedMeIds = likedMeSwipes.map(s => s.swiper_id);
+      const likedMeIds = likedMeSwipes.map(s => String(s.swiper_id));
 
       const availableProfiles = allProfiles.filter(p => {
         // 1. Filter out self and already swiped
-        if (p.user_id === user.id || swipedIds.includes(p.user_id)) return false;
+        if (String(p.user_id) === String(user.id) || swipedIds.includes(String(p.user_id))) return false;
         
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
@@ -131,13 +132,23 @@ export default function DiscoverPage() {
     setTimeout(() => setActionFeedback(null), 600);
 
     try {
-      // Use Backend Function for Swipe Logic (and Emails)
-      const { base44 } = require('@/api/base44Client');
+      // 1. Create Swipe Entity Client-Side (Robust persistence)
+      try {
+          await Swipe.create({
+              swiper_id: userProfile.user_id,
+              swiped_id: swipedProfile.user_id,
+              action
+          });
+      } catch (e) {
+          console.error("Failed to create swipe locally", e);
+      }
 
       // Optimistic UI update
       setCurrentIndex(prev => prev + 1);
       setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
 
+      // 2. Call Backend for Match Logic (and Emails)
+      const { base44 } = require('@/api/base44Client');
       const result = await base44.functions.handleSwipe({
           swiper_id: userProfile.user_id, 
           swiped_id: swipedProfile.user_id, 
@@ -148,8 +159,8 @@ export default function DiscoverPage() {
           setMatchData({ profile1: userProfile, profile2: swipedProfile });
       }
     } catch (error) { 
-        console.error("Error recording swipe:", error); 
-        // Optional: Revert UI if error (complex to implement perfectly, skipping for simplicity as errors are rare)
+        console.error("Error in swipe flow:", error); 
+        // We don't revert UI because we likely saved the swipe locally at least.
     }
   };
   
@@ -215,12 +226,13 @@ export default function DiscoverPage() {
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => (
-                <ProfileCard
-                  key={`${profile.id}-${currentIndex}-${index}`}
-                  profile={profile}
-                  onSwipe={handleSwipe}
-                  isActive={index === arr.length - 1}
-                />
+                <ErrorBoundary key={`${profile.id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
+                    <ProfileCard
+                    profile={profile}
+                    onSwipe={handleSwipe}
+                    isActive={index === arr.length - 1}
+                    />
+                </ErrorBoundary>
               ))
             ) : (
               <motion.div 
