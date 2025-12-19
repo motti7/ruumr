@@ -147,7 +147,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="absolute top-0 left-0 right-0 h-6 bg-gray-900 z-50 flex justify-center">
                     <div className="w-32 h-4 bg-black rounded-b-xl"></div>
                 </div>
-                <div className="h-full overflow-y-auto no-scrollbar bg-gray-50 relative">
+                <div className="flex flex-col h-full bg-gray-50 relative">
                     <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
                     :root {
@@ -179,7 +179,7 @@ export default function Layout({ children, currentPageName }) {
                     `}</style>
                     
                     {shouldShowNav && (
-                        <header className="bg-white sticky top-0 z-40 border-b border-gray-200">
+                        <header className="bg-white shrink-0 z-40 border-b border-gray-200">
                             <div className="px-4 h-16 flex items-center justify-between">
                                 <Link to={createPageUrl("Settings")}>
                                     <Settings className="w-6 h-6 text-gray-400"/>
@@ -194,12 +194,14 @@ export default function Layout({ children, currentPageName }) {
                         </header>
                     )}
 
-                    <main className={`bg-gray-50 ${shouldShowNav ? 'pb-20' : ''}`}>
-                        {children}
-                    </main>
+                    <div className="flex-1 overflow-y-auto no-scrollbar relative">
+                        <main className="bg-gray-50 pb-4">
+                            {children}
+                        </main>
+                    </div>
 
                     {shouldShowNav && (
-                        <nav className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-40">
+                        <nav className="shrink-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-40">
                             <div className="flex items-center justify-around py-2">
                             {navigationItems.map((item) => {
                                 const isActive = location.pathname === item.path;
