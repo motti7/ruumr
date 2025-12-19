@@ -1,22 +1,18 @@
 const { base44 } = require('@base44/backend-sdk');
 
 module.exports = async function(params) {
-    // This function runs on the backend
     try {
         // Fetch all profiles
-        const profiles = await base44.entities.Profile.list(1000); // Fetch up to 1000
+        const profiles = await base44.entities.Profile.list(1000); 
         let sentCount = 0;
         
         for (const p of profiles) {
-            // Check for missing or bad photos
-            // Logic: No photos array, empty array, or contains blob/nulls exclusively?
-            // User specifically said "users that don't have photos (because I deleted them)"
             const photos = p.photos || [];
-            const validPhotos = photos.filter(ph => ph && !ph.startsWith('blob:'));
+            // Check if photos array is effectively empty or contains only invalid blobs
+            // Logic: Filter out nulls and blobs
+            const validPhotos = photos.filter(ph => ph && typeof ph === 'string' && !ph.startsWith('blob:'));
             
             if (validPhotos.length === 0) {
-                 // Try to send email
-                 // We use p.created_by which stores the creator's email
                  if (p.created_by) {
                      try {
                          await base44.integrations.Core.SendEmail({

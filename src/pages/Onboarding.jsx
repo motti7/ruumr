@@ -632,7 +632,12 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר... (בהקמה)">
+            <Step step={9} currentStep={step} title={
+                <div className="flex items-center justify-center gap-2">
+                    אם היית שיר...
+                    <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">BETA</span>
+                </div>
+            }>
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center">
                     <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
                         <Music className="w-12 h-12 text-green-600" />

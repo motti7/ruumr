@@ -141,10 +141,6 @@ export default function MatchesPage() {
                   match={match.profile}
                   isOnline={match.isOnline}
                   onClickProfile={() => {
-                    // Use router navigation for SPA feel
-                    const url = createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`;
-                    // Extract path for navigate
-                    const path = url.replace(window.location.origin, '');
                     navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
                   }}
                   onClickChat={() => {

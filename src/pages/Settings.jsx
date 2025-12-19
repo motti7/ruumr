@@ -75,10 +75,14 @@ export default function SettingsPage() {
       if (confirm("האם לשלוח מייל תזכורת לכל המשתמשים ללא תמונות?")) {
           try {
               const res = await base44.functions.send_reminders({});
-              alert(`נשלחו ${res.sent_count} מיילים.`);
+              if (res.success) {
+                  alert(`נשלחו ${res.sent_count} מיילים.`);
+              } else {
+                  alert("שגיאה: " + res.error);
+              }
           } catch (e) {
               console.error(e);
-              alert("שגיאה בשליחה");
+              alert("שגיאה בשליחה: " + e.message);
           }
       }
   };
