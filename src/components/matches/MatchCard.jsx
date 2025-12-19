@@ -32,9 +32,7 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
               priority={false}
             />
           </div>
-          {isOnline && (
-            <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm" />
-          )}
+          {/* Online status removed */}
         </div>
         
         <div className="flex-1 min-w-0">

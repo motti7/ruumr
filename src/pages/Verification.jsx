@@ -1,9 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Profile } from '@/entities/Profile';
-import { User } from '@/entities/User';
 import { createPageUrl } from '@/utils';
 import { UploadFile } from "@/integrations/Core";
+import { base44 } from "@/api/base44Client"; // Ensure base44 is imported
 import { ArrowRight, Camera, Check, Shield, Mail, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +31,13 @@ export default function VerificationPage() {
     const [otp, setOtp] = useState(['', '', '', '']);
 
     useEffect(() => {
-        User.me().then(u => setEmail(u.email)).catch(console.error);
+        const fetchUser = async () => {
+            try {
+                const u = await base44.auth.me(); // Safer access
+                setEmail(u.email);
+            } catch (e) { console.error(e); }
+        };
+        fetchUser();
     }, []);
     const [selfie, setSelfie] = useState(null);
     const videoRef = useRef(null);
@@ -98,14 +103,15 @@ export default function VerificationPage() {
         setIsLoading(true);
         try {
             // Upload selfie logic here if needed, for now just update verification status
-            const user = await User.me();
-            const profiles = await Profile.filter({ user_id: user.id });
+            const user = await base44.auth.me();
+            const profiles = await base44.entities.Profile.filter({ user_id: user.id });
             if (profiles.length > 0) {
-                await Profile.update(profiles[0].id, { is_verified: true });
+                await base44.entities.Profile.update(profiles[0].id, { is_verified: true });
             }
             setStep(5);
         } catch (e) {
-            console.error(e);
+            console.error("Verification error:", e);
+            alert("אירעה שגיאה בתהליך האימות. אנא נסה שנית.");
         }
         setIsLoading(false);
     };

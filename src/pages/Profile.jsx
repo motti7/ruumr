@@ -24,8 +24,7 @@ export default function ProfilePage() {
   const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  const videoInputRef = useRef(null);
+  // Removed dedicated video input state
 
   useEffect(() => { loadProfile(); }, []);
 
@@ -111,19 +110,30 @@ export default function ProfilePage() {
     if (!file) return;
     setUploadingIndex(index);
     try {
-        file = await compressImage(file);
-        const { file_url } = await UploadFile({ file });
+        let fileUrl;
+        if (file.type.startsWith('video/')) {
+            if (file.size > 50 * 1024 * 1024) {
+                throw new Error("Video too large (max 50MB)");
+            }
+            const { file_url } = await UploadFile({ file });
+            fileUrl = file_url;
+        } else {
+            file = await compressImage(file);
+            const { file_url } = await UploadFile({ file });
+            fileUrl = file_url;
+        }
+        
         const newPhotos = [...(formData.photos || Array(6).fill(null))];
-        newPhotos[index] = file_url;
+        newPhotos[index] = fileUrl;
         setFormData(prev => ({...prev, photos: newPhotos}));
     } catch (error) { 
         console.error("Upload failed", error);
+        alert(error.message || "העלאת הקובץ נכשלה");
         setFormData(prev => {
             const newPhotos = [...(prev.photos || [])];
             newPhotos[index] = null;
             return {...prev, photos: newPhotos};
         });
-        alert("העלאת התמונה נכשלה");
     }
     setUploadingIndex(null);
   };
@@ -239,7 +249,7 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
       <AnimatePresence>
@@ -306,15 +316,24 @@ export default function ProfilePage() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className={`aspect-square rounded-lg overflow-hidden relative ${isEditing ? 'cursor-pointer border-2 border-gray-200 hover:border-[--theme-orange]' : ''} transition-all`} onClick={() => triggerFileInput(i)}>
                 {(formData.photos?.length > i && formData.photos[i]) ? (
-                  <SmartImage 
-                    src={formData.photos[i]} 
-                    alt={`תמונה ${i+1}`} 
-                    className="w-full h-full" 
-                    priority={true}
-                  />
+                  formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
+                      <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                  ) : (
+                      <SmartImage 
+                        src={formData.photos[i]} 
+                        alt={`מדיה ${i+1}`} 
+                        className="w-full h-full" 
+                        priority={true}
+                      />
+                  )
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    {isEditing && <Plus className="w-6 h-6 text-gray-400"/>}
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 gap-1">
+                    {isEditing && (
+                        <>
+                            <Plus className="w-6 h-6 text-gray-400"/>
+                            {i === 0 && <span className="text-[10px] text-gray-400">תמונות/וידאו</span>}
+                        </>
+                    )}
                   </div>
                 )}
                 {/* Click handler for Lightbox when NOT editing */}
@@ -455,60 +474,12 @@ export default function ProfilePage() {
               <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
             </div>
 
-            <div>
-              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  <Video className="w-4 h-4 text-[--theme-orange]" />
-                  סרטון פרופיל (עד 15 שניות)
-              </label>
-              
-              <div className="bg-white p-4 rounded-2xl border border-gray-200">
-                  {formData.video_url ? (
-                      <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
-                          <video 
-                              src={formData.video_url} 
-                              className="w-full h-full object-cover" 
-                              controls
-                          />
-                          {isEditing && (
-                              <button 
-                                  onClick={() => setFormData(prev => ({ ...prev, video_url: null }))}
-                                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-md hover:bg-red-600"
-                              >
-                                  <X className="w-4 h-4" />
-                              </button>
-                          )}
-                      </div>
-                  ) : (
-                      <div 
-                          onClick={() => isEditing && videoInputRef.current?.click()}
-                          className={`border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 gap-2 transition-colors ${isEditing ? 'cursor-pointer hover:bg-gray-50 hover:border-[--theme-orange]' : 'opacity-50'}`}
-                      >
-                          {isUploadingVideo ? (
-                              <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
-                          ) : (
-                              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                  <Video className="w-6 h-6 text-gray-400" />
-                              </div>
-                          )}
-                          <span className="text-sm font-medium">
-                              {isUploadingVideo ? 'מעלה...' : isEditing ? 'לחץ להעלאת סרטון' : 'אין סרטון'}
-                          </span>
-                      </div>
-                  )}
-                  <input 
-                      type="file" 
-                      ref={videoInputRef} 
-                      className="hidden" 
-                      accept="video/*" 
-                      onChange={handleVideoUpload}
-                  />
-              </div>
-            </div>
+            {/* Video section removed as per request */}
 
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
                   <Music className="w-4 h-4 text-[--theme-orange]" />
-                  השיר שלי
+                  השיר שלי <span className="text-xs text-gray-400 font-normal">(בהקמה)</span>
               </label>
               
               {isEditing && !formData.song_name && (

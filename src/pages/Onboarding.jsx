@@ -632,7 +632,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר...">
+            <Step step={9} currentStep={step} title="אם היית שיר... (בהקמה)">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center">
                     <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
                         <Music className="w-12 h-12 text-green-600" />

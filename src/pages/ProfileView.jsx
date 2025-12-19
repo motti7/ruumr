@@ -130,13 +130,22 @@ export default function ProfileViewPage() {
   const regularPhotos = profile.photos?.filter(p => p) || [];
   const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
   
-  let allMedia = [...regularPhotos];
+  const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
+
+  let allMedia = [...regularPhotos].map(item => {
+      if (typeof item === 'string') {
+          return isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item };
+      }
+      return item;
+  });
+
   if (profile.video_url) {
       allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
   }
-  allMedia = [...allMedia, ...apartmentPhotos];
   
-  const media = allMedia.length > 0 ? allMedia.map(m => typeof m === 'string' ? { type: 'image', url: m } : m) : [{ type: 'image', url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
+  allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
+  
+  const media = allMedia.length > 0 ? allMedia : [{ type: 'image', url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
 
   // Prefetch next and prev photos
   useEffect(() => {

@@ -158,16 +158,27 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
     
-    // Insert video at index 1 if it exists, otherwise just photos
-    let allMedia = [...regularPhotos];
+    // Combine arrays. Handle mixed content in regularPhotos.
+    // We treat strings ending in video extensions as videos.
+    const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
+
+    let allMedia = [...regularPhotos].map(item => {
+        if (typeof item === 'string') {
+            return isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item };
+        }
+        return item; // already object?
+    });
+
+    // If legacy video_url exists (from before we removed the section), insert it (maybe at start or index 1?)
+    // Let's prepend it or insert at 1 to match previous behavior if data exists
     if (profile.video_url) {
         allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
     }
-    // Add apartment photos at the end
-    allMedia = [...allMedia, ...apartmentPhotos];
+
+    // Add apartment photos (always images)
+    allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
     
-    // Normalize string photos to objects for consistent handling
-    const media = allMedia.length > 0 ? allMedia.map(m => typeof m === 'string' ? { type: 'image', url: m } : m) : [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
+    const media = allMedia.length > 0 ? allMedia : [{ type: 'image', url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=800&fit=crop&crop=face" }];
 
     const handleDragEnd = async (event, info) => {
         const offset = info.offset.x;
