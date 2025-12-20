@@ -106,29 +106,13 @@ export default function ProfileViewPage() {
     setIsLoading(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p>לא נמצא פרופיל</p>
-      </div>
-    );
-  }
-
   const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
   const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
   const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
-  // Show user's photos as is, without aggressive deduplication or stock fallbacks that might confuse the user
-  const regularPhotos = profile.photos?.filter(p => p) || [];
-  const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
+  // Calculate media safely (profile might be null)
+  const regularPhotos = profile?.photos?.filter(p => p) || [];
+  const apartmentPhotos = (profile?.current_status === 'has_apartment' && profile?.apartment_photos?.filter(p => p)) ? profile.apartment_photos.filter(p => p) : [];
   
   const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
 
@@ -139,7 +123,7 @@ export default function ProfileViewPage() {
       return item;
   });
 
-  if (profile.video_url) {
+  if (profile?.video_url) {
       allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
   }
   
@@ -181,6 +165,22 @@ export default function ProfileViewPage() {
       }
       return url;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p>לא נמצא פרופיל</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20" dir="rtl">
@@ -230,20 +230,13 @@ export default function ProfileViewPage() {
             ))}
           </div>
           <div className="absolute inset-0 flex z-0">
-            {/* If video, give it some space to be clicked for controls, but preserve edge tapping for navigation if possible, or use custom controls. 
-                For simplicity in MVP, let's keep navigation areas but maybe shrink them or expect user to tap edges. 
-                Video controls overlay usually eats clicks. 
-            */}
             <div className="w-1/6 h-full cursor-w-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length)} />
-            <div className="w-4/6 h-full" /> {/* Dead zone for video interaction if needed */}
+            <div className="w-4/6 h-full" /> 
             <div className="w-1/6 h-full cursor-e-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % media.length)} />
           </div>
         </div>
       </div>
       
-      {/* Lightbox for full size viewing */}
-      {/* (Optional: could add ImageLightbox here too if requested, but user asked for it in Onboarding specifically. Adding it here is a bonus) */}
-
       <div className="p-4 space-y-4">
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
