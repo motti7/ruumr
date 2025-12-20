@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -143,6 +143,8 @@ const ProfileDetail = ({ profile, onClose }) => {
 export default function ProfileCard({ profile, onSwipe, isActive }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const audioRef = useRef(null);
     
     // Motion values for drag animation
     const x = useMotionValue(0);
@@ -154,6 +156,28 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     const nopeOpacity = useTransform(x, [-20, -150], [0, 1]);
     
     const controls = useAnimation();
+
+    useEffect(() => {
+        if (isActive && profile.song_preview_url && !isMuted) {
+            if (audioRef.current) {
+                audioRef.current.volume = 0;
+                audioRef.current.play().catch(e => console.log("Autoplay prevented", e));
+                // Fade in
+                let vol = 0;
+                const interval = setInterval(() => {
+                    if (vol < 1) {
+                        vol += 0.1;
+                        if (audioRef.current) audioRef.current.volume = Math.min(vol, 1);
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 200);
+                return () => clearInterval(interval);
+            }
+        } else if (audioRef.current) {
+            audioRef.current.pause();
+        }
+    }, [isActive, profile.song_preview_url, isMuted]);
 
     const regularPhotos = profile.photos?.filter(p => p) || [];
     const apartmentPhotos = profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p) ? profile.apartment_photos.filter(p => p) : [];
@@ -205,6 +229,9 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
         // If tapped on info button area (approx top left), don't change photo
         if (tapX < 60 && e.clientY - rect.top < 60) return;
+        
+        // If tapped on mute button area (approx top right under the bars)
+        if (tapX > width - 60 && e.clientY - rect.top < 80) return;
 
         if (tapX < width / 2) {
             setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length);
@@ -359,6 +386,9 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     onClick={handleTap}
                 >
                     <div className="absolute inset-0 bg-gray-100">
+                        {profile.song_preview_url && (
+                            <audio ref={audioRef} src={profile.song_preview_url} loop />
+                        )}
                         {media.length > 0 ? (
                             media[currentPhotoIndex].type === 'video' ? (
                                 <video
@@ -410,6 +440,28 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                     >
                         <Info className="w-5 h-5 text-[--theme-orange]" />
                     </button>
+
+                    {profile.song_preview_url && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMuted(!isMuted);
+                            }}
+                            className="absolute top-14 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-full shadow-lg z-20 hover:bg-black/70 transition-colors"
+                        >
+                            {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-green-400" />}
+                        </button>
+                    )}
+                    
+                    {profile.song_name && (
+                         <div className="absolute top-14 left-4 flex items-center gap-2 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full z-20 pointer-events-none max-w-[150px]">
+                            <Music className="w-3 h-3 text-green-400 animate-pulse" />
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="text-[10px] font-bold text-white truncate leading-tight">{profile.song_name}</span>
+                                <span className="text-[9px] text-white/80 truncate leading-tight">{profile.song_artist}</span>
+                            </div>
+                        </div>
+                    )}
 
                     {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
                          // Fallback content when no media
