@@ -141,7 +141,11 @@ export default function MatchesPage() {
                   match={match.profile}
                   isOnline={match.isOnline}
                   onClickProfile={() => {
-                    navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
+                    if (match.profile && match.profile.user_id) {
+                        navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
+                    } else {
+                        console.error("Missing profile ID", match);
+                    }
                   }}
                   onClickChat={() => {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);

@@ -25,13 +25,14 @@ export default function VerificationPage() {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const [otp, setOtp] = useState(['', '', '', '']);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const u = await base44.auth.me(); // Safer access
+                const u = await base44.auth.me(); 
                 setEmail(u.email);
             } catch (e) { console.error(e); }
         };
@@ -146,8 +147,8 @@ export default function VerificationPage() {
                             <div className="flex items-center gap-4">
                                 <div className="bg-blue-50 p-3 rounded-2xl"><Mail className="w-6 h-6 text-blue-500"/></div>
                                 <div className="text-right flex-1">
-                                    <h4 className="font-bold text-gray-900">אימות אימייל</h4>
-                                    <p className="text-sm text-gray-500">קוד קצר שנשלח אלייך</p>
+                                    <h4 className="font-bold text-gray-900">אימות SMS</h4>
+                                    <p className="text-sm text-gray-500">קוד קצר שנשלח לנייד</p>
                                 </div>
                                 <div className="w-6 h-6 rounded-full border-2 border-gray-200"></div>
                             </div>
@@ -174,25 +175,43 @@ export default function VerificationPage() {
                 return (
                     <div className="space-y-6">
                         <div className="text-center">
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">אימות אימייל</h2>
-                            <p className="text-gray-500">נשלח קוד אימות לכתובת איתה נרשמת</p>
+                            <h2 className="text-2xl font-black text-gray-900 mb-2">אימות SMS</h2>
+                            <p className="text-gray-500">הזן את מספר הטלפון שלך</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                            <span className="font-bold text-lg">{email}</span>
-                        </div>
+                        <Input 
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="050-0000000"
+                            className="text-center text-xl h-14"
+                            type="tel"
+                        />
                         <Button 
                             onClick={async () => {
+                                if (phone.length < 9) {
+                                    alert("מספר לא תקין");
+                                    return;
+                                }
                                 setIsLoading(true);
-                                const code = Math.floor(1000 + Math.random() * 9000).toString();
-                                setGeneratedCode(code);
-                                await sendVerificationEmail(email, code);
-                                setIsLoading(false);
-                                setStep(3);
+                                try {
+                                    // Generate Code
+                                    const code = Math.floor(1000 + Math.random() * 9000).toString();
+                                    setGeneratedCode(code);
+                                    
+                                    // Call Backend Function for SMS
+                                    await base44.functions.send_otp_sms({ phone, code });
+                                    
+                                    setIsLoading(false);
+                                    setStep(3);
+                                } catch(e) {
+                                    console.error(e);
+                                    alert("שגיאה בשליחת SMS: " + e.message);
+                                    setIsLoading(false);
+                                }
                             }} 
-                            disabled={!email || isLoading}
+                            disabled={!phone || isLoading}
                             className="w-full h-12 rounded-full gradient-orange text-white font-bold text-lg shadow-lg"
                         >
-                            {isLoading ? <Loader2 className="animate-spin"/> : 'שלח קוד לאימייל'}
+                            {isLoading ? <Loader2 className="animate-spin"/> : 'שלח קוד ב-SMS'}
                         </Button>
                     </div>
                 );
@@ -201,7 +220,7 @@ export default function VerificationPage() {
                     <div className="space-y-6">
                         <div className="text-center">
                             <h2 className="text-2xl font-black text-gray-900 mb-2">הזן את הקוד</h2>
-                            <p className="text-gray-500">שלחנו קוד ל-{email}</p>
+                            <p className="text-gray-500">שלחנו קוד ל-{phone}</p>
                         </div>
                         <div className="flex justify-center gap-4" dir="ltr">
                             {otp.map((digit, i) => (

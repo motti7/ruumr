@@ -181,9 +181,11 @@ export default function Layout({ children, currentPageName }) {
                     {shouldShowNav && (
                         <header className="bg-white shrink-0 z-40 border-b border-gray-200">
                             <div className="px-4 h-16 flex items-center justify-between">
-                                <Link to={createPageUrl("Settings")}>
-                                    <Settings className="w-6 h-6 text-gray-400"/>
-                                </Link>
+                                <div className="flex gap-2">
+                                    <Link to={createPageUrl("Settings")}>
+                                        <Settings className="w-6 h-6 text-gray-400"/>
+                                    </Link>
+                                </div>
                                 <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                                      <h1 className="text-3xl logo-font">Roomi</h1>
                                 </Link>

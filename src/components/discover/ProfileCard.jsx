@@ -382,12 +382,10 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 </div>
                             )
                         ) : (
-                            // Empty State
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-200">
-                                <div className="bg-white p-4 rounded-full mb-4 shadow-sm opacity-50">
-                                    <div className="w-12 h-12 rounded-full border-4 border-gray-300"></div>
-                                </div>
-                                <p className="text-gray-400 font-bold">אין תמונה</p>
+                            // Empty State - White pages with just overlay (modified per request)
+                            <div className="w-full h-full bg-white relative">
+                                {/* Two "pages" effect could be subtle borders or shadow, but user asked for "white pages like that" without circle */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white via-white to-gray-50 opacity-50"></div>
                             </div>
                         )}
                     </div>
@@ -407,9 +405,10 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-4 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95"
+                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-5 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
+                        aria-label="View Profile Info"
                     >
-                        <Info className="w-6 h-6 text-[--theme-orange]" />
+                        <Info className="w-7 h-7 text-[--theme-orange]" />
                     </button>
 
                     {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
