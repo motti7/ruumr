@@ -17,6 +17,7 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -78,7 +79,6 @@ export default function AdminUsersPage() {
         if (!msg) return;
         
         try {
-            // Attempt to send email
             await base44.integrations.Core.SendEmail({
                 to: userToMsg.email,
                 subject: "הודעה מצוות Roomi",
@@ -87,6 +87,51 @@ export default function AdminUsersPage() {
             alert("הודעה נשלחה בהצלחה");
         } catch(e) {
             alert("שגיאה בשליחה");
+        }
+    };
+
+    const handleBulkMessage = async () => {
+        if (selectedUsers.length === 0) return;
+        const msg = prompt(`הכנס הודעה לשליחה ל-${selectedUsers.length} משתמשים:`);
+        if (!msg) return;
+
+        setLoading(true);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const userId of selectedUsers) {
+            const user = users.find(u => u.id === userId);
+            if (user && user.email) {
+                try {
+                     await base44.integrations.Core.SendEmail({
+                        to: user.email,
+                        subject: "הודעה מצוות Roomi",
+                        body: msg
+                    });
+                    successCount++;
+                } catch(e) {
+                    failCount++;
+                }
+            }
+        }
+        setLoading(false);
+        alert(`נשלחו ${successCount} הודעות בהצלחה. ${failCount} נכשלו.`);
+        setSelectedUsers([]);
+    };
+
+    const toggleSelectUser = (userId) => {
+        if (selectedUsers.includes(userId)) {
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        } else {
+            setSelectedUsers([...selectedUsers, userId]);
+        }
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedUsers.length === filteredUsers.length) {
+            setSelectedUsers([]);
+        } else {
+            setSelectedUsers(filteredUsers.map(u => u.id));
         }
     };
 
@@ -103,7 +148,15 @@ export default function AdminUsersPage() {
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-black text-gray-900">ניהול משתמשים</h1>
-                    <Button onClick={loadData} variant="outline"><Loader2 className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} /> רענן</Button>
+                    <div className="flex gap-2">
+                        {selectedUsers.length > 0 && (
+                            <Button onClick={handleBulkMessage} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
+                                <MessageSquare className="w-4 h-4 ml-2" />
+                                שלח הודעה ({selectedUsers.length})
+                            </Button>
+                        )}
+                        <Button onClick={loadData} variant="outline"><Loader2 className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} /> רענן</Button>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -123,6 +176,14 @@ export default function AdminUsersPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead className="text-right w-[50px]">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0} 
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4"
+                                        />
+                                    </TableHead>
                                     <TableHead className="text-right">שם</TableHead>
                                     <TableHead className="text-right">אימייל</TableHead>
                                     <TableHead className="text-right">סטטוס פרופיל</TableHead>
@@ -141,6 +202,14 @@ export default function AdminUsersPage() {
                                     const profile = profiles[user.id];
                                     return (
                                         <TableRow key={user.id}>
+                                            <TableCell>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={selectedUsers.includes(user.id)} 
+                                                    onChange={() => toggleSelectUser(user.id)}
+                                                    className="w-4 h-4"
+                                                />
+                                            </TableCell>
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-3">
                                                     {profile?.photos?.[0] && (

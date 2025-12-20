@@ -405,10 +405,10 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-5 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
+                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
                         aria-label="View Profile Info"
                     >
-                        <Info className="w-7 h-7 text-[--theme-orange]" />
+                        <Info className="w-5 h-5 text-[--theme-orange]" />
                     </button>
 
                     {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
