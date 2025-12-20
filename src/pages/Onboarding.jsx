@@ -80,6 +80,7 @@ export default function OnboardingPage() {
   const [uploadingApartmentPhotos, setUploadingApartmentPhotos] = useState(new Set());
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -292,27 +293,35 @@ export default function OnboardingPage() {
   const searchSong = async () => {
       if (!spotifySearch.trim()) return;
       setIsSearchingSong(true);
+      setSearchResults([]);
       try {
-          // Use Backend Function!
           const res = await base44.functions.searchSong({ query: spotifySearch });
           
-          if (res?.spotify_id) {
-              setFormData(prev => ({
-                  ...prev,
-                  spotify_track_id: res.spotify_id,
-                  song_preview_url: res.preview_url,
-                  song_name: res.name,
-                  song_artist: res.artist,
-                  song_image: res.image_url
-              }));
+          if (res?.tracks) {
+              setSearchResults(res.tracks);
+          } else if (res?.error) {
+              alert("שגיאה: " + res.error);
           } else {
-              alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
+              alert("לא נמצאו שירים");
           }
       } catch (e) {
           console.error(e);
           alert("שגיאה בחיפוש השיר (וודא שיש לך אינטרנט או נסה שנית)");
       }
       setIsSearchingSong(false);
+  };
+  
+  const selectSong = (track) => {
+       setFormData(prev => ({
+          ...prev,
+          spotify_track_id: track.spotify_id,
+          song_preview_url: track.preview_url,
+          song_name: track.name,
+          song_artist: track.artist,
+          song_image: track.image_url
+      }));
+      setSearchResults([]); // Clear search after selection
+      setSpotifySearch("");
   };
   
   const triggerFileInput = (index, isApartment = false) => {
@@ -635,16 +644,16 @@ export default function OnboardingPage() {
             <Step step={9} currentStep={step} title={
                 <div className="flex items-center justify-center gap-2">
                     אם היית שיר...
-                    <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">BETA</span>
+                    <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">New</span>
                 </div>
             }>
-                <div className="flex flex-col items-center justify-center h-full space-y-6 text-center">
+                <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
                         <Music className="w-12 h-12 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-black text-gray-900">איזה שיר היית?</h2>
+                    <h2 className="text-2xl font-black text-gray-900">חבר את Spotify</h2>
                     <p className="text-gray-500 max-w-xs">
-                        מוזיקה מחברת בין אנשים. בחר/י שיר שמתאר אותך או את הווייב שלך.
+                        חפש את השיר שמתאר אותך הכי טוב.
                     </p>
 
                     <div className="w-full max-w-sm space-y-4">
@@ -652,7 +661,7 @@ export default function OnboardingPage() {
                             <Input 
                                 value={spotifySearch} 
                                 onChange={(e) => setSpotifySearch(e.target.value)} 
-                                placeholder="חפש שיר או אמן..." 
+                                placeholder="חפש שיר..." 
                                 className="h-14 text-lg pr-12 rounded-full border-2 border-gray-200 focus:border-green-500 focus:ring-green-500"
                                 onKeyDown={(e) => e.key === 'Enter' && searchSong()}
                             />
@@ -666,7 +675,27 @@ export default function OnboardingPage() {
                             </Button>
                         </div>
 
-                        {formData.song_name ? (
+                        {/* Search Results List */}
+                        {searchResults.length > 0 && !formData.song_name && (
+                            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto">
+                                {searchResults.map((track) => (
+                                    <div 
+                                        key={track.spotify_id}
+                                        onClick={() => selectSong(track)}
+                                        className="p-3 border-b border-gray-50 flex items-center gap-3 hover:bg-green-50 cursor-pointer text-right transition-colors"
+                                    >
+                                        <img src={track.image_url} className="w-10 h-10 rounded-md object-cover" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold text-gray-900 truncate">{track.name}</div>
+                                            <div className="text-xs text-gray-500 truncate">{track.artist}</div>
+                                        </div>
+                                        <Plus className="w-5 h-5 text-green-500" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {formData.song_name && (
                             <motion.div 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -685,33 +714,10 @@ export default function OnboardingPage() {
                                     <X className="w-4 h-4" />
                                 </button>
                             </motion.div>
-                        ) : formData.spotify_track_id && (
-                             <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white p-2 rounded-2xl shadow-lg border border-green-100 relative"
-                            >
-                                <iframe 
-                                    src={`https://open.spotify.com/embed/track/${formData.spotify_track_id}?utm_source=generator&theme=0`} 
-                                    width="100%" 
-                                    height="152" 
-                                    frameBorder="0" 
-                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                                    loading="lazy"
-                                    className="rounded-xl"
-                                ></iframe>
-                                <button 
-                                    onClick={() => setFormField('spotify_track_id', '')}
-                                    className="absolute -top-2 -left-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </motion.div>
                         )}
                         
-                        {!formData.spotify_track_id && !formData.song_name && (
+                        {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
                             <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-50">
-                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Arctic Monkeys</span>
                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">טונה</span>
                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Full Trunk</span>
                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Omer Adam</span>

@@ -1,10 +1,22 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, CheckCircle2, ChevronDown, Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, Monitor } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
+  const [isMobile, setIsMobile] = useState(false);
+  const [showDesktopMessage, setShowDesktopMessage] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
@@ -12,8 +24,12 @@ export default function LandingPage() {
     }
   };
 
-  const handleLogin = () => {
-    base44.auth.redirectToLogin();
+  const handleAction = () => {
+    if (isMobile) {
+      base44.auth.redirectToLogin();
+    } else {
+      setShowDesktopMessage(true);
+    }
   };
 
   const fadeInUp = {
@@ -22,11 +38,43 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900" dir="rtl">
+    <div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden" dir="rtl">
       
+      {/* Desktop Message Modal */}
+      <AnimatePresence>
+        {showDesktopMessage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowDesktopMessage(false)}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Smartphone className="w-8 h-8 text-[--theme-orange]" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Roomi מותאמת לנייד!</h3>
+              <p className="text-gray-500 mb-6 leading-relaxed">
+                כדי ליהנות מהחוויה המלאה, אנחנו ממליצים לפתוח את האפליקציה מהטלפון הנייד.
+              </p>
+              
+              <div className="bg-gray-100 p-4 rounded-xl mb-6 inline-block">
+                 <QrCode className="w-32 h-32 text-gray-800" />
+              </div>
+              <p className="text-sm font-bold text-gray-400 mb-6">סרוק כדי לפתוח בנייד</p>
+
+              <Button onClick={() => setShowDesktopMessage(false)} className="w-full rounded-full gradient-orange text-white font-bold h-12">
+                הבנתי, תודה
+              </Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
              <h1 className="text-3xl font-black text-[--theme-orange] font-[Pacifico]">Roomi</h1>
           </div>
@@ -35,37 +83,37 @@ export default function LandingPage() {
             <button onClick={() => scrollToSection('how-it-works')} className="hover:text-[--theme-orange] transition-colors">איך זה עובד</button>
             <button onClick={() => scrollToSection('why-roomi')} className="hover:text-[--theme-orange] transition-colors">למה רומי?</button>
           </nav>
-          <Button onClick={handleLogin} className="rounded-full gradient-orange text-white font-bold px-6 shadow-lg hover:shadow-orange-200 hover:scale-105 transition-all">
-            כניסה / הרשמה
+          <Button onClick={handleAction} className="rounded-full gradient-orange text-white font-bold px-6 shadow-lg hover:shadow-orange-200 hover:scale-105 transition-all">
+            {isMobile ? "כניסה / הרשמה" : "הורד לנייד"}
           </Button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.h1 
               initial="hidden" animate="visible" variants={fadeInUp}
-              className="text-5xl md:text-7xl font-black text-gray-900 leading-tight mb-6"
+              className="text-4xl md:text-7xl font-black text-gray-900 leading-tight mb-6"
             >
               למצוא שותפים <span className="text-[--theme-orange]">בכיף.</span>
             </motion.h1>
             <motion.p 
               initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.1 }}
-              className="text-xl md:text-2xl text-gray-500 mb-10 leading-relaxed"
+              className="text-lg md:text-2xl text-gray-500 mb-8 md:mb-10 leading-relaxed px-4"
             >
               האפליקציה שפותחה על ידי סטודנטים בשביל סטודנטים. 
               בלי בלאגן, בלי בזבוז זמן, ועם התאמה מדויקת לוייב שלכם.
             </motion.p>
             <motion.div 
               initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.2 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center px-4"
             >
-              <Button onClick={handleLogin} className="h-14 px-8 rounded-full gradient-orange text-white text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
-                בואו נתחיל <ArrowLeft className="mr-2 w-5 h-5" />
+              <Button onClick={handleAction} className="h-14 px-8 rounded-full gradient-orange text-white text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all w-full sm:w-auto">
+                {isMobile ? "בואו נתחיל" : "פתח בנייד"} <ArrowLeft className="mr-2 w-5 h-5" />
               </Button>
-              <Button onClick={() => scrollToSection('how-it-works')} variant="outline" className="h-14 px-8 rounded-full border-2 text-lg font-bold hover:bg-gray-50">
+              <Button onClick={() => scrollToSection('how-it-works')} variant="outline" className="h-14 px-8 rounded-full border-2 text-lg font-bold hover:bg-gray-50 w-full sm:w-auto">
                 איך זה עובד?
               </Button>
             </motion.div>
@@ -74,24 +122,24 @@ export default function LandingPage() {
         
         {/* Abstract Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-30">
-            <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-50"></div>
-            <div className="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+            <div className="absolute top-[-10%] right-[-5%] w-72 h-72 md:w-96 md:h-96 bg-orange-200 rounded-full blur-3xl opacity-50"></div>
+            <div className="absolute bottom-[10%] left-[-10%] w-80 h-80 md:w-[500px] md:h-[500px] bg-blue-100 rounded-full blur-3xl opacity-50"></div>
         </div>
       </section>
 
       {/* Bento Grid - Why Roomi */}
-      <section id="why-roomi" className="py-24 bg-gray-50">
+      <section id="why-roomi" className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-gray-900 mb-4">למה דווקא רומי?</h2>
-            <p className="text-xl text-gray-500">בנינו את הפלטפורמה שתמיד רצינו שתהיה לנו.</p>
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">למה דווקא רומי?</h2>
+            <p className="text-lg md:text-xl text-gray-500">בנינו את הפלטפורמה שתמיד רצינו שתהיה לנו.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto md:auto-rows-[300px]">
             {/* Feature 1 - Large */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between overflow-hidden relative group"
+              className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between overflow-hidden relative group min-h-[300px]"
             >
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
@@ -108,7 +156,7 @@ export default function LandingPage() {
             {/* Feature 2 */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-gray-900 text-white rounded-3xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden"
+              className="bg-gray-900 text-white rounded-3xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[300px]"
             >
               <div className="relative z-10">
                 <Users className="w-10 h-10 mb-4 text-orange-400" />
@@ -123,7 +171,7 @@ export default function LandingPage() {
             {/* Feature 3 */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between"
+              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[300px]"
             >
               <div>
                 <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
@@ -139,13 +187,13 @@ export default function LandingPage() {
             {/* Feature 4 - Large */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="md:col-span-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 shadow-sm text-white flex flex-col justify-center relative overflow-hidden"
+              className="md:col-span-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 shadow-sm text-white flex flex-col justify-center relative overflow-hidden min-h-[300px]"
             >
               <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                  <div className="flex-1">
                     <h3 className="text-3xl font-black mb-4">טכנולוגיית Web App מתקדמת</h3>
                     <p className="text-orange-50 text-lg mb-6">
-                      בנינו את רומי כאפליקציית ווב (PWA). זה אומר שלא צריך להוריד עדכונים כבדים, היא עובדת מכל מכשיר, ואפשר להתקין אותה בשנייה על מסך הבית.
+                      בנינו את רומי כאפליקציית ווב (PWA). היא עובדת מכל מכשיר, ואפשר להתקין אותה בשנייה על מסך הבית.
                     </p>
                     <div className="flex gap-4">
                         <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
@@ -154,7 +202,7 @@ export default function LandingPage() {
                         </div>
                         <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
                             <Globe className="w-5 h-5" />
-                            <span className="font-bold text-sm">זמין מכל מקום</span>
+                            <span className="font-bold text-sm">ללא הורדה</span>
                         </div>
                     </div>
                  </div>
@@ -167,15 +215,15 @@ export default function LandingPage() {
       </section>
 
       {/* Story Section */}
-      <section id="about" className="py-24 bg-white">
+      <section id="about" className="py-16 md:py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-orange-50 rounded-[3rem] p-10 md:p-16 text-center relative">
+          <div className="bg-orange-50 rounded-[2.5rem] p-8 md:p-16 text-center relative">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-full shadow-lg">
                  <div className="w-16 h-16 bg-[--theme-orange] rounded-full flex items-center justify-center text-white font-bold text-2xl">R</div>
              </div>
              
              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 mt-6">קצת עלינו</h2>
-             <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed">
+             <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-base">
                 <p className="mb-6">
                   היי, אנחנו קבוצה של סטודנטים מהאוניברסיטה. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים. 
                   קבוצות פייסבוק מוצפות, הודעות בוואטסאפ שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
@@ -191,7 +239,7 @@ export default function LandingPage() {
                 </p>
              </div>
              
-             <div className="mt-10 flex justify-center gap-4">
+             <div className="mt-10 flex flex-wrap justify-center gap-2 md:gap-4">
                  <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#סטודנטים</div>
                  <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#תל_אביב</div>
                  <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#טכנולוגיה</div>
@@ -201,7 +249,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it Works Section */}
-      <section id="how-it-works" className="py-24 bg-gray-900 text-white">
+      <section id="how-it-works" className="py-16 md:py-24 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-black mb-12">איך זה עובד?</h2>
           
@@ -217,8 +265,6 @@ export default function LandingPage() {
                      <h3 className="text-xl font-bold">המדריך המלא לשימוש באפליקציה</h3>
                      <p className="text-gray-300 text-sm mt-1">איך נרשמים, איך יוצרים פרופיל, ואיך מתקינים את האפליקציה לנייד.</p>
                  </div>
-                 {/* Suggestion for user to upload video later */}
-                 {/* <video src="..." poster="..." className="w-full h-full object-cover" controls /> */}
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
@@ -227,7 +273,7 @@ export default function LandingPage() {
                      { step: 2, title: "מגדירים העדפות", desc: "ספרו לנו מה אתם מחפשים ומה הוייב שלכם." },
                      { step: 3, title: "מתחילים לסרוק", desc: "סווייפ ימינה למי שאהבתם, וצ'אט ברגע שיש התאמה." }
                  ].map((item) => (
-                     <div key={item.step} className="text-center">
+                     <div key={item.step} className="text-center p-4">
                          <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-[--theme-orange] text-xl border border-gray-700">
                              {item.step}
                          </div>
@@ -243,24 +289,24 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-            <h2 className="text-5xl font-black text-gray-900 mb-8">מוכנים למצוא את השותף המושלם?</h2>
-            <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-8">מוכנים למצוא את השותף המושלם?</h2>
+            <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
                 הצטרפו לאלפי משתמשים שכבר מצאו בית ושותפים לחיים. ההרשמה חינם ולוקחת בדיוק דקה.
             </p>
-            <Button onClick={handleLogin} className="h-16 px-12 rounded-full gradient-orange text-white text-xl font-bold shadow-2xl hover:scale-105 transition-transform">
-                יאללה, תרשמו אותי!
+            <Button onClick={handleAction} className="h-16 px-12 rounded-full gradient-orange text-white text-xl font-bold shadow-2xl hover:scale-105 transition-transform w-full sm:w-auto">
+                {isMobile ? "יאללה, תרשמו אותי!" : "פתח בנייד"}
             </Button>
         </div>
         
         {/* Decorative Circles */}
-        <div className="absolute left-[-10%] bottom-[-50%] w-[600px] h-[600px] bg-orange-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
-        <div className="absolute right-[-10%] top-[-50%] w-[600px] h-[600px] bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute left-[-10%] bottom-[-50%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-orange-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+        <div className="absolute right-[-10%] top-[-50%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
       </section>
 
       {/* Footer */}
       <footer className="bg-gray-50 py-12 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
+            <div className="text-center md:text-right">
                 <h2 className="text-2xl font-black text-[--theme-orange] font-[Pacifico] mb-2">Roomi</h2>
                 <p className="text-gray-400 text-sm">© 2024 Roomi. כל הזכויות שמורות.</p>
             </div>

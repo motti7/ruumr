@@ -1,6 +1,3 @@
-import { fetch } from 'undici'; // Base44 functions environment usually supports fetch, but importing just in case or relying on global. 
-// Assuming global fetch is available in Base44 backend environment (Node 18+).
-
 export default async function(input) {
     const { query } = input;
     if (!query) return { error: "Query is required" };
@@ -9,54 +6,60 @@ export default async function(input) {
     const clientSecret = '9832c946b9b34d2595f2ef1cb00becba';
 
     try {
-        // 1. Get Access Token
+        // 1. Get Access Token (Client Credentials Flow)
+        // Note: We use global fetch which is available in Node 18+ environments
         const authString = btoa(`${clientId}:${clientSecret}`);
-        const tokenParams = new URLSearchParams();
-        tokenParams.append('grant_type', 'client_credentials');
-
+        
         const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
                 'Authorization': `Basic ${authString}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: tokenParams
+            body: new URLSearchParams({ grant_type: 'client_credentials' })
         });
 
         if (!tokenRes.ok) {
-            throw new Error(`Failed to get token: ${tokenRes.statusText}`);
+            const errText = await tokenRes.text();
+            console.error("Spotify Token Error:", errText);
+            throw new Error(`Failed to get token: ${tokenRes.status}`);
         }
 
         const tokenData = await tokenRes.json();
         const accessToken = tokenData.access_token;
 
-        // 2. Search for track
-        const searchRes = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
+        // 2. Search for tracks (Limit 5)
+        const searchRes = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=5`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
 
         if (!searchRes.ok) {
-            throw new Error(`Search failed: ${searchRes.statusText}`);
+            const errText = await searchRes.text();
+            console.error("Spotify Search Error:", errText);
+            throw new Error(`Search failed: ${searchRes.status}`);
         }
 
         const searchData = await searchRes.json();
 
         if (searchData.tracks && searchData.tracks.items.length > 0) {
-            const track = searchData.tracks.items[0];
+            // Return array of tracks
             return {
-                spotify_id: track.id,
-                preview_url: track.preview_url, // Note: Spotify often returns null for preview_url nowadays
-                name: track.name,
-                artist: track.artists.map(a => a.name).join(', '),
-                image_url: track.album.images[0]?.url
+                tracks: searchData.tracks.items.map(track => ({
+                    spotify_id: track.id,
+                    preview_url: track.preview_url,
+                    name: track.name,
+                    artist: track.artists.map(a => a.name).join(', '),
+                    image_url: track.album.images[0]?.url // High res
+                }))
             };
         } else {
-            return { error: "No tracks found" };
+            return { tracks: [] };
         }
 
     } catch (error) {
-        return { error: error.message };
+        console.error("Spotify Integration Error:", error);
+        return { error: error.message || "Unknown error occurred" };
     }
 }
