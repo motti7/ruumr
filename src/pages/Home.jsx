@@ -10,9 +10,20 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirection disabled for testing/verification as requested
-    setIsLoading(false);
-  }, []);
+    const checkUser = async () => {
+      try {
+        const isAuth = await base44.auth.isAuthenticated();
+        if (isAuth) {
+           navigate(createPageUrl("Discover"));
+        } else {
+           setIsLoading(false);
+        }
+      } catch (error) {
+        setIsLoading(false);
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   if (isLoading) {
     return (

@@ -15,6 +15,7 @@ import LikesSent from './pages/LikesSent';
 import Banned from './pages/Banned';
 import AdminUsers from './pages/AdminUsers';
 import LandingPage from './pages/LandingPage';
+import Privacy from './pages/Privacy';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "Banned": Banned,
     "AdminUsers": AdminUsers,
     "LandingPage": LandingPage,
+    "Privacy": Privacy,
 }
 
 export const pagesConfig = {

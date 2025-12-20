@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, Monitor } from 'lucide-react';
+import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, MessageCircle, CheckCircle, Music } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { createPageUrl } from '@/utils';
 
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false);
@@ -26,7 +27,8 @@ export default function LandingPage() {
 
   const handleAction = () => {
     if (isMobile) {
-      base44.auth.redirectToLogin();
+      // Redirect to Login/App
+      base44.auth.redirectToLogin(createPageUrl('Discover'));
     } else {
       setShowDesktopMessage(true);
     }
@@ -60,7 +62,7 @@ export default function LandingPage() {
               </p>
               
               <div className="bg-gray-100 p-4 rounded-xl mb-6 inline-block">
-                 <QrCode className="w-32 h-32 text-gray-800" />
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`} alt="QR" className="w-32 h-32 mix-blend-multiply" />
               </div>
               <p className="text-sm font-bold text-gray-400 mb-6">סרוק כדי לפתוח בנייד</p>
 
@@ -90,25 +92,25 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
+      <section className="relative pt-12 pb-20 md:pt-28 md:pb-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto">
             <motion.h1 
               initial="hidden" animate="visible" variants={fadeInUp}
-              className="text-4xl md:text-7xl font-black text-gray-900 leading-tight mb-6"
+              className="text-4xl md:text-7xl font-black text-gray-900 leading-[1.1] mb-6 tracking-tight"
             >
               למצוא שותפים <span className="text-[--theme-orange]">בכיף.</span>
             </motion.h1>
             <motion.p 
               initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.1 }}
-              className="text-lg md:text-2xl text-gray-500 mb-8 md:mb-10 leading-relaxed px-4"
+              className="text-lg md:text-2xl text-gray-500 mb-8 md:mb-12 leading-relaxed px-4 max-w-2xl mx-auto"
             >
-              האפליקציה שפותחה על ידי סטודנטים בשביל סטודנטים. 
+              האפליקציה שפותחה על ידי צעירים בשביל צעירים. 
               בלי בלאגן, בלי בזבוז זמן, ועם התאמה מדויקת לוייב שלכם.
             </motion.p>
             <motion.div 
               initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.2 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center px-4"
+              className="flex flex-col sm:flex-row gap-4 justify-center px-4 w-full sm:w-auto"
             >
               <Button onClick={handleAction} className="h-14 px-8 rounded-full gradient-orange text-white text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all w-full sm:w-auto">
                 {isMobile ? "בואו נתחיל" : "פתח בנייד"} <ArrowLeft className="mr-2 w-5 h-5" />
@@ -135,40 +137,48 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl text-gray-500">בנינו את הפלטפורמה שתמיד רצינו שתהיה לנו.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto md:auto-rows-[300px]">
-            {/* Feature 1 - Large */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto">
+            {/* Feature 1 - Large - Vibe */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between overflow-hidden relative group min-h-[300px]"
+              className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between overflow-hidden relative group min-h-[320px]"
             >
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
                   <Heart className="w-6 h-6 text-[--theme-orange]" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">התאמה על בסיס וייב וסגנון חיים</h3>
-                <p className="text-gray-500 max-w-md">
-                  אנחנו לא מסתכלים רק על התקציב. האלגוריתם שלנו מחבר ביניכם על בסיס הרגלים, שמירת שבת, כשרות, אהבה לחיות מחמד ורמת הניקיון.
+                <h3 className="text-2xl font-bold mb-3">התאמה על בסיס וייב וסגנון חיים</h3>
+                <p className="text-gray-500 max-w-lg leading-relaxed text-lg">
+                  בלי שאלונים חופרים ובלי אלגוריתמים מסובכים. החיבור ברומי פשוט וטבעי - הוא מבוסס על הוייב שלכם, הטעם המוזיקלי (כן, יש חיבור לספוטיפיי ואפל מיוזיק!), התמונות, הגיל, וכמובן המיקום. פשוט תהיו אתם.
                 </p>
+                
+                <div className="flex flex-wrap gap-2 mt-6">
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">🎵 מוזיקה</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">📸 תמונות</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">✨ וייב</span>
+                </div>
               </div>
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-gradient-to-tr from-orange-50 to-white rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
             </motion.div>
 
-            {/* Feature 2 */}
+            {/* Feature 2 - Young People */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="bg-gray-900 text-white rounded-3xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[300px]"
+              className="bg-gray-900 text-white rounded-3xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[320px]"
             >
               <div className="relative z-10">
-                <Users className="w-10 h-10 mb-4 text-orange-400" />
-                <h3 className="text-2xl font-bold mb-2">צעירים לצעירים</h3>
-                <p className="text-gray-300">
-                  קהילה איכותית של סטודנטים וצעירים שמחפשים בדיוק את מה שאתם מחפשים.
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                   <Users className="w-6 h-6 text-orange-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">צעירים לצעירים</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  קהילה איכותית של חבר'ה צעירים, סטודנטים, חיילים משוחררים וכל מי שבראש טוב, שמחפשים בדיוק את מה שאתם מחפשים.
                 </p>
               </div>
               <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-gray-800 to-gray-900 -z-10"></div>
             </motion.div>
 
-            {/* Feature 3 */}
+            {/* Feature 3 - Fast Interface */}
             <motion.div 
               whileHover={{ y: -5 }}
               className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[300px]"
@@ -177,37 +187,49 @@ export default function LandingPage() {
                 <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
                   <Zap className="w-6 h-6 text-blue-500" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">ממשק מהיר ואינטואיטיבי</h3>
-                <p className="text-gray-500">
-                  בלי רשימות משעממות. סווייפ ימינה, סווייפ שמאלה, צ'אט, וסגרתם דירה.
+                <h3 className="text-2xl font-bold mb-3">ממשק מהיר ואינטואיטיבי</h3>
+                <p className="text-gray-500 leading-relaxed">
+                  בלי רשימות משעממות. סווייפ ימינה, סווייפ שמאלה, צ'אט, וסגרתם דירה. הכל עובד חלק ומהיר.
+                </p>
+              </div>
+            </motion.div>
+            
+            {/* Feature 4 - Music */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[300px]"
+            >
+              <div>
+                <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Music className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">תשמיעו את הקול שלכם</h3>
+                <p className="text-gray-500 leading-relaxed">
+                  הוסיפו שיר לפרופיל שלכם שמתנגן אוטומטית. כי אין כמו מוזיקה טובה כדי לשבור את הקרח ולהבין את הוייב.
                 </p>
               </div>
             </motion.div>
 
-            {/* Feature 4 - Large */}
+            {/* Feature 5 - Large - Web App */}
             <motion.div 
               whileHover={{ y: -5 }}
-              className="md:col-span-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 shadow-sm text-white flex flex-col justify-center relative overflow-hidden min-h-[300px]"
+              className="md:col-span-1 lg:col-span-1 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 shadow-sm text-white flex flex-col justify-center relative overflow-hidden min-h-[300px]"
             >
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                 <div className="flex-1">
-                    <h3 className="text-3xl font-black mb-4">טכנולוגיית Web App מתקדמת</h3>
-                    <p className="text-orange-50 text-lg mb-6">
-                      בנינו את רומי כאפליקציית ווב (PWA). היא עובדת מכל מכשיר, ואפשר להתקין אותה בשנייה על מסך הבית.
+              <div className="relative z-10">
+                    <h3 className="text-2xl font-black mb-4">פשוט וקל</h3>
+                    <p className="text-orange-50 text-lg mb-6 leading-relaxed">
+                       עובד מכל מכשיר, בלי הורדה. פשוט נכנסים ומתחילים לחפש.
                     </p>
-                    <div className="flex gap-4">
-                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                            <Smartphone className="w-5 h-5" />
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm w-fit">
+                            <Smartphone className="w-4 h-4" />
                             <span className="font-bold text-sm">התקנה ב-Tap</span>
                         </div>
-                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                            <Globe className="w-5 h-5" />
+                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm w-fit">
+                            <Globe className="w-4 h-4" />
                             <span className="font-bold text-sm">ללא הורדה</span>
                         </div>
                     </div>
-                 </div>
-                 {/* Mock Phone Element */}
-                 <div className="hidden md:block w-48 h-64 bg-white/10 rounded-2xl border-4 border-white/20 backdrop-blur-md rotate-6"></div>
               </div>
             </motion.div>
           </div>
@@ -223,9 +245,9 @@ export default function LandingPage() {
              </div>
              
              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 mt-6">קצת עלינו</h2>
-             <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-base">
+             <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-lg">
                 <p className="mb-6">
-                  היי, אנחנו קבוצה של סטודנטים מהאוניברסיטה. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים. 
+                  היי, אנחנו קבוצה של חבר'ה צעירים. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים. 
                   קבוצות פייסבוק מוצפות, הודעות בוואטסאפ שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
                 </p>
                 <p className="mb-6">
@@ -240,9 +262,10 @@ export default function LandingPage() {
              </div>
              
              <div className="mt-10 flex flex-wrap justify-center gap-2 md:gap-4">
-                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#סטודנטים</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#צעירים</div>
                  <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#תל_אביב</div>
-                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#טכנולוגיה</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#שותפים</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#וייב</div>
              </div>
           </div>
         </div>
@@ -254,23 +277,24 @@ export default function LandingPage() {
           <h2 className="text-4xl font-black mb-12">איך זה עובד?</h2>
           
           <div className="max-w-4xl mx-auto">
-             {/* Video Placeholder */}
-             <div className="aspect-video bg-gray-800 rounded-3xl overflow-hidden shadow-2xl relative group cursor-pointer border border-gray-700">
-                 <div className="absolute inset-0 flex items-center justify-center">
-                     <div className="w-20 h-20 bg-[--theme-orange] rounded-full flex items-center justify-center pl-1 shadow-xl group-hover:scale-110 transition-transform">
-                         <Play className="w-8 h-8 text-white fill-current" />
-                     </div>
-                 </div>
-                 <div className="absolute bottom-0 w-full p-8 bg-gradient-to-t from-black/80 to-transparent text-right">
-                     <h3 className="text-xl font-bold">המדריך המלא לשימוש באפליקציה</h3>
-                     <p className="text-gray-300 text-sm mt-1">איך נרשמים, איך יוצרים פרופיל, ואיך מתקינים את האפליקציה לנייד.</p>
-                 </div>
+             {/* Video Container */}
+             <div className="aspect-[9/16] md:aspect-video w-full max-w-sm md:max-w-none mx-auto bg-gray-800 rounded-3xl overflow-hidden shadow-2xl relative border border-gray-700">
+                 <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/856KE7mJ_c8?rel=0&modestbranding=1" 
+                    title="Roomi App Demo" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    className="absolute inset-0"
+                 ></iframe>
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
                  {[
-                     { step: 1, title: "נרשמים בקלות", desc: "הרשמה מהירה דרך גוגל ומילוי פרופיל קצר." },
-                     { step: 2, title: "מגדירים העדפות", desc: "ספרו לנו מה אתם מחפשים ומה הוייב שלכם." },
+                     { step: 1, title: "נרשמים בקלות", desc: "הרשמה מהירה ומילוי פרופיל קצר שמתמקד במה שחשוב." },
+                     { step: 2, title: "מגדירים וייב", desc: "בוחרים שיר, מעלים תמונות ומספרים קצת על עצמכם." },
                      { step: 3, title: "מתחילים לסרוק", desc: "סווייפ ימינה למי שאהבתם, וצ'אט ברגע שיש התאמה." }
                  ].map((item) => (
                      <div key={item.step} className="text-center p-4">
@@ -311,9 +335,9 @@ export default function LandingPage() {
                 <p className="text-gray-400 text-sm">© 2024 Roomi. כל הזכויות שמורות.</p>
             </div>
             <div className="flex gap-6 text-sm font-medium text-gray-500">
-                <a href="#" className="hover:text-[--theme-orange]">תנאי שימוש</a>
-                <a href="#" className="hover:text-[--theme-orange]">מדיניות פרטיות</a>
-                <a href="#" className="hover:text-[--theme-orange]">צור קשר</a>
+                <a href={createPageUrl('Terms')} className="hover:text-[--theme-orange]">תנאי שימוש</a>
+                <a href={createPageUrl('Privacy')} className="hover:text-[--theme-orange]">מדיניות פרטיות</a>
+                <a href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" className="hover:text-[--theme-orange]">צור קשר</a>
             </div>
         </div>
       </footer>
