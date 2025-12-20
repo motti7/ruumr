@@ -27,8 +27,8 @@ export default function LandingPage() {
 
   const handleAction = () => {
     if (isMobile) {
-      // Redirect to Login/App
-      base44.auth.redirectToLogin(createPageUrl('Discover'));
+      // Redirect to Onboarding
+      window.location.href = createPageUrl('Onboarding');
     } else {
       setShowDesktopMessage(true);
     }
@@ -62,7 +62,7 @@ export default function LandingPage() {
               </p>
               
               <div className="bg-gray-100 p-4 rounded-xl mb-6 inline-block">
-                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`} alt="QR" className="w-32 h-32 mix-blend-multiply" />
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} alt="QR" className="w-32 h-32 mix-blend-multiply" />
               </div>
               <p className="text-sm font-bold text-gray-400 mb-6">סרוק כדי לפתוח בנייד</p>
 
