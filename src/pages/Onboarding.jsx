@@ -295,12 +295,19 @@ export default function OnboardingPage() {
       setIsSearchingSong(true);
       setSearchResults([]);
       try {
-          const res = await base44.functions.searchSong({ query: spotifySearch });
+          // Using iTunes API for reliable, key-free song search with previews
+          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=20&entity=song`);
+          const data = await response.json();
           
-          if (res?.tracks) {
-              setSearchResults(res.tracks);
-          } else if (res?.error) {
-              alert("שגיאה: " + res.error);
+          if (data.results && data.results.length > 0) {
+              const tracks = data.results.map(item => ({
+                  spotify_id: String(item.trackId), // Mapping iTunes ID to our ID field
+                  name: item.trackName,
+                  artist: item.artistName,
+                  image_url: item.artworkUrl100?.replace('100x100', '300x300'), // Get higher quality image
+                  preview_url: item.previewUrl
+              }));
+              setSearchResults(tracks);
           } else {
               alert("לא נמצאו שירים");
           }
@@ -717,10 +724,8 @@ export default function OnboardingPage() {
                         )}
                         
                         {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
-                            <div className="flex flex-wrap justify-center gap-2 mt-4 opacity-50">
-                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">טונה</span>
-                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Full Trunk</span>
-                                <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">Omer Adam</span>
+                            <div className="text-center mt-4 text-sm text-gray-400">
+                                <p>חפש שיר (לדוגמה: "Tuna", "Full Trunk", "Coldplay")</p>
                             </div>
                         )}
                     </div>

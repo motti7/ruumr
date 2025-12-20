@@ -12,13 +12,18 @@ export default function HomePage() {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const isLoggedIn = await base44.auth.isAuthenticated();
+        // Short timeout to prevent hanging
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(false), 2000));
+        const authPromise = base44.auth.isAuthenticated();
+        
+        const isLoggedIn = await Promise.race([authPromise, timeoutPromise]);
+        
         if (isLoggedIn) {
             navigate(createPageUrl("Discover"));
             return;
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.warn("Auth check failed or timed out, rendering landing page", error);
       }
       setIsLoading(false);
     };
