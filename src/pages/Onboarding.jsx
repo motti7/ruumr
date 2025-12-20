@@ -88,7 +88,8 @@ export default function OnboardingPage() {
         const userData = await User.me();
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
       } catch (e) {
-        navigate(createPageUrl('Home'));
+        // If user is not logged in, redirect to login page then back here
+        base44.auth.redirectToLogin(window.location.href);
       }
     };
     fetchUser();

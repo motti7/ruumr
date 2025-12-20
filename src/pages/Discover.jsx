@@ -157,6 +157,20 @@ export default function DiscoverPage() {
 
       if (result.match) {
           setMatchData({ profile1: userProfile, profile2: swipedProfile });
+          
+          // Send email notification to the current user
+          try {
+              const user = await User.me();
+              if (user.email) {
+                  await base44.integrations.Core.SendEmail({
+                      to: user.email,
+                      subject: `🎉 יש לך התאמה חדשה עם ${swipedProfile.name}!`,
+                      body: `היי ${user.full_name || userProfile.name},\n\nיש לך התאמה חדשה ב-Roomi עם ${swipedProfile.name}!\n\nהיכנס/י לאפליקציה כדי להתחיל לצ'וטט:\n${window.location.origin}${createPageUrl('Chat')}?matchId=${result.match_id || ''}`
+                  });
+              }
+          } catch (emailError) {
+              console.error("Failed to send match email", emailError);
+          }
       }
     } catch (error) { 
         console.error("Error in swipe flow:", error); 
