@@ -216,24 +216,25 @@ export default function ProfilePage() {
       if (!spotifySearch.trim()) return;
       setIsSearchingSong(true);
       try {
-          const res = await base44.functions.searchSong({ query: spotifySearch });
+          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=1&entity=song`);
+          const data = await response.json();
           
-          if (res?.spotify_id) {
+          if (data.results && data.results.length > 0) {
+              const item = data.results[0];
               setFormData(prev => ({
                   ...prev,
-                  spotify_track_id: res.spotify_id,
-                  song_preview_url: res.preview_url,
-                  song_name: res.name,
-                  song_artist: res.artist,
-                  song_image: res.image_url
+                  spotify_track_id: String(item.trackId),
+                  song_preview_url: item.previewUrl,
+                  song_name: item.trackName,
+                  song_artist: item.artistName,
+                  song_image: item.artworkUrl100?.replace('100x100', '300x300')
               }));
               setSpotifySearch("");
           } else {
-              alert("לא נמצא שיר. נסה לחפש שם שיר ואמן.");
+              alert("לא נמצא שיר");
           }
       } catch (e) {
           console.error(e);
-          alert("שגיאה בחיפוש השיר");
       }
       setIsSearchingSong(false);
   };

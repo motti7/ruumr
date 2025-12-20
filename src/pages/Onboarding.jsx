@@ -295,25 +295,21 @@ export default function OnboardingPage() {
       setIsSearchingSong(true);
       setSearchResults([]);
       try {
-          // Using iTunes API for reliable, key-free song search with previews
-          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=20&entity=song`);
+          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=8&entity=song`);
           const data = await response.json();
           
           if (data.results && data.results.length > 0) {
               const tracks = data.results.map(item => ({
-                  spotify_id: String(item.trackId), // Mapping iTunes ID to our ID field
+                  spotify_id: String(item.trackId),
                   name: item.trackName,
                   artist: item.artistName,
-                  image_url: item.artworkUrl100?.replace('100x100', '300x300'), // Get higher quality image
+                  image_url: item.artworkUrl100?.replace('100x100', '300x300'),
                   preview_url: item.previewUrl
               }));
               setSearchResults(tracks);
-          } else {
-              alert("לא נמצאו שירים");
           }
       } catch (e) {
           console.error(e);
-          alert("שגיאה בחיפוש השיר (וודא שיש לך אינטרנט או נסה שנית)");
       }
       setIsSearchingSong(false);
   };
@@ -648,35 +644,30 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title={
-                <div className="flex items-center justify-center gap-2">
-                    אם היית שיר...
-                    <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">New</span>
-                </div>
-            }>
+            <Step step={9} currentStep={step} title="הפסקול שלך">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
-                    <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                        <Music className="w-12 h-12 text-green-600" />
+                    <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-2 shadow-lg animate-pulse">
+                        <Music className="w-12 h-12 text-white" />
                     </div>
-                    <h2 className="text-2xl font-black text-gray-900">חבר את Spotify</h2>
+                    <h2 className="text-2xl font-black text-gray-900">איזה שיר הוא אתה?</h2>
                     <p className="text-gray-500 max-w-xs">
-                        חפש את השיר שמתאר אותך הכי טוב.
+                        בחר שיר שייכנס לאנשים ללב (ולפרופיל).
                     </p>
 
                     <div className="w-full max-w-sm space-y-4">
-                        <div className="relative">
+                        <div className="relative group">
                             <Input 
                                 value={spotifySearch} 
                                 onChange={(e) => setSpotifySearch(e.target.value)} 
-                                placeholder="חפש שיר..." 
-                                className="h-14 text-lg pr-12 rounded-full border-2 border-gray-200 focus:border-green-500 focus:ring-green-500"
+                                placeholder="חפש שיר או אמן..." 
+                                className="h-14 text-lg pr-12 rounded-2xl border-2 border-gray-100 focus:border-[--theme-orange] focus:ring-[--theme-orange] transition-all bg-gray-50 focus:bg-white shadow-sm"
                                 onKeyDown={(e) => e.key === 'Enter' && searchSong()}
                             />
                             <Button 
                                 onClick={searchSong} 
                                 disabled={isSearchingSong || !spotifySearch.trim()} 
                                 size="icon" 
-                                className="absolute top-2 right-2 h-10 w-10 rounded-full bg-green-500 hover:bg-green-600"
+                                className="absolute top-2 right-2 h-10 w-10 rounded-xl gradient-orange hover:brightness-110 shadow-md transition-transform active:scale-95"
                             >
                                 {isSearchingSong ? <Loader2 className="animate-spin w-5 h-5 text-white"/> : <Search className="w-5 h-5 text-white"/>}
                             </Button>
@@ -684,39 +675,56 @@ export default function OnboardingPage() {
 
                         {/* Search Results List */}
                         {searchResults.length > 0 && !formData.song_name && (
-                            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto">
+                            <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto px-1">
                                 {searchResults.map((track) => (
-                                    <div 
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
                                         key={track.spotify_id}
                                         onClick={() => selectSong(track)}
-                                        className="p-3 border-b border-gray-50 flex items-center gap-3 hover:bg-green-50 cursor-pointer text-right transition-colors"
+                                        className="p-3 bg-white rounded-xl border border-gray-100 flex items-center gap-3 hover:border-[--theme-orange] hover:shadow-md cursor-pointer text-right transition-all"
                                     >
-                                        <img src={track.image_url} className="w-10 h-10 rounded-md object-cover" />
+                                        <img src={track.image_url} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
                                         <div className="flex-1 min-w-0">
                                             <div className="font-bold text-gray-900 truncate">{track.name}</div>
                                             <div className="text-xs text-gray-500 truncate">{track.artist}</div>
                                         </div>
-                                        <Plus className="w-5 h-5 text-green-500" />
-                                    </div>
+                                        <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
+                                            <Plus className="w-4 h-4 text-[--theme-orange]" />
+                                        </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         )}
 
                         {formData.song_name && (
                             <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-gray-900 p-4 rounded-2xl shadow-lg border border-gray-800 relative text-white text-right flex items-center gap-4"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-black p-4 rounded-3xl shadow-2xl border border-gray-800 relative text-white text-right flex items-center gap-4 overflow-hidden"
                             >
-                                <img src={formData.song_image} className="w-16 h-16 rounded-lg object-cover" />
-                                <div className="flex-1">
-                                    <div className="font-bold">{formData.song_name}</div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-900/50"></div>
+                                
+                                <div className="relative z-10 w-16 h-16 rounded-full border-2 border-gray-700 overflow-hidden animate-[spin_8s_linear_infinite]">
+                                    <img src={formData.song_image} className="w-full h-full object-cover opacity-80" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-4 h-4 bg-black rounded-full border border-gray-700"></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 relative z-10">
+                                    <div className="font-bold text-lg leading-tight">{formData.song_name}</div>
                                     <div className="text-sm text-gray-400">{formData.song_artist}</div>
+                                    <div className="flex gap-0.5 h-3 items-end mt-2">
+                                        {[1,2,3,4,5].map(i => (
+                                            <div key={i} className="w-1 bg-[--theme-orange] rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}></div>
+                                        ))}
+                                    </div>
                                 </div>
                                 
                                 <button 
                                     onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
-                                    className="absolute -top-2 -left-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                                    className="absolute top-2 left-2 bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-colors z-20"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -724,8 +732,8 @@ export default function OnboardingPage() {
                         )}
                         
                         {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
-                            <div className="text-center mt-4 text-sm text-gray-400">
-                                <p>חפש שיר (לדוגמה: "Tuna", "Full Trunk", "Coldplay")</p>
+                            <div className="text-center mt-8 opacity-50">
+                                <Music className="w-16 h-16 mx-auto mb-2 text-gray-300" />
                             </div>
                         )}
                     </div>
