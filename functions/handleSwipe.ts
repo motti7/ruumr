@@ -1,79 +1,53 @@
-import { base44 } from "@base44/backend-sdk";
+const { base44 } = require('@base44/backend-sdk');
 
-export default async function handleSwipe({ swiper_id, swiped_id, action }) {
-  // 1. Create the swipe record
-  const swipe = await base44.entities.Swipe.create({
-    swiper_id,
-    swiped_id,
-    action
-  });
+module.exports = async function(params) {
+    // params: { swiper_id, swiped_id, action }
+    const { swiper_id, swiped_id, action } = params;
 
-  if (action !== 'like') {
-    return { status: 'recorded', match: false };
-  }
+    if (action !== 'like') {
+        return { match: false };
+    }
 
-  // 2. Fetch users involved
-  const swiperUser = (await base44.entities.User.filter({ id: swiper_id }))[0];
-  const swipedUser = (await base44.entities.User.filter({ id: swiped_id }))[0];
-  
-  if (!swiperUser || !swipedUser) return { status: 'error', message: 'User not found' };
-
-  // 3. Check for Match
-  const otherSwipe = await base44.entities.Swipe.filter({
-    swiper_id: swiped_id,
-    swiped_id: swiper_id,
-    action: 'like'
-  });
-
-  if (otherSwipe.length > 0) {
-    // IT'S A MATCH!
-    await base44.entities.Match.create({
-      user1_id: swiper_id,
-      user2_id: swiped_id
+    // Check if the other person liked me
+    // We look for a swipe where swiper = swiped_id AND swiped = swiper_id AND action = 'like'
+    const otherSwipe = await base44.entities.Swipe.filter({
+        swiper_id: swiped_id,
+        swiped_id: swiper_id,
+        action: 'like'
     });
 
-    // Send Email to BOTH
-    await base44.integrations.Core.SendEmail({
-      to: swiperUser.email,
-      subject: "יש לך התאמה חדשה ב-Roomi! 🎉",
-      body: `היי ${swiperUser.full_name || 'שותף/ה'},
-      
-יש לך התאמה חדשה עם ${swipedUser.full_name || 'משתמש/ת ב-Roomi'}!
-כנס/י לאפליקציה כדי להתחיל לצ'וטט.
+    if (otherSwipe.length > 0) {
+        // IT'S A MATCH!
+        
+        // 1. Create Match Entity
+        await base44.entities.Match.create({
+            user1_id: swiper_id,
+            user2_id: swiped_id,
+            status: 'active'
+        });
 
-בהצלחה,
-צוות Roomi`
-    });
+        // 2. Notify users via SMS (if they have phone numbers)
+        try {
+            const swiperProfile = (await base44.entities.Profile.filter({ user_id: swiper_id }))[0];
+            const swipedProfile = (await base44.entities.Profile.filter({ user_id: swiped_id }))[0];
 
-    await base44.integrations.Core.SendEmail({
-      to: swipedUser.email,
-      subject: "יש לך התאמה חדשה ב-Roomi! 🎉",
-      body: `היי ${swipedUser.full_name || 'שותף/ה'},
-      
-יש לך התאמה חדשה עם ${swiperUser.full_name || 'משתמש/ת ב-Roomi'}!
-כנס/י לאפליקציה כדי להתחיל לצ'וטט.
+            if (swiperProfile?.phone_number) {
+                 // Send SMS to Swiper
+                 console.log(`[SMS Notification] To ${swiperProfile.phone_number}: יש לך התאמה חדשה עם ${swipedProfile?.name || 'מישהו'}!`);
+                 // Example: await sendSMS(swiperProfile.phone_number, "New Match!");
+            }
 
-בהצלחה,
-צוות Roomi`
-    });
+            if (swipedProfile?.phone_number) {
+                 // Send SMS to Swiped
+                 console.log(`[SMS Notification] To ${swipedProfile.phone_number}: יש לך התאמה חדשה עם ${swiperProfile?.name || 'מישהו'}!`);
+            }
+            
+        } catch (e) {
+            console.error("Failed to send match notifications", e);
+        }
 
-    return { status: 'match', match: true };
-  } else {
-    // Just a Like - Send Notification to the swiped person
-    // "User X liked you"
-    
-    // We want to be careful not to spam, but user asked for it.
-    await base44.integrations.Core.SendEmail({
-      to: swipedUser.email,
-      subject: "מישהו עשה לך לייק ב-Roomi! 👍",
-      body: `היי ${swipedUser.full_name || 'שותף/ה'},
-      
-המשתמש/ת ${swiperUser.full_name || 'מ-Roomi'} עשה/תה לך לייק!
-כנס/י לאפליקציה, אולי זו ההתאמה הבאה שלך?
+        return { match: true };
+    }
 
-צוות Roomi`
-    });
-    
-    return { status: 'liked', match: false };
-  }
-}
+    return { match: false };
+};

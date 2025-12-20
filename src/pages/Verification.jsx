@@ -105,7 +105,10 @@ export default function VerificationPage() {
             const user = await base44.auth.me();
             const profiles = await base44.entities.Profile.filter({ user_id: user.id });
             if (profiles.length > 0) {
-                await base44.entities.Profile.update(profiles[0].id, { is_verified: true });
+                await base44.entities.Profile.update(profiles[0].id, { 
+                    is_verified: true,
+                    phone_number: phone // Save phone number to profile
+                });
             }
             setStep(5);
         } catch (e) {
