@@ -71,21 +71,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleAdminEmail = async () => {
-      if (confirm("האם לשלוח מייל תזכורת לכל המשתמשים ללא תמונות?")) {
-          try {
-              const res = await base44.functions.send_reminders({});
-              if (res.success) {
-                  alert(`נשלחו ${res.sent_count} מיילים.`);
-              } else {
-                  alert("שגיאה: " + res.error);
-              }
-          } catch (e) {
-              console.error(e);
-              alert("שגיאה בשליחה: " + e.message);
-          }
-      }
-  };
+
 
   return (
     <div className="p-4 pb-24 bg-gray-50 min-h-screen" dir="rtl">
@@ -124,7 +110,7 @@ export default function SettingsPage() {
                 מחק חשבון
             </Button>
             
-{/* Admin Reminder Button Removed */}
+
             <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-gray-400 text-xs">
                 <Shield className="w-3 h-3 ml-2" />
                 Admin: User Management
