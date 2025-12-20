@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
@@ -143,7 +143,51 @@ const ProfileDetail = ({ profile, onClose }) => {
 export default function ProfileCard({ profile, onSwipe, isActive }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const audioRef = useRef(null);
     
+    useEffect(() => {
+        if (!audioRef.current || !profile.song_preview_url) return;
+        
+        const audio = audioRef.current;
+        
+        if (isActive) {
+            audio.volume = 0;
+            const playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Fade in
+                    let vol = 0;
+                    const interval = setInterval(() => {
+                        if (vol < 0.8) {
+                            vol += 0.05;
+                            audio.volume = Math.min(vol, 0.8);
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 200);
+                    return () => clearInterval(interval);
+                }).catch(error => {
+                    console.log("Audio play failed:", error);
+                });
+            }
+        } else {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+        
+        return () => {
+            audio.pause();
+        };
+    }, [isActive, profile.song_preview_url]);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.muted = isMuted;
+        }
+    }, [isMuted]);
+
     // Motion values for drag animation
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -419,6 +463,30 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                   {profile.age} • {profile.location}
                               </div>
                          </div>
+                    )}
+
+                    {/* Music Player */}
+                    {profile.song_preview_url && profile.song_name && isActive && (
+                        <div className="absolute bottom-32 right-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                             <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
+                                  {profile.song_image ? (
+                                      <img src={profile.song_image} className="w-full h-full object-cover" />
+                                  ) : (
+                                      <div className="w-full h-full bg-gray-800 flex items-center justify-center"><Music className="w-4 h-4 text-white"/></div>
+                                  )}
+                             </div>
+                             <div className="flex flex-col max-w-[120px]">
+                                  <span className="text-white text-xs font-bold truncate">{profile.song_name}</span>
+                                  <span className="text-white/60 text-[10px] truncate">{profile.song_artist}</span>
+                             </div>
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                             >
+                                 {isMuted ? <VolumeX className="w-4 h-4 text-white"/> : <Volume2 className="w-4 h-4 text-[--theme-orange]"/>}
+                             </button>
+                             <audio ref={audioRef} src={profile.song_preview_url} loop className="hidden" />
+                        </div>
                     )}
 
                     {/* Like / Nope Badges */}
