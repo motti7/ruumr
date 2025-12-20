@@ -128,8 +128,10 @@ export default function Layout({ children, currentPageName }) {
         <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta property="og:site_name" content="Roomi" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Roomi - למצוא שותפים בכיף" />
-        <meta property="og:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
+        <title>Roomi - למצוא שותפים בכיף | דירות שותפים בתל אביב והמרכז</title>
+        <meta name="description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין. הצטרפו לקהילת הסטודנטים והצעירים הגדולה בישראל." />
+        <meta property="og:title" content="Roomi - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
+        <meta property="og:description" content="מחפשים שותפים? רומי היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
         <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
@@ -138,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
         <meta name="thumbnail" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
-        <meta name="twitter:description" content="האפליקציה החדשה למציאת שותפים ודירות בישראל" />
+        <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
         <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
