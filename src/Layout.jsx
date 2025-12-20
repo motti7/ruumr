@@ -144,96 +144,32 @@ export default function Layout({ children, currentPageName }) {
         <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
-        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden w-[375px] h-[750px] max-h-[90vh] border-8 border-gray-900 relative shrink-0">
-                <div className="absolute top-0 left-0 right-0 h-6 bg-gray-900 z-50 flex justify-center">
-                    <div className="w-32 h-4 bg-black rounded-b-xl"></div>
+        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
+            {currentPageName === 'Home' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
+                <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
+                    {children}
                 </div>
-                <div className="flex flex-col h-full bg-gray-50 relative">
-                    <style>{`
-                    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-                    :root {
-                        --theme-orange: #FF5722;
-                        --theme-orange-dark: #E64A19;
-                    }
-                    .logo-font {
-                        font-family: 'Pacifico', cursive;
-                        color: var(--theme-orange);
-                        font-weight: 400;
-                    }
-                    .gradient-orange {
-                        background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
-                    }
-                    .components-slider-thumb {
-                        background-color: var(--theme-orange) !important;
-                        border-color: var(--theme-orange) !important;
-                    }
-                    .components-slider-range, .components-progress-indicator {
-                        background-color: var(--theme-orange) !important;
-                    }
-                    .no-scrollbar::-webkit-scrollbar {
-                        display: none;
-                    }
-                    .no-scrollbar {
-                        -ms-overflow-style: none;
-                        scrollbar-width: none;
-                    }
-                    `}</style>
-                    
-                    {shouldShowNav && (
-                        <header className="bg-white shrink-0 z-40 border-b border-gray-200">
-                            <div className="px-4 h-16 flex items-center justify-between">
-                                <div className="flex gap-2">
-                                    <Link to={createPageUrl("Settings")}>
-                                        <Settings className="w-6 h-6 text-gray-400"/>
-                                    </Link>
-                                </div>
-                                <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
-                                     <h1 className="text-3xl logo-font">Roomi</h1>
-                                </Link>
-                                <Link to={createPageUrl("Profile")}>
-                                    <User className="w-6 h-6 text-gray-400"/>
-                                </Link>
-                            </div>
-                        </header>
-                    )}
-
-                    <div className="flex-1 overflow-y-auto no-scrollbar relative">
-                        <main className="bg-gray-50 pb-4">
-                            {children}
-                        </main>
+            ) : (
+                <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-xl flex flex-col items-center">
+                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+                        <Smartphone className="w-10 h-10 text-[--theme-orange]" />
                     </div>
-
-                    {shouldShowNav && (
-                        <nav className="shrink-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-40">
-                            <div className="flex items-center justify-around py-2">
-                            {navigationItems.map((item) => {
-                                const isActive = location.pathname === item.path;
-                                const Icon = item.icon;
-                                return (
-                                <Link key={item.name} to={item.path} className="flex-1">
-                                    <motion.div
-                                    whileTap={{ scale: 0.9 }}
-                                    className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 ${
-                                        isActive ? 'text-[--theme-orange]' : 'text-gray-400'
-                                    } relative`}
-                                    >
-                                    <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
-                                    {item.badgeCount > 0 && (
-                                        <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
-                                            {item.badgeCount}
-                                        </span>
-                                    )}
-                                    </motion.div>
-                                </Link>
-                                );
-                            })}
-                            </div>
-                        </nav>
-                    )}
+                    <h1 className="text-2xl font-black text-gray-800 mb-2">האפליקציה זמינה בנייד בלבד</h1>
+                    <p className="text-gray-500 mb-8 text-lg">
+                        Roomi היא חוויה שנועדה למובייל.
+                        <br/>
+                        אנא פתח/י את האפליקציה מהטלפון שלך.
+                    </p>
+                    <div className="bg-gray-100 p-4 rounded-xl border border-gray-200">
+                        <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`} 
+                            alt="Scan QR Code" 
+                            className="w-32 h-32 mix-blend-multiply"
+                        />
+                    </div>
+                    <p className="text-sm text-gray-400 mt-4">סרוק/י כדי לפתוח בנייד</p>
                 </div>
-            </div>
-            <p className="mt-6 text-gray-400 font-medium">תצוגה מקדימה במצב מובייל</p>
+            )}
         </div>
 
         <div className="sm:hidden">
