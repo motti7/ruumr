@@ -14,6 +14,7 @@ import LikesYou from './pages/LikesYou';
 import LikesSent from './pages/LikesSent';
 import Banned from './pages/Banned';
 import AdminUsers from './pages/AdminUsers';
+import LandingPage from './pages/LandingPage';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "LikesSent": LikesSent,
     "Banned": Banned,
     "AdminUsers": AdminUsers,
+    "LandingPage": LandingPage,
 }
 
 export const pagesConfig = {

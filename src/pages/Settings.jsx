@@ -124,10 +124,7 @@ export default function SettingsPage() {
                 מחק חשבון
             </Button>
             
-             <Button onClick={handleAdminEmail} variant="outline" className="w-full mt-8 border-dashed border-gray-300 text-gray-400 text-xs">
-                <Mail className="w-3 h-3 ml-2" />
-                Admin: Send Photo Reminders
-            </Button>
+{/* Admin Reminder Button Removed */}
             <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-gray-400 text-xs">
                 <Shield className="w-3 h-3 ml-2" />
                 Admin: User Management
