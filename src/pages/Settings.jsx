@@ -128,6 +128,10 @@ export default function SettingsPage() {
                 <Mail className="w-3 h-3 ml-2" />
                 Admin: Send Photo Reminders
             </Button>
+            <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-gray-400 text-xs">
+                <Shield className="w-3 h-3 ml-2" />
+                Admin: User Management
+            </Button>
         </div>
       </div>
     </div>
