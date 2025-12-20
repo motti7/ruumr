@@ -152,7 +152,8 @@ export default function DiscoverPage() {
       const result = await base44.functions.handleSwipe({
           swiper_id: userProfile.user_id, 
           swiped_id: swipedProfile.user_id, 
-          action
+          action,
+          origin: window.location.origin
       });
 
       if (result.match) {
