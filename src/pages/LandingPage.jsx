@@ -114,7 +114,7 @@ export default function LandingPage() {
               className="text-5xl md:text-7xl font-black text-gray-900 mb-8 leading-[1.1] tracking-tight"
             >
               למצוא שותפים<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--theme-orange] to-orange-500">בדיוק בווייב שלך</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--theme-orange] to-orange-500">שפשוט כיף איתם</span>
             </motion.h1>
 
             <motion.p 

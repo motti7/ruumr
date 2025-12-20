@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook, Linkedin, Twitter } from 'lucide-react';
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -85,15 +85,8 @@ export default function OnboardingPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Check if user is logged in
         const userData = await User.me();
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
-
-        // Check if user already has a profile - if so, redirect to Discover
-        const userProfiles = await Profile.filter({ user_id: userData.id });
-        if (userProfiles.length > 0) {
-            navigate(createPageUrl('Discover'));
-        }
       } catch (e) {
         // If user is not logged in, redirect to login page then back here
         base44.auth.redirectToLogin(window.location.href);
@@ -632,24 +625,18 @@ export default function OnboardingPage() {
                         <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <Instagram className="w-4 h-4 text-[--theme-orange]"/>
                             קישור לרשת חברתית
                         </label>
-                        <div className="flex gap-4 justify-center text-gray-400 mb-2">
-                             <Instagram className="w-6 h-6 text-[#E1306C]" />
-                             <Facebook className="w-6 h-6 text-[#1877F2]" />
-                             <Twitter className="w-6 h-6 text-black" />
-                             <Linkedin className="w-6 h-6 text-[#0A66C2]" />
-                        </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק כאן קישור לפרופיל" 
-                            className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-center"
+                            placeholder="" 
+                            className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
-                        <p className="text-xs text-center text-gray-400">אינסטגרם, פייסבוק, לינקדאין או כל רשת אחרת</p>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
@@ -665,7 +652,7 @@ export default function OnboardingPage() {
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">איזה שיר הוא אתה?</h2>
                     <p className="text-gray-500 max-w-xs">
-                        מוזיקה טובה היא הדרך הכי טובה להתחבר.
+                        בחר שיר שייכנס לאנשים ללב (ולפרופיל).
                     </p>
 
                     <div className="w-full max-w-sm space-y-4">
