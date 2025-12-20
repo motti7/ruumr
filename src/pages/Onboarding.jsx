@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook, Linkedin, Twitter } from 'lucide-react';
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -88,8 +88,7 @@ export default function OnboardingPage() {
         const userData = await User.me();
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
       } catch (e) {
-        // If user is not logged in, redirect to login page then back here
-        base44.auth.redirectToLogin(window.location.href);
+        navigate(createPageUrl('Home'));
       }
     };
     fetchUser();
@@ -626,25 +625,14 @@ export default function OnboardingPage() {
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 mb-2 block">קישור לרשת חברתית</label>
-                        <div className="flex gap-4 justify-center mb-3">
-                            <div className="p-2 bg-pink-50 rounded-full border border-pink-100">
-                                <Instagram className="w-6 h-6 text-pink-600"/>
-                            </div>
-                            <div className="p-2 bg-blue-50 rounded-full border border-blue-100">
-                                <Facebook className="w-6 h-6 text-blue-600"/>
-                            </div>
-                            <div className="p-2 bg-sky-50 rounded-full border border-sky-100">
-                                <Twitter className="w-6 h-6 text-sky-500"/>
-                            </div>
-                            <div className="p-2 bg-indigo-50 rounded-full border border-indigo-100">
-                                <Linkedin className="w-6 h-6 text-indigo-600"/>
-                            </div>
-                        </div>
+                        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <Instagram className="w-4 h-4 text-[--theme-orange]"/>
+                            קישור לרשת חברתית
+                        </label>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק קישור לפרופיל..." 
+                            placeholder="" 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -662,6 +650,9 @@ export default function OnboardingPage() {
                         <Music className="w-12 h-12 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">איזה שיר הוא אתה?</h2>
+                    <p className="text-gray-500 max-w-xs">
+                        בחר שיר שייכנס לאנשים ללב (ולפרופיל).
+                    </p>
 
                     <div className="w-full max-w-sm space-y-4">
                         <div className="relative group">
