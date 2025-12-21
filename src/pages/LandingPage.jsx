@@ -189,14 +189,23 @@ export default function LandingPage() {
                </div>
                
                <div className="mt-auto relative z-10 flex -space-x-4 space-x-reverse pt-8">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-gray-900 bg-gray-700 flex items-center justify-center text-xs font-bold">
-                       {/* Placeholder avatars */}
-                       <span className="opacity-50">User</span>
+                  {[
+                    { name: "דניאל", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=faces" },
+                    { name: "אור", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces" },
+                    { name: "טל", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces" },
+                    { name: "מוטי", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=faces" },
+                    { name: "עמית", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=faces" },
+                    { name: "עדן", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=faces" }
+                  ].map((user, i) => (
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-gray-900 bg-gray-800 overflow-hidden relative group cursor-pointer">
+                       <img src={user.img} alt={user.name} className="w-full h-full object-cover" />
+                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[8px] text-white font-bold">
+                          {user.name}
+                       </div>
                     </div>
                   ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-gray-900 bg-[--theme-orange] flex items-center justify-center font-bold text-sm">
-                    +2K
+                  <div className="w-12 h-12 rounded-full border-4 border-gray-900 bg-gray-800 flex items-center justify-center font-bold text-sm text-white">
+                    <span className="text-xl">✨</span>
                   </div>
                </div>
             </motion.div>
@@ -365,8 +374,6 @@ export default function LandingPage() {
                 <p className="text-gray-400 text-sm">© 2024 Roomi. כל הזכויות שמורות.</p>
             </div>
             <div className="flex gap-6 text-sm font-medium text-gray-500">
-                <a href={createPageUrl('Terms')} className="hover:text-[--theme-orange]">תנאי שימוש</a>
-                <a href={createPageUrl('Privacy')} className="hover:text-[--theme-orange]">מדיניות פרטיות</a>
                 <a href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" className="hover:text-[--theme-orange]">צור קשר</a>
             </div>
         </div>
