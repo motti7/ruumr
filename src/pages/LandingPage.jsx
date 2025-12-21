@@ -1,256 +1,344 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { motion } from "framer-motion";
-import { Smartphone, Music, Heart, MapPin, Camera, Coffee, Sparkles, Zap, Users, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, MessageCircle, CheckCircle, Music } from 'lucide-react';
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { createPageUrl } from '@/utils';
 
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false);
-  const [showDesktopModal, setShowDesktopModal] = useState(false);
+  const [showDesktopMessage, setShowDesktopMessage] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
-    if (element) element.scrollIntoView({ behavior: "smooth" });
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
-  const handleStart = () => {
+  const handleAction = () => {
     if (isMobile) {
-        // On mobile: Redirect to Base44 login, then to PostLogin router page
-        const { base44 } = require('@/api/base44Client');
-        base44.auth.redirectToLogin(createPageUrl('PostLogin'));
+      // Redirect to Onboarding
+      window.location.href = createPageUrl('Onboarding');
     } else {
-      // On desktop: Show QR code
-      setShowDesktopModal(true);
+      setShowDesktopMessage(true);
     }
   };
 
   const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-orange-100" dir="rtl">
+    <div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden" dir="rtl">
       
-      {/* Desktop Modal for QR Code */}
-      {showDesktopModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowDesktopModal(false)}>
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowDesktopModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <ArrowLeft className="w-6 h-6 text-gray-500" />
-            </button>
-            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Smartphone className="w-8 h-8 text-[--theme-orange]" />
-            </div>
-            <h3 className="text-2xl font-black mb-2 text-gray-800">החוויה המלאה בנייד</h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
-              סרקו את הקוד כדי להירשם ולהתחיל למצוא שותפים ב-Roomi
-            </p>
-            <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 inline-block mb-4">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.origin + createPageUrl('Onboarding'))}`} 
-                alt="Scan to start" 
-                className="w-40 h-40 mix-blend-multiply"
-              />
-            </div>
-            <p className="text-sm font-bold text-[--theme-orange] animate-pulse">סרוק אותי!</p>
+      {/* Desktop Message Modal */}
+      <AnimatePresence>
+        {showDesktopMessage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowDesktopMessage(false)}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Smartphone className="w-8 h-8 text-[--theme-orange]" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Roomi מותאמת לנייד!</h3>
+              <p className="text-gray-500 mb-6 leading-relaxed">
+                כדי ליהנות מהחוויה המלאה, אנחנו ממליצים לפתוח את האפליקציה מהטלפון הנייד.
+              </p>
+              
+              <div className="bg-gray-100 p-4 rounded-xl mb-6 inline-block">
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} alt="QR" className="w-32 h-32 mix-blend-multiply" />
+              </div>
+              <p className="text-sm font-bold text-gray-400 mb-6">סרוק כדי לפתוח בנייד</p>
+
+              <Button onClick={() => setShowDesktopMessage(false)} className="w-full rounded-full gradient-orange text-white font-bold h-12">
+                הבנתי, תודה
+              </Button>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2" onClick={() => window.location.reload()}>
-             <div className="w-10 h-10 bg-[--theme-orange] rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
-                <span className="text-white font-black text-xl">R</span>
-             </div>
-             <span className="text-2xl font-black tracking-tight text-gray-900">Roomi</span>
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+             <h1 className="text-3xl font-black text-[--theme-orange] font-[Pacifico]">Roomi</h1>
           </div>
-          
-          <div className="flex items-center gap-6">
-             <nav className="hidden md:flex items-center gap-8 font-medium text-gray-500">
-                <button onClick={() => scrollToSection('features')} className="hover:text-[--theme-orange] transition-colors">איך זה עובד</button>
-                <button onClick={() => scrollToSection('story')} className="hover:text-[--theme-orange] transition-colors">הסיפור שלנו</button>
-             </nav>
-             <Button 
-                onClick={handleStart}
-                className="rounded-full px-6 py-5 font-bold shadow-lg shadow-orange-100 gradient-orange text-white hover:brightness-110 transition-all"
-             >
-                כניסה / הרשמה
-             </Button>
-          </div>
+          <nav className="hidden md:flex gap-8 font-medium text-gray-600">
+            <button onClick={() => scrollToSection('about')} className="hover:text-[--theme-orange] transition-colors">הסיפור שלנו</button>
+            <button onClick={() => scrollToSection('how-it-works')} className="hover:text-[--theme-orange] transition-colors">איך זה עובד</button>
+            <button onClick={() => scrollToSection('why-roomi')} className="hover:text-[--theme-orange] transition-colors">למה רומי?</button>
+          </nav>
+          <Button onClick={handleAction} className="rounded-full gradient-orange text-white font-bold px-6 shadow-lg hover:shadow-orange-200 hover:scale-105 transition-all">
+            {isMobile ? "כניסה / הרשמה" : "הורד לנייד"}
+          </Button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-100 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 opacity-60"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 opacity-60"></div>
-
-        <div className="container mx-auto px-6 relative z-10 text-center">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-[--theme-orange] font-bold text-sm mb-8"
-            >
-                <Sparkles className="w-4 h-4" />
-                <span>הדרך החדשה למצוא שותפים</span>
-            </motion.div>
-            
+      <section className="relative pt-12 pb-20 md:pt-28 md:pb-40 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
             <motion.h1 
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              className="text-5xl md:text-7xl font-black text-gray-900 mb-8 leading-[1.1] tracking-tight"
+              initial="hidden" animate="visible" variants={fadeInUp}
+              className="text-4xl md:text-7xl font-black text-gray-900 leading-[1.1] mb-6 tracking-tight"
             >
-              למצוא שותפים<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--theme-orange] to-orange-500">שפשוט כיף איתם</span>
+              למצוא שותפים <span className="text-[--theme-orange]">בכיף.</span>
             </motion.h1>
-
             <motion.p 
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              transition={{ delay: 0.2 }}
-              className="text-xl md:text-2xl text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed"
+              initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.1 }}
+              className="text-lg md:text-2xl text-gray-500 mb-8 md:mb-12 leading-relaxed px-4 max-w-2xl mx-auto"
             >
-              חיבור פשוט וטבעי מבוסס על הווייב, סגנון החיים, דת, גיל ומיקום.
-              <br/>
-              פשוט תהיו אתם - זה הכי טוב.
+              האפליקציה שפותחה על ידי צעירים בשביל צעירים. 
+              בלי בלאגן, בלי בזבוז זמן, ועם התאמה מדויקת לוייב שלכם.
             </motion.p>
-
             <motion.div 
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center px-4 w-full sm:w-auto"
             >
-                <Button 
-                  onClick={handleStart}
-                  className="w-full sm:w-auto px-10 py-7 text-xl rounded-full font-black shadow-xl shadow-orange-200 gradient-orange text-white hover:scale-105 transition-transform"
-                >
-                  בואו נתחיל
-                  <ArrowLeft className="mr-2 w-6 h-6" />
-                </Button>
+              <Button onClick={handleAction} className="h-14 px-8 rounded-full gradient-orange text-white text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all w-full sm:w-auto">
+                {isMobile ? "בואו נתחיל" : "פתח בנייד"} <ArrowLeft className="mr-2 w-5 h-5" />
+              </Button>
+              <Button onClick={() => scrollToSection('how-it-works')} variant="outline" className="h-14 px-8 rounded-full border-2 text-lg font-bold hover:bg-gray-50 w-full sm:w-auto">
+                איך זה עובד?
+              </Button>
             </motion.div>
-
-            {/* Floating Avatars Animation */}
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="mt-20 flex justify-center -space-x-4 space-x-reverse"
-            >
-                {[1,2,3,4,5].map((i) => (
-                    <div key={i} className="w-14 h-14 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
-                        <img src={`https://i.pravatar.cc/150?img=${10+i}`} alt="User" className="w-full h-full object-cover" />
-                    </div>
-                ))}
-                <div className="w-14 h-14 rounded-full border-4 border-white shadow-lg bg-gray-900 text-white flex items-center justify-center font-bold text-sm z-10">
-                    +2K
-                </div>
-            </motion.div>
-            <p className="mt-4 text-gray-400 font-medium">הצטרפו לאלפי שותפים שכבר מצאו בית</p>
+          </div>
+        </div>
+        
+        {/* Abstract Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-30">
+            <div className="absolute top-[-10%] right-[-5%] w-72 h-72 md:w-96 md:h-96 bg-orange-200 rounded-full blur-3xl opacity-50"></div>
+            <div className="absolute bottom-[10%] left-[-10%] w-80 h-80 md:w-[500px] md:h-[500px] bg-blue-100 rounded-full blur-3xl opacity-50"></div>
         </div>
       </section>
 
-      {/* Features Grid (Bento Box) */}
-      <section id="features" className="py-24 bg-gray-50/50">
-          <div className="container mx-auto px-6">
-              <div className="text-center mb-16">
-                  <h2 className="text-3xl md:text-5xl font-black mb-4">בדיוק מה שחשוב</h2>
-                  <p className="text-gray-500 text-xl max-w-xl mx-auto">בלי שאלונים מתישים. אנחנו מתמקדים במה שבאמת משפיע על החיים המשותפים.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                  {/* 1. Vibe - Large */}
-                  <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col md:flex-row items-center gap-8 overflow-hidden relative group hover:border-[--theme-orange] transition-colors">
-                      <div className="relative z-10 flex-1 text-center md:text-right">
-                          <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
-                              <Zap className="w-7 h-7 text-purple-600" />
-                          </div>
-                          <h3 className="text-2xl font-black mb-3">הווייב שלך</h3>
-                          <p className="text-gray-500 text-lg leading-relaxed">
-                              שקט וביתי או מסיבות ורעש? אנחנו מחברים ביניכם לפי האנרגיה בבית.
-                          </p>
-                      </div>
-                      <div className="flex-1 relative h-48 w-full">
-                           <div className="absolute inset-0 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-2xl rotate-3 opacity-90 group-hover:rotate-6 transition-transform duration-500 flex items-center justify-center">
-                                <span className="text-white font-black text-2xl">VIBE CHECK</span>
-                           </div>
-                      </div>
-                  </div>
-
-                  {/* 2. Lifestyle */}
-                  <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 hover:border-[--theme-orange] transition-colors">
-                      <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
-                          <Coffee className="w-7 h-7 text-green-600" />
-                      </div>
-                      <h3 className="text-2xl font-black mb-3">לייף סטייל</h3>
-                      <p className="text-gray-500">
-                          כשרות, שבת, ניקיון וחיות מחמד. כל הדברים הקטנים שעושים בית.
-                      </p>
-                  </div>
-
-                  {/* 3. Photos */}
-                  <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 hover:border-[--theme-orange] transition-colors">
-                      <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                          <Camera className="w-7 h-7 text-blue-600" />
-                      </div>
-                      <h3 className="text-2xl font-black mb-3">תמונות ומיקום</h3>
-                      <p className="text-gray-500">
-                          לראות את הבנאדם, לראות את הדירה. הכי פשוט, הכי ברור.
-                      </p>
-                  </div>
-
-                  {/* 4. Music - Large */}
-                  <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col md:flex-row-reverse items-center gap-8 overflow-hidden relative group hover:border-[--theme-orange] transition-colors">
-                      <div className="relative z-10 flex-1 text-center md:text-right">
-                          <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
-                              <Music className="w-7 h-7 text-red-600" />
-                          </div>
-                          <h3 className="text-2xl font-black mb-3">הפסקול של הבית</h3>
-                          <p className="text-gray-500 text-lg leading-relaxed">
-                              שתפו את השיר שהכי מגדיר אתכם. כי אין כמו מוזיקה טובה כדי לשבור את הקרח.
-                          </p>
-                      </div>
-                      <div className="flex-1 relative flex justify-center">
-                           <div className="w-40 h-40 bg-gray-900 rounded-full border-4 border-gray-800 shadow-2xl flex items-center justify-center animate-[spin_10s_linear_infinite]">
-                                <div className="w-16 h-16 bg-red-500 rounded-full border-4 border-red-400"></div>
-                           </div>
-                           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-xs bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
-                               Now Playing
-                           </div>
-                      </div>
-                  </div>
-              </div>
+      {/* Bento Grid - Why Roomi */}
+      <section id="why-roomi" className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">למה דווקא רומי?</h2>
+            <p className="text-lg md:text-xl text-gray-500">בנינו את הפלטפורמה שתמיד רצינו שתהיה לנו.</p>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto">
+            {/* Feature 1 - Large - Vibe */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between overflow-hidden relative group min-h-[320px]"
+            >
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Heart className="w-6 h-6 text-[--theme-orange]" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">התאמה על בסיס וייב וסגנון חיים</h3>
+                <p className="text-gray-500 max-w-lg leading-relaxed text-lg">
+                  בלי שאלונים חופרים ובלי אלגוריתמים מסובכים. החיבור ברומי פשוט וטבעי - הוא מבוסס על הוייב שלכם, הטעם המוזיקלי (כן, יש חיבור לספוטיפיי ואפל מיוזיק!), התמונות, הגיל, וכמובן המיקום. פשוט תהיו אתם.
+                </p>
+                
+                <div className="flex flex-wrap gap-2 mt-6">
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">🎵 מוזיקה</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">📸 תמונות</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">✨ וייב</span>
+                </div>
+              </div>
+              <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-gradient-to-tr from-orange-50 to-white rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
+            </motion.div>
+
+            {/* Feature 2 - Young People */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-gray-900 text-white rounded-3xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[320px]"
+            >
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                   <Users className="w-6 h-6 text-orange-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">צעירים לצעירים</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  קהילה איכותית של חבר'ה צעירים, סטודנטים, חיילים משוחררים וכל מי שבראש טוב, שמחפשים בדיוק את מה שאתם מחפשים.
+                </p>
+              </div>
+              <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-gray-800 to-gray-900 -z-10"></div>
+            </motion.div>
+
+            {/* Feature 3 - Fast Interface */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[300px]"
+            >
+              <div>
+                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Zap className="w-6 h-6 text-blue-500" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">ממשק מהיר ואינטואיטיבי</h3>
+                <p className="text-gray-500 leading-relaxed">
+                  בלי רשימות משעממות. סווייפ ימינה, סווייפ שמאלה, צ'אט, וסגרתם דירה. הכל עובד חלק ומהיר.
+                </p>
+              </div>
+            </motion.div>
+            
+            {/* Feature 4 - Music */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[300px]"
+            >
+              <div>
+                <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Music className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">תשמיעו את הקול שלכם</h3>
+                <p className="text-gray-500 leading-relaxed">
+                  הוסיפו שיר לפרופיל שלכם שמתנגן אוטומטית. כי אין כמו מוזיקה טובה כדי לשבור את הקרח ולהבין את הוייב.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Feature 5 - Large - Web App */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="md:col-span-1 lg:col-span-1 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 shadow-sm text-white flex flex-col justify-center relative overflow-hidden min-h-[300px]"
+            >
+              <div className="relative z-10">
+                    <h3 className="text-2xl font-black mb-4">פשוט וקל</h3>
+                    <p className="text-orange-50 text-lg mb-6 leading-relaxed">
+                       עובד מכל מכשיר, בלי הורדה. פשוט נכנסים ומתחילים לחפש.
+                    </p>
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm w-fit">
+                            <Smartphone className="w-4 h-4" />
+                            <span className="font-bold text-sm">התקנה ב-Tap</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm w-fit">
+                            <Globe className="w-4 h-4" />
+                            <span className="font-bold text-sm">ללא הורדה</span>
+                        </div>
+                    </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Story Section */}
+      <section id="about" className="py-16 md:py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-orange-50 rounded-[2.5rem] p-8 md:p-16 text-center relative">
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-full shadow-lg">
+                 <div className="w-16 h-16 bg-[--theme-orange] rounded-full flex items-center justify-center text-white font-bold text-2xl">R</div>
+             </div>
+             
+             <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 mt-6">קצת עלינו</h2>
+             <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-lg">
+                <p className="mb-6">
+                  היי, אנחנו קבוצה של חבר'ה צעירים. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים. 
+                  קבוצות פייסבוק מוצפות, הודעות בוואטסאפ שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
+                </p>
+                <p className="mb-6">
+                  החלטנו לקחת את העניינים לידיים ולפתח את הפתרון שהיינו צריכים בעצמנו. 
+                  <span className="font-bold text-[--theme-orange]"> Roomi </span> 
+                  נולדה מתוך הבנה שהעולם היום הוא דינמי, ושמגורים משותפים הם לא רק "קורת גג", אלא חוויה חברתית.
+                </p>
+                <p>
+                  המטרה שלנו היא ליצור חיבורים אמיתיים, להפוך את תהליך החיפוש לאינטואיטיבי (ואפילו כיפי!), 
+                  ולעזור לכם למצוא את הבית הבא שלכם עם אנשים שבאמת מתאימים לכם.
+                </p>
+             </div>
+             
+             <div className="mt-10 flex flex-wrap justify-center gap-2 md:gap-4">
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#צעירים</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#תל_אביב</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#שותפים</div>
+                 <div className="bg-white px-4 py-2 rounded-full shadow-sm text-sm font-bold text-gray-500">#וייב</div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works Section */}
+      <section id="how-it-works" className="py-16 md:py-24 bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-black mb-12">איך זה עובד?</h2>
+          
+          <div className="max-w-4xl mx-auto">
+             {/* Video Container */}
+             <div className="aspect-[9/16] md:aspect-video w-full max-w-sm md:max-w-none mx-auto bg-gray-800 rounded-3xl overflow-hidden shadow-2xl relative border border-gray-700">
+                 <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/856KE7mJ_c8?rel=0&modestbranding=1" 
+                    title="Roomi App Demo" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    className="absolute inset-0"
+                 ></iframe>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                 {[
+                     { step: 1, title: "נרשמים בקלות", desc: "הרשמה מהירה ומילוי פרופיל קצר שמתמקד במה שחשוב." },
+                     { step: 2, title: "מגדירים וייב", desc: "בוחרים שיר, מעלים תמונות ומספרים קצת על עצמכם." },
+                     { step: 3, title: "מתחילים לסרוק", desc: "סווייפ ימינה למי שאהבתם, וצ'אט ברגע שיש התאמה." }
+                 ].map((item) => (
+                     <div key={item.step} className="text-center p-4">
+                         <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-[--theme-orange] text-xl border border-gray-700">
+                             {item.step}
+                         </div>
+                         <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                         <p className="text-gray-400">{item.desc}</p>
+                     </div>
+                 ))}
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-8">מוכנים למצוא את השותף המושלם?</h2>
+            <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
+                הצטרפו לאלפי משתמשים שכבר מצאו בית ושותפים לחיים. ההרשמה חינם ולוקחת בדיוק דקה.
+            </p>
+            <Button onClick={handleAction} className="h-16 px-12 rounded-full gradient-orange text-white text-xl font-bold shadow-2xl hover:scale-105 transition-transform w-full sm:w-auto">
+                {isMobile ? "יאללה, תרשמו אותי!" : "פתח בנייד"}
+            </Button>
+        </div>
+        
+        {/* Decorative Circles */}
+        <div className="absolute left-[-10%] bottom-[-50%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-orange-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+        <div className="absolute right-[-10%] top-[-50%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{animationDelay: '2s'}}></div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-12">
-        <div className="container mx-auto px-6 text-center">
-           <div className="w-12 h-12 bg-[--theme-orange] rounded-xl flex items-center justify-center shadow-lg shadow-orange-200 mx-auto mb-6">
-              <span className="text-white font-black text-2xl">R</span>
-           </div>
-           <p className="text-gray-400 text-sm mb-8">© 2024 Roomi. כל הזכויות שמורות.</p>
-           <div className="flex justify-center gap-6 text-sm font-medium text-gray-500">
-             <Link to={createPageUrl("Terms")} className="hover:text-[--theme-orange]">תנאי שימוש</Link>
-             <Link to={createPageUrl("Privacy")} className="hover:text-[--theme-orange]">פרטיות</Link>
-             <a href="mailto:support@roomi.me" className="hover:text-[--theme-orange]">צור קשר</a>
-           </div>
+      <footer className="bg-gray-50 py-12 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-center md:text-right">
+                <h2 className="text-2xl font-black text-[--theme-orange] font-[Pacifico] mb-2">Roomi</h2>
+                <p className="text-gray-400 text-sm">© 2024 Roomi. כל הזכויות שמורות.</p>
+            </div>
+            <div className="flex gap-6 text-sm font-medium text-gray-500">
+                <a href={createPageUrl('Terms')} className="hover:text-[--theme-orange]">תנאי שימוש</a>
+                <a href={createPageUrl('Privacy')} className="hover:text-[--theme-orange]">מדיניות פרטיות</a>
+                <a href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" className="hover:text-[--theme-orange]">צור קשר</a>
+            </div>
         </div>
       </footer>
     </div>
