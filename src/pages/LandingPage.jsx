@@ -150,7 +150,7 @@ export default function LandingPage() {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--theme-orange] to-pink-500">וייב אמיתי.</span>
                  </h3>
                  <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-lg mb-6">
-                    שכחו מטבלאות אקסל משעממות וסינונים יבשים. ברומי, האלגוריתם החכם שלנו לומד את הטעם המוזיקלי שלכם, את המקומות שאתם אוהבים לבלות בהם, ואת אורח החיים הייחודי לכם.
+                    בלי כאבי ראש ובלי מאמץ. פשוט תהיו אתם. ב-Roomi מוצאים שותפים בדרך הטבעית ביותר. אנחנו מחברים ביניכם על בסיס סגנון החיים, הגיל והמיקום שלכם. תעלו תמונות, תראו את הסטייל שלכם, והשותף המושלם כבר ימצא אתכם
                  </p>
                  <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-lg">
                     אנחנו מאמינים ששותפות טובה מתחילה בכימיה, לא רק בתקציב. המערכת מחברת ביניכם לבין אנשים שחולקים את אותו "וייב", כך שהבית הבא שלכם יהיה הרבה יותר מסתם דירה - הוא יהיה מקום שכיף לחזור אליו.
@@ -158,7 +158,7 @@ export default function LandingPage() {
               </div>
               
               <div className="mt-8 flex gap-3 flex-wrap relative z-10">
-                 {['🎵 מוזיקה', '🕶️ סטייל', '✨ אווירה', '🤝 כימיה'].map(tag => (
+                 {['🎵 מוזיקה', '🕶️ לייף סטייל', '✨ ווייב', '🤝 כימיה'].map(tag => (
                    <span key={tag} className="px-5 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl text-gray-700 font-bold hover:bg-white hover:shadow-md transition-all cursor-default">
                       {tag}
                    </span>
