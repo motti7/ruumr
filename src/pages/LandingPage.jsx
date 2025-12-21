@@ -253,9 +253,9 @@ export default function LandingPage() {
                       
                       <div className="space-y-3">
                           <div className="flex items-center gap-3 bg-black/30 px-4 py-3 rounded-xl border border-white/10">
-                              <div className="text-xl">🍎</div>
+                              <div className="text-xl">📱</div>
                               <div className="text-left">
-                                  <div className="text-[10px] text-[--theme-orange]">לחווייה המלאה:</div>
+                                  <div className="text-lg font-black text-[--theme-orange]">
                                   <div className="font-bold text-xs">לחיצה על השלוש נקודות בדפדפן {'>'} הוסף למסך הבית</div>
                               </div>
                           </div>
