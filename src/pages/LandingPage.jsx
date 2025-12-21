@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, MessageCircle, CheckCircle, Music } from 'lucide-react';
+import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, MessageCircle, CheckCircle, Music, Sparkles, Rocket, PartyPopper, Headphones } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from '@/utils';
