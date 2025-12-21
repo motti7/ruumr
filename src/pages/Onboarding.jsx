@@ -64,7 +64,7 @@ export default function OnboardingPage() {
     existing_roommates: 0,
     apartment_total_budget: 5000,
     // Song Info
-    spotify_track_id: '',
+    itunes_track_id: '',
     song_preview_url: null,
     song_name: '',
     song_artist: '',
@@ -78,7 +78,7 @@ export default function OnboardingPage() {
   // Use Sets to track multiple concurrent uploads
   const [uploadingPhotos, setUploadingPhotos] = useState(new Set());
   const [uploadingApartmentPhotos, setUploadingApartmentPhotos] = useState(new Set());
-  const [spotifySearch, setSpotifySearch] = useState("");
+  const [itunesSearch, setItunesSearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
 
@@ -292,16 +292,16 @@ export default function OnboardingPage() {
   };
 
   const searchSong = async () => {
-      if (!spotifySearch.trim()) return;
+      if (!itunesSearch.trim()) return;
       setIsSearchingSong(true);
       setSearchResults([]);
       try {
-          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=8&entity=song`);
+          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(itunesSearch)}&media=music&limit=8&entity=song`);
           const data = await response.json();
-          
+
           if (data.results && data.results.length > 0) {
               const tracks = data.results.map(item => ({
-                  spotify_id: String(item.trackId),
+                  itunes_id: String(item.trackId),
                   name: item.trackName,
                   artist: item.artistName,
                   image_url: item.artworkUrl100?.replace('100x100', '300x300'),
@@ -314,18 +314,18 @@ export default function OnboardingPage() {
       }
       setIsSearchingSong(false);
   };
-  
+
   const selectSong = (track) => {
        setFormData(prev => ({
           ...prev,
-          spotify_track_id: track.spotify_id,
+          itunes_track_id: track.itunes_id,
           song_preview_url: track.preview_url,
           song_name: track.name,
           song_artist: track.artist,
           song_image: track.image_url
       }));
       setSearchResults([]); // Clear search after selection
-      setSpotifySearch("");
+      setItunesSearch("");
   };
   
   const triggerFileInput = (index, isApartment = false) => {
@@ -381,9 +381,8 @@ export default function OnboardingPage() {
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="נעים להכיר!">
                 <div className="absolute top-0 right-4 z-20">
-                    <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('')} className="text-gray-400 hover:text-[--theme-orange]">
-                        <X className="w-5 h-5 ml-1" />
-                        חזור
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
+                        <ArrowRight className="h-6 w-6" />
                     </Button>
                 </div>
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
@@ -640,17 +639,11 @@ export default function OnboardingPage() {
                             <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
                                 <Facebook className="w-5 h-5 text-white"/>
                             </div>
-                            <div className="p-2.5 bg-black rounded-full shadow-sm">
-                                <Twitter className="w-5 h-5 text-white"/>
-                            </div>
-                            <div className="p-2.5 bg-[#0A66C2] rounded-full shadow-sm">
-                                <Linkedin className="w-5 h-5 text-white"/>
-                            </div>
                         </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק קישור לאינסטגרם, פייסבוק או טיקטוק..." 
+                            placeholder="הדבק קישור לאינסטגרם או פייסבוק..." 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -673,15 +666,15 @@ export default function OnboardingPage() {
                     <div className="w-full max-w-sm space-y-4">
                         <div className="relative group">
                             <Input 
-                                value={spotifySearch} 
-                                onChange={(e) => setSpotifySearch(e.target.value)} 
+                                value={itunesSearch} 
+                                onChange={(e) => setItunesSearch(e.target.value)} 
                                 placeholder="חפש שיר או אמן..." 
                                 className="h-14 text-lg pr-12 rounded-2xl border-2 border-gray-100 focus:border-[--theme-orange] focus:ring-[--theme-orange] transition-all bg-gray-50 focus:bg-white shadow-sm"
                                 onKeyDown={(e) => e.key === 'Enter' && searchSong()}
                             />
                             <Button 
                                 onClick={searchSong} 
-                                disabled={isSearchingSong || !spotifySearch.trim()} 
+                                disabled={isSearchingSong || !itunesSearch.trim()} 
                                 size="icon" 
                                 className="absolute top-2 right-2 h-10 w-10 rounded-xl gradient-orange hover:brightness-110 shadow-md transition-transform active:scale-95"
                             >
@@ -696,7 +689,7 @@ export default function OnboardingPage() {
                                     <motion.div 
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        key={track.spotify_id}
+                                        key={track.itunes_id}
                                         onClick={() => selectSong(track)}
                                         className="p-3 bg-white rounded-xl border border-gray-100 flex items-center gap-3 hover:border-[--theme-orange] hover:shadow-md cursor-pointer text-right transition-all"
                                     >
@@ -739,15 +732,15 @@ export default function OnboardingPage() {
                                 </div>
                                 
                                 <button 
-                                    onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                                    onClick={() => setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
                                     className="absolute top-2 left-2 bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-colors z-20"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
-                            </motion.div>
-                        )}
-                        
-                        {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
+                                </motion.div>
+                                )}
+
+                                {!formData.itunes_track_id && !formData.song_name && searchResults.length === 0 && (
                             <div className="text-center mt-8 opacity-50">
                                 <Music className="w-16 h-16 mx-auto mb-2 text-gray-300" />
                             </div>

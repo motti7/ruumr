@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const apartmentFileInputRef = useRef(null);
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
-  const [spotifySearch, setSpotifySearch] = useState("");
+  const [itunesSearch, setItunesSearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
   // Removed dedicated video input state
 
@@ -213,23 +213,23 @@ export default function ProfilePage() {
   };
 
   const searchSong = async () => {
-      if (!spotifySearch.trim()) return;
+      if (!itunesSearch.trim()) return;
       setIsSearchingSong(true);
       try {
-          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=1&entity=song`);
+          const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(itunesSearch)}&media=music&limit=1&entity=song`);
           const data = await response.json();
-          
+
           if (data.results && data.results.length > 0) {
               const item = data.results[0];
               setFormData(prev => ({
                   ...prev,
-                  spotify_track_id: String(item.trackId),
+                  itunes_track_id: String(item.trackId),
                   song_preview_url: item.previewUrl,
                   song_name: item.trackName,
                   song_artist: item.artistName,
                   song_image: item.artworkUrl100?.replace('100x100', '300x300')
               }));
-              setSpotifySearch("");
+              setItunesSearch("");
           } else {
               alert("לא נמצא שיר");
           }
@@ -482,8 +482,8 @@ export default function ProfilePage() {
                     {(isEditing && !formData.song_name) ? (
                         <div className="w-full space-y-2 relative z-20" onClick={e => e.stopPropagation()}>
                             <Input 
-                                value={spotifySearch} 
-                                onChange={(e) => setSpotifySearch(e.target.value)} 
+                                value={itunesSearch} 
+                                onChange={(e) => setItunesSearch(e.target.value)} 
                                 placeholder="חפש שיר..." 
                                 className="bg-white/10 border-white/20 text-white text-center placeholder:text-white/40 h-10 text-sm"
                                 dir="rtl"
@@ -491,7 +491,7 @@ export default function ProfilePage() {
                             />
                             <Button 
                                 onClick={searchSong} 
-                                disabled={isSearchingSong || !spotifySearch.trim()} 
+                                disabled={isSearchingSong || !itunesSearch.trim()} 
                                 className="w-full bg-white/10 hover:bg-white/20 text-white h-8 text-xs"
                             >
                                 {isSearchingSong ? <Loader2 className="animate-spin w-3 h-3"/> : "חפש"}
@@ -518,11 +518,19 @@ export default function ProfilePage() {
 
                     {isEditing && formData.song_name && (
                         <button 
-                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
+                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
                             className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2"
                         >
                             <X className="w-5 h-5" />
                         </button>
+                    )}
+                    {isEditing && formData.song_name && (
+                          <button 
+                              onClick={(e) => { e.stopPropagation(); handleSave(); }}
+                              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-full shadow-lg transition-colors z-20"
+                          >
+                              שמור שיר
+                          </button>
                     )}
                     
                     {/* Background decorations */}
@@ -548,12 +556,6 @@ export default function ProfilePage() {
                     </div>
                     <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
                         <Facebook className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-black rounded-full shadow-sm">
-                        <Twitter className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
-                        <Linkedin className="w-4 h-4 text-white"/>
                     </div>
                 </div>
               )}
