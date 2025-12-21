@@ -364,11 +364,7 @@ export default function OnboardingPage() {
                    <Button variant="ghost" size="icon" onClick={prevStep} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                    </Button>
-                 ) : (
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('LandingPage')} className="hover:bg-orange-50 text-gray-500">
-                        <ArrowRight className="h-6 w-6" />
-                    </Button>
-                 )}
+                 ) : <div className="w-10"/>}
                  <span className="font-bold text-[--theme-orange]">שלב {displayStep} מתוך {displayTotal}</span>
                  <div className="w-10"/>
              </div>
@@ -632,17 +628,17 @@ export default function OnboardingPage() {
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700 mb-2 block">קישור לרשת חברתית</label>
                         <div className="flex gap-4 justify-center mb-3">
-                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
-                                <Instagram className="w-6 h-6 text-[#E1306C]"/>
+                            <div className="p-2 bg-pink-50 rounded-full border border-pink-100">
+                                <Instagram className="w-6 h-6 text-pink-600"/>
                             </div>
-                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
-                                <Facebook className="w-6 h-6 text-[#1877F2]"/>
+                            <div className="p-2 bg-blue-50 rounded-full border border-blue-100">
+                                <Facebook className="w-6 h-6 text-blue-600"/>
                             </div>
-                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
-                                <Twitter className="w-6 h-6 text-[#1DA1F2]"/>
+                            <div className="p-2 bg-sky-50 rounded-full border border-sky-100">
+                                <Twitter className="w-6 h-6 text-sky-500"/>
                             </div>
-                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
-                                <Linkedin className="w-6 h-6 text-[#0A66C2]"/>
+                            <div className="p-2 bg-indigo-50 rounded-full border border-indigo-100">
+                                <Linkedin className="w-6 h-6 text-indigo-600"/>
                             </div>
                         </div>
                         <Input 
@@ -660,7 +656,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר...">
+            <Step step={9} currentStep={step} title="הפסקול שלך">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-2 shadow-lg animate-pulse">
                         <Music className="w-12 h-12 text-white" />

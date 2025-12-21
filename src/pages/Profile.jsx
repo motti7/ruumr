@@ -539,19 +539,14 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <Instagram className="w-4 h-4 text-[--theme-orange]" />
                   קישור לרשת חברתית
               </label>
-              <div className="flex gap-3 mb-2">
-                  <div className="p-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><Instagram className="w-4 h-4 text-[#E1306C]"/></div>
-                  <div className="p-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><Facebook className="w-4 h-4 text-[#1877F2]"/></div>
-                  <div className="p-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><Twitter className="w-4 h-4 text-[#1DA1F2]"/></div>
-                  <div className="p-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><Linkedin className="w-4 h-4 text-[#0A66C2]"/></div>
-              </div>
               <Input 
                   disabled={!isEditing} 
                   value={formData.social_link || ""} 
                   onChange={(e) => setFormField('social_link', e.target.value)} 
-                  placeholder="הדבק כאן קישור (אינסטגרם, פייסבוק...)" 
+                  placeholder="" 
                   className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
                   dir="ltr" 
               />
