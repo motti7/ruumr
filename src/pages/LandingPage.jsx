@@ -23,9 +23,8 @@ export default function LandingPage() {
 
   const handleStart = () => {
     if (isMobile) {
-      // On mobile: Trigger login flow, redirect to Discover (which handles profile check)
-      const { base44 } = require('@/api/base44Client');
-      base44.auth.redirectToLogin(createPageUrl('Discover'));
+      // On mobile: Go directly to Onboarding (which will trigger login if needed)
+      window.location.href = createPageUrl('Onboarding');
     } else {
       // On desktop: Show QR code
       setShowDesktopModal(true);
@@ -86,7 +85,7 @@ export default function LandingPage() {
                 onClick={handleStart}
                 className="rounded-full px-6 py-5 font-bold shadow-lg shadow-orange-100 gradient-orange text-white hover:brightness-110 transition-all"
              >
-                כניסה / הרשמה
+                הרשמה
              </Button>
           </div>
         </div>
