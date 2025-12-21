@@ -149,13 +149,14 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-3">התאמה על בסיס וייב וסגנון חיים</h3>
                 <p className="text-gray-500 max-w-lg leading-relaxed text-lg">
-                  בלי שאלונים חופרים ובלי אלגוריתמים מסובכים. החיבור ברומי פשוט וטבעי - הוא מבוסס על הוייב שלכם, הטעם המוזיקלי (כן, יש חיבור לספוטיפיי ואפל מיוזיק!), התמונות, הגיל, וכמובן המיקום. פשוט תהיו אתם.
+                  בלי שאלונים חופרים ובלי אלגוריתמים מסובכים. החיבור ברומי פשוט וטבעי - הוא מבוסס על הוייב שלכם, הטעם המוזיקלי , התמונות, הגיל, וכמובן המיקום. פשוט תהיו אתם.
                 </p>
                 
                 <div className="flex flex-wrap gap-2 mt-6">
-                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">🎵 מוזיקה</span>
-                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">📸 תמונות</span>
                    <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">✨ וייב</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">📸 תמונות</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">🕶️ לייף סטייל</span>
+                   <span className="bg-orange-50 text-[--theme-orange] px-3 py-1 rounded-full text-sm font-bold">🎵 מוזיקה</span>
                 </div>
               </div>
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-gradient-to-tr from-orange-50 to-white rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
