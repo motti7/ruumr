@@ -279,14 +279,14 @@ export default function ProfilePage() {
           <h1 className="text-2xl font-black text-gray-800">הפרופיל שלי</h1>
           <Button 
               onClick={() => {
-                  if (isEditing) {
-                      handleSave();
-                  } else {
+                  if (!isEditing) {
                       setIsEditing(true);
                       toast.info("לא לשכוח לשמור שינויים", {
                           duration: 3000,
                           position: "top-center"
                       });
+                  } else {
+                      handleSave();
                   }
               }} 
               className="rounded-full gradient-orange text-white shadow-lg"
