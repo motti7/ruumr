@@ -64,7 +64,7 @@ export default function OnboardingPage() {
     existing_roommates: 0,
     apartment_total_budget: 5000,
     // Song Info
-    spotify_track_id: '',
+    itunes_track_id: '',
     song_preview_url: null,
     song_name: '',
     song_artist: '',
@@ -318,7 +318,7 @@ export default function OnboardingPage() {
   const selectSong = (track) => {
        setFormData(prev => ({
           ...prev,
-          spotify_track_id: track.spotify_id,
+          itunes_track_id: track.spotify_id,
           song_preview_url: track.preview_url,
           song_name: track.name,
           song_artist: track.artist,
@@ -381,9 +381,8 @@ export default function OnboardingPage() {
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="נעים להכיר!">
                 <div className="absolute top-0 right-4 z-20">
-                    <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('')} className="text-gray-400 hover:text-[--theme-orange]">
-                        <X className="w-5 h-5 ml-1" />
-                        חזור
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
+                       <ArrowRight className="h-6 w-6" />
                     </Button>
                 </div>
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
@@ -640,17 +639,11 @@ export default function OnboardingPage() {
                             <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
                                 <Facebook className="w-5 h-5 text-white"/>
                             </div>
-                            <div className="p-2.5 bg-black rounded-full shadow-sm">
-                                <Twitter className="w-5 h-5 text-white"/>
-                            </div>
-                            <div className="p-2.5 bg-[#0A66C2] rounded-full shadow-sm">
-                                <Linkedin className="w-5 h-5 text-white"/>
-                            </div>
                         </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק קישור לאינסטגרם, פייסבוק או טיקטוק..." 
+                            placeholder="הדבק קישור לאינסטגרם או פייסבוק..." 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -739,15 +732,15 @@ export default function OnboardingPage() {
                                 </div>
                                 
                                 <button 
-                                    onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                                    onClick={() => setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
                                     className="absolute top-2 left-2 bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-colors z-20"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
-                            </motion.div>
-                        )}
-                        
-                        {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
+                                </motion.div>
+                                )}
+
+                                {!formData.itunes_track_id && !formData.song_name && searchResults.length === 0 && (
                             <div className="text-center mt-8 opacity-50">
                                 <Music className="w-16 h-16 mx-auto mb-2 text-gray-300" />
                             </div>

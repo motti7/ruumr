@@ -223,8 +223,8 @@ export default function ProfilePage() {
               const item = data.results[0];
               setFormData(prev => ({
                   ...prev,
-                  spotify_track_id: String(item.trackId),
-                  song_preview_url: item.previewUrl,
+                      itunes_track_id: String(item.trackId),
+                      song_preview_url: item.previewUrl,
                   song_name: item.trackName,
                   song_artist: item.artistName,
                   song_image: item.artworkUrl100?.replace('100x100', '300x300')
@@ -518,7 +518,7 @@ export default function ProfilePage() {
 
                     {isEditing && formData.song_name && (
                         <button 
-                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
+                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
                             className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2"
                         >
                             <X className="w-5 h-5" />
@@ -548,12 +548,6 @@ export default function ProfilePage() {
                     </div>
                     <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
                         <Facebook className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-black rounded-full shadow-sm">
-                        <Twitter className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
-                        <Linkedin className="w-4 h-4 text-white"/>
                     </div>
                 </div>
               )}
