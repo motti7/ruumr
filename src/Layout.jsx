@@ -145,7 +145,7 @@ export default function Layout({ children, currentPageName }) {
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
-            {currentPageName === 'Home' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
+            {currentPageName === 'Home' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' || currentPageName === 'LandingPage' ? (
                 <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                     {children}
                 </div>

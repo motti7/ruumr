@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook, Linkedin, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -88,7 +88,8 @@ export default function OnboardingPage() {
         const userData = await User.me();
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
       } catch (e) {
-        navigate(createPageUrl('Home'));
+        // If user is not logged in, redirect to login page then back here
+        base44.auth.redirectToLogin(window.location.href);
       }
     };
     fetchUser();
@@ -363,7 +364,11 @@ export default function OnboardingPage() {
                    <Button variant="ghost" size="icon" onClick={prevStep} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                    </Button>
-                 ) : <div className="w-10"/>}
+                 ) : (
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('LandingPage')} className="hover:bg-orange-50 text-gray-500">
+                        <ArrowRight className="h-6 w-6" />
+                    </Button>
+                 )}
                  <span className="font-bold text-[--theme-orange]">שלב {displayStep} מתוך {displayTotal}</span>
                  <div className="w-10"/>
              </div>
@@ -625,14 +630,25 @@ export default function OnboardingPage() {
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg"/>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                            <Instagram className="w-4 h-4 text-[--theme-orange]"/>
-                            קישור לרשת חברתית
-                        </label>
+                        <label className="text-sm font-bold text-gray-700 mb-2 block">קישור לרשת חברתית</label>
+                        <div className="flex gap-4 justify-center mb-3">
+                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                                <Instagram className="w-6 h-6 text-[#E1306C]"/>
+                            </div>
+                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                                <Facebook className="w-6 h-6 text-[#1877F2]"/>
+                            </div>
+                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                                <Twitter className="w-6 h-6 text-[#1DA1F2]"/>
+                            </div>
+                            <div className="p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                                <Linkedin className="w-6 h-6 text-[#0A66C2]"/>
+                            </div>
+                        </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="" 
+                            placeholder="הדבק קישור לפרופיל..." 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -644,15 +660,12 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="הפסקול שלך">
+            <Step step={9} currentStep={step} title="אם היית שיר...">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-2 shadow-lg animate-pulse">
                         <Music className="w-12 h-12 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">איזה שיר הוא אתה?</h2>
-                    <p className="text-gray-500 max-w-xs">
-                        בחר שיר שייכנס לאנשים ללב (ולפרופיל).
-                    </p>
 
                     <div className="w-full max-w-sm space-y-4">
                         <div className="relative group">
