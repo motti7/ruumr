@@ -26,12 +26,8 @@ export default function LandingPage() {
   };
 
   const handleAction = () => {
-    if (isMobile) {
-      // Redirect to Onboarding
+      // Redirect to Onboarding (allowed on all devices now)
       window.location.href = createPageUrl('Onboarding');
-    } else {
-      setShowDesktopMessage(true);
-    }
   };
 
   const fadeInUp = {
@@ -153,8 +149,11 @@ export default function LandingPage() {
                     התאמה על בסיס<br/>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[--theme-orange] to-pink-500">וייב אמיתי.</span>
                  </h3>
+                 <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-lg mb-6">
+                    שכחו מטבלאות אקסל משעממות וסינונים יבשים. ברומי, האלגוריתם החכם שלנו לומד את הטעם המוזיקלי שלכם, את המקומות שאתם אוהבים לבלות בהם, ואת אורח החיים הייחודי לכם.
+                 </p>
                  <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-lg">
-                    החיבור ברומי מבוסס על מה שבאמת משנה: המוזיקה שאתם שומעים, הטיולים, הלייף סטייל והתחושה. לא עוד טבלאות אקסל משעממות.
+                    אנחנו מאמינים ששותפות טובה מתחילה בכימיה, לא רק בתקציב. המערכת מחברת ביניכם לבין אנשים שחולקים את אותו "וייב", כך שהבית הבא שלכם יהיה הרבה יותר מסתם דירה - הוא יהיה מקום שכיף לחזור אליו.
                  </p>
               </div>
               
