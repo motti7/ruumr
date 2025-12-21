@@ -66,7 +66,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Home', 'Chat'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Home', 'Chat', 'LandingPage'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -162,7 +162,7 @@ export default function Layout({ children, currentPageName }) {
                     </p>
                     <div className="bg-gray-100 p-4 rounded-xl border border-gray-200">
                         <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`} 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} 
                             alt="Scan QR Code" 
                             className="w-32 h-32 mix-blend-multiply"
                         />
