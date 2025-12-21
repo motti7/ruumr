@@ -195,54 +195,25 @@ export default function VerificationPage() {
                         key="step3"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="w-full text-center flex flex-col items-center justify-center pt-4"
+                        className="w-full text-center flex flex-col items-center justify-center pt-10"
                     >
-                         <div className="relative mb-8">
-                             <div className="absolute inset-0 bg-[--theme-orange] blur-3xl opacity-20 rounded-full"></div>
-                             <div className="w-40 h-40 bg-gradient-to-tr from-[--theme-orange] to-pink-500 rounded-full flex items-center justify-center relative shadow-2xl overflow-hidden">
-                                <motion.div 
-                                    initial={{ scale: 0, rotate: -180 }} 
-                                    animate={{ scale: 1, rotate: 0 }} 
-                                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                                    className="relative z-10"
-                                >
-                                    <Check className="w-20 h-20 text-white" strokeWidth={4} />
-                                </motion.div>
-                                <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>
-                                {/* Confetti Effect */}
-                                {[...Array(12)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="absolute w-2 h-2 bg-white rounded-full"
-                                        initial={{ opacity: 1, x: 0, y: 0 }}
-                                        animate={{ 
-                                            opacity: 0, 
-                                            x: (Math.random() - 0.5) * 150, 
-                                            y: (Math.random() - 0.5) * 150 
-                                        }}
-                                        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-                                    />
-                                ))}
-                             </div>
-                         </div>
-                         
-                         <motion.h1 
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-4xl font-black text-gray-900 mb-3"
-                         >
-                             You're In!
-                         </motion.h1>
-                         <motion.p 
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className="text-gray-500 text-xl font-medium"
-                         >
-                             הפרופיל שלך אומת בהצלחה.<br/>
-                             הגיע הזמן למצוא את השותפים המושלמים.
-                         </motion.p>
+                         <div className="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-6 relative">
+                            <motion.div 
+                                initial={{ scale: 0 }} 
+                                animate={{ scale: 1 }} 
+                                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                            >
+                                <ShieldCheck className="w-16 h-16 text-green-500" />
+                            </motion.div>
+                            <motion.div 
+                                className="absolute inset-0 border-4 border-green-500 rounded-full"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: [0, 1, 0], scale: 1.2 }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            />
+                        </div>
+                        <h1 className="text-3xl font-black text-gray-900 mb-2">החשבון אומת!</h1>
+                        <p className="text-gray-500 text-lg">ברוכים הבאים לקהילה הרשמית.</p>
                     </motion.div>
                 )}
             </AnimatePresence>
