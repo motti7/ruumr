@@ -158,7 +158,7 @@ export default function LandingPage() {
               </div>
               
               <div className="mt-8 flex gap-3 flex-wrap relative z-10">
-                 {['🕶️ לייף סטייל', '✨ ווייב', '🤝 כימיה', '🎵 מוזיקה'].map(tag => (
+                 {['🕶️ לייף סטייל', '🤙 ווייב', '🤝 כימיה', '🎵 מוזיקה'].map(tag => (
                    <span key={tag} className="px-5 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl text-gray-700 font-bold hover:bg-white hover:shadow-md transition-all cursor-default">
                       {tag}
                    </span>
@@ -204,7 +204,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                   <div className="w-12 h-12 rounded-full border-4 border-gray-900 bg-gray-800 flex items-center justify-center font-bold text-sm text-white">
-                    <span className="text-xl">✨</span>
+                    <span className="text-xl">🤙</span>
                   </div>
                </div>
             </motion.div>
@@ -286,7 +286,7 @@ export default function LandingPage() {
              <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-lg">
                 <p className="mb-6">
                   היי, אנחנו קבוצה של סטודנטים צעירים באוניברסיטה. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים.
-                  קבוצות פייסבוק מוצפות, הודעות בוואטסאפ שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
+                  קבוצות פייסבוק מוצפות, הודעות שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
                 </p>
                 <p className="mb-6">
                   החלטנו לקחת את העניינים לידיים ולפתח את הפתרון שהיינו צריכים בעצמנו. 
