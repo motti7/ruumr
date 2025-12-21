@@ -1,39 +1,59 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, FileText } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import { Link } from 'react-router-dom';
 
 export default function TermsPage() {
-    const today = new Date().toLocaleDateString('he-IL', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-
     return (
-        <div className="p-6 bg-gray-50 min-h-screen" dir="rtl">
-            <div className="flex items-center mb-8">
-                <Link to={createPageUrl("Settings")} className="ml-4">
-                    <ArrowRight className="w-6 h-6 text-gray-600" />
-                </Link>
-                <h1 className="text-3xl font-black text-gray-800">תנאי שימוש</h1>
-            </div>
+        <div className="min-h-screen bg-gray-50 p-6 md:p-12" dir="rtl">
+            <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm p-8 md:p-12">
+                <div className="flex items-center gap-4 mb-8 border-b border-gray-100 pb-6">
+                    <Link to={createPageUrl('Home')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <ArrowRight className="w-6 h-6 text-gray-600" />
+                    </Link>
+                    <div className="flex items-center gap-3">
+                        <FileText className="w-8 h-8 text-[--theme-orange]" />
+                        <h1 className="text-3xl font-black text-gray-900">תנאי שימוש</h1>
+                    </div>
+                </div>
 
-            <div className="space-y-6 text-gray-700 leading-relaxed">
-                <p>ברוכים הבאים ל-Roomi. השימוש באפליקציה מהווה הסכמה לתנאים אלו.</p>
-                <div>
-                    <h2 className="font-bold text-lg mb-2">1. שימוש באפליקציה</h2>
-                    <p>האפליקציה מיועדת למציאת שותפים לדיור בלבד. כל שימוש אחר אסור. המשתמשים נדרשים להיות מעל גיל 18.</p>
+                <div className="prose prose-lg text-gray-600 leading-relaxed">
+                    <p className="font-bold text-gray-800">
+                        ברוכים הבאים ל-Roomi! השימוש באפליקציה כפוף לתנאים הבאים. אנא קראו אותם בעיון.
+                    </p>
+
+                    <h3>1. הסכמה לתנאים</h3>
+                    <p>
+                        עצם ההרשמה והשימוש ב-Roomi מהווים הסכמה לתנאים אלו. אם אינכם מסכימים, אנא אל תשתמשו בשירות.
+                    </p>
+
+                    <h3>2. התנהגות נאותה</h3>
+                    <p>
+                        Roomi היא קהילה המבוססת על כבוד הדדי. חל איסור מוחלט על:
+                    </p>
+                    <ul className="list-disc pr-6">
+                        <li>הטרדה, אלימות מילולית או שיימינג.</li>
+                        <li>העלאת תוכן פוגעני, מיני או גזעני.</li>
+                        <li>יצירת פרופילים מזויפים (Catfishing).</li>
+                    </ul>
+                    <p>
+                        אנו שומרים לעצמנו את הזכות לחסום משתמשים שיפרו כללים אלו ללא התראה מוקדמת.
+                    </p>
+
+                    <h3>3. אחריות</h3>
+                    <p>
+                        Roomi משמשת כפלטפורמה לחיבור בין אנשים. אין אנו אחראים על טיב הדירות, אמינות השותפים או כל אינטראקציה שמתרחשת מחוץ לאפליקציה. אנו ממליצים לנקוט במשנה זהירות, להיפגש במקומות ציבוריים ולחתום על חוזים מסודרים.
+                    </p>
+
+                    <h3>4. קניין רוחני</h3>
+                    <p>
+                        כל הזכויות על העיצוב, הקוד והמותג Roomi שמורות לנו. אין להעתיק או לעשות שימוש מסחרי ללא אישור.
+                    </p>
+
+                    <p className="text-sm text-gray-400 mt-8">
+                        עודכן לאחרונה: ינואר 2025
+                    </p>
                 </div>
-                <div>
-                    <h2 className="font-bold text-lg mb-2">2. תוכן משתמש</h2>
-                    <p>האחריות על התוכן המועלה (תמונות, טקסטים) חלה על המשתמש בלבד. אין להעלות תוכן פוגעני, מטעה או בלתי חוקי.</p>
-                </div>
-                 <div>
-                    <h2 className="font-bold text-lg mb-2">3. פרטיות</h2>
-                    <p>אנו מכבדים את פרטיותך. מידע אישי לא ישותף עם צדדים שלישיים ללא הסכמתך, למעט כנדרש על פי חוק.</p>
-                </div>
-                <p className="text-sm text-gray-500">תנאי השימוש עודכנו לאחרונה ב{today}.</p>
             </div>
         </div>
     );

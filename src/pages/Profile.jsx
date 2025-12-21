@@ -549,12 +549,7 @@ export default function ProfilePage() {
                     <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
                         <Facebook className="w-4 h-4 text-white"/>
                     </div>
-                    <div className="p-2 bg-black rounded-full shadow-sm">
-                        <Twitter className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
-                        <Linkedin className="w-4 h-4 text-white"/>
-                    </div>
+
                 </div>
               )}
               <Input 
