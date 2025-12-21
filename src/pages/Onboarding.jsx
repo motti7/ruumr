@@ -6,7 +6,8 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook, Linkedin, Twitter } from 'lucide-react';
+import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook } from 'lucide-react';
+import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -633,16 +634,13 @@ export default function OnboardingPage() {
                                 <Facebook className="w-5 h-5 text-white"/>
                             </div>
                             <div className="p-2.5 bg-black rounded-full shadow-sm">
-                                <Twitter className="w-5 h-5 text-white"/>
-                            </div>
-                            <div className="p-2.5 bg-[#0A66C2] rounded-full shadow-sm">
-                                <Linkedin className="w-5 h-5 text-white"/>
+                                <SiTiktok className="w-5 h-5 text-white"/>
                             </div>
                         </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק קישור לאינסטגרם, פייסבוק או טיקטוק..." 
+                            placeholder="הדבק קישור כאן" 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />

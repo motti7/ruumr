@@ -53,14 +53,9 @@ export default function LandingPage() {
                 <Smartphone className="w-8 h-8 text-[--theme-orange]" />
               </div>
               <h3 className="text-2xl font-black mb-2">Roomi מותאמת לנייד!</h3>
-              <p className="text-gray-500 mb-6 leading-relaxed">
-                כדי ליהנות מהחוויה המלאה, אנחנו ממליצים לפתוח את האפליקציה מהטלפון הנייד.
+              <p className="text-gray-500 mb-8 leading-relaxed text-lg">
+                כדי ליהנות מהחוויה המלאה, אנא פתח/י את האפליקציה מהטלפון הנייד שלך.
               </p>
-              
-              <div className="bg-gray-100 p-4 rounded-xl mb-6 inline-block">
-                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} alt="QR" className="w-32 h-32 mix-blend-multiply" />
-              </div>
-              <p className="text-sm font-bold text-gray-400 mb-6">סרוק כדי לפתוח בנייד</p>
 
               <Button onClick={() => setShowDesktopMessage(false)} className="w-full rounded-full gradient-orange text-white font-bold h-12">
                 הבנתי, תודה

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
@@ -451,7 +452,45 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* SONG SECTION MOVED HERE - MIDDLE OF PAGE */}
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
+              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+            </div>
+
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  קישור לרשת חברתית
+              </label>
+              {isEditing && (
+                <div className="flex gap-3 justify-center mb-3">
+                    <div className="p-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
+                        <Instagram className="w-4 h-4 text-white"/>
+                    </div>
+                    <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
+                        <Facebook className="w-4 h-4 text-white"/>
+                    </div>
+                    <div className="p-2 bg-black rounded-full shadow-sm">
+                        <SiTiktok className="w-4 h-4 text-white"/>
+                    </div>
+                </div>
+              )}
+              <Input 
+                  disabled={!isEditing} 
+                  value={formData.social_link || ""} 
+                  onChange={(e) => setFormField('social_link', e.target.value)} 
+                  placeholder="הדבק קישור..." 
+                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-left" 
+                  dir="ltr" 
+              />
+            </div>
+            <div>
+              <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>
+              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+            </div>
+        </div>
+        
+        <div className="space-y-4">
+            {/* SONG SECTION - MOVED HERE */}
             <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
                 <div className={`w-full h-full rounded-[2.5rem] bg-gradient-to-br from-gray-900 to-black p-6 shadow-2xl relative overflow-hidden border border-gray-800 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
                      onClick={() => !isEditing && !formData.song_name && setIsEditing(true)}
@@ -503,7 +542,7 @@ export default function ProfilePage() {
                             <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "לחץ להוספת שיר לפרופיל"}</p>
                             
                             {formData.song_preview_url && (
-                                <audio controls src={formData.song_preview_url} className="mt-3 h-6 w-full opacity-50 hover:opacity-100 transition-opacity" />
+                                <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full [&::-webkit-media-controls-panel]:bg-white/10" style={{filter: 'invert(1) hue-rotate(180deg)'}} />
                             )}
                             
                             {!formData.song_name && !isEditing && (
@@ -531,50 +570,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
-            
-            <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
-              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
-            </div>
 
-            <div>
-              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  קישור לרשת חברתית
-              </label>
-              {isEditing && (
-                <div className="flex gap-3 justify-center mb-3">
-                    <div className="p-2 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
-                        <Instagram className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
-                        <Facebook className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-black rounded-full shadow-sm">
-                        <Twitter className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
-                        <Linkedin className="w-4 h-4 text-white"/>
-                    </div>
-                </div>
-              )}
-              <Input 
-                  disabled={!isEditing} 
-                  value={formData.social_link || ""} 
-                  onChange={(e) => setFormField('social_link', e.target.value)} 
-                  placeholder="הדבק קישור..." 
-                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
-                  dir="ltr" 
-              />
-            </div>
-            <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>
-              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
-            </div>
-
-            {/* Song section was moved to top */}
-        </div>
-        
-        <div className="space-y-4">
             <div className="text-right">
                 <label className="block text-right font-bold text-gray-700 mb-2">
                   מחפש/ת

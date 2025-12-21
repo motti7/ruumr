@@ -128,8 +128,8 @@ export default function Layout({ children, currentPageName }) {
         <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta property="og:site_name" content="Roomi" />
         <meta property="og:type" content="website" />
-        <title>Roomi - למצוא שותפים בכיף | דירות שותפים בתל אביב והמרכז</title>
-        <meta name="description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין. הצטרפו לקהילת הסטודנטים והצעירים הגדולה בישראל." />
+        <title>Roomi - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
+        <meta name="description" content="Roomi - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
         <meta property="og:description" content="מחפשים שותפים? רומי היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
         <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
