@@ -248,7 +248,7 @@ export default function LandingPage() {
              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 mt-6">קצת עלינו</h2>
              <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed text-sm md:text-lg">
                 <p className="mb-6">
-                  היי, אנחנו קבוצה של סטודנטים באוניברסיטה. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים.
+                  היי, אנחנו קבוצה של סטודנטים צעירים באוניברסיטה. כמו כולכם, גם אנחנו חווינו את הסיוט של חיפוש שותפים.
                   קבוצות פייסבוק מוצפות, הודעות בוואטסאפ שלא נענות, ודייטים מביכים בדירות שפשוט לא התאימו.
                 </p>
                 <p className="mb-6">
