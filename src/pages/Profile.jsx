@@ -478,9 +478,9 @@ export default function ProfilePage() {
                   disabled={!isEditing} 
                   value={formData.social_link || ""} 
                   onChange={(e) => setFormField('social_link', e.target.value)} 
-                  placeholder="הדבק קישור..." 
-                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-left" 
-                  dir="ltr" 
+                  placeholder="הדבק קישור כאן" 
+                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
+                  dir="rtl" 
               />
             </div>
             <div>

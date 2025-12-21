@@ -6,7 +6,7 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowRight, Check, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { Mail, ArrowRight, Check, RefreshCw, ShieldCheck, Sparkles, Award, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function VerificationPage() {
@@ -197,19 +197,61 @@ export default function VerificationPage() {
                         animate={{ scale: 1, opacity: 1 }}
                         className="w-full text-center flex flex-col items-center justify-center pt-10"
                     >
-                         <div className="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-6 relative">
+                         <div className="relative w-32 h-32 mb-6">
+                            {/* Main Badge */}
                             <motion.div 
-                                initial={{ scale: 0 }} 
-                                animate={{ scale: 1 }} 
-                                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                                initial={{ scale: 0, rotate: -180 }} 
+                                animate={{ scale: 1, rotate: 0 }} 
+                                transition={{ type: "spring", stiffness: 150, delay: 0.1 }}
+                                className="w-full h-full bg-gradient-to-br from-[--theme-orange] via-red-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl relative overflow-hidden"
                             >
-                                <ShieldCheck className="w-16 h-16 text-green-500" />
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.3)_0%,transparent_60%)]"></div>
+                                <Award className="w-16 h-16 text-white relative z-10" strokeWidth={2.5} />
+                                
+                                {/* Shine effect */}
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-20"
+                                    animate={{ x: ['-200%', '200%'] }}
+                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                                />
                             </motion.div>
+                            
+                            {/* Orbiting particles */}
+                            {[0, 1, 2].map((i) => (
+                                <motion.div
+                                    key={i}
+                                    className="absolute w-3 h-3 bg-yellow-400 rounded-full"
+                                    style={{
+                                        top: '50%',
+                                        left: '50%',
+                                        marginTop: '-6px',
+                                        marginLeft: '-6px'
+                                    }}
+                                    animate={{
+                                        x: [0, Math.cos((i * 120 * Math.PI) / 180) * 70],
+                                        y: [0, Math.sin((i * 120 * Math.PI) / 180) * 70],
+                                        scale: [0, 1, 0],
+                                        opacity: [0, 1, 0]
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        delay: i * 0.3,
+                                        ease: "easeOut"
+                                    }}
+                                />
+                            ))}
+                            
+                            {/* Pulse rings */}
                             <motion.div 
-                                className="absolute inset-0 border-4 border-green-500 rounded-full"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: [0, 1, 0], scale: 1.2 }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="absolute inset-0 border-4 border-[--theme-orange] rounded-full"
+                                animate={{ opacity: [0.5, 0], scale: [1, 1.4] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                            />
+                            <motion.div 
+                                className="absolute inset-0 border-4 border-pink-500 rounded-full"
+                                animate={{ opacity: [0.5, 0], scale: [1, 1.4] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.75 }}
                             />
                         </div>
                         <h1 className="text-3xl font-black text-gray-900 mb-2">החשבון אומת!</h1>

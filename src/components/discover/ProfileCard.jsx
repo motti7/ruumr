@@ -148,41 +148,44 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     
     useEffect(() => {
         if (!audioRef.current || !profile.song_preview_url) return;
-        
+
         const audio = audioRef.current;
-        
-        // Play only when active AND on the second photo (index 1)
-        if (isActive && currentPhotoIndex === 1) {
-            audio.volume = 0;
-            const playPromise = audio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // Fade in
-                    let vol = 0;
-                    const interval = setInterval(() => {
-                        if (vol < 0.8) {
-                            vol += 0.05;
-                            audio.volume = Math.min(vol, 0.8);
-                        } else {
-                            clearInterval(interval);
-                        }
-                    }, 200);
-                    return () => clearInterval(interval);
-                }).catch(error => {
-                    console.log("Audio play failed:", error);
-                });
+
+        // Play when active (don't stop on photo change or expanded state)
+        if (isActive) {
+            if (audio.paused) {
+                audio.volume = 0;
+                const playPromise = audio.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Fade in
+                        let vol = 0;
+                        const interval = setInterval(() => {
+                            if (vol < 0.8) {
+                                vol += 0.05;
+                                audio.volume = Math.min(vol, 0.8);
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 200);
+                    }).catch(error => {
+                        console.log("Audio play failed:", error);
+                    });
+                }
             }
         } else {
-            // Pause if not active OR not on second photo
+            // Only pause if not active
             audio.pause();
             audio.currentTime = 0;
         }
-        
+
         return () => {
-            audio.pause();
+            if (!isActive) {
+                audio.pause();
+            }
         };
-    }, [isActive, currentPhotoIndex, profile.song_preview_url]);
+    }, [isActive, profile.song_preview_url]);
 
     useEffect(() => {
         if (audioRef.current) {
@@ -469,7 +472,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
                     {/* Music Player */}
                     {profile.song_preview_url && profile.song_name && isActive && (
-                        <div className="absolute bottom-24 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="absolute bottom-32 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
                                       <img src={profile.song_image} className="w-full h-full object-cover" />
