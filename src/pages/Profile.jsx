@@ -548,10 +548,36 @@ export default function ProfilePage() {
               <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
             </div>
 
-            {/* Song section was moved to top */}
-        </div>
-        
-        <div className="space-y-4">
+            {/* Add Song Section for users who skipped it */}
+            {isEditing && !formData.song_name && !formData.spotify_track_id && (
+                <div className="mt-6 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Music className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <h3 className="font-bold text-gray-800 mb-2">עוד לא בחרת שיר!</h3>
+                    <p className="text-sm text-gray-500 mb-4">מוזיקה היא הדרך הכי טובה להתחבר. הוסף את השיר שמגדיר אותך.</p>
+                    <div className="relative">
+                        <Input 
+                            value={spotifySearch} 
+                            onChange={(e) => setSpotifySearch(e.target.value)} 
+                            placeholder="חפש שיר..." 
+                            className="text-center"
+                            dir="rtl"
+                        />
+                        <Button 
+                            onClick={searchSong} 
+                            disabled={isSearchingSong || !spotifySearch.trim()} 
+                            size="sm"
+                            className="mt-2 w-full gradient-orange text-white"
+                        >
+                            {isSearchingSong ? <Loader2 className="animate-spin w-4 h-4"/> : "חפש והוסף"}
+                        </Button>
+                    </div>
+                </div>
+            )}
+            </div>
+
+            <div className="space-y-4">
             <div className="text-right">
                 <label className="block text-right font-bold text-gray-700 mb-2">
                   מחפש/ת
