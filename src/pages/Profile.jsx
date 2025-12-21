@@ -223,7 +223,7 @@ export default function ProfilePage() {
               const item = data.results[0];
               setFormData(prev => ({
                   ...prev,
-                  spotify_track_id: String(item.trackId),
+                  itunes_track_id: String(item.trackId),
                   song_preview_url: item.previewUrl,
                   song_name: item.trackName,
                   song_artist: item.artistName,
@@ -503,7 +503,14 @@ export default function ProfilePage() {
                             <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "לחץ להוספת שיר לפרופיל"}</p>
                             
                             {formData.song_preview_url && (
-                                <audio controls src={formData.song_preview_url} className="mt-3 h-6 w-full opacity-50 hover:opacity-100 transition-opacity" />
+                                <div className="absolute -bottom-16 left-0 right-0 px-4" onClick={e => e.stopPropagation()}>
+                                    <audio 
+                                        controls 
+                                        src={formData.song_preview_url} 
+                                        className="w-full h-8 opacity-70 hover:opacity-100 transition-opacity" 
+                                        style={{ filter: 'invert(1)' }}
+                                    />
+                                </div>
                             )}
                             
                             {!formData.song_name && !isEditing && (
@@ -518,12 +525,25 @@ export default function ProfilePage() {
 
                     {isEditing && formData.song_name && (
                         <button 
-                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
+                            onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
                             className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2"
                         >
                             <X className="w-5 h-5" />
                         </button>
-                    )}
+                        )}
+
+                        {/* Explicit Save Button for Song */}
+                        {isEditing && formData.song_name && (
+                         <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
+                             <Button 
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); handleSave(); }}
+                                className="bg-green-500 hover:bg-green-600 text-white rounded-full px-4 h-8 text-xs font-bold shadow-lg"
+                             >
+                                 שמור שיר
+                             </Button>
+                         </div>
+                        )}
                     
                     {/* Background decorations */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -549,12 +569,7 @@ export default function ProfilePage() {
                     <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
                         <Facebook className="w-4 h-4 text-white"/>
                     </div>
-                    <div className="p-2 bg-black rounded-full shadow-sm">
-                        <Twitter className="w-4 h-4 text-white"/>
-                    </div>
-                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
-                        <Linkedin className="w-4 h-4 text-white"/>
-                    </div>
+
                 </div>
               )}
               <Input 

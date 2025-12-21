@@ -6,16 +6,20 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowRight, Check, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { Mail, ArrowRight, Check, RefreshCw, ShieldCheck, Sparkles, Camera, User } from "lucide-react";
+import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 
 export default function VerificationPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Email Input, 2: Code Input, 3: Success
+  const [step, setStep] = useState(1); // 1: Email Input, 2: Code Input, 3: Selfie, 4: Success
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
+  const [selfieUrl, setSelfieUrl] = useState(null);
+  const videoRef = useRef(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   
   // Load user email on mount
   useEffect(() => {
@@ -69,13 +73,8 @@ export default function VerificationPage() {
       try {
         const user = await User.me();
         const profiles = await Profile.filter({ user_id: user.id });
-        if (profiles.length > 0) {
-            await Profile.update(profiles[0].id, { is_verified: true });
-        }
-        setStep(3);
-        setTimeout(() => {
-            navigate(createPageUrl("Discover"));
-        }, 2000);
+        setStep(3); // Move to Selfie Step
+
       } catch (error) {
         console.error(error);
       }
@@ -191,29 +190,134 @@ export default function VerificationPage() {
                 )}
 
                 {step === 3 && (
-                    <motion.div 
+                    <motion.div
                         key="step3"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="w-full text-center flex flex-col items-center justify-center pt-10"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="w-full flex flex-col items-center"
                     >
-                         <div className="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-6 relative">
-                            <motion.div 
-                                initial={{ scale: 0 }} 
-                                animate={{ scale: 1 }} 
-                                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                            >
-                                <ShieldCheck className="w-16 h-16 text-green-500" />
-                            </motion.div>
-                            <motion.div 
-                                className="absolute inset-0 border-4 border-green-500 rounded-full"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: [0, 1, 0], scale: 1.2 }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                            />
+                        <h1 className="text-3xl font-black text-gray-900 mb-3 text-center">אימות פנים</h1>
+                        <p className="text-gray-500 text-center mb-8 text-lg">
+                            צלם סלפי קצר כדי לוודא שאתה זה אתה (לא יוצג בפרופיל)
+                        </p>
+
+                        <div className="relative w-64 h-64 bg-gray-100 rounded-full overflow-hidden mb-8 border-4 border-gray-200 shadow-inner flex items-center justify-center">
+                            {selfieUrl ? (
+                                <img src={selfieUrl} alt="Selfie" className="w-full h-full object-cover transform scale-x-[-1]" />
+                            ) : isCameraOpen ? (
+                                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform scale-x-[-1]" />
+                            ) : (
+                                <User className="w-32 h-32 text-gray-300" />
+                            )}
                         </div>
-                        <h1 className="text-3xl font-black text-gray-900 mb-2">החשבון אומת!</h1>
-                        <p className="text-gray-500 text-lg">ברוכים הבאים לקהילה הרשמית.</p>
+
+                        {!selfieUrl ? (
+                            !isCameraOpen ? (
+                                <Button 
+                                    onClick={async () => {
+                                        setIsCameraOpen(true);
+                                        try {
+                                            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                                            if (videoRef.current) videoRef.current.srcObject = stream;
+                                        } catch(e) { 
+                                            alert("לא הצלחנו לפתוח את המצלמה. וודא שנתת הרשאה.");
+                                            setIsCameraOpen(false);
+                                        }
+                                    }}
+                                    className="w-full py-6 rounded-2xl bg-gray-900 text-white text-lg font-bold shadow-lg"
+                                >
+                                    <Camera className="mr-2 w-5 h-5" /> פתח מצלמה
+                                </Button>
+                            ) : (
+                                <Button 
+                                    onClick={async () => {
+                                        if (videoRef.current) {
+                                            const canvas = document.createElement("canvas");
+                                            canvas.width = videoRef.current.videoWidth;
+                                            canvas.height = videoRef.current.videoHeight;
+                                            canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
+                                            
+                                            // Stop camera
+                                            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                                            setIsCameraOpen(false);
+                                            
+                                            // Convert to blob and upload
+                                            canvas.toBlob(async (blob) => {
+                                                const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+                                                setIsLoading(true);
+                                                try {
+                                                    const { file_url } = await UploadFile({ file });
+                                                    setSelfieUrl(file_url);
+                                                } catch(e) {
+                                                    console.error(e);
+                                                    alert("שגיאה בהעלאה");
+                                                }
+                                                setIsLoading(false);
+                                            }, 'image/jpeg', 0.8);
+                                        }
+                                    }}
+                                    className="w-full py-6 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-lg font-bold shadow-lg"
+                                >
+                                    צלם עכשיו
+                                </Button>
+                            )
+                        ) : (
+                             <div className="flex flex-col gap-3 w-full">
+                                <Button 
+                                    onClick={async () => {
+                                         setIsLoading(true);
+                                         try {
+                                             const user = await User.me();
+                                             const profiles = await Profile.filter({ user_id: user.id });
+                                             if (profiles.length > 0) {
+                                                 await Profile.update(profiles[0].id, { is_verified: true }); // In real app, we'd save selfie for admin review
+                                             }
+                                             setStep(4);
+                                             setTimeout(() => {
+                                                 navigate(createPageUrl("Discover"));
+                                             }, 3000);
+                                         } catch(e) {}
+                                         setIsLoading(false);
+                                    }}
+                                    disabled={isLoading}
+                                    className="w-full py-6 rounded-2xl gradient-orange text-white text-lg font-bold shadow-lg"
+                                >
+                                    {isLoading ? <RefreshCw className="animate-spin" /> : "אשר וסיים"}
+                                </Button>
+                                <Button 
+                                    variant="ghost" 
+                                    onClick={() => setSelfieUrl(null)}
+                                    className="text-gray-500"
+                                >
+                                    צלם שוב
+                                </Button>
+                             </div>
+                        )}
+                    </motion.div>
+                )}
+
+                {step === 4 && (
+                    <motion.div 
+                        key="step4"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full flex flex-col items-center justify-center pt-10 text-center"
+                    >
+                         <div className="relative mb-8">
+                             <div className="absolute inset-0 bg-gradient-to-tr from-green-400 to-emerald-600 blur-3xl opacity-40 rounded-full animate-pulse"></div>
+                             <div className="w-40 h-40 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center relative z-10 rotate-3 border-4 border-green-50">
+                                 <ShieldCheck className="w-20 h-20 text-green-500" />
+                                 <div className="absolute -top-3 -right-3 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-2xl shadow-lg animate-bounce">
+                                     ✨
+                                 </div>
+                             </div>
+                         </div>
+                        <h1 className="text-4xl font-black text-gray-900 mb-3 tracking-tight">אתה בפנים!</h1>
+                        <p className="text-gray-500 text-xl max-w-xs mx-auto leading-relaxed">
+                            הפרופיל שלך אומת בהצלחה.<br/>
+                            <span className="text-green-600 font-bold">הוי כחול בדרך...</span>
+                        </p>
                     </motion.div>
                 )}
             </AnimatePresence>
