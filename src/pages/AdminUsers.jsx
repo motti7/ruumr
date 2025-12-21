@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Trash2, ShieldAlert, MessageSquare } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
@@ -18,6 +21,9 @@ export default function AdminUsersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [showEmailDialog, setShowEmailDialog] = useState(false);
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailBody, setEmailBody] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -92,10 +98,13 @@ export default function AdminUsersPage() {
 
     const handleBulkMessage = async () => {
         if (selectedUsers.length === 0) return;
-        const msg = prompt(`הכנס הודעה לשליחה ל-${selectedUsers.length} משתמשים:`);
-        if (!msg) return;
+        if (!emailSubject.trim() || !emailBody.trim()) {
+            alert("נא למלא נושא ותוכן המייל");
+            return;
+        }
 
         setLoading(true);
+        setShowEmailDialog(false);
         let successCount = 0;
         let failCount = 0;
 
@@ -105,8 +114,8 @@ export default function AdminUsersPage() {
                 try {
                      await base44.integrations.Core.SendEmail({
                         to: user.email,
-                        subject: "הודעה מצוות Roomi",
-                        body: msg
+                        subject: emailSubject,
+                        body: emailBody
                     });
                     successCount++;
                 } catch(e) {
@@ -117,6 +126,8 @@ export default function AdminUsersPage() {
         setLoading(false);
         alert(`נשלחו ${successCount} הודעות בהצלחה. ${failCount} נכשלו.`);
         setSelectedUsers([]);
+        setEmailSubject("");
+        setEmailBody("");
     };
 
     const toggleSelectUser = (userId) => {
@@ -150,7 +161,7 @@ export default function AdminUsersPage() {
                     <h1 className="text-3xl font-black text-gray-900">ניהול משתמשים</h1>
                     <div className="flex gap-2">
                         {selectedUsers.length > 0 && (
-                            <Button onClick={handleBulkMessage} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
+                            <Button onClick={() => setShowEmailDialog(true)} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
                                 <MessageSquare className="w-4 h-4 ml-2" />
                                 שלח הודעה ({selectedUsers.length})
                             </Button>
@@ -246,6 +257,44 @@ export default function AdminUsersPage() {
                         </Table>
                     </div>
                 </div>
+
+                <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+                    <DialogContent className="max-w-2xl" dir="rtl">
+                        <DialogHeader>
+                            <DialogTitle className="text-right">שליחת מייל ל-{selectedUsers.length} משתמשים</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="subject" className="text-right block">נושא המייל</Label>
+                                <Input 
+                                    id="subject"
+                                    value={emailSubject}
+                                    onChange={(e) => setEmailSubject(e.target.value)}
+                                    placeholder="לדוגמה: עדכון חשוב מצוות Roomi"
+                                    className="text-right"
+                                    dir="rtl"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="body" className="text-right block">תוכן המייל</Label>
+                                <Textarea 
+                                    id="body"
+                                    value={emailBody}
+                                    onChange={(e) => setEmailBody(e.target.value)}
+                                    placeholder="כתוב כאן את תוכן ההודעה...&#10;&#10;ניתן לרדת שורה ולכתוב טקסט ארוך"
+                                    className="min-h-[200px] text-right"
+                                    dir="rtl"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="flex gap-2">
+                            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>ביטול</Button>
+                            <Button onClick={handleBulkMessage} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
+                                שלח מייל
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
