@@ -245,7 +245,7 @@ export default function LandingPage() {
                           <span className="font-bold text-xs">PWA Technology</span>
                       </div>
                       <h3 className="text-2xl font-black mb-3">
-                         בלי חובת הורדה.
+                         
                       </h3>
                       <p className="text-blue-100 text-sm leading-relaxed mb-6">
                          חווית אפליקציה ישירות מהדפדפן.
@@ -255,7 +255,7 @@ export default function LandingPage() {
                           <div className="flex items-center gap-3 bg-black/30 px-4 py-3 rounded-xl border border-white/10">
                               <div className="text-xl">🍎</div>
                               <div className="text-left">
-                                  <div className="text-[10px] text-blue-200">iOS</div>
+                                  <div className="text-[10px] text-blue-200">לחווייה המלאה:</div>
                                   <div className="font-bold text-xs">לחיצה על השלוש נקודות בדפדפן {'>'} הוסף למסך הבית</div>
                               </div>
                           </div>
