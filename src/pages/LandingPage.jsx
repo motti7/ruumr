@@ -184,7 +184,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-3xl font-black mb-4">קהילה של<br/>צעירים בלבד</h3>
                   <p className="text-gray-400 text-lg leading-relaxed">
-                     סטודנטים, חיילים משוחררים, אמנים ואנשי העולם הגדול. אנחנו מסננים את הרעש כדי שאתם תמצאו בדיוק את מי שאתם מחפשים.
+                      סטודנטים, חיילים משוחררים, צעירים, ואנשי העולם הגדול. אנחנו מסננים את הרעש כדי שאתם תמצאו בדיוק את מי שאתם מחפשים.
                   </p>
                </div>
                
@@ -245,10 +245,10 @@ export default function LandingPage() {
                           <span className="font-bold text-xs">PWA Technology</span>
                       </div>
                       <h3 className="text-2xl font-black mb-3">
-                         בלי הורדה.
+                         בלי חובת הורדה.
                       </h3>
                       <p className="text-blue-100 text-sm leading-relaxed mb-6">
-                         חווית אפליקציה מלאה ישירות מהדפדפן.
+                         חווית אפליקציה ישירות מהדפדפן.
                       </p>
                       
                       <div className="space-y-3">
@@ -256,7 +256,7 @@ export default function LandingPage() {
                               <div className="text-xl">🍎</div>
                               <div className="text-left">
                                   <div className="text-[10px] text-blue-200">iOS</div>
-                                  <div className="font-bold text-xs">שתף {'>'} הוסף למסך הבית</div>
+                                  <div className="font-bold text-xs">לחיצה על השלוש נקודות בדפדפן {'>'} הוסף למסך הבית</div>
                               </div>
                           </div>
                       </div>
