@@ -116,11 +116,73 @@ export default function VerificationPage() {
                         className="w-full"
                     >
                         <div className="mb-8 flex justify-center">
-                            <div className="w-24 h-24 bg-gradient-to-tr from-blue-500 to-blue-600 rounded-3xl rotate-3 shadow-xl flex items-center justify-center relative group">
-                                <div className="absolute inset-0 bg-white opacity-20 rounded-3xl transform rotate-6 scale-90"></div>
-                                <Mail className="w-10 h-10 text-white relative z-10" />
-                                <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-300 animate-pulse" />
-                            </div>
+                            <motion.div 
+                                className="relative w-32 h-32"
+                                animate={{ 
+                                    rotate: [0, 5, -5, 0],
+                                    y: [0, -10, 0]
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                            >
+                                {/* Main envelope */}
+                                <div className="w-full h-full bg-gradient-to-br from-[--theme-orange] via-orange-500 to-red-500 rounded-3xl shadow-2xl flex items-center justify-center relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.3)_0%,transparent_60%)]"></div>
+                                    <Mail className="w-14 h-14 text-white relative z-10" strokeWidth={2.5} />
+                                    
+                                    {/* Shine effect */}
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-20"
+                                        animate={{ x: ['-200%', '200%'] }}
+                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                                    />
+                                </div>
+                                
+                                {/* Flying sparkles */}
+                                {[0, 1, 2].map((i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="absolute"
+                                        initial={{ 
+                                            x: 64, 
+                                            y: 64,
+                                            scale: 0,
+                                            opacity: 0
+                                        }}
+                                        animate={{
+                                            x: [64, 64 + Math.cos((i * 120 * Math.PI) / 180) * 60],
+                                            y: [64, 64 + Math.sin((i * 120 * Math.PI) / 180) * 60],
+                                            scale: [0, 1, 0],
+                                            opacity: [0, 1, 0]
+                                        }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            delay: i * 0.4,
+                                            ease: "easeOut"
+                                        }}
+                                    >
+                                        <Sparkles className="w-5 h-5 text-yellow-400" />
+                                    </motion.div>
+                                ))}
+                                
+                                {/* Pulse ring */}
+                                <motion.div 
+                                    className="absolute inset-0 border-4 border-[--theme-orange] rounded-3xl"
+                                    animate={{ 
+                                        opacity: [0.3, 0], 
+                                        scale: [1, 1.2] 
+                                    }}
+                                    transition={{ 
+                                        duration: 1.5, 
+                                        repeat: Infinity,
+                                        ease: "easeOut"
+                                    }}
+                                />
+                            </motion.div>
                         </div>
 
                         <h1 className="text-3xl font-black text-gray-900 mb-3 text-center">בואו נאמת שזה אתם</h1>

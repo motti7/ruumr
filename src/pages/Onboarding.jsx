@@ -641,8 +641,8 @@ export default function OnboardingPage() {
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
                             placeholder="הדבק קישור כאן" 
-                            className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
-                            dir="ltr"
+                            className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-right"
+                            dir="rtl"
                         />
                     </div>
                     <div className="space-y-2">

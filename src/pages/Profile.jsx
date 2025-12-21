@@ -277,7 +277,20 @@ export default function ProfilePage() {
       <div className="bg-white">
         <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
           <h1 className="text-2xl font-black text-gray-800">הפרופיל שלי</h1>
-          <Button onClick={() => isEditing ? handleSave() : setIsEditing(true)} className="rounded-full gradient-orange text-white shadow-lg">
+          <Button 
+              onClick={() => {
+                  if (isEditing) {
+                      handleSave();
+                  } else {
+                      setIsEditing(true);
+                      toast.info("לא לשכוח לשמור שינויים", {
+                          duration: 3000,
+                          position: "top-center"
+                      });
+                  }
+              }} 
+              className="rounded-full gradient-orange text-white shadow-lg"
+          >
               {isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
           </Button>
         </div>
