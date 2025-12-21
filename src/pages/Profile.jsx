@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook, Twitter, Linkedin, CheckCircle } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook, Twitter, Linkedin } from "lucide-react";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
@@ -549,7 +549,12 @@ export default function ProfilePage() {
                     <div className="p-2 bg-[#1877F2] rounded-full shadow-sm">
                         <Facebook className="w-4 h-4 text-white"/>
                     </div>
-
+                    <div className="p-2 bg-black rounded-full shadow-sm">
+                        <Twitter className="w-4 h-4 text-white"/>
+                    </div>
+                    <div className="p-2 bg-[#0A66C2] rounded-full shadow-sm">
+                        <Linkedin className="w-4 h-4 text-white"/>
+                    </div>
                 </div>
               )}
               <Input 

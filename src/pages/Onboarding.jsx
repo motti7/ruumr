@@ -64,7 +64,7 @@ export default function OnboardingPage() {
     existing_roommates: 0,
     apartment_total_budget: 5000,
     // Song Info
-    itunes_track_id: '',
+    spotify_track_id: '',
     song_preview_url: null,
     song_name: '',
     song_artist: '',
@@ -301,7 +301,7 @@ export default function OnboardingPage() {
           
           if (data.results && data.results.length > 0) {
               const tracks = data.results.map(item => ({
-                  itunes_track_id: String(item.trackId),
+                  spotify_id: String(item.trackId),
                   name: item.trackName,
                   artist: item.artistName,
                   image_url: item.artworkUrl100?.replace('100x100', '300x300'),
@@ -317,9 +317,9 @@ export default function OnboardingPage() {
   
   const selectSong = (track) => {
        setFormData(prev => ({
-           ...prev,
-           itunes_track_id: track.itunes_track_id,
-           song_preview_url: track.preview_url,
+          ...prev,
+          spotify_track_id: track.spotify_id,
+          song_preview_url: track.preview_url,
           song_name: track.name,
           song_artist: track.artist,
           song_image: track.image_url
@@ -381,8 +381,9 @@ export default function OnboardingPage() {
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="נעים להכיר!">
                 <div className="absolute top-0 right-4 z-20">
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
-                       <ArrowRight className="h-6 w-6" />
+                    <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('')} className="text-gray-400 hover:text-[--theme-orange]">
+                        <X className="w-5 h-5 ml-1" />
+                        חזור
                     </Button>
                 </div>
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
@@ -719,14 +720,14 @@ export default function OnboardingPage() {
                                 className="bg-black p-4 rounded-3xl shadow-2xl border border-gray-800 relative text-white text-right flex items-center gap-4 overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-900/50"></div>
-
+                                
                                 <div className="relative z-10 w-16 h-16 rounded-full border-2 border-gray-700 overflow-hidden animate-[spin_8s_linear_infinite]">
                                     <img src={formData.song_image} className="w-full h-full object-cover opacity-80" />
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="w-4 h-4 bg-black rounded-full border border-gray-700"></div>
                                     </div>
                                 </div>
-
+                                
                                 <div className="flex-1 relative z-10">
                                     <div className="font-bold text-lg leading-tight">{formData.song_name}</div>
                                     <div className="text-sm text-gray-400">{formData.song_artist}</div>
@@ -736,17 +737,17 @@ export default function OnboardingPage() {
                                         ))}
                                     </div>
                                 </div>
-
+                                
                                 <button 
-                                    onClick={() => setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
+                                    onClick={() => setFormData(prev => ({...prev, spotify_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
                                     className="absolute top-2 left-2 bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-colors z-20"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
                             </motion.div>
                         )}
-
-                        {!formData.itunes_track_id && !formData.song_name && searchResults.length === 0 && (
+                        
+                        {!formData.spotify_track_id && !formData.song_name && searchResults.length === 0 && (
                             <div className="text-center mt-8 opacity-50">
                                 <Music className="w-16 h-16 mx-auto mb-2 text-gray-300" />
                             </div>
