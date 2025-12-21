@@ -189,12 +189,12 @@ export default function LandingPage() {
                
                <div className="mt-auto relative z-10 flex -space-x-4 space-x-reverse pt-8">
                   {[
-                    { name: "דניאל", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=faces" },
-                    { name: "אור", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces" },
-                    { name: "טל", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces" },
-                    { name: "מוטי", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=faces" },
-                    { name: "עמית", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=faces" },
-                    { name: "עדן", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=faces" }
+                    { name: "דניאל", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/f6af26b11_3fcc958b-805c-4765-9dc3-13345f00ec7c.jpeg" },
+                    { name: "אור", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/61c0ac1bc_or (2).jpg" },
+                    { name: "טל", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/9d2bf58c7_tal (4).jpg" },
+                    { name: "מוטי", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/6db888242_1000105829.jpg" },
+                    { name: "עמית", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/49e47de86_amit (2).jpg" },
+                    { name: "עדן", img: "https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/public/68c919adff6ac6fafb51bed6/1bf9b3f8b_eden (1).jpg" }
                   ].map((user, i) => (
                     <div key={i} className="w-12 h-12 rounded-full border-4 border-gray-900 bg-gray-800 overflow-hidden relative group cursor-pointer">
                        <img src={user.img} alt={user.name} className="w-full h-full object-cover" />
