@@ -380,6 +380,12 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="נעים להכיר!">
+                <div className="absolute top-0 right-4 z-20">
+                    <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('')} className="text-gray-400 hover:text-[--theme-orange]">
+                        <X className="w-5 h-5 ml-1" />
+                        חזור
+                    </Button>
+                </div>
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
                 <div className="space-y-6">
                     <div className="space-y-2 text-right">
@@ -627,24 +633,24 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700 mb-2 block">קישור לרשת חברתית</label>
-                        <div className="flex gap-4 justify-center mb-3">
-                            <div className="p-2 bg-pink-50 rounded-full border border-pink-100">
-                                <Instagram className="w-6 h-6 text-pink-600"/>
+                        <div className="flex gap-4 justify-center mb-4">
+                            <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
+                                <Instagram className="w-5 h-5 text-white"/>
                             </div>
-                            <div className="p-2 bg-blue-50 rounded-full border border-blue-100">
-                                <Facebook className="w-6 h-6 text-blue-600"/>
+                            <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
+                                <Facebook className="w-5 h-5 text-white"/>
                             </div>
-                            <div className="p-2 bg-sky-50 rounded-full border border-sky-100">
-                                <Twitter className="w-6 h-6 text-sky-500"/>
+                            <div className="p-2.5 bg-black rounded-full shadow-sm">
+                                <Twitter className="w-5 h-5 text-white"/>
                             </div>
-                            <div className="p-2 bg-indigo-50 rounded-full border border-indigo-100">
-                                <Linkedin className="w-6 h-6 text-indigo-600"/>
+                            <div className="p-2.5 bg-[#0A66C2] rounded-full shadow-sm">
+                                <Linkedin className="w-5 h-5 text-white"/>
                             </div>
                         </div>
                         <Input 
                             value={formData.social_link} 
                             onChange={(e) => setFormField('social_link', e.target.value)} 
-                            placeholder="הדבק קישור לפרופיל..." 
+                            placeholder="הדבק קישור לאינסטגרם, פייסבוק או טיקטוק..." 
                             className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-left"
                             dir="ltr"
                         />
@@ -656,12 +662,13 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="הפסקול שלך">
+            <Step step={9} currentStep={step} title="אם היית שיר...">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
+                    <h2 className="text-xl font-medium text-gray-500 -mt-4">איזה שיר הוא אתה?</h2>
+                    
                     <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-2 shadow-lg animate-pulse">
                         <Music className="w-12 h-12 text-white" />
                     </div>
-                    <h2 className="text-2xl font-black text-gray-900">איזה שיר הוא אתה?</h2>
 
                     <div className="w-full max-w-sm space-y-4">
                         <div className="relative group">

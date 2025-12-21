@@ -469,7 +469,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
                     {/* Music Player */}
                     {profile.song_preview_url && profile.song_name && isActive && (
-                        <div className="absolute bottom-32 right-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="absolute bottom-32 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
                                       <img src={profile.song_image} className="w-full h-full object-cover" />
