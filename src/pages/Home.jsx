@@ -9,21 +9,11 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Removed auto-redirect logic as requested. 
+  // The root path now always shows the landing page.
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (isAuth) {
-           navigate(createPageUrl("Discover"));
-        } else {
-           setIsLoading(false);
-        }
-      } catch (error) {
-        setIsLoading(false);
-      }
-    };
-    checkUser();
-  }, [navigate]);
+    setIsLoading(false);
+  }, []);
 
   if (isLoading) {
     return (
