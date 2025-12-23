@@ -72,7 +72,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u1.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p2.name}!`,
-                        body: `היי ${p1.name},<br><br>גילינו שיש לך התאמה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
+                        body: `היי ${p1.name},<br><br>יש לך התאמה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
                     });
                     emailsSent++;
                 } catch (e) {
@@ -85,7 +85,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u2.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p1.name}!`,
-                        body: `היי ${p2.name},<br><br>גילינו שיש לך התאמה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
+                        body: `היי ${p2.name},<br><br>יש לך התאמה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
                     });
                     emailsSent++;
                 } catch (e) {
