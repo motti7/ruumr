@@ -460,9 +460,19 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                         <Info className="w-5 h-5 text-[--theme-orange]" />
                     </button>
 
-                    {/* Music Player - Positioned below Info button */}
+                    {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
+                         // Fallback content when no media
+                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-5 pb-8 pointer-events-none">
+                              <h2 className="text-4xl font-bold text-white mb-1">{profile.name}</h2>
+                              <div className="text-white/90 text-base mb-3 font-medium">
+                                  {profile.age} • {profile.location}
+                              </div>
+                         </div>
+                    )}
+
+                    {/* Music Player */}
                     {profile.song_preview_url && profile.song_name && isActive && (
-                        <div className="absolute top-20 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="absolute bottom-32 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
                                       <img src={profile.song_image} className="w-full h-full object-cover" />
@@ -482,16 +492,6 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                              </button>
                              <audio ref={audioRef} src={profile.song_preview_url} loop className="hidden" />
                         </div>
-                    )}
-
-                    {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
-                         // Fallback content when no media
-                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-5 pb-8 pointer-events-none">
-                              <h2 className="text-4xl font-bold text-white mb-1">{profile.name}</h2>
-                              <div className="text-white/90 text-base mb-3 font-medium">
-                                  {profile.age} • {profile.location}
-                              </div>
-                         </div>
                     )}
 
                     {/* Like / Nope Badges */}
