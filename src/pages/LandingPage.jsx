@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Users, Zap, Heart, Smartphone, Globe, Play, QrCode, MessageCircle, CheckCircle, Music, Sparkles, Rocket, PartyPopper, Headphones } from 'lucide-react';
-import { base44 } from "@/api/base44Client";
+import { Smartphone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from '@/utils';
 
@@ -11,8 +10,10 @@ export default function LandingPage() {
 
   useEffect(() => {
     const checkMobile = () => {
+      // בדיקה האם רוחב המסך הוא של מובייל (768px ומטה)
       setIsMobile(window.innerWidth <= 768);
     };
+    
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -25,20 +26,21 @@ export default function LandingPage() {
     }
   };
 
+  // --- השינוי המרכזי כאן ---
   const handleAction = () => {
-      // Redirect to Onboarding (allowed on all devices now)
-      window.location.href = createPageUrl('Onboarding');
-  };
-
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+      if (isMobile) {
+        // אם המשתמש בנייד - אפשר להמשיך להרשמה
+        window.location.href = createPageUrl('Onboarding');
+      } else {
+        // אם המשתמש במחשב - נפתח את ההודעה החוסמת
+        setShowDesktopMessage(true);
+      }
   };
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden" dir="rtl">
       
-      {/* Desktop Message Modal */}
+      {/* Desktop Message Modal - הודעה למשתמשי מחשב */}
       <AnimatePresence>
         {showDesktopMessage && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowDesktopMessage(false)}>
@@ -52,9 +54,11 @@ export default function LandingPage() {
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Smartphone className="w-8 h-8 text-[--theme-orange]" />
               </div>
-              <h3 className="text-2xl font-black mb-2">Roomi מותאמת לנייד!</h3>
+              <h3 className="text-2xl font-black mb-2">ההרשמה דרך הנייד בלבד</h3>
               <p className="text-gray-500 mb-8 leading-relaxed text-lg">
-                כדי ליהנות מהחוויה המלאה, אנא פתח/י את האפליקציה מהטלפון הנייד שלך.
+                כדי להבטיח חוויית שימוש מושלמת, תהליך ההרשמה והשימוש באפליקציה זמינים כרגע דרך הטלפון הנייד בלבד.
+                <br/><br/>
+                מוזמנים להיכנס ל-<strong>Roomi.me</strong> דרך הנייד!
               </p>
 
               <Button onClick={() => setShowDesktopMessage(false)} className="w-full rounded-full gradient-orange text-white font-bold h-12">
@@ -71,13 +75,17 @@ export default function LandingPage() {
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
              <h1 className="text-3xl font-black text-[--theme-orange] font-[Pacifico]">Roomi</h1>
           </div>
+          
+          {/* תפריט ניווט - מוצג רק במחשב */}
           <nav className="hidden md:flex gap-8 font-medium text-gray-600">
             <button onClick={() => scrollToSection('about')} className="hover:text-[--theme-orange] transition-colors">הסיפור שלנו</button>
             <button onClick={() => scrollToSection('how-it-works')} className="hover:text-[--theme-orange] transition-colors">איך זה עובד</button>
             <button onClick={() => scrollToSection('why-roomi')} className="hover:text-[--theme-orange] transition-colors">למה רומי?</button>
           </nav>
+
+          {/* כפתור הפעולה הראשי */}
           <Button onClick={handleAction} className="rounded-full gradient-orange text-white font-bold px-6 shadow-lg hover:shadow-orange-200 hover:scale-105 transition-all">
-            {isMobile ? "כניסה / הרשמה" : "פתח בנייד"}
+            {isMobile ? "כניסה / הרשמה" : "התחברות מהנייד"}
           </Button>
         </div>
       </header>
