@@ -132,38 +132,43 @@ export default function DiscoverPage() {
     setTimeout(() => setActionFeedback(null), 600);
 
     try {
-      // 1. Create Swipe Entity Client-Side (Robust persistence)
-      try {
-          await Swipe.create({
-              swiper_id: userProfile.user_id,
-              swiper_name: userProfile.name,
-              swiped_id: swipedProfile.user_id,
-              swiped_name: swipedProfile.name,
-              action
-          });
-      } catch (e) {
-          console.error("Failed to create swipe locally", e);
-      }
+      // 1. ALWAYS Create Swipe Entity First (CRITICAL - must not fail!)
+      const swipeData = {
+          swiper_id: userProfile.user_id,
+          swiper_name: userProfile.name,
+          swiped_id: swipedProfile.user_id,
+          swiped_name: swipedProfile.name,
+          action
+      };
+      
+      await Swipe.create(swipeData);
+      console.log("✅ Swipe saved successfully:", swipeData);
 
       // Optimistic UI update
       setCurrentIndex(prev => prev + 1);
       setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
 
-      // 2. Call Backend for Match Logic (and Emails)
-      const { base44 } = require('@/api/base44Client');
-      const result = await base44.functions.handleSwipe({
-          swiper_id: userProfile.user_id, 
-          swiped_id: swipedProfile.user_id, 
-          action,
-          origin: window.location.origin
-      });
+      // 2. Call Backend for Match Logic (and Emails) - This can fail without breaking flow
+      try {
+          const { base44 } = require('@/api/base44Client');
+          const result = await base44.functions.handleSwipe({
+              swiper_id: userProfile.user_id, 
+              swiped_id: swipedProfile.user_id, 
+              action,
+              origin: window.location.origin
+          });
 
-      if (result.match) {
-          setMatchData({ profile1: userProfile, profile2: swipedProfile });
+          if (result?.match) {
+              setMatchData({ profile1: userProfile, profile2: swipedProfile });
+          }
+      } catch (matchError) {
+          console.error("❌ Match check failed (swipe was still saved):", matchError);
       }
     } catch (error) { 
-        console.error("Error in swipe flow:", error); 
-        // We don't revert UI because we likely saved the swipe locally at least.
+        console.error("❌ CRITICAL: Swipe save failed:", error); 
+        alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
+        // Revert UI since swipe wasn't saved
+        setCurrentIndex(prev => Math.max(0, prev));
     }
   };
   
