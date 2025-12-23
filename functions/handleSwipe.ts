@@ -51,13 +51,9 @@ export default async function(context) {
             }
 
             // 2. Send Emails
-            const [user1, user2] = await Promise.all([
-                base44.asServiceRole.entities.User.filter({ id: swiper_id }),
-                base44.asServiceRole.entities.User.filter({ id: swiped_id })
-            ]);
-
-            const u1 = user1[0];
-            const u2 = user2[0];
+            const allUsers = await base44.asServiceRole.entities.User.list();
+            const u1 = allUsers.find(u => u.id === swiper_id);
+            const u2 = allUsers.find(u => u.id === swiped_id);
             const appUrl = origin || "https://roomi.me";
             const chatUrl = `${appUrl}/chat?matchId=${match_id}`;
 
