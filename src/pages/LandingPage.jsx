@@ -89,6 +89,7 @@ export default function LandingPage() {
           </Button>
         </div>
       </header>
+      
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-20 md:pt-28 md:pb-40 overflow-hidden">
