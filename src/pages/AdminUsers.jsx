@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare } from "lucide-react";
+import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Sparkles } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -146,6 +146,20 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleFixMatches = async () => {
+        if (!confirm('זה יצור התאמות רטרואקטיביות ויישלח מיילים לכולם. להמשיך?')) return;
+        
+        setLoading(true);
+        try {
+            const result = await base44.functions.fixMatchesRetroactive({});
+            alert(result.message || 'הסתיים בהצלחה!');
+        } catch (error) {
+            console.error('Error fixing matches:', error);
+            alert('שגיאה בתיקון ההתאמות');
+        }
+        setLoading(false);
+    };
+
     const filteredUsers = users.filter(u => 
         u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,6 +174,10 @@ export default function AdminUsersPage() {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-black text-gray-900">ניהול משתמשים</h1>
                     <div className="flex gap-2">
+                        <Button onClick={handleFixMatches} variant="outline" className="bg-green-50 hover:bg-green-100 border-green-200">
+                            <Sparkles className="w-4 h-4 ml-2 text-green-600" />
+                            <span className="text-green-700">תקן התאמות</span>
+                        </Button>
                         {selectedUsers.length > 0 && (
                             <Button onClick={() => setShowEmailDialog(true)} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
                                 <MessageSquare className="w-4 h-4 ml-2" />
