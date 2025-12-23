@@ -34,7 +34,7 @@ export default function Layout({ children, currentPageName }) {
                const matches = await Match.filter({ user1_id: user.id }); 
                const matches2 = await Match.filter({ user2_id: user.id });
                const total = matches.length + matches2.length;
-               
+
                if (total > matchesCount && matchesCount !== 0) {
                    // New match detected!
                    if (Notification.permission === 'granted') {
@@ -45,7 +45,7 @@ export default function Layout({ children, currentPageName }) {
                    }
                }
                setMatchesCount(total);
-               
+
                // Request permissions if not denied/granted yet
                if (user.enable_notifications !== false && Notification.permission === 'default') {
                    Notification.requestPermission();
@@ -53,12 +53,12 @@ export default function Layout({ children, currentPageName }) {
 
            } catch(e) {}
        };
-       if (!['Onboarding', 'Home'].includes(currentPageName)) {
+       if (!['Onboarding'].includes(currentPageName)) {
            checkNotifications();
            const interval = setInterval(checkNotifications, 10000); // Poll every 10s
            return () => clearInterval(interval);
        }
-  }, [currentPageName, matchesCount]);
+       }, [currentPageName, matchesCount]);
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
@@ -66,7 +66,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Home', 'Chat', 'LandingPage'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -145,7 +145,7 @@ export default function Layout({ children, currentPageName }) {
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
-            {currentPageName === 'Home' || currentPageName === 'LandingPage' || currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
+            {currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
                 <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                     {children}
                 </div>

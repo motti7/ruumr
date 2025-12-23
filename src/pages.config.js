@@ -4,7 +4,6 @@ import Chat from './pages/Chat';
 import Discover from './pages/Discover';
 import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
-import LandingPage from './pages/LandingPage';
 import LikesSent from './pages/LikesSent';
 import LikesYou from './pages/LikesYou';
 import Matches from './pages/Matches';
@@ -26,7 +25,6 @@ export const PAGES = {
     "Discover": Discover,
     "HelpCenter": HelpCenter,
     "Home": Home,
-    "LandingPage": LandingPage,
     "LikesSent": LikesSent,
     "LikesYou": LikesYou,
     "Matches": Matches,
