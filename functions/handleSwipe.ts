@@ -27,11 +27,22 @@ export default async function(context) {
                 ]
             });
 
+            // Get profile names first
+            const [profile1List, profile2List] = await Promise.all([
+                base44.asServiceRole.entities.Profile.filter({ user_id: swiper_id }),
+                base44.asServiceRole.entities.Profile.filter({ user_id: swiped_id })
+            ]);
+            
+            const p1 = profile1List[0];
+            const p2 = profile2List[0];
+
             let match_id;
             if (existingMatches.length === 0) {
                 const match = await base44.asServiceRole.entities.Match.create({
                     user1_id: swiper_id,
                     user2_id: swiped_id,
+                    user1_name: p1?.name || '',
+                    user2_name: p2?.name || '',
                     status: 'active'
                 });
                 match_id = match.id;
@@ -40,20 +51,13 @@ export default async function(context) {
             }
 
             // 2. Send Emails
-            // We do this asynchronously without awaiting to not block the response too much, 
-            // but in serverless usually we should await.
-            
-            const [user1, user2, profile1List, profile2List] = await Promise.all([
+            const [user1, user2] = await Promise.all([
                 base44.asServiceRole.entities.User.filter({ id: swiper_id }),
-                base44.asServiceRole.entities.User.filter({ id: swiped_id }),
-                base44.asServiceRole.entities.Profile.filter({ user_id: swiper_id }),
-                base44.asServiceRole.entities.Profile.filter({ user_id: swiped_id })
+                base44.asServiceRole.entities.User.filter({ id: swiped_id })
             ]);
 
             const u1 = user1[0];
             const u2 = user2[0];
-            const p1 = profile1List[0];
-            const p2 = profile2List[0];
             const appUrl = origin || "https://roomi.me";
             const chatUrl = `${appUrl}/chat?matchId=${match_id}`;
 
@@ -63,7 +67,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u1.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p2.name}!`,
-                        body: `היי ${p1.name},\n\nיש לך התאמה חדשה ב-Roomi עם ${p2.name}!\n\nהיכנס/י לאפליקציה כדי להתחיל לצ'וטט:\n${chatUrl}`
+                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
                     });
                 }
 
@@ -72,7 +76,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u2.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p1.name}!`,
-                        body: `היי ${p2.name},\n\nיש לך התאמה חדשה ב-Roomi עם ${p1.name}!\n\nהיכנס/י לאפליקציה כדי להתחיל לצ'וטט:\n${chatUrl}`
+                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
                     });
                 }
             }

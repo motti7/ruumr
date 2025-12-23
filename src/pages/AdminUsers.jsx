@@ -166,6 +166,18 @@ export default function AdminUsersPage() {
                                 שלח הודעה ({selectedUsers.length})
                             </Button>
                         )}
+                        <Button onClick={async () => {
+                            if (confirm('זה יתקן התאמות שחסרות ויש להן לייק הדדי. להמשיך?')) {
+                                setLoading(true);
+                                try {
+                                    const result = await base44.functions.fixMatchesRetroactive({ origin: window.location.origin });
+                                    alert(result.message || 'הסתיים בהצלחה');
+                                } catch(e) {
+                                    alert('שגיאה: ' + e.message);
+                                }
+                                setLoading(false);
+                            }
+                        }} variant="outline" className="border-green-500 text-green-600">תיקון התאמות למפרע</Button>
                         <Button onClick={loadData} variant="outline"><Loader2 className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} /> רענן</Button>
                     </div>
                 </div>

@@ -136,7 +136,9 @@ export default function DiscoverPage() {
       try {
           await Swipe.create({
               swiper_id: userProfile.user_id,
+              swiper_name: userProfile.name,
               swiped_id: swipedProfile.user_id,
+              swiped_name: swipedProfile.name,
               action
           });
       } catch (e) {
