@@ -51,30 +51,56 @@ export default async function(context) {
             }
 
             // 2. Send Emails
-            const allUsers = await base44.asServiceRole.entities.User.list();
-            const u1 = allUsers.find(u => u.id === swiper_id);
-            const u2 = allUsers.find(u => u.id === swiped_id);
+            console.log("🔵 Starting email sending process...");
+            console.log("User IDs:", { swiper_id, swiped_id });
+            
             const appUrl = origin || "https://roomi.me";
             const chatUrl = `${appUrl}/chat?matchId=${match_id}`;
+            
+            // Get users with more detailed logging
+            const allUsers = await base44.asServiceRole.entities.User.list();
+            console.log("📧 Total users in system:", allUsers.length);
+            console.log("User IDs in system:", allUsers.map(u => u.id));
+            
+            const u1 = allUsers.find(u => u.id === swiper_id);
+            const u2 = allUsers.find(u => u.id === swiped_id);
+            
+            console.log("Found User 1:", u1 ? { id: u1.id, email: u1.email } : "NOT FOUND");
+            console.log("Found User 2:", u2 ? { id: u2.id, email: u2.email } : "NOT FOUND");
+            console.log("Profile 1:", p1 ? { name: p1.name } : "NOT FOUND");
+            console.log("Profile 2:", p2 ? { name: p2.name } : "NOT FOUND");
 
-            if (u1 && u2 && p1 && p2) {
-                // Email to Swiper (User 1)
-                if (u1.email) {
+            // Send emails with error handling
+            try {
+                if (u1?.email && p1 && p2) {
+                    console.log(`📨 Sending email to User 1: ${u1.email}`);
                     await base44.integrations.Core.SendEmail({
                         to: u1.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p2.name}!`,
-                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
+                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${chatUrl}">${chatUrl}</a>`
                     });
+                    console.log("✅ Email sent to User 1");
+                } else {
+                    console.log("⚠️ Cannot send email to User 1:", { hasUser: !!u1, hasEmail: !!u1?.email, hasProfile1: !!p1, hasProfile2: !!p2 });
                 }
+            } catch (emailError) {
+                console.error("❌ Failed to send email to User 1:", emailError);
+            }
 
-                // Email to Swiped (User 2)
-                if (u2.email) {
+            try {
+                if (u2?.email && p1 && p2) {
+                    console.log(`📨 Sending email to User 2: ${u2.email}`);
                     await base44.integrations.Core.SendEmail({
                         to: u2.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p1.name}!`,
-                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br>${chatUrl}`
+                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${chatUrl}">${chatUrl}</a>`
                     });
+                    console.log("✅ Email sent to User 2");
+                } else {
+                    console.log("⚠️ Cannot send email to User 2:", { hasUser: !!u2, hasEmail: !!u2?.email, hasProfile1: !!p1, hasProfile2: !!p2 });
                 }
+            } catch (emailError) {
+                console.error("❌ Failed to send email to User 2:", emailError);
             }
 
             return { match: true, match_id };
