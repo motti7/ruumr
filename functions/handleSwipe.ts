@@ -80,10 +80,10 @@ export default async function(context) {
             return { match: true, match_id };
         }
     } catch (e) {
-        console.error("Error in handleSwipe:", e);
-        // Even if error, if we found match logic, we might want to return true? 
-        // But safe to return false or rethrow. 
-        // Returning false prevents UI match screen but keeps app stable.
+        console.error("CRITICAL ERROR in handleSwipe:", e, e.stack);
+        // Log all data for debugging
+        console.error("Failed swipe data:", { swiper_id, swiped_id, action });
+        throw e; // Re-throw so we can see the error in logs
     }
 
     return { match: false };
