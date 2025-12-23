@@ -160,14 +160,7 @@ export default function Layout({ children, currentPageName }) {
                         <br/>
                         אנא פתח/י את האפליקציה מהטלפון שלך.
                     </p>
-                    <div className="bg-gray-100 p-4 rounded-xl border border-gray-200">
-                        <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} 
-                            alt="Scan QR Code" 
-                            className="w-32 h-32 mix-blend-multiply"
-                        />
-                    </div>
-                    <p className="text-sm text-gray-400 mt-4">סרוק/י כדי לפתוח בנייד</p>
+
                 </div>
             )}
         </div>

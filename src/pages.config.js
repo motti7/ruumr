@@ -1,43 +1,43 @@
-import Discover from './pages/Discover';
-import Matches from './pages/Matches';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Home from './pages/Home';
-import Onboarding from './pages/Onboarding';
-import HelpCenter from './pages/HelpCenter';
-import Terms from './pages/Terms';
-import Permissions from './pages/Permissions';
-import Chat from './pages/Chat';
-import ProfileView from './pages/ProfileView';
-import Verification from './pages/Verification';
-import LikesYou from './pages/LikesYou';
-import LikesSent from './pages/LikesSent';
-import Banned from './pages/Banned';
 import AdminUsers from './pages/AdminUsers';
+import Banned from './pages/Banned';
+import Chat from './pages/Chat';
+import Discover from './pages/Discover';
+import HelpCenter from './pages/HelpCenter';
+import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
+import LikesSent from './pages/LikesSent';
+import LikesYou from './pages/LikesYou';
+import Matches from './pages/Matches';
+import Onboarding from './pages/Onboarding';
+import Permissions from './pages/Permissions';
 import Privacy from './pages/Privacy';
+import Profile from './pages/Profile';
+import ProfileView from './pages/ProfileView';
+import Settings from './pages/Settings';
+import Terms from './pages/Terms';
+import Verification from './pages/Verification';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Discover": Discover,
-    "Matches": Matches,
-    "Profile": Profile,
-    "Settings": Settings,
-    "Home": Home,
-    "Onboarding": Onboarding,
-    "HelpCenter": HelpCenter,
-    "Terms": Terms,
-    "Permissions": Permissions,
-    "Chat": Chat,
-    "ProfileView": ProfileView,
-    "Verification": Verification,
-    "LikesYou": LikesYou,
-    "LikesSent": LikesSent,
-    "Banned": Banned,
     "AdminUsers": AdminUsers,
+    "Banned": Banned,
+    "Chat": Chat,
+    "Discover": Discover,
+    "HelpCenter": HelpCenter,
+    "Home": Home,
     "LandingPage": LandingPage,
+    "LikesSent": LikesSent,
+    "LikesYou": LikesYou,
+    "Matches": Matches,
+    "Onboarding": Onboarding,
+    "Permissions": Permissions,
     "Privacy": Privacy,
+    "Profile": Profile,
+    "ProfileView": ProfileView,
+    "Settings": Settings,
+    "Terms": Terms,
+    "Verification": Verification,
 }
 
 export const pagesConfig = {

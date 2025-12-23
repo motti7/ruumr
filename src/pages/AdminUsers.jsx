@@ -115,7 +115,7 @@ export default function AdminUsersPage() {
                      await base44.integrations.Core.SendEmail({
                         to: user.email,
                         subject: emailSubject,
-                        body: emailBody
+                        body: emailBody.replace(/\n/g, '<br>')
                     });
                     successCount++;
                 } catch(e) {
