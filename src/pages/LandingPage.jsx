@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, ArrowLeft, Zap, Sparkles, Rocket, PartyPopper, Music, Headphones } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from '@/utils';
 
@@ -35,6 +35,11 @@ export default function LandingPage() {
         // אם המשתמש במחשב - נפתח את ההודעה החוסמת
         setShowDesktopMessage(true);
       }
+  };
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
   return (
