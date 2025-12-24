@@ -151,10 +151,23 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
         const audio = audioRef.current;
 
+        // Handle visibility change
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                audio.pause();
+            } else if (isActive && !audio.paused) {
+                audio.play().catch(() => {});
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         // Play when active (don't stop on photo change or expanded state)
-        if (isActive) {
+        if (isActive && !document.hidden) {
             if (audio.paused) {
                 audio.volume = 0;
+                
+                // Handle autoplay restrictions in browsers
                 const playPromise = audio.play();
 
                 if (playPromise !== undefined) {
@@ -170,17 +183,20 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             }
                         }, 200);
                     }).catch(error => {
-                        console.log("Audio play failed:", error);
+                        console.log("Audio autoplay blocked by browser - user interaction required:", error);
+                        // Mute by default if autoplay fails
+                        setIsMuted(true);
                     });
                 }
             }
         } else {
-            // Only pause if not active
+            // Only pause if not active or tab hidden
             audio.pause();
             audio.currentTime = 0;
         }
 
         return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (!isActive) {
                 audio.pause();
             }
@@ -454,7 +470,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
+                        className="absolute top-16 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
                         aria-label="View Profile Info"
                     >
                         <Info className="w-5 h-5 text-[--theme-orange]" />
@@ -472,7 +488,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
 
                     {/* Music Player */}
                     {profile.song_preview_url && profile.song_name && isActive && (
-                        <div className="absolute bottom-4 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="absolute top-4 left-4 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
                                       <img src={profile.song_image} className="w-full h-full object-cover" />
