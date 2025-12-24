@@ -314,7 +314,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute top-16 right-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                                className="absolute bottom-24 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                             >
                                 {(() => {
                                     const l = String(profile.social_link).toLowerCase();
