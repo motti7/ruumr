@@ -126,22 +126,48 @@ export default function Layout({ children, currentPageName }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta property="og:site_name" content="Roomi" />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://roomi.me" />
+        <meta property="og:locale" content="he_IL" />
         <title>Roomi - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
         <meta name="description" content="Roomi - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
         <meta property="og:description" content="מחפשים שותפים? רומי היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
         <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:image:secure_url" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
         <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:alt" content="Roomi - אפליקציה למציאת שותפים" />
         <link rel="image_src" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
         <meta name="thumbnail" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@Roomi" />
         <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
         <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
         <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta name="twitter:image:alt" content="Roomi Logo" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Roomi",
+            "url": "https://roomi.me",
+            "logo": "https://cdn-icons-png.flaticon.com/512/3405/3405802.png",
+            "description": "האפליקציה החכמה למציאת שותפים ודירות בישראל",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Web",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "ILS"
+            }
+          })}
+        </script>
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
