@@ -40,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
                    if (Notification.permission === 'granted') {
                        new Notification('Roomi', {
                            body: 'יש לך התאמה חדשה!',
-                           icon: 'https://cdn-icons-png.flaticon.com/512/3405/3405802.png'
+                           icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png'
                        });
                    }
                }
@@ -124,11 +124,11 @@ export default function Layout({ children, currentPageName }) {
         <meta name="theme-color" content="#FF5722" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
         <meta property="og:site_name" content="Roomi" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://roomi.me" />
@@ -137,19 +137,19 @@ export default function Layout({ children, currentPageName }) {
         <meta name="description" content="Roomi - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
         <meta property="og:title" content="Roomi - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
         <meta property="og:description" content="מחפשים שותפים? רומי היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
-        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <meta property="og:image:secure_url" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta property="og:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <meta property="og:image:secure_url" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:alt" content="Roomi - אפליקציה למציאת שותפים" />
-        <link rel="image_src" href="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
-        <meta name="thumbnail" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <link rel="image_src" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <meta name="thumbnail" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@Roomi" />
         <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
         <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
-        <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3405/3405802.png" />
+        <meta name="twitter:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
         <meta name="twitter:image:alt" content="Roomi Logo" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -157,7 +157,7 @@ export default function Layout({ children, currentPageName }) {
             "@type": "WebApplication",
             "name": "Roomi",
             "url": "https://roomi.me",
-            "logo": "https://cdn-icons-png.flaticon.com/512/3405/3405802.png",
+            "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png",
             "description": "האפליקציה החכמה למציאת שותפים ודירות בישראל",
             "applicationCategory": "LifestyleApplication",
             "operatingSystem": "Web",
