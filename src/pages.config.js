@@ -1,3 +1,4 @@
+import AdminAnalytics from './pages/AdminAnalytics';
 import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
 import Chat from './pages/Chat';
@@ -15,11 +16,11 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
-import AdminAnalytics from './pages/AdminAnalytics';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminAnalytics": AdminAnalytics,
     "AdminUsers": AdminUsers,
     "Banned": Banned,
     "Chat": Chat,
@@ -37,7 +38,6 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
-    "AdminAnalytics": AdminAnalytics,
 }
 
 export const pagesConfig = {

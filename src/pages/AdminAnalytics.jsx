@@ -35,9 +35,12 @@ export default function AdminAnalyticsPage() {
         try {
             const allViews = await PageView.list(10000);
             
+            // Filter only Onboarding steps
+            const onboardingViews = allViews.filter(v => v.page_name.startsWith('Onboarding - Step'));
+            
             // Group by page name
             const grouped = {};
-            allViews.forEach(view => {
+            onboardingViews.forEach(view => {
                 if (!grouped[view.page_name]) {
                     grouped[view.page_name] = { count: 0, uniqueUsers: new Set() };
                 }
@@ -47,12 +50,17 @@ export default function AdminAnalyticsPage() {
                 }
             });
 
-            // Convert to array and sort
-            const stats = Object.keys(grouped).map(pageName => ({
-                page: pageName,
-                totalViews: grouped[pageName].count,
-                uniqueUsers: grouped[pageName].uniqueUsers.size
-            })).sort((a, b) => b.totalViews - a.totalViews);
+            // Convert to array and sort by step number
+            const stats = Object.keys(grouped).map(pageName => {
+                const stepMatch = pageName.match(/Step (\d+)/);
+                const stepNum = stepMatch ? parseInt(stepMatch[1]) : 0;
+                return {
+                    page: pageName,
+                    stepNumber: stepNum,
+                    totalViews: grouped[pageName].count,
+                    uniqueUsers: grouped[pageName].uniqueUsers.size
+                };
+            }).sort((a, b) => a.stepNumber - b.stepNumber);
 
             setPageStats(stats);
         } catch (e) {
@@ -68,8 +76,8 @@ export default function AdminAnalyticsPage() {
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 mb-1">ניתוח כניסות</h1>
-                        <p className="text-gray-500">סטטיסטיקות צפיות בעמודים</p>
+                        <h1 className="text-3xl font-black text-gray-900 mb-1">שלבי הרשמה</h1>
+                        <p className="text-gray-500">כמה אנשים הגיעו לכל שלב בתהליך ההרשמה</p>
                     </div>
                     <BarChart3 className="w-10 h-10 text-[--theme-orange]" />
                 </div>
@@ -80,12 +88,16 @@ export default function AdminAnalyticsPage() {
                     </div>
                 ) : (
                     <div className="grid gap-4">
-                        {pageStats.map((stat, idx) => (
+                        {pageStats.map((stat, idx) => {
+                            const dropoff = idx > 0 ? ((pageStats[idx-1].uniqueUsers - stat.uniqueUsers) / pageStats[idx-1].uniqueUsers * 100).toFixed(1) : 0;
+                            return (
                             <Card key={stat.page} className="hover:shadow-lg transition-shadow">
                                 <CardHeader className="pb-3">
                                     <CardTitle className="text-right flex items-center justify-between">
                                         <span className="font-bold text-lg">{stat.page}</span>
-                                        <span className="text-3xl font-black text-[--theme-orange]">#{idx + 1}</span>
+                                        {idx > 0 && dropoff > 0 && (
+                                            <span className="text-sm text-red-500 font-normal">-{dropoff}% מהשלב הקודם</span>
+                                        )}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -102,7 +114,7 @@ export default function AdminAnalyticsPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        ))}
+                        )}))}
                         
                         {pageStats.length === 0 && (
                             <div className="text-center py-12 text-gray-400">

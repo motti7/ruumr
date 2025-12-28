@@ -95,6 +95,25 @@ export default function OnboardingPage() {
     };
     fetchUser();
   }, [navigate]);
+
+  useEffect(() => {
+    const trackStep = async () => {
+      try {
+        const { PageView } = require('@/entities/PageView');
+        const user = await User.me();
+        await PageView.create({
+          page_name: `Onboarding - Step ${step}`,
+          user_id: user.id
+        });
+      } catch(e) {
+        try {
+          const { PageView } = require('@/entities/PageView');
+          await PageView.create({ page_name: `Onboarding - Step ${step}` });
+        } catch(e2) {}
+      }
+    };
+    trackStep();
+  }, [step]);
   
   const canProceed = () => {
     switch(step) {
