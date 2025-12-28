@@ -114,7 +114,8 @@ export default function AdminAnalyticsPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        )}))}
+                            );
+                        })}
                         
                         {pageStats.length === 0 && (
                             <div className="text-center py-12 text-gray-400">
