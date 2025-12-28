@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
 import { Message } from "@/entities/Message";
+import { PageView } from "@/entities/PageView";
 import { useState, useEffect } from "react";
 
 export default function Layout({ children, currentPageName }) {
@@ -15,6 +16,21 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate(); // Import this hook if not imported!
 
   useEffect(() => {
+       const trackPageView = async () => {
+           try {
+               const user = await UserEntity.me();
+               await PageView.create({
+                   page_name: currentPageName,
+                   user_id: user.id
+               });
+           } catch(e) {
+               // Guest user or error - track without user_id
+               try {
+                   await PageView.create({ page_name: currentPageName });
+               } catch(e2) {}
+           }
+       };
+
        const checkBanned = async () => {
            try {
                const user = await UserEntity.me();
@@ -53,6 +69,8 @@ export default function Layout({ children, currentPageName }) {
 
            } catch(e) {}
        };
+       trackPageView();
+
        if (!['Onboarding'].includes(currentPageName)) {
            checkNotifications();
            const interval = setInterval(checkNotifications, 10000); // Poll every 10s

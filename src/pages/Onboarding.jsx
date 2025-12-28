@@ -822,6 +822,13 @@ export default function OnboardingPage() {
             </div>
         )}
       </div>
+      
+      <button 
+        onClick={() => window.location.href = createPageUrl('AdminAnalytics')} 
+        className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors"
+      >
+        Admin
+      </button>
     </div>
   );
 }
