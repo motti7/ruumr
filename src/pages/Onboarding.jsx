@@ -99,17 +99,14 @@ export default function OnboardingPage() {
   useEffect(() => {
     const trackStep = async () => {
       try {
-        const { PageView } = require('@/entities/PageView');
         const user = await User.me();
+        const { PageView } = require('@/entities/PageView');
         await PageView.create({
           page_name: `Onboarding - Step ${step}`,
           user_id: user.id
         });
       } catch(e) {
-        try {
-          const { PageView } = require('@/entities/PageView');
-          await PageView.create({ page_name: `Onboarding - Step ${step}` });
-        } catch(e2) {}
+        console.error("Failed to track onboarding step:", e);
       }
     };
     trackStep();
