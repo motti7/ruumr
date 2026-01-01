@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
             await base44.integrations.Core.SendEmail({
                 to: userToMsg.email,
                 subject: "הודעה מצוות Roomi",
-                body: msg
+                body: msg.replace(/\n/g, '<br>')
             });
             alert("הודעה נשלחה בהצלחה");
         } catch(e) {
