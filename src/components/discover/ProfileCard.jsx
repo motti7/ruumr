@@ -359,7 +359,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             {profile.current_status === 'has_apartment' && (
                                 <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
                                     <Home className="w-4 h-4 ml-1" />
-                                    {profile.location}
+                                    יש לי דירה!
                                 </div>
                             )}
                         </div>
