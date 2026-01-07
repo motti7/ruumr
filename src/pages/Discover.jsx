@@ -148,21 +148,55 @@ export default function DiscoverPage() {
       setCurrentIndex(prev => prev + 1);
       setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
 
-      // 2. Call Backend for Match Logic (and Emails) - This can fail without breaking flow
-      try {
-          const { base44 } = require('@/api/base44Client');
-          const result = await base44.functions.handleSwipe({
-              swiper_id: userProfile.user_id, 
-              swiped_id: swipedProfile.user_id, 
-              action,
-              origin: window.location.origin
-          });
+      // 2. Check for match manually since backend might fail
+      if (action === 'like') {
+          try {
+              // Check if the other person also liked me
+              const reverseSwipes = await Swipe.filter({ 
+                  swiper_id: swipedProfile.user_id, 
+                  swiped_id: userProfile.user_id, 
+                  action: 'like' 
+              });
 
-          if (result?.match) {
-              setMatchData({ profile1: userProfile, profile2: swipedProfile });
+              if (reverseSwipes && reverseSwipes.length > 0) {
+                  // It's a match! Create it
+                  const existingMatches = await Match.filter({
+                      $or: [
+                          { user1_id: userProfile.user_id, user2_id: swipedProfile.user_id },
+                          { user1_id: swipedProfile.user_id, user2_id: userProfile.user_id }
+                      ]
+                  });
+
+                  if (existingMatches.length === 0) {
+                      await Match.create({
+                          user1_id: userProfile.user_id,
+                          user2_id: swipedProfile.user_id,
+                          user1_name: userProfile.name,
+                          user2_name: swipedProfile.name,
+                          status: 'active'
+                      });
+                  }
+
+                  setMatchData({ profile1: userProfile, profile2: swipedProfile });
+                  
+                  // Try to call backend function for emails (optional)
+                  try {
+                      const { base44 } = require('@/api/base44Client');
+                      if (base44.functions?.handleSwipe) {
+                          await base44.functions.handleSwipe({
+                              swiper_id: userProfile.user_id, 
+                              swiped_id: swipedProfile.user_id, 
+                              action,
+                              origin: window.location.origin
+                          });
+                      }
+                  } catch (e) {
+                      console.log("Backend email notification failed (match was created anyway)");
+                  }
+              }
+          } catch (matchError) {
+              console.error("❌ Match check failed:", matchError);
           }
-      } catch (matchError) {
-          console.error("❌ Match check failed (swipe was still saved):", matchError);
       }
     } catch (error) { 
         console.error("❌ CRITICAL: Swipe save failed:", error); 
