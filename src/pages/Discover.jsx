@@ -148,9 +148,11 @@ export default function DiscoverPage() {
       setCurrentIndex(prev => prev + 1);
       setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
 
-      // 2. Check for match manually since backend might fail
+      // 2. Check for match - CRITICAL LOGIC!
       if (action === 'like') {
           try {
+              console.log(`🔍 Checking if ${swipedProfile.name} liked me back...`);
+
               // Check if the other person also liked me
               const reverseSwipes = await Swipe.filter({ 
                   swiper_id: swipedProfile.user_id, 
@@ -158,8 +160,12 @@ export default function DiscoverPage() {
                   action: 'like' 
               });
 
+              console.log(`📊 Found ${reverseSwipes?.length || 0} reverse swipes`);
+
               if (reverseSwipes && reverseSwipes.length > 0) {
-                  // It's a match! Create it
+                  console.log(`💕 IT'S A MATCH! Creating match...`);
+
+                  // It's a match! Check if already exists
                   const existingMatches = await Match.filter({
                       $or: [
                           { user1_id: userProfile.user_id, user2_id: swipedProfile.user_id },
@@ -175,10 +181,14 @@ export default function DiscoverPage() {
                           user2_name: swipedProfile.name,
                           status: 'active'
                       });
+                      console.log(`✅ Match created successfully!`);
+                  } else {
+                      console.log(`⏭️ Match already exists in database`);
                   }
 
+                  // Show animation
                   setMatchData({ profile1: userProfile, profile2: swipedProfile });
-                  
+
                   // Try to call backend function for emails (optional)
                   try {
                       const { base44 } = require('@/api/base44Client');
@@ -189,13 +199,17 @@ export default function DiscoverPage() {
                               action,
                               origin: window.location.origin
                           });
+                          console.log(`📧 Email notifications sent`);
                       }
                   } catch (e) {
-                      console.log("Backend email notification failed (match was created anyway)");
+                      console.log("📧 Email notification skipped (match was created)");
                   }
+              } else {
+                  console.log(`👍 Like saved, waiting for them to like back...`);
               }
           } catch (matchError) {
-              console.error("❌ Match check failed:", matchError);
+              console.error("❌ CRITICAL ERROR in match detection:", matchError);
+              alert("שגיאה בזיהוי התאמה. אנא צור קשר עם התמיכה.");
           }
       }
     } catch (error) { 
