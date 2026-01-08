@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare } from "lucide-react";
+import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -168,6 +168,10 @@ export default function AdminUsersPage() {
                                 שלח הודעה ({selectedUsers.length})
                             </Button>
                         )}
+                        <Button onClick={() => navigate(createPageUrl('AdminFixMatches'))} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                            <Heart className="w-4 h-4 ml-2" />
+                            תיקון התאמות
+                        </Button>
                         <Button onClick={loadData} variant="outline"><Loader2 className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} /> רענן</Button>
                     </div>
                 </div>

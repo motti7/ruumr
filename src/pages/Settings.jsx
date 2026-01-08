@@ -115,11 +115,6 @@ export default function SettingsPage() {
                 <Shield className="w-3 h-3 ml-2" />
                 Admin: User Management
             </Button>
-
-            <Button onClick={() => window.location.href = createPageUrl('AdminFixMatches')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-red-400 text-xs">
-                <Shield className="w-3 h-3 ml-2" />
-                Admin: Fix Matches (תיקון התאמות)
-            </Button>
         </div>
       </div>
     </div>
