@@ -35,15 +35,30 @@ export default function AdminFixMatchesPage() {
         setResults(null);
 
         try {
-            // Get all swipes
-            const allSwipes = await Swipe.list(10000);
+            // Get all swipes - need to get them in batches since RLS limits us
+            const { base44 } = require('@/api/base44Client');
+            const me = await User.me();
+            
+            // Get ALL profiles first
             const allProfiles = await Profile.list(10000);
             const profileMap = {};
             allProfiles.forEach(p => {
                 profileMap[p.user_id] = p;
             });
 
-            console.log(`Found ${allSwipes.length} swipes`);
+            // Get ALL swipes by fetching for each user (workaround for RLS)
+            const allSwipes = [];
+            for (const profile of allProfiles) {
+                try {
+                    // Get swipes where this user is the swiper
+                    const userSwipes = await base44.entities.Swipe.filter({ swiper_id: profile.user_id });
+                    allSwipes.push(...userSwipes);
+                } catch (e) {
+                    console.log(`Failed to get swipes for ${profile.user_id}`);
+                }
+            }
+            
+            console.log(`Found ${allSwipes.length} swipes from ${allProfiles.length} users`);
             
             let matchesCreated = 0;
             let matchesSkipped = 0;
