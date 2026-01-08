@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 
 export default function AdminFixMatchesPage() {
     const [loading, setLoading] = useState(false);
@@ -36,7 +37,6 @@ export default function AdminFixMatchesPage() {
 
         try {
             // Get all swipes - need to get them in batches since RLS limits us
-            const { base44 } = require('@/api/base44Client');
             const me = await User.me();
             
             // Get ALL profiles first
