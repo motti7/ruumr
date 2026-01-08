@@ -36,35 +36,36 @@ export default function AdminFixMatchesPage() {
         setResults(null);
 
         try {
-            // Get all swipes - need to get them in batches since RLS limits us
-            const me = await User.me();
+            // Get ALL swipes without any filter
+            console.log("🔍 Fetching all swipes...");
+            const allSwipes = await Swipe.list(100000);
+            console.log(`✅ Found ${allSwipes.length} total swipes in system`);
             
-            // Get ALL profiles first
+            // Get ALL profiles
             const allProfiles = await Profile.list(10000);
             const profileMap = {};
             allProfiles.forEach(p => {
                 profileMap[p.user_id] = p;
             });
-
-            // Get ALL swipes by fetching for each user (workaround for RLS)
-            const allSwipes = [];
-            for (const profile of allProfiles) {
-                try {
-                    // Get swipes where this user is the swiper
-                    const userSwipes = await base44.entities.Swipe.filter({ swiper_id: profile.user_id });
-                    allSwipes.push(...userSwipes);
-                } catch (e) {
-                    console.log(`Failed to get swipes for ${profile.user_id}`);
-                }
-            }
-            
-            console.log(`Found ${allSwipes.length} swipes from ${allProfiles.length} users`);
+            console.log(`✅ Found ${allProfiles.length} profiles`);
             
             let matchesCreated = 0;
             let matchesSkipped = 0;
             const processedPairs = new Set();
+            const mutualLikes = [];
 
-            // Group swipes by user pairs
+            // Build a map of all likes for quick lookup
+            const likesMap = {};
+            allSwipes.forEach(swipe => {
+                if (swipe.action === 'like') {
+                    const key = `${swipe.swiper_id}->${swipe.swiped_id}`;
+                    likesMap[key] = true;
+                }
+            });
+            
+            console.log(`🔍 Processing ${Object.keys(likesMap).length} likes...`);
+
+            // Find mutual likes
             for (const swipe of allSwipes) {
                 if (swipe.action !== 'like') continue;
 
@@ -72,44 +73,48 @@ export default function AdminFixMatchesPage() {
                 const user2 = swipe.swiped_id;
 
                 // Create unique pair ID (sorted to avoid duplicates)
-                const pairId = [user1, user2].sort().join('-');
+                const pairId = [user1, user2].sort().join('|');
                 if (processedPairs.has(pairId)) continue;
                 processedPairs.add(pairId);
 
-                // Check if reverse like exists
-                const reverseSwipe = allSwipes.find(s => 
-                    s.swiper_id === user2 && 
-                    s.swiped_id === user1 && 
-                    s.action === 'like'
-                );
+                // Check if reverse like exists using the map
+                const reverseLikeKey = `${user2}->${user1}`;
+                if (likesMap[reverseLikeKey]) {
+                    mutualLikes.push({ user1, user2 });
+                    console.log(`💕 Found mutual like: ${user1} <-> ${user2}`);
+                }
+            }
 
-                if (reverseSwipe) {
-                    // It's a match! Check if already exists
-                    const existingMatches = await Match.filter({
-                        $or: [
-                            { user1_id: user1, user2_id: user2 },
-                            { user1_id: user2, user2_id: user1 }
-                        ]
+            console.log(`✅ Found ${mutualLikes.length} mutual likes total`);
+
+            // Now create matches for all mutual likes
+            for (const { user1, user2 } of mutualLikes) {
+                // Check if match already exists
+                const existingMatches = await Match.filter({
+                    $or: [
+                        { user1_id: user1, user2_id: user2 },
+                        { user1_id: user2, user2_id: user1 }
+                    ]
+                });
+
+                const p1 = profileMap[user1];
+                const p2 = profileMap[user2];
+
+                if (existingMatches.length === 0) {
+                    // Create the match
+                    await Match.create({
+                        user1_id: user1,
+                        user2_id: user2,
+                        user1_name: p1?.name || 'Unknown',
+                        user2_name: p2?.name || 'Unknown',
+                        status: 'active'
                     });
 
-                    if (existingMatches.length === 0) {
-                        // Create the match
-                        const p1 = profileMap[user1];
-                        const p2 = profileMap[user2];
-
-                        await Match.create({
-                            user1_id: user1,
-                            user2_id: user2,
-                            user1_name: p1?.name || 'Unknown',
-                            user2_name: p2?.name || 'Unknown',
-                            status: 'active'
-                        });
-
-                        matchesCreated++;
-                        console.log(`✅ Created match: ${p1?.name} <-> ${p2?.name}`);
-                    } else {
-                        matchesSkipped++;
-                    }
+                    matchesCreated++;
+                    console.log(`✅ Created match: ${p1?.name || user1} <-> ${p2?.name || user2}`);
+                } else {
+                    matchesSkipped++;
+                    console.log(`⏭️ Match already exists: ${p1?.name || user1} <-> ${p2?.name || user2}`);
                 }
             }
 
