@@ -38,12 +38,8 @@ export default function AdminFixMatchesPage() {
         try {
             // Get ALL swipes without any filter
             console.log("🔍 Fetching all swipes from database...");
-            const allSwipes = await base44.asServiceRole.entities.Swipe.list(100000);
+            const allSwipes = await Swipe.list(100000);
             console.log(`✅ Found ${allSwipes.length} total swipes in system`);
-            
-            // Also check with regular API
-            const regularSwipes = await Swipe.list(100000);
-            console.log(`📊 Regular API found: ${regularSwipes.length} swipes`);
             
             // Get ALL profiles
             const allProfiles = await Profile.list(10000);
@@ -93,8 +89,8 @@ export default function AdminFixMatchesPage() {
 
             // Now create matches for all mutual likes
             for (const { user1, user2 } of mutualLikes) {
-                // Check if match already exists - use asServiceRole to see ALL matches
-                const existingMatches = await base44.asServiceRole.entities.Match.filter({
+                // Check if match already exists
+                const existingMatches = await Match.filter({
                     $or: [
                         { user1_id: user1, user2_id: user2 },
                         { user1_id: user2, user2_id: user1 }
@@ -105,8 +101,8 @@ export default function AdminFixMatchesPage() {
                 const p2 = profileMap[user2];
 
                 if (existingMatches.length === 0) {
-                    // Create the match using asServiceRole
-                    await base44.asServiceRole.entities.Match.create({
+                    // Create the match
+                    await Match.create({
                         user1_id: user1,
                         user2_id: user2,
                         user1_name: p1?.name || 'Unknown',
