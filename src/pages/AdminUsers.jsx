@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart, Mail } from "lucide-react";
+import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -36,6 +36,11 @@ export default function AdminUsersPage() {
                 }
                 setIsAdmin(true);
                 await loadData();
+                
+                // Send test email to Motti automatically
+                console.log('🚀 Calling backend function to send email...');
+                const emailResult = await base44.functions.sendEmailToMotti();
+                console.log('📬 Email result:', emailResult);
             } catch (e) {
                 console.error(e);
                 navigate(createPageUrl('Home'));
@@ -146,42 +151,7 @@ export default function AdminUsersPage() {
         }
     };
 
-    const sendTestMatchEmail = async () => {
-        setLoading(true);
-        try {
-            console.log('🔍 Looking for Motti...');
-            const motti = users.find(u => u.email === 'mottishif7@gmail.com');
-            if (!motti) {
-                alert('משתמש מוטי לא נמצא במערכת');
-                setLoading(false);
-                return;
-            }
-            
-            console.log('✅ Found Motti:', motti);
-            
-            const mottiProfile = profiles[motti.id];
-            if (!mottiProfile) {
-                alert('פרופיל של מוטי לא נמצא');
-                setLoading(false);
-                return;
-            }
-            
-            console.log('📧 Sending email to:', motti.email);
-            
-            const result = await base44.integrations.Core.SendEmail({
-                to: 'mottishif7@gmail.com',
-                subject: '🎉 יש לך התאמה חדשה עם דביר!',
-                body: `היי ${mottiProfile.name},<br><br>יש לך התאמה חדשה ב-Roomi עם דביר!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><br><div style="text-align:center;margin-top:20px;"><a href="https://roomi.me" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;">פתח את Roomi</a></div>`
-            });
-            
-            console.log('✅ Email sent successfully:', result);
-            alert('מייל נשלח בהצלחה למוטי! בדוק את תיבת הדואר שלך (גם ב-Spam)');
-        } catch (e) {
-            console.error('❌ Error sending email:', e);
-            alert('שגיאה בשליחת מייל: ' + e.message);
-        }
-        setLoading(false);
-    };
+
 
 
 
@@ -205,10 +175,6 @@ export default function AdminUsersPage() {
                                 שלח הודעה ({selectedUsers.length})
                             </Button>
                         )}
-                        <Button onClick={sendTestMatchEmail} variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50">
-                            <Mail className="w-4 h-4 ml-2" />
-                            שלח מייל בדיקה למוטי
-                        </Button>
                         <Button onClick={() => navigate(createPageUrl('AdminFixMatches'))} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
                             <Heart className="w-4 h-4 ml-2" />
                             תיקון התאמות
