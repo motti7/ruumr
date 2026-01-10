@@ -55,7 +55,6 @@ export default async function(context) {
             console.log("User IDs:", { swiper_id, swiped_id });
             
             const appUrl = origin || "https://roomi.me";
-            const chatUrl = `${appUrl}/chat?matchId=${match_id}`;
             
             // Get users with more detailed logging
             const allUsers = await base44.asServiceRole.entities.User.list();
@@ -77,7 +76,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u1.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p2.name}!`,
-                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${chatUrl}">${chatUrl}</a>`
+                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
                     });
                     console.log("✅ Email sent to User 1");
                 } else {
@@ -93,7 +92,7 @@ export default async function(context) {
                     await base44.integrations.Core.SendEmail({
                         to: u2.email,
                         subject: `🎉 יש לך התאמה חדשה עם ${p1.name}!`,
-                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${chatUrl}">${chatUrl}</a>`
+                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
                     });
                     console.log("✅ Email sent to User 2");
                 } else {
