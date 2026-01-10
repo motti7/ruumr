@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart } from "lucide-react";
+import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart, Mail } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -146,6 +146,32 @@ export default function AdminUsersPage() {
         }
     };
 
+    const sendTestMatchEmail = async () => {
+        try {
+            const motti = users.find(u => u.email === 'mottishif7@gmail.com');
+            if (!motti) {
+                alert('משתמש מוטי לא נמצא');
+                return;
+            }
+            
+            const mottiProfile = profiles[motti.id];
+            if (!mottiProfile) {
+                alert('פרופיל של מוטי לא נמצא');
+                return;
+            }
+            
+            await base44.integrations.Core.SendEmail({
+                to: 'mottishif7@gmail.com',
+                subject: '🎉 יש לך התאמה חדשה עם דביר!',
+                body: `היי ${mottiProfile.name},<br><br>יש לך התאמה חדשה ב-Roomi עם דביר!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="https://roomi.me" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
+            });
+            
+            alert('מייל נשלח למוטי!');
+        } catch (e) {
+            alert('שגיאה בשליחת מייל: ' + e.message);
+        }
+    };
+
 
 
     const filteredUsers = users.filter(u => 
@@ -168,6 +194,10 @@ export default function AdminUsersPage() {
                                 שלח הודעה ({selectedUsers.length})
                             </Button>
                         )}
+                        <Button onClick={sendTestMatchEmail} variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                            <Mail className="w-4 h-4 ml-2" />
+                            שלח מייל בדיקה למוטי
+                        </Button>
                         <Button onClick={() => navigate(createPageUrl('AdminFixMatches'))} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
                             <Heart className="w-4 h-4 ml-2" />
                             תיקון התאמות
