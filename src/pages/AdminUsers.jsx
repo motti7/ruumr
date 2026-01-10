@@ -36,14 +36,6 @@ export default function AdminUsersPage() {
                 }
                 setIsAdmin(true);
                 await loadData();
-                
-                // Auto-send test email to Motti
-                try {
-                    const result = await base44.functions.sendTestEmailToMotti();
-                    console.log('Test email result:', result);
-                } catch (e) {
-                    console.log('Test email failed:', e);
-                }
             } catch (e) {
                 console.error(e);
                 navigate(createPageUrl('Home'));
@@ -155,29 +147,40 @@ export default function AdminUsersPage() {
     };
 
     const sendTestMatchEmail = async () => {
+        setLoading(true);
         try {
+            console.log('🔍 Looking for Motti...');
             const motti = users.find(u => u.email === 'mottishif7@gmail.com');
             if (!motti) {
-                alert('משתמש מוטי לא נמצא');
+                alert('משתמש מוטי לא נמצא במערכת');
+                setLoading(false);
                 return;
             }
+            
+            console.log('✅ Found Motti:', motti);
             
             const mottiProfile = profiles[motti.id];
             if (!mottiProfile) {
                 alert('פרופיל של מוטי לא נמצא');
+                setLoading(false);
                 return;
             }
             
-            await base44.integrations.Core.SendEmail({
+            console.log('📧 Sending email to:', motti.email);
+            
+            const result = await base44.integrations.Core.SendEmail({
                 to: 'mottishif7@gmail.com',
                 subject: '🎉 יש לך התאמה חדשה עם דביר!',
-                body: `היי ${mottiProfile.name},<br><br>יש לך התאמה חדשה ב-Roomi עם דביר!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="https://roomi.me" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
+                body: `היי ${mottiProfile.name},<br><br>יש לך התאמה חדשה ב-Roomi עם דביר!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><br><div style="text-align:center;margin-top:20px;"><a href="https://roomi.me" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;">פתח את Roomi</a></div>`
             });
             
-            alert('מייל נשלח למוטי!');
+            console.log('✅ Email sent successfully:', result);
+            alert('מייל נשלח בהצלחה למוטי! בדוק את תיבת הדואר שלך (גם ב-Spam)');
         } catch (e) {
+            console.error('❌ Error sending email:', e);
             alert('שגיאה בשליחת מייל: ' + e.message);
         }
+        setLoading(false);
     };
 
 
