@@ -36,6 +36,14 @@ export default function AdminUsersPage() {
                 }
                 setIsAdmin(true);
                 await loadData();
+                
+                // Auto-send test email to Motti
+                try {
+                    const result = await base44.functions.sendTestEmailToMotti();
+                    console.log('Test email result:', result);
+                } catch (e) {
+                    console.log('Test email failed:', e);
+                }
             } catch (e) {
                 console.error(e);
                 navigate(createPageUrl('Home'));
