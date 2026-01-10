@@ -103,6 +103,53 @@ export default async function(context) {
             }
 
             return { match: true, match_id };
+        } else {
+            // No match, but check if we should send likes notification to swiped user
+            try {
+                // Count how many likes the swiped user has received
+                const allLikesForSwipedUser = await base44.asServiceRole.entities.Swipe.filter({
+                    swiped_id: swiped_id,
+                    action: 'like'
+                });
+                
+                const totalLikes = allLikesForSwipedUser.length;
+                
+                // Get the user to check last notification count
+                const allUsers = await base44.asServiceRole.entities.User.list();
+                const swipedUser = allUsers.find(u => u.id === swiped_id);
+                
+                if (swipedUser) {
+                    const lastNotificationCount = swipedUser.last_likes_notification_count || 0;
+                    const newLikesSinceLastNotification = totalLikes - lastNotificationCount;
+                    
+                    console.log(`💕 Likes check for ${swiped_id}: Total=${totalLikes}, LastNotified=${lastNotificationCount}, New=${newLikesSinceLastNotification}`);
+                    
+                    // Send notification every 2 new likes
+                    if (newLikesSinceLastNotification >= 2) {
+                        const swipedProfile = await base44.asServiceRole.entities.Profile.filter({ user_id: swiped_id });
+                        const profile = swipedProfile[0];
+                        
+                        if (swipedUser.email && profile) {
+                            const appUrl = origin || "https://roomi.me";
+                            
+                            await base44.integrations.Core.SendEmail({
+                                to: swipedUser.email,
+                                subject: `💕 קיבלת ${newLikesSinceLastNotification} לייקים חדשים ב-Roomi!`,
+                                body: `היי ${profile.name},<br><br>יש לך ${newLikesSinceLastNotification} לייקים חדשים ב-Roomi! 🔥<br><br>מישהו מתעניין בך - היכנס/י לאפליקציה כדי לראות מי:<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">גלה מי אוהב אותך ❤️</a>`
+                            });
+                            
+                            // Update the notification counter
+                            await base44.asServiceRole.entities.User.update(swipedUser.id, {
+                                last_likes_notification_count: totalLikes
+                            });
+                            
+                            console.log(`✅ Likes notification sent to ${swipedUser.email}`);
+                        }
+                    }
+                }
+            } catch (notificationError) {
+                console.error("❌ Failed to send likes notification:", notificationError);
+            }
         }
     } catch (e) {
         console.error("CRITICAL ERROR in handleSwipe:", e, e.stack);
