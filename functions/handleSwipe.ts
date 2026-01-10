@@ -131,11 +131,12 @@ export default async function(context) {
                         
                         if (swipedUser.email && profile) {
                             const appUrl = origin || "https://roomi.me";
+                            const likeWord = newLikesSinceLastNotification === 2 ? 'שני פרופילים' : `${newLikesSinceLastNotification} פרופילים`;
                             
                             await base44.integrations.Core.SendEmail({
                                 to: swipedUser.email,
-                                subject: `💕 קיבלת ${newLikesSinceLastNotification} לייקים חדשים ב-Roomi!`,
-                                body: `היי ${profile.name},<br><br>יש לך ${newLikesSinceLastNotification} לייקים חדשים ב-Roomi! 🔥<br><br>מישהו מתעניין בך - היכנס/י לאפליקציה כדי לראות מי:<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">גלה מי אוהב אותך ❤️</a>`
+                                subject: `💫 ${likeWord} סימנו התעניינות בך!`,
+                                body: `היי ${profile.name} 👋<br><br>${likeWord} סימנו התעניינות בך לאחרונה ב-Roomi! 😍<br><br>בוא/י לגלות מי מחכה לך 💕<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">גלה מי זה ✨</a>`
                             });
                             
                             // Update the notification counter
