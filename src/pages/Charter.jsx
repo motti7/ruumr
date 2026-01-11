@@ -56,16 +56,24 @@ export default function CharterPage() {
   };
 
   const handleComplete = async (summary, score) => {
+    const { Message } = require('@/entities/all');
+    const agreements = summary.filter(s => s.isMatch).map(s => `✓ ${s.title}: ${s.myChoice}`);
+    const discussions = summary.filter(s => !s.isMatch).map(s => `💭 ${s.title}: ${s.compromise}`);
+    
+    const summaryMessage = `🎉 *סיימתם את חוזה השותפות!*\n\nציון תאימות: *${score}%*\n\n*מסכימים על:*\n${agreements.join('\n')}\n\n*נקודות לדיון:*\n${discussions.join('\n')}`;
+    
     try {
-      // Save charter to database (you can create a Charter entity if needed)
-      console.log('Charter completed:', { summary, score, matchId: match.id });
-      
-      // For now, just navigate back
-      navigate(createPageUrl('Matches'));
+      await Message.create({
+        match_id: match.id,
+        sender_id: 'system',
+        content: summaryMessage,
+        is_read: false
+      });
     } catch (e) {
-      console.error(e);
-      alert('שגיאה בשמירת החוזה');
+      console.error("Failed to create summary message:", e);
     }
+    
+    navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
   };
 
   if (loading) {
@@ -86,8 +94,10 @@ export default function CharterPage() {
 
   return (
     <RoomiCharter
+      matchId={match.id}
       user1Name={user1Profile.name}
       user2Name={user2Profile.name}
+      onClose={() => navigate(createPageUrl('Matches'))}
       onComplete={handleComplete}
     />
   );
