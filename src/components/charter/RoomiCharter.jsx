@@ -1,453 +1,393 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, AlertCircle, Sparkles, Download, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import confetti from "canvas-confetti";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, X, Check, AlertCircle, Trophy, ArrowRight, Users, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import confetti from 'canvas-confetti';
 
 const CHARTER_DATA = {
-  levels: [
+  "game_title": "Roomi Vibe Check",
+  "levels": [
     {
-      name: "Dealbreakers",
-      emoji: "🚨",
-      questions: [
+      "id": "level_1",
+      "name": "🚩 הקווים האדומים (Dealbreakers)",
+      "description": "דברים שאי אפשר לגור ביחד בלעדיהם. חייבים הסכמה!",
+      "questions": [
         {
-          id: "smoking",
-          question: "עישון בדירה?",
-          emoji: "🚬",
-          options: [
-            { id: "yes", text: "כן, בסדר גמור", emoji: "✅" },
-            { id: "no", text: "ממש לא!", emoji: "🚫" }
-          ],
-          compromise: "עישון רק במרפסת/חוץ"
+          "id": "q_smoking",
+          "title": "🚬 עישון בדירה",
+          "option_a": "בכיף, חופשי בסלון",
+          "option_b": "איכס! רק בחוץ/במרפסת",
+          "compromise": "מעשנים רק במרפסת (עם דלת סגורה!)",
+          "icon": "🚬"
         },
         {
-          id: "pets",
-          question: "חיות מחמד בדירה?",
-          emoji: "🐕",
-          options: [
-            { id: "yes", text: "בטח! אוהב/ת חיות", emoji: "❤️" },
-            { id: "no", text: "לא, אלרגיה/העדפה", emoji: "🙅" }
-          ],
-          compromise: "רק חיות קטנות בכלוב (דגים, ציפורים)"
+          "id": "q_partners",
+          "title": "😍 בני/בנות זוג",
+          "option_a": "בית פתוח - שישנו פה חופשי",
+          "option_b": "מוגזם - גג פעמיים בשבוע",
+          "compromise": "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות.",
+          "icon": "💕"
         },
         {
-          id: "overnight_guests",
-          question: "אורחים לינה?",
-          emoji: "🛏️",
-          options: [
-            { id: "yes", text: "כן, בתיאום מראש", emoji: "👍" },
-            { id: "rarely", text: "רק לעיתים נדירות", emoji: "⏰" }
-          ],
-          compromise: "אורחים מקסימום פעם בחודש עם הודעה מראש"
+          "id": "q_pets",
+          "title": "🐶 בעלי חיים",
+          "option_a": "מת על חיות, תביאו הכל",
+          "option_b": "אלרגי / לא מתחבר",
+          "compromise": "אין פשרה (זה Dealbreaker). חייבים להסכים מראש.",
+          "icon": "🐾"
         }
       ]
     },
     {
-      name: "Money Matters",
-      emoji: "💰",
-      questions: [
+      "id": "level_2",
+      "name": "💸 הכסף והבירוקרטיה (The Bank)",
+      "description": "כדי שלא נריב על השקל...",
+      "questions": [
         {
-          id: "bills_split",
-          question: "איך מחלקים חשבונות?",
-          emoji: "💸",
-          options: [
-            { id: "equal", text: "חלוקה שווה", emoji: "⚖️" },
-            { id: "usage", text: "לפי שימוש", emoji: "📊" }
-          ],
-          compromise: "חשבונות קבועים שווה, משתנים לפי שימוש"
+          "id": "q_groceries",
+          "title": "🛒 קניות לבית (נייר טואלט, שמן, חלב)",
+          "option_a": "קונים משותף ומתחלקים",
+          "option_b": "כל אחד קונה לעצמו (מדפים נפרדים)",
+          "compromise": "בסיס משותף (נייר טואלט, חומרי ניקוי) - אוכל בנפרד.",
+          "icon": "🛒"
         },
         {
-          id: "shared_expenses",
-          question: "קניות משותפות?",
-          emoji: "🛒",
-          options: [
-            { id: "shared", text: "קופה משותפת", emoji: "🏦" },
-            { id: "separate", text: "כל אחד לעצמו", emoji: "🚶" }
-          ],
-          compromise: "משותף רק למוצרי בסיס (נייר טואלט, חומרי ניקיון)"
+          "id": "q_bills",
+          "title": "🧾 תשלום חשבונות",
+          "option_a": "אחד משלם והשאר מעבירים לו בביט",
+          "option_b": "כל חשבון על שם מישהו אחר",
+          "compromise": "משתמשים באפליקציית תשלומים ייעודית (כמו Splitwise).",
+          "icon": "💳"
+        },
+        {
+          "id": "q_cleaning_money",
+          "title": "🧹 מנקה חיצונית?",
+          "option_a": "חייבים! שמים כסף כל שבוע",
+          "option_b": "חבל על הכסף, מנקים לבד",
+          "compromise": "מנקים לבד בשוטף, מביאים מנקה פעם בחודש ליסודי.",
+          "icon": "🧽"
         }
       ]
     },
     {
-      name: "Lifestyle Vibes",
-      emoji: "🌟",
-      questions: [
+      "id": "level_3",
+      "name": "🍕 החיים עצמם (Lifestyle)",
+      "description": "הדברים הקטנים שעושים את ההבדל",
+      "questions": [
         {
-          id: "cleaning",
-          question: "שגרת ניקיון?",
-          emoji: "🧹",
-          options: [
-            { id: "weekly", text: "ניקיון שבועי יחד", emoji: "📅" },
-            { id: "rotation", text: "רוטציה - כל אחד בתורו", emoji: "🔄" }
-          ],
-          compromise: "רוטציה שבועית + ניקיון גדול משותף פעם בחודש"
+          "id": "q_dishes",
+          "title": "🍽️ כלים בכיור",
+          "option_a": "שוטפים מיד אחרי האוכל!",
+          "option_b": "זורמים... שוטפים כשמצטבר",
+          "compromise": "חוק ה-24 שעות: הכיור חייב להיות ריק לפני שהולכים לישון.",
+          "icon": "🍴"
         },
         {
-          id: "noise",
-          question: "רעש בלילה?",
-          emoji: "🔊",
-          options: [
-            { id: "quiet", text: "שקט אחרי 22:00", emoji: "😴" },
-            { id: "flexible", text: "גמיש, בתיאום", emoji: "🤝" }
-          ],
-          compromise: "שקט בימי ראשון-חמישי, גמיש בסופ\"ש"
+          "id": "q_ac",
+          "title": "❄️ מלחמות המזגן (קיץ)",
+          "option_a": "מקפיא! 18 מעלות",
+          "option_b": "חסכוני/נעים - 24 מעלות",
+          "compromise": "23 מעלות ביום, בלילה כל אחד בחדר שלו מחליט.",
+          "icon": "🌡️"
         },
         {
-          id: "parties",
-          question: "מסיבות בדירה?",
-          emoji: "🎉",
-          options: [
-            { id: "yes", text: "בטח! נהנה מחברה", emoji: "🥳" },
-            { id: "rarely", text: "רק לאירועים מיוחדים", emoji: "🎂" }
-          ],
-          compromise: "מסיבות מקסימום פעם בחודשיים עם הודעה שבוע מראש"
-        },
-        {
-          id: "common_areas",
-          question: "שימוש במרחבים משותפים?",
-          emoji: "🏠",
-          options: [
-            { id: "shared", text: "שימוש חופשי לכולם", emoji: "🤗" },
-            { id: "scheduled", text: "מתואם מראש", emoji: "📋" }
-          ],
-          compromise: "חופשי למעט אירועים גדולים - צריך תיאום"
+          "id": "q_hosting",
+          "title": "🎉 חברים ומסיבות",
+          "option_a": "תמיד שמח, הבית פתוח",
+          "option_b": "צריך שקט, לתאם מראש",
+          "compromise": "מותר לארח בכיף, אבל אחרי 23:00 שומרים על שקט בסלון.",
+          "icon": "🎊"
         }
       ]
     }
   ]
 };
 
-export default function RoomiCharter({ matchId, user1Name, user2Name, onClose }) {
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState({ user1: {}, user2: {} });
-  const [currentUser, setCurrentUser] = useState("user1");
+export default function RoomiCharter({ user1Name, user2Name, onComplete }) {
+  const [currentUser, setCurrentUser] = useState('user1'); // user1 or user2
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [showCompromise, setShowCompromise] = useState(false);
+  const [showMatch, setShowMatch] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  const [pendingAnswer, setPendingAnswer] = useState(null);
+  const [isComplete, setIsComplete] = useState(false);
 
-  const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
-  const currentQ = allQuestions[currentQuestion];
-  const totalQuestions = allQuestions.length;
-  const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+  const allQuestions = CHARTER_DATA.levels.flatMap(level => 
+    level.questions.map(q => ({ ...q, levelName: level.name }))
+  );
+  
+  const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
+  const currentQuestion = currentLevel?.questions[currentQuestionIndex];
+  const progress = ((Object.keys(answers).length / 2) / allQuestions.length) * 100;
 
-  const handleAnswer = (optionId) => {
-    const questionId = currentQ.id;
-    const newAnswers = { ...answers };
-    
-    if (currentUser === "user1") {
-      newAnswers.user1[questionId] = optionId;
-      setAnswers(newAnswers);
-      setPendingAnswer(optionId);
-      setCurrentUser("user2");
-    } else {
-      newAnswers.user2[questionId] = optionId;
-      setAnswers(newAnswers);
-      
-      // Check if match
-      if (newAnswers.user1[questionId] === optionId) {
+  const handleAnswer = (option) => {
+    const qId = currentQuestion.id;
+    const newAnswers = { ...answers, [`${qId}_${currentUser}`]: option };
+    setAnswers(newAnswers);
+
+    // Check if both users answered
+    const user1Answer = currentUser === 'user1' ? option : newAnswers[`${qId}_user1`];
+    const user2Answer = currentUser === 'user2' ? option : newAnswers[`${qId}_user2`];
+
+    if (user1Answer && user2Answer) {
+      if (user1Answer === user2Answer) {
         // Match!
+        setShowMatch(true);
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 }
         });
-        setTimeout(() => nextQuestion(), 1500);
+        setTimeout(() => {
+          setShowMatch(false);
+          moveToNext();
+        }, 2000);
       } else {
         // Conflict
         setShowConflict(true);
+        setTimeout(() => {
+          setShowConflict(false);
+          setShowCompromise(true);
+        }, 1500);
       }
+    } else {
+      // Switch to other user
+      setCurrentUser(currentUser === 'user1' ? 'user2' : 'user1');
     }
   };
 
-  const handleCompromise = () => {
-    const questionId = currentQ.id;
-    const newAnswers = { ...answers };
-    newAnswers.user1[questionId] = "compromise";
-    newAnswers.user2[questionId] = "compromise";
-    setAnswers(newAnswers);
-    setShowConflict(false);
-    nextQuestion();
+  const handleCompromiseAccept = () => {
+    const qId = currentQuestion.id;
+    setAnswers({ ...answers, [`${qId}_compromise`]: true });
+    setShowCompromise(false);
+    moveToNext();
   };
 
-  const nextQuestion = () => {
-    setCurrentUser("user1");
-    setPendingAnswer(null);
-    
-    if (currentQuestion < totalQuestions - 1) {
-      setCurrentQuestion(prev => prev + 1);
+  const moveToNext = () => {
+    if (currentQuestionIndex < currentLevel.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentUser('user1');
+    } else if (currentLevelIndex < CHARTER_DATA.levels.length - 1) {
+      setCurrentLevelIndex(currentLevelIndex + 1);
+      setCurrentQuestionIndex(0);
+      setCurrentUser('user1');
     } else {
-      setShowSummary(true);
+      setIsComplete(true);
     }
   };
 
   const calculateScore = () => {
     let score = 0;
     allQuestions.forEach(q => {
-      const answer1 = answers.user1[q.id];
-      const answer2 = answers.user2[q.id];
-      
-      if (answer1 === answer2 && answer1 !== "compromise") {
-        score += 10; // Perfect match
-      } else if (answer1 === "compromise" && answer2 === "compromise") {
-        score += 5; // Compromise
-      }
+      const user1 = answers[`${q.id}_user1`];
+      const user2 = answers[`${q.id}_user2`];
+      if (user1 === user2) score += 10;
+      else if (answers[`${q.id}_compromise`]) score += 5;
     });
     return score;
   };
 
-  const maxScore = totalQuestions * 10;
-  const score = calculateScore();
-  const compatibilityPercent = Math.round((score / maxScore) * 100);
+  const getSummary = () => {
+    return allQuestions.map(q => {
+      const user1 = answers[`${q.id}_user1`];
+      const user2 = answers[`${q.id}_user2`];
+      const isMatch = user1 === user2;
+      const isCompromise = answers[`${q.id}_compromise`];
+      
+      return {
+        title: q.title,
+        result: isMatch ? (user1 === 'a' ? q.option_a : q.option_b) : (isCompromise ? q.compromise : 'לא הוסכם'),
+        type: isMatch ? 'match' : (isCompromise ? 'compromise' : 'conflict')
+      };
+    });
+  };
 
-  if (showSummary) {
+  if (isComplete) {
+    const finalScore = calculateScore();
+    const maxScore = allQuestions.length * 10;
+    const summary = getSummary();
+
     return (
-      <div className="fixed inset-0 bg-white z-[100] overflow-auto" dir="rtl">
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 p-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl mx-auto"
-          >
-            <div className="bg-white rounded-3xl shadow-2xl p-8">
-              <div className="text-center mb-8">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.2 }}
-                  className="w-24 h-24 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <Sparkles className="w-12 h-12 text-white" />
-                </motion.div>
-                <h2 className="text-3xl font-black mb-2">חוזה השותפות שלכם מוכן!</h2>
-                <p className="text-gray-500">הנה מה שסיכמתם 🎉</p>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-gradient-to-br from-orange-400 to-pink-500 z-50 overflow-auto"
+        dir="rtl"
+      >
+        <div className="min-h-screen p-6 pb-24">
+          <div className="max-w-2xl mx-auto">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring" }}
+              className="bg-white rounded-3xl p-8 shadow-2xl mb-6"
+            >
+              <div className="text-center mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Trophy className="w-12 h-12 text-white" />
+                </div>
+                <h1 className="text-3xl font-black text-gray-900 mb-2">🎉 החוזה הושלם!</h1>
+                <p className="text-gray-600">ציון תואמות: <span className="text-4xl font-black text-[--theme-orange]">{finalScore}/{maxScore}</span></p>
               </div>
 
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-bold text-gray-700">ציון התאמה</span>
-                  <span className="text-2xl font-black text-[--theme-orange]">{compatibilityPercent}%</span>
-                </div>
-                <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${compatibilityPercent}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    className="h-full bg-gradient-to-r from-orange-400 to-pink-500"
-                  />
-                </div>
-                <p className="text-center text-sm text-gray-500 mt-2">
-                  {compatibilityPercent >= 80 && "התאמה מעולה! אתם יכולים להיות שותפים נהדרים 🌟"}
-                  {compatibilityPercent >= 60 && compatibilityPercent < 80 && "התאמה טובה! יש לכם בסיס מוצק 👍"}
-                  {compatibilityPercent < 60 && "יש עבודה לעשות, אבל אפשר להצליח! 💪"}
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <h3 className="font-bold text-lg mb-4">הכללים שלכם:</h3>
-                {allQuestions.map(q => {
-                  const answer1 = answers.user1[q.id];
-                  const answer2 = answers.user2[q.id];
-                  const isMatch = answer1 === answer2 && answer1 !== "compromise";
-                  const isCompromise = answer1 === "compromise";
-                  
-                  return (
-                    <div key={q.id} className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">{q.emoji}</span>
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-800 mb-1">{q.question}</p>
-                          {isMatch && (
-                            <div className="flex items-center gap-2 text-green-600">
-                              <Check className="w-4 h-4" />
-                              <span className="text-sm font-medium">
-                                {q.options.find(o => o.id === answer1)?.text}
-                              </span>
-                            </div>
-                          )}
-                          {isCompromise && (
-                            <div className="flex items-center gap-2 text-orange-600">
-                              <AlertCircle className="w-4 h-4" />
-                              <span className="text-sm font-medium">{q.compromise}</span>
-                            </div>
-                          )}
-                        </div>
+              <div className="space-y-3 mb-6">
+                <h3 className="font-bold text-lg text-gray-900 mb-3">✅ הכללים המוסכמים:</h3>
+                {summary.map((item, i) => (
+                  <div key={i} className={`p-3 rounded-xl border-2 ${
+                    item.type === 'match' ? 'bg-green-50 border-green-200' :
+                    item.type === 'compromise' ? 'bg-yellow-50 border-yellow-200' :
+                    'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      {item.type === 'match' && <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />}
+                      {item.type === 'compromise' && <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />}
+                      {item.type === 'conflict' && <X className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />}
+                      <div className="flex-1">
+                        <p className="font-bold text-sm text-gray-900">{item.title}</p>
+                        <p className="text-xs text-gray-700 mt-1">{item.result}</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex gap-3">
-                <Button onClick={onClose} variant="outline" className="flex-1">
-                  סגור
-                </Button>
-                <Button 
-                  onClick={() => {
-                    confetti({
-                      particleCount: 200,
-                      spread: 100,
-                      origin: { y: 0.5 }
-                    });
-                  }}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                >
-                  <Sparkles className="w-4 h-4 ml-2" />
-                  חגוג!
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
-  if (showConflict) {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-red-50 to-orange-50 z-[100] flex items-center justify-center p-6" dir="rtl">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
-        >
-          <div className="text-center mb-6">
-            <motion.div
-              animate={{ rotate: [0, -10, 10, -10, 0] }}
-              transition={{ duration: 0.5 }}
-              className="text-6xl mb-4"
-            >
-              😬
-            </motion.div>
-            <h3 className="text-2xl font-black mb-2">אופס! יש פה אי-הסכמה</h3>
-            <p className="text-gray-600">אבל אל דאגה, יש לנו פשרה מנצחת!</p>
-          </div>
-
-          <div className="bg-orange-50 rounded-2xl p-6 mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">{currentQ.emoji}</span>
-              <div>
-                <p className="font-bold text-lg mb-3">{currentQ.question}</p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-blue-600">{user1Name}:</span>
-                    <span>{currentQ.options.find(o => o.id === answers.user1[currentQ.id])?.text}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-pink-600">{user2Name}:</span>
-                    <span>{currentQ.options.find(o => o.id === answers.user2[currentQ.id])?.text}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
-            <p className="text-sm text-gray-500 mb-2">💡 הפשרה שלנו:</p>
-            <p className="font-bold text-gray-800">{currentQ.compromise}</p>
-          </div>
-
-          <Button 
-            onClick={handleCompromise}
-            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-          >
-            מסכימ/ה לפשרה ✨
-          </Button>
-        </motion.div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-orange-100 to-pink-100 z-[100] overflow-auto" dir="rtl">
-      <div className="min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-white shadow-sm p-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-3">
-              <button onClick={onClose} className="p-2">
-                <ArrowRight className="w-6 h-6 text-gray-600" />
-              </button>
-              <h2 className="font-black text-xl">חוזה השותפות 📜</h2>
-              <div className="w-10" />
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mb-2">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  className="h-full bg-gradient-to-r from-orange-400 to-pink-500"
-                />
-              </div>
-              <p className="text-xs text-gray-500 text-center mt-1">
-                שאלה {currentQuestion + 1} מתוך {totalQuestions}
-              </p>
-            </div>
-
-            {/* Current User Indicator */}
-            <div className="flex items-center justify-center gap-4">
-              <div className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentUser === "user1" 
-                  ? "bg-blue-500 text-white scale-110" 
-                  : "bg-gray-200 text-gray-500"
-              }`}>
-                {user1Name}
-              </div>
-              <span className="text-2xl">👥</span>
-              <div className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentUser === "user2" 
-                  ? "bg-pink-500 text-white scale-110" 
-                  : "bg-gray-200 text-gray-500"
-              }`}>
-                {user2Name}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Question Card */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentQuestion}
-              initial={{ scale: 0.8, opacity: 0, rotateY: -90 }}
-              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              exit={{ scale: 0.8, opacity: 0, rotateY: 90 }}
-              transition={{ type: "spring", duration: 0.6 }}
-              className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
-            >
-              <div className="text-center mb-8">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-7xl mb-4"
-                >
-                  {currentQ.emoji}
-                </motion.div>
-                <h3 className="text-2xl font-black mb-2">{currentQ.question}</h3>
-                <p className="text-gray-500 text-sm">
-                  {currentUser === "user1" ? user1Name : user2Name}, מה אתה/ת מעדיפ/ה?
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {currentQ.options.map((option, idx) => (
-                  <motion.button
-                    key={option.id}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => handleAnswer(option.id)}
-                    className="w-full bg-gradient-to-r from-orange-50 to-pink-50 hover:from-orange-100 hover:to-pink-100 border-2 border-orange-200 rounded-2xl p-6 flex items-center gap-4 transition-all"
-                  >
-                    <span className="text-4xl">{option.emoji}</span>
-                    <span className="font-bold text-lg flex-1 text-right">{option.text}</span>
-                  </motion.button>
                 ))}
               </div>
+
+              <Button
+                onClick={() => onComplete?.(summary, finalScore)}
+                className="w-full h-14 text-lg font-bold gradient-orange text-white rounded-full shadow-lg hover:scale-105 transition-transform"
+              >
+                <Sparkles className="w-5 h-5 ml-2" />
+                חתום ושמור את החוזה
+              </Button>
             </motion.div>
-          </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (!currentQuestion) return null;
+
+  const currentUserName = currentUser === 'user1' ? user1Name : user2Name;
+
+  return (
+    <div className="fixed inset-0 bg-gray-50 z-50 overflow-hidden" dir="rtl">
+      <AnimatePresence>
+        {showMatch && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <div className="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl">
+                <Heart className="w-16 h-16 text-white" fill="white" />
+              </div>
+              <h2 className="text-4xl font-black text-white">התאמה! 🎉</h2>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showConflict && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              animate={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <div className="w-32 h-32 bg-red-500 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl">
+                <AlertCircle className="w-16 h-16 text-white" />
+              </div>
+              <h2 className="text-4xl font-black text-white">אופס... 😅</h2>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="h-full flex flex-col">
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-black text-gray-900">{CHARTER_DATA.game_title}</h1>
+            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
+              <Users className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-bold text-gray-700">{currentUserName}</span>
+            </div>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              className="h-full gradient-orange"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-2">{currentLevel.name}</p>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          {showCompromise ? (
+            <motion.div
+              key="compromise"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full max-w-md"
+            >
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl p-8 shadow-2xl text-center">
+                <div className="text-6xl mb-4">🤝</div>
+                <h2 className="text-2xl font-black text-white mb-4">בואו נמצא פתרון</h2>
+                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                  <p className="text-white font-bold text-lg leading-relaxed">{currentQuestion.compromise}</p>
+                </div>
+                <Button
+                  onClick={handleCompromiseAccept}
+                  className="w-full h-14 bg-white text-[--theme-orange] font-black text-lg rounded-full hover:scale-105 transition-transform shadow-lg"
+                >
+                  <Check className="w-5 h-5 ml-2" />
+                  מקובל עלינו!
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={currentQuestion.id}
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -300 }}
+              className="w-full max-w-md"
+            >
+              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div className="bg-gradient-to-br from-orange-400 to-pink-500 p-8 text-center">
+                  <div className="text-7xl mb-4">{currentQuestion.icon}</div>
+                  <h2 className="text-2xl font-black text-white leading-tight">{currentQuestion.title}</h2>
+                </div>
+                <div className="p-6 space-y-4">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAnswer('a')}
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  >
+                    {currentQuestion.option_a}
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAnswer('b')}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-lg p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  >
+                    {currentQuestion.option_b}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
