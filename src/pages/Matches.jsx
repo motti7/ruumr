@@ -6,15 +6,12 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
-import RoomiCharter from "../components/charter/RoomiCharter";
-import { Message } from "@/entities/all";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState(null);
 
   const loadMatches = useCallback(async () => {
     setIsLoading(true);
@@ -81,38 +78,6 @@ export default function MatchesPage() {
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
-
-  const handleCharterComplete = async (summary, score) => {
-    const agreements = summary.filter(s => s.isMatch).map(s => `✓ ${s.title}: ${s.myChoice}`);
-    const discussions = summary.filter(s => !s.isMatch).map(s => `💭 ${s.title}: ${s.compromise}`);
-    
-    const summaryMessage = `🎉 *סיימתם את חוזה השותפות!*\n\nציון תאימות: *${score}%*\n\n*מסכימים על:*\n${agreements.join('\n')}\n\n*נקודות לדיון:*\n${discussions.join('\n')}`;
-    
-    try {
-      await Message.create({
-        match_id: selectedMatch.id,
-        sender_id: 'system',
-        content: summaryMessage,
-        is_read: false
-      });
-    } catch (e) {
-      console.error("Failed to create summary message:", e);
-    }
-    
-    navigate(createPageUrl('Chat') + `?matchId=${selectedMatch.id}`);
-  };
-
-  if (selectedMatch) {
-    return (
-      <RoomiCharter
-        matchId={selectedMatch.id}
-        user1Name={user?.full_name || 'אני'}
-        user2Name={selectedMatch.profile?.name || 'שותף'}
-        onClose={() => setSelectedMatch(null)}
-        onComplete={handleCharterComplete}
-      />
-    );
-  }
 
   if (isLoading) {
     return (
@@ -187,7 +152,7 @@ export default function MatchesPage() {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
                   onClickCharter={() => {
-                     setSelectedMatch(match);
+                     navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                   }}
                 />
               </motion.div>
