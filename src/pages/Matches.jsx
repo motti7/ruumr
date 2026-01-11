@@ -6,25 +6,18 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
-import RoomiCharter from "../components/charter/RoomiCharter";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
 
   const loadMatches = useCallback(async () => {
     setIsLoading(true);
     try {
       const userData = await User.me();
       setUser(userData);
-      
-      // Load user profile
-      const myProfiles = await Profile.filter({ user_id: userData.id });
-      setUserProfile(myProfiles[0]);
 
       const userMatches = await Match.filter({ user1_id: userData.id });
       const userMatches2 = await Match.filter({ user2_id: userData.id });
@@ -102,15 +95,6 @@ export default function MatchesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
-      {selectedMatch && userProfile && (
-        <RoomiCharter 
-          matchId={selectedMatch.id}
-          user1Name={userProfile.name}
-          user2Name={selectedMatch.profile.name}
-          onClose={() => setSelectedMatch(null)}
-        />
-      )}
-      
       <div className="sticky top-16 bg-gray-50 z-10 p-4 pb-2">
         <h1 className="text-3xl font-black text-gray-900 mb-2">התאמות</h1>
         {matches.length > 0 && (
@@ -156,6 +140,7 @@ export default function MatchesPage() {
                 <MatchCard
                   match={match.profile}
                   isOnline={match.isOnline}
+                  matchId={match.id}
                   onClickProfile={() => {
                     if (match.profile && match.profile.user_id) {
                         navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
@@ -167,7 +152,7 @@ export default function MatchesPage() {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
                   onClickCharter={() => {
-                    setSelectedMatch(match);
+                     navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                   }}
                 />
               </motion.div>

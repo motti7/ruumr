@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { MessageCircle, MapPin, FileText } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-export default function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter }) {
+export default function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
   const handleProfileClick = (e) => {
     e.stopPropagation();
     onClickProfile();
@@ -16,7 +16,7 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
 
   const handleCharterClick = (e) => {
     e.stopPropagation();
-    onClickCharter?.();
+    onClickCharter();
   };
 
   return (
@@ -51,11 +51,11 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           <motion.div 
             whileTap={{ scale: 0.85 }}
             onClick={handleCharterClick}
-            className="text-[--theme-orange] bg-orange-50 p-3 rounded-full hover:bg-orange-100 transition-colors"
+            className="text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md"
           >
             <FileText className="w-5 h-5" />
           </motion.div>
