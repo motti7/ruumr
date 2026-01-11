@@ -9,50 +9,6 @@ import { User as UserEntity } from "@/entities/User";
 import { Message } from "@/entities/Message";
 import { useState, useEffect } from "react";
 
-function CharterHintButton() {
-  const [showHint, setShowHint] = useState(false);
-
-  useEffect(() => {
-    const hasSeenHint = localStorage.getItem('roomi_charter_hint_seen');
-    if (!hasSeenHint) {
-      setShowHint(true);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    localStorage.setItem('roomi_charter_hint_seen', 'true');
-    setShowHint(false);
-  };
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => window.dispatchEvent(new Event('openCharter'))}
-        className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
-      >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </button>
-      {showHint && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-orange-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
-          <p className="text-xs font-bold leading-tight mb-3">
-            🤝 חוזה שותפות<br/>
-            <span className="text-[10px] font-normal opacity-90">שאלון אינטראקטיבי - מה חשוב לך בחיים משותפים?</span>
-          </p>
-          <button
-            onClick={handleDismiss}
-            className="w-full bg-white text-orange-500 text-xs font-bold py-2 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            הבנתי! 👍
-          </button>
-          <div className="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-orange-400"></div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
@@ -270,14 +226,9 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                              <h1 className="text-3xl logo-font">Roomi</h1>
                         </Link>
-                        <div className="flex items-center gap-2">
-                            {currentPageName === 'Discover' && (
-                                <CharterHintButton />
-                            )}
-                            <Link to={createPageUrl("Profile")}>
-                                <User className="w-6 h-6 text-gray-400"/>
-                            </Link>
-                        </div>
+                        <Link to={createPageUrl("Profile")}>
+                            <User className="w-6 h-6 text-gray-400"/>
+                        </Link>
                     </div>
                 </header>
             )}

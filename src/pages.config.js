@@ -2,6 +2,7 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import AdminFixMatches from './pages/AdminFixMatches';
 import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
+import Charter from './pages/Charter';
 import Chat from './pages/Chat';
 import Discover from './pages/Discover';
 import HelpCenter from './pages/HelpCenter';
@@ -17,7 +18,6 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
-import Charter from './pages/Charter';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +26,7 @@ export const PAGES = {
     "AdminFixMatches": AdminFixMatches,
     "AdminUsers": AdminUsers,
     "Banned": Banned,
+    "Charter": Charter,
     "Chat": Chat,
     "Discover": Discover,
     "HelpCenter": HelpCenter,
@@ -41,7 +42,6 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
-    "Charter": Charter,
 }
 
 export const pagesConfig = {
