@@ -226,9 +226,19 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                              <h1 className="text-3xl logo-font">Roomi</h1>
                         </Link>
-                        <Link to={createPageUrl("Profile")}>
-                            <User className="w-6 h-6 text-gray-400"/>
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            {currentPageName === 'Discover' && (
+                                <button 
+                                    onClick={() => window.dispatchEvent(new CustomEvent('openCharter'))}
+                                    className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                >
+                                    <span className="text-white text-lg">📜</span>
+                                </button>
+                            )}
+                            <Link to={createPageUrl("Profile")}>
+                                <User className="w-6 h-6 text-gray-400"/>
+                            </Link>
+                        </div>
                     </div>
                 </header>
             )}
