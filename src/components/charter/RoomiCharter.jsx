@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { X } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { User } from '@/entities/User';
-import { base44 } from '@/api/base44Client';
 
 const CHARTER_DATA = {
   "game_title": "Roomi Vibe Check",
@@ -24,7 +22,7 @@ const CHARTER_DATA = {
           "id": "q_partners",
           "title": "בני/בנות זוג",
           "emoji": "😍",
-          "option_a": "בית פתוח - שייישנו פה חופשי",
+          "option_a": "בית פתוח - שישנו פה חופשי",
           "option_b": "מוגזם - גג פעמיים בשבוע",
           "compromise": "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות."
         },
@@ -101,167 +99,112 @@ const CHARTER_DATA = {
   ]
 };
 
-export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, onComplete }) {
-  const [currentUserId, setCurrentUserId] = useState(null);
+export default function RoomiCharter({ user1Name, user2Name, onClose }) {
+  const [currentUser, setCurrentUser] = useState('user1');
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [myAnswers, setMyAnswers] = useState({});
-  const [partnerAnswers, setPartnerAnswers] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [showCompromise, setShowCompromise] = useState(false);
+  const [showMatch, setShowMatch] = useState(false);
+  const [showConflict, setShowConflict] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [direction, setDirection] = useState(0);
 
   const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
   const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
   const currentQuestion = currentLevel?.questions[currentQuestionIndex];
-  const totalAnswered = Object.keys(myAnswers).length;
+  const totalAnswered = Object.keys(answers).filter(k => !k.includes('compromise')).length / 2;
   const progress = (totalAnswered / allQuestions.length) * 100;
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const user = await User.me();
-        setCurrentUserId(user.id);
-
-        // טען תשובות קיימות
-        const myCharterAnswers = await base44.entities.CharterAnswer.filter({ 
-          match_id: matchId, 
-          user_id: user.id 
-        });
-
-        if (myCharterAnswers.length > 0) {
-          const saved = myCharterAnswers[0];
-          setMyAnswers(saved.answers || {});
-          
-          if (saved.is_complete) {
-            // אני סיימתי - בדוק אם השותף סיים
-            const partnerCharterAnswers = await base44.entities.CharterAnswer.filter({ 
-              match_id: matchId 
-            });
-            const partnerAnswer = partnerCharterAnswers.find(a => a.user_id !== user.id);
-            
-            if (partnerAnswer && partnerAnswer.is_complete) {
-              setPartnerAnswers(partnerAnswer.answers);
-              setIsComplete(true);
-            } else {
-              // השותף עדיין לא סיים - סגור ונצא
-              onClose();
-              return;
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error loading charter data:", error);
-      }
-      setIsLoading(false);
-    };
-    loadData();
-  }, [matchId]);
-
-  const handleAnswer = async (option) => {
+  const handleAnswer = (option) => {
     const qId = currentQuestion.id;
-    const newAnswers = { ...myAnswers, [qId]: option };
-    setMyAnswers(newAnswers);
+    const newAnswers = { ...answers, [`${qId}_${currentUser}`]: option };
+    setAnswers(newAnswers);
 
-    // שמור בדטה-בייס
-    try {
-      const existing = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId, 
-        user_id: currentUserId 
-      });
+    const user1Answer = currentUser === 'user1' ? option : newAnswers[`${qId}_user1`];
+    const user2Answer = currentUser === 'user2' ? option : newAnswers[`${qId}_user2`];
 
-      const isLastQuestion = (
-        currentQuestionIndex === currentLevel.questions.length - 1 && 
-        currentLevelIndex === CHARTER_DATA.levels.length - 1
-      );
-
-      if (existing.length > 0) {
-        await base44.entities.CharterAnswer.update(existing[0].id, {
-          answers: newAnswers,
-          is_complete: isLastQuestion
+    if (user1Answer && user2Answer) {
+      if (user1Answer === user2Answer) {
+        setShowMatch(true);
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63']
         });
+        setTimeout(() => {
+          setShowMatch(false);
+          moveToNext();
+        }, 2500);
       } else {
-        await base44.entities.CharterAnswer.create({
-          match_id: matchId,
-          user_id: currentUserId,
-          answers: newAnswers,
-          is_complete: isLastQuestion
-        });
+        setShowConflict(true);
+        setTimeout(() => {
+          setShowConflict(false);
+          setShowCompromise(true);
+        }, 1800);
       }
-    } catch (error) {
-      console.error("Error saving answer:", error);
+    } else {
+      setCurrentUser(currentUser === 'user1' ? 'user2' : 'user1');
+      setDirection(option === 'a' ? 1 : -1);
     }
+  };
 
-    // עבור לשאלה הבאה
+  const handleCompromiseAccept = () => {
+    const qId = currentQuestion.id;
+    setAnswers({ ...answers, [`${qId}_compromise`]: true });
+    setShowCompromise(false);
+    moveToNext();
+  };
+
+  const moveToNext = () => {
+    setCurrentUser('user1');
     if (currentQuestionIndex < currentLevel.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else if (currentLevelIndex < CHARTER_DATA.levels.length - 1) {
       setCurrentLevelIndex(currentLevelIndex + 1);
       setCurrentQuestionIndex(0);
     } else {
-      // סיימתי! בדוק אם השותף סיים
-      try {
-        const allAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId });
-        const partnerAnswer = allAnswers.find(a => a.user_id !== currentUserId);
-        
-        if (partnerAnswer && partnerAnswer.is_complete) {
-          setPartnerAnswers(partnerAnswer.answers);
-          setIsComplete(true);
-          confetti({
-            particleCount: 200,
-            spread: 120,
-            origin: { y: 0.4 },
-            colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
-          });
-        } else {
-          // השותף עדיין לא סיים - פשוט סגור
-          onClose();
-        }
-      } catch (error) {
-        console.error("Error checking partner completion:", error);
-        onClose();
-      }
+      setIsComplete(true);
+      confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.4 },
+        colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
+      });
     }
   };
 
   const calculateScore = () => {
-    if (!partnerAnswers) return 0;
-    let matches = 0;
+    let score = 0;
     allQuestions.forEach(q => {
-      if (myAnswers[q.id] && myAnswers[q.id] === partnerAnswers[q.id]) {
-        matches++;
-      }
+      const user1 = answers[`${q.id}_user1`];
+      const user2 = answers[`${q.id}_user2`];
+      if (user1 === user2) score += 10;
+      else if (answers[`${q.id}_compromise`]) score += 5;
     });
-    return Math.round((matches / allQuestions.length) * 100);
+    return score;
   };
 
   const getSummary = () => {
     return allQuestions.map(q => {
-      const myAnswer = myAnswers[q.id];
-      const theirAnswer = partnerAnswers?.[q.id];
-      const isMatch = myAnswer === theirAnswer;
+      const user1 = answers[`${q.id}_user1`];
+      const user2 = answers[`${q.id}_user2`];
+      const isMatch = user1 === user2;
+      const isCompromise = answers[`${q.id}_compromise`];
       return {
         title: q.title,
         emoji: q.emoji,
-        myChoice: myAnswer === 'a' ? q.option_a : q.option_b,
-        theirChoice: theirAnswer === 'a' ? q.option_a : q.option_b,
-        isMatch,
-        compromise: q.compromise
+        result: isMatch ? (user1 === 'a' ? q.option_a : q.option_b) : (isCompromise ? q.compromise : 'לא הוסכם'),
+        type: isMatch ? 'match' : (isCompromise ? 'compromise' : 'conflict')
       };
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-500 flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-white animate-spin" />
-      </div>
-    );
-  }
-
-
-
-  if (isComplete && partnerAnswers) {
-    const compatibilityPercent = calculateScore();
+  if (isComplete) {
+    const finalScore = calculateScore();
+    const maxScore = allQuestions.length * 10;
+    const compatibilityPercent = Math.round((finalScore / maxScore) * 100);
     const summary = getSummary();
 
     return (
@@ -305,32 +248,28 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
                   className={`backdrop-blur-xl rounded-2xl p-4 border-2 ${
-                    item.isMatch ? 'bg-green-500/20 border-green-400' : 'bg-yellow-500/20 border-yellow-400'
+                    item.type === 'match' ? 'bg-green-500/20 border-green-400' :
+                    item.type === 'compromise' ? 'bg-yellow-500/20 border-yellow-400' :
+                    'bg-red-500/20 border-red-400'
                   }`}
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3">
                     <span className="text-3xl">{item.emoji}</span>
-                    <p className="font-bold text-white text-sm flex-1">{item.title}</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-white text-sm">{item.title}</p>
+                      <p className="text-white/80 text-xs mt-1">{item.result}</p>
+                    </div>
                   </div>
-                  {item.isMatch ? (
-                    <p className="text-white/90 text-xs pr-11">✓ שניכם: {item.myChoice}</p>
-                  ) : (
-                    <>
-                      <p className="text-white/80 text-xs pr-11">אני: {item.myChoice}</p>
-                      <p className="text-white/80 text-xs pr-11">{user2Name}: {item.theirChoice}</p>
-                      <p className="text-white font-bold text-xs pr-11 mt-2">💡 {item.compromise}</p>
-                    </>
-                  )}
                 </motion.div>
               ))}
             </div>
 
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => onComplete?.(summary, compatibilityPercent)}
+              onClick={() => onClose?.()}
               className="w-full h-16 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xl font-black rounded-full shadow-2xl"
             >
-              המשך לצ'אט 💬
+              חתימה והפצה 🚀
             </motion.button>
           </motion.div>
         </div>
@@ -340,9 +279,55 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
 
   if (!currentQuestion) return null;
 
+  const currentUserName = currentUser === 'user1' ? user1Name : user2Name;
+
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 overflow-hidden" dir="rtl">
-      {/* Progress Bar */}
+      <AnimatePresence mode="wait">
+        {showMatch && (
+          <motion.div
+            key="match"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 z-50 flex items-center justify-center"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.3, 1],
+                rotate: [0, 10, -10, 0]
+              }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              <div className="text-9xl mb-4">💚</div>
+              <h2 className="text-7xl font-black text-white">זה התאמה!</h2>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showConflict && (
+          <motion.div
+            key="conflict"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: 1, 
+              opacity: 1,
+              x: [0, -10, 10, -10, 10, 0]
+            }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ x: { duration: 0.5 } }}
+            className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 z-50 flex items-center justify-center"
+          >
+            <motion.div className="text-center">
+              <div className="text-9xl mb-4">😬</div>
+              <h2 className="text-6xl font-black text-white">אופס...</h2>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Instagram-style Progress */}
       <div className="absolute top-0 left-0 right-0 p-3 flex gap-1 z-10">
         {allQuestions.map((_, i) => (
           <div key={i} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
@@ -363,46 +348,82 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
         <X className="w-6 h-6 text-white" />
       </button>
 
+
+
       <div className="h-full flex items-center justify-center p-6 pt-32">
-        <motion.div
-          key={currentQuestion.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl shadow-2xl overflow-hidden">
-            <div className="p-8 text-center">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="text-9xl mb-6"
-              >
-                {currentQuestion.emoji}
-              </motion.div>
-              <h2 className="text-5xl font-black text-white leading-tight mb-2">
-                {currentQuestion.title}
-              </h2>
-              <p className="text-xl text-white/80 font-bold">מה אתה/ת מעדיפ/ה?</p>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleAnswer('a')}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-xl p-6 rounded-2xl shadow-xl"
-              >
-                {currentQuestion.option_a}
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleAnswer('b')}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-black text-xl p-6 rounded-2xl shadow-xl"
-              >
-                {currentQuestion.option_b}
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
+        <AnimatePresence mode="wait">
+          {showCompromise ? (
+            <motion.div
+              key="compromise"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, rotate: 180 }}
+              transition={{ type: "spring", damping: 15 }}
+              className="w-full max-w-md"
+            >
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl p-8 shadow-2xl">
+                <div className="text-center mb-6">
+                  <div className="text-8xl mb-4">🤝</div>
+                  <h2 className="text-4xl font-black text-white mb-2">בואו נמצא פתרון</h2>
+                </div>
+                <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-6 mb-6">
+                  <p className="text-white font-black text-2xl leading-tight text-center">
+                    {currentQuestion.compromise}
+                  </p>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCompromiseAccept}
+                  className="w-full h-16 bg-white text-orange-600 font-black text-xl rounded-full shadow-xl"
+                >
+                  מקובל! 👍
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={currentQuestion.id}
+              initial={{ x: direction > 0 ? 300 : -300, opacity: 0, rotate: direction > 0 ? 20 : -20 }}
+              animate={{ x: 0, opacity: 1, rotate: 0 }}
+              exit={{ x: direction > 0 ? -300 : 300, opacity: 0, rotate: direction > 0 ? -20 : 20 }}
+              transition={{ type: "spring", damping: 20, stiffness: 100 }}
+              className="w-full max-w-md"
+            >
+              <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl shadow-2xl overflow-hidden">
+                <div className="p-8 text-center">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-9xl mb-6"
+                  >
+                    {currentQuestion.emoji}
+                  </motion.div>
+                  <h2 className="text-5xl font-black text-white leading-tight mb-2">
+                    {currentQuestion.title}
+                  </h2>
+                  <p className="text-xl text-white/80 font-bold">מה אתה/ת מעדיפ/ה?</p>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAnswer('a')}
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-xl p-6 rounded-2xl shadow-xl"
+                  >
+                    {currentQuestion.option_a}
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAnswer('b')}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-black text-xl p-6 rounded-2xl shadow-xl"
+                  >
+                    {currentQuestion.option_b}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
