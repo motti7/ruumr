@@ -17,7 +17,6 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
-import Charter from './pages/Charter';
 import __Layout from './Layout.jsx';
 
 
@@ -41,7 +40,6 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
-    "Charter": Charter,
 }
 
 export const pagesConfig = {
