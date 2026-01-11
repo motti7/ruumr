@@ -268,45 +268,6 @@ export default function DiscoverPage() {
         />
       )}
 
-      {/* Charter Button - Top Left */}
-      {!showCharter && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5, type: "spring" }}
-          className="fixed top-20 left-4 z-40"
-        >
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setShowCharter(true)}
-            className="bg-gradient-to-br from-orange-500 to-pink-500 p-4 rounded-full shadow-2xl hover:scale-110 transition-transform"
-          >
-            <FileText className="w-6 h-6 text-white" />
-          </motion.button>
-          
-          {showCharterHint && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ delay: 1 }}
-              className="absolute top-0 right-full mr-3 w-48 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 rounded-2xl shadow-xl"
-            >
-              <button
-                onClick={() => setShowCharterHint(false)}
-                className="absolute -top-1 -right-1 w-5 h-5 bg-white text-purple-600 rounded-full flex items-center justify-center text-xs font-bold"
-              >
-                ✕
-              </button>
-              <p className="text-sm font-bold leading-tight">
-                🤝 חוזה שותפות<br/>
-                <span className="text-xs font-normal opacity-90">תשאלון אינטראקטיבי - מה חשוב לך בחיים משותפים?</span>
-              </p>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-
       <AnimatePresence>
         {actionFeedback && (
           <motion.div

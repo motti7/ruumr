@@ -219,16 +219,37 @@ export default function Layout({ children, currentPageName }) {
             
             {shouldShowNav && (
                 <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
-                    <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+                    <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between relative">
                         <Link to={createPageUrl("Settings")}>
                             <Settings className="w-6 h-6 text-gray-400"/>
                         </Link>
                         <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                              <h1 className="text-3xl logo-font">Roomi</h1>
                         </Link>
-                        <Link to={createPageUrl("Profile")}>
-                            <User className="w-6 h-6 text-gray-400"/>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            {currentPageName === 'Discover' && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => window.dispatchEvent(new Event('openCharter'))}
+                                        className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+                                    >
+                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </button>
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 rounded-2xl shadow-xl z-[100]">
+                                        <p className="text-xs font-bold leading-tight text-center">
+                                            🤝 חוזה שותפות<br/>
+                                            <span className="text-[10px] font-normal opacity-90">שאלון אינטראקטיבי - מה חשוב לך בחיים משותפים?</span>
+                                        </p>
+                                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-purple-600"></div>
+                                    </div>
+                                </div>
+                            )}
+                            <Link to={createPageUrl("Profile")}>
+                                <User className="w-6 h-6 text-gray-400"/>
+                            </Link>
+                        </div>
                     </div>
                 </header>
             )}
