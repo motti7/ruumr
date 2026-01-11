@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Heart, X, Home } from "lucide-react";
+import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function DiscoverPage() {
   const [lastSwipes, setLastSwipes] = useState([]);
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
+  const [showCharterSelector, setShowCharterSelector] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -90,6 +92,12 @@ export default function DiscoverPage() {
   }, [navigate]);
 
   useEffect(() => { loadData(); }, [loadData]);
+  
+  useEffect(() => {
+    const handleOpenCharter = () => setShowCharterSelector(true);
+    window.addEventListener('openCharter', handleOpenCharter);
+    return () => window.removeEventListener('openCharter', handleOpenCharter);
+  }, []);
   
   // Aggressive Prefetch: Next 5 profiles
   useEffect(() => {
@@ -249,6 +257,10 @@ export default function DiscoverPage() {
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>
+
+      {showCharterSelector && (
+        <CharterMatchSelector onClose={() => setShowCharterSelector(false)} />
+      )}
 
       <AnimatePresence>
         {actionFeedback && (
