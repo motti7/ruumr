@@ -211,7 +211,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 overflow-auto bg-gradient-to-br from-orange-800 via-red-800 to-orange-700"
+        className="fixed inset-0 z-50 overflow-auto bg-gradient-to-br from-orange-700 via-orange-600 to-orange-500"
         dir="rtl"
       >
         <div className="min-h-screen p-4 pb-32 flex flex-col items-center justify-center">
@@ -267,7 +267,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => onClose?.()}
-              className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xl font-black rounded-full shadow-2xl"
+              className="w-full h-16 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xl font-black rounded-full shadow-2xl"
             >
               חתימה והפצה 🚀
             </motion.button>
@@ -282,7 +282,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
   const currentUserName = currentUser === 'user1' ? user1Name : user2Name;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-800 to-red-800 overflow-hidden" dir="rtl">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 overflow-hidden" dir="rtl">
       <AnimatePresence mode="wait">
         {showMatch && (
           <motion.div
@@ -317,7 +317,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
             }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ x: { duration: 0.5 } }}
-            className="absolute inset-0 bg-gradient-to-br from-red-600 to-orange-600 z-50 flex items-center justify-center"
+            className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 z-50 flex items-center justify-center"
           >
             <motion.div className="text-center">
               <div className="text-9xl mb-4">😬</div>
@@ -389,7 +389,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
               transition={{ type: "spring", damping: 20, stiffness: 100 }}
               className="w-full max-w-md"
             >
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl shadow-2xl overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl shadow-2xl overflow-hidden">
                 <div className="p-8 text-center">
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
