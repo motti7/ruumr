@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { User } from '@/entities/User';
+import { base44 } from '@/api/base44Client';
 
 const CHARTER_DATA = {
   "game_title": "Roomi Vibe Check",
@@ -22,7 +24,7 @@ const CHARTER_DATA = {
           "id": "q_partners",
           "title": "בני/בנות זוג",
           "emoji": "😍",
-          "option_a": "בית פתוח - שישנו פה חופשי",
+          "option_a": "בית פתוח - שיישנו פה חופשי",
           "option_b": "מוגזם - גג פעמיים בשבוע",
           "compromise": "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות."
         },
@@ -99,107 +101,278 @@ const CHARTER_DATA = {
   ]
 };
 
-export default function RoomiCharter({ user1Name, user2Name, onClose }) {
-  const [currentUser, setCurrentUser] = useState('user1');
+export default function RoomiCharter({ matchId, user1Name, user2Name, onClose }) {
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [myAnswers, setMyAnswers] = useState({});
+  const [theirAnswers, setTheirAnswers] = useState({});
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
   const [showCompromise, setShowCompromise] = useState(false);
   const [showMatch, setShowMatch] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [direction, setDirection] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [waitingForOther, setWaitingForOther] = useState(false);
 
   const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
   const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
   const currentQuestion = currentLevel?.questions[currentQuestionIndex];
-  const totalAnswered = Object.keys(answers).filter(k => !k.includes('compromise')).length / 2;
-  const progress = (totalAnswered / allQuestions.length) * 100;
 
-  const handleAnswer = (option) => {
-    const qId = currentQuestion.id;
-    const newAnswers = { ...answers, [`${qId}_${currentUser}`]: option };
-    setAnswers(newAnswers);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const user = await User.me();
+        setCurrentUserId(user.id);
 
-    const user1Answer = currentUser === 'user1' ? option : newAnswers[`${qId}_user1`];
-    const user2Answer = currentUser === 'user2' ? option : newAnswers[`${qId}_user2`];
-
-    if (user1Answer && user2Answer) {
-      if (user1Answer === user2Answer) {
-        setShowMatch(true);
-        confetti({
-          particleCount: 150,
-          spread: 100,
-          origin: { y: 0.5 },
-          colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63']
+        // טעינת תשובות קיימות
+        const allAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId });
+        
+        const mine = {};
+        const theirs = {};
+        
+        allAnswers.forEach(answer => {
+          const key = answer.question_id;
+          if (answer.user_id === user.id) {
+            mine[key] = answer.answer;
+            if (answer.accepted_compromise) {
+              mine[`${key}_compromise`] = true;
+            }
+          } else {
+            theirs[key] = answer.answer;
+            if (answer.accepted_compromise) {
+              theirs[`${key}_compromise`] = true;
+            }
+          }
         });
-        setTimeout(() => {
-          setShowMatch(false);
-          moveToNext();
-        }, 2500);
-      } else {
-        setShowConflict(true);
-        setTimeout(() => {
-          setShowConflict(false);
-          setShowCompromise(true);
-        }, 1800);
+
+        setMyAnswers(mine);
+        setTheirAnswers(theirs);
+
+        // מציאת השאלה הבאה שצריך לענות עליה
+        let foundNext = false;
+        for (let i = 0; i < allQuestions.length && !foundNext; i++) {
+          const q = allQuestions[i];
+          if (!mine[q.id]) {
+            // מצאנו שאלה שעדיין לא עניתי עליה
+            const levelIndex = CHARTER_DATA.levels.findIndex(l => l.questions.some(qq => qq.id === q.id));
+            const questionIndex = CHARTER_DATA.levels[levelIndex].questions.findIndex(qq => qq.id === q.id);
+            setCurrentLevelIndex(levelIndex);
+            setCurrentQuestionIndex(questionIndex);
+            foundNext = true;
+          }
+        }
+
+        // בדיקה אם סיימנו
+        if (Object.keys(mine).filter(k => !k.includes('compromise')).length === allQuestions.length) {
+          // עניתי על הכל, האם השני גם ענה?
+          if (Object.keys(theirs).filter(k => !k.includes('compromise')).length === allQuestions.length) {
+            setIsComplete(true);
+          } else {
+            setWaitingForOther(true);
+          }
+        }
+
+      } catch (error) {
+        console.error("Error loading charter data:", error);
       }
+      setIsLoading(false);
+    };
+
+    loadData();
+
+    // Subscribe to real-time updates
+    const unsubscribe = base44.entities.CharterAnswer.subscribe((event) => {
+      if (event.data.match_id === matchId && event.data.user_id !== currentUserId) {
+        // השני ענה על שאלה
+        const key = event.data.question_id;
+        setTheirAnswers(prev => ({
+          ...prev,
+          [key]: event.data.answer,
+          ...(event.data.accepted_compromise ? { [`${key}_compromise`]: true } : {})
+        }));
+
+        // בדיקה אם עכשיו יש תשובה משני הצדדים לשאלה הנוכחית
+        if (currentQuestion && event.data.question_id === currentQuestion.id && myAnswers[currentQuestion.id]) {
+          checkForMatchOrConflict(currentQuestion.id, myAnswers[currentQuestion.id], event.data.answer);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [matchId]);
+
+  const checkForMatchOrConflict = (questionId, myAnswer, theirAnswer) => {
+    if (myAnswer === theirAnswer) {
+      setShowMatch(true);
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.5 },
+        colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63']
+      });
+      setTimeout(() => {
+        setShowMatch(false);
+        moveToNext();
+      }, 2500);
     } else {
-      setCurrentUser(currentUser === 'user1' ? 'user2' : 'user1');
-      setDirection(option === 'a' ? 1 : -1);
+      setShowConflict(true);
+      setTimeout(() => {
+        setShowConflict(false);
+        setShowCompromise(true);
+      }, 1800);
     }
   };
 
-  const handleCompromiseAccept = () => {
+  const handleAnswer = async (option) => {
+    if (!currentQuestion || !currentUserId) return;
+
     const qId = currentQuestion.id;
-    setAnswers({ ...answers, [`${qId}_compromise`]: true });
-    setShowCompromise(false);
-    moveToNext();
+    
+    try {
+      // שמירה בדאטאבייס
+      await base44.entities.CharterAnswer.create({
+        match_id: matchId,
+        user_id: currentUserId,
+        question_id: qId,
+        answer: option,
+        accepted_compromise: false
+      });
+
+      // עדכון state
+      setMyAnswers(prev => ({ ...prev, [qId]: option }));
+
+      // בדיקה אם השני כבר ענה
+      if (theirAnswers[qId]) {
+        checkForMatchOrConflict(qId, option, theirAnswers[qId]);
+      } else {
+        // ממתינים לשני
+        setWaitingForOther(true);
+      }
+    } catch (error) {
+      console.error("Error saving answer:", error);
+      alert("שגיאה בשמירת התשובה");
+    }
+  };
+
+  const handleCompromiseAccept = async () => {
+    const qId = currentQuestion.id;
+    
+    try {
+      // עדכון התשובה שלי שקיבלתי את הפשרה
+      const myAnswer = await base44.entities.CharterAnswer.filter({
+        match_id: matchId,
+        user_id: currentUserId,
+        question_id: qId
+      });
+
+      if (myAnswer[0]) {
+        await base44.entities.CharterAnswer.update(myAnswer[0].id, {
+          accepted_compromise: true
+        });
+      }
+
+      setMyAnswers(prev => ({ ...prev, [`${qId}_compromise`]: true }));
+      setShowCompromise(false);
+      moveToNext();
+    } catch (error) {
+      console.error("Error accepting compromise:", error);
+    }
   };
 
   const moveToNext = () => {
-    setCurrentUser('user1');
     if (currentQuestionIndex < currentLevel.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setWaitingForOther(false);
     } else if (currentLevelIndex < CHARTER_DATA.levels.length - 1) {
       setCurrentLevelIndex(currentLevelIndex + 1);
       setCurrentQuestionIndex(0);
+      setWaitingForOther(false);
     } else {
-      setIsComplete(true);
-      confetti({
-        particleCount: 200,
-        spread: 120,
-        origin: { y: 0.4 },
-        colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
-      });
+      // סיימנו את כל השאלות - בדיקה אם השני גם סיים
+      if (Object.keys(theirAnswers).filter(k => !k.includes('compromise')).length === allQuestions.length) {
+        setIsComplete(true);
+        confetti({
+          particleCount: 200,
+          spread: 120,
+          origin: { y: 0.4 },
+          colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
+        });
+      } else {
+        setWaitingForOther(true);
+      }
     }
   };
 
   const calculateScore = () => {
     let score = 0;
     allQuestions.forEach(q => {
-      const user1 = answers[`${q.id}_user1`];
-      const user2 = answers[`${q.id}_user2`];
-      if (user1 === user2) score += 10;
-      else if (answers[`${q.id}_compromise`]) score += 5;
+      const mine = myAnswers[q.id];
+      const theirs = theirAnswers[q.id];
+      if (mine === theirs) score += 10;
+      else if (myAnswers[`${q.id}_compromise`] || theirAnswers[`${q.id}_compromise`]) score += 5;
     });
     return score;
   };
 
   const getSummary = () => {
     return allQuestions.map(q => {
-      const user1 = answers[`${q.id}_user1`];
-      const user2 = answers[`${q.id}_user2`];
-      const isMatch = user1 === user2;
-      const isCompromise = answers[`${q.id}_compromise`];
+      const mine = myAnswers[q.id];
+      const theirs = theirAnswers[q.id];
+      const isMatch = mine === theirs;
+      const isCompromise = myAnswers[`${q.id}_compromise`] || theirAnswers[`${q.id}_compromise`];
       return {
         title: q.title,
         emoji: q.emoji,
-        result: isMatch ? (user1 === 'a' ? q.option_a : q.option_b) : (isCompromise ? q.compromise : 'לא הוסכם'),
+        result: isMatch ? (mine === 'a' ? q.option_a : q.option_b) : (isCompromise ? q.compromise : 'לא הוסכם'),
         type: isMatch ? 'match' : (isCompromise ? 'compromise' : 'conflict')
       };
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 flex items-center justify-center" dir="rtl">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full"
+        />
+      </div>
+    );
+  }
+
+  if (waitingForOther) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 flex items-center justify-center p-6" dir="rtl">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 text-center max-w-md"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-8xl mb-6"
+          >
+            ⏳
+          </motion.div>
+          <h2 className="text-4xl font-black text-white mb-4">
+            מחכים ל{user2Name}...
+          </h2>
+          <p className="text-xl text-white/80 mb-8">
+            שלחנו לו/ה הודעה, הוא/היא צריכ/ה לענות על השאלות
+          </p>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+            className="bg-white/20 hover:bg-white/30 text-white font-bold py-4 px-8 rounded-full"
+          >
+            סגור בינתיים
+          </motion.button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (isComplete) {
     const finalScore = calculateScore();
@@ -279,8 +452,6 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
 
   if (!currentQuestion) return null;
 
-  const currentUserName = currentUser === 'user1' ? user1Name : user2Name;
-
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 overflow-hidden" dir="rtl">
       <AnimatePresence mode="wait">
@@ -327,28 +498,27 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
         )}
       </AnimatePresence>
 
-      {/* Instagram-style Progress */}
       <div className="absolute top-0 left-0 right-0 p-3 flex gap-1 z-10">
-        {allQuestions.map((_, i) => (
-          <div key={i} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: i < totalAnswered ? '100%' : '0%' }}
-              className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
-            />
-          </div>
-        ))}
+        {allQuestions.map((q, i) => {
+          const answered = myAnswers[q.id] && theirAnswers[q.id];
+          return (
+            <div key={i} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: answered ? '100%' : '0%' }}
+                className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
+              />
+            </div>
+          );
+        })}
       </div>
 
-      {/* Close Button */}
       <button
         onClick={() => onClose?.()}
         className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
       >
         <X className="w-6 h-6 text-white" />
       </button>
-
-
 
       <div className="h-full flex items-center justify-center p-6 pt-32">
         <AnimatePresence mode="wait">
@@ -383,9 +553,9 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
           ) : (
             <motion.div
               key={currentQuestion.id}
-              initial={{ x: direction > 0 ? 300 : -300, opacity: 0, rotate: direction > 0 ? 20 : -20 }}
-              animate={{ x: 0, opacity: 1, rotate: 0 }}
-              exit={{ x: direction > 0 ? -300 : 300, opacity: 0, rotate: direction > 0 ? -20 : 20 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: "spring", damping: 20, stiffness: 100 }}
               className="w-full max-w-md"
             >
