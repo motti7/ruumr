@@ -133,24 +133,6 @@ export default function ChatPage() {
         ) : (
           messages.map((msg, idx) => {
             const isMyMessage = msg.sender_id === user.id;
-            const isSystemMessage = msg.sender_id === 'system';
-            
-            if (isSystemMessage) {
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="flex justify-center"
-                >
-                  <div className="max-w-[85%] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-orange-200 rounded-2xl p-4">
-                    <p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line font-medium">{msg.content}</p>
-                  </div>
-                </motion.div>
-              );
-            }
-            
             return (
               <motion.div
                 key={idx}

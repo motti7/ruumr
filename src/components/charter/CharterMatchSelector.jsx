@@ -5,12 +5,8 @@ import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
 import RoomiCharter from './RoomiCharter';
 import SmartImage from '@/components/shared/SmartImage';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { Message } from '@/entities/all';
 
 export default function CharterMatchSelector({ onClose }) {
-  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -50,35 +46,12 @@ export default function CharterMatchSelector({ onClose }) {
     const myProfile = { name: user?.full_name || 'אני' };
     const theirProfile = selectedMatch.profile;
     
-    const handleCharterComplete = async (summary, score) => {
-      // צור הודעת סיכום בצ'אט
-      const agreements = summary.filter(s => s.isMatch).map(s => `✓ ${s.title}: ${s.myChoice}`);
-      const discussions = summary.filter(s => !s.isMatch).map(s => `💭 ${s.title}: ${s.compromise}`);
-      
-      const summaryMessage = `🎉 *סיימתם את חוזה השותפות!*\n\nציון תאימות: *${score}%*\n\n*מסכימים על:*\n${agreements.join('\n')}\n\n*נקודות לדיון:*\n${discussions.join('\n')}`;
-      
-      try {
-        await Message.create({
-          match_id: selectedMatch.id,
-          sender_id: 'system',
-          content: summaryMessage,
-          is_read: false
-        });
-      } catch (e) {
-        console.error("Failed to create summary message:", e);
-      }
-      
-      // עבור לצ'אט
-      navigate(createPageUrl('Chat') + `?matchId=${selectedMatch.id}`);
-    };
-    
     return (
       <RoomiCharter
         matchId={selectedMatch.id}
         user1Name={myProfile.name}
         user2Name={theirProfile.name}
         onClose={() => setSelectedMatch(null)}
-        onComplete={handleCharterComplete}
       />
     );
   }

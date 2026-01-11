@@ -101,7 +101,7 @@ const CHARTER_DATA = {
   ]
 };
 
-export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, onComplete }) {
+export default function RoomiCharter({ matchId, user1Name, user2Name, onClose }) {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -109,6 +109,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
   const [partnerAnswers, setPartnerAnswers] = useState(null);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [waitingForPartner, setWaitingForPartner] = useState(false);
 
   const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
   const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
@@ -143,9 +144,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
               setPartnerAnswers(partnerAnswer.answers);
               setIsComplete(true);
             } else {
-              // השותף עדיין לא סיים - סגור ונצא
-              onClose();
-              return;
+              setWaitingForPartner(true);
             }
           }
         }
@@ -213,12 +212,11 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
             colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
           });
         } else {
-          // השותף עדיין לא סיים - פשוט סגור
-          onClose();
+          setWaitingForPartner(true);
         }
       } catch (error) {
         console.error("Error checking partner completion:", error);
-        onClose();
+        setWaitingForPartner(true);
       }
     }
   };
@@ -258,7 +256,35 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
     );
   }
 
-
+  if (waitingForPartner) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-500 flex items-center justify-center p-6" dir="rtl">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="bg-white rounded-3xl p-8 text-center max-w-md"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="text-7xl mb-6"
+          >
+            ⏳
+          </motion.div>
+          <h2 className="text-3xl font-black text-gray-800 mb-3">סיימת!</h2>
+          <p className="text-gray-600 text-lg mb-6">
+            מחכים ש{user2Name} יסיים/תסיים את השאלון...
+          </p>
+          <button
+            onClick={onClose}
+            className="w-full py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold rounded-full"
+          >
+            חזור/י אחר כך
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (isComplete && partnerAnswers) {
     const compatibilityPercent = calculateScore();
@@ -327,10 +353,10 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose, o
 
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => onComplete?.(summary, compatibilityPercent)}
+              onClick={() => onClose?.()}
               className="w-full h-16 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xl font-black rounded-full shadow-2xl"
             >
-              המשך לצ'אט 💬
+              סגור 🚀
             </motion.button>
           </motion.div>
         </div>

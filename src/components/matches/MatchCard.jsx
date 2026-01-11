@@ -1,30 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, MapPin, FileText, Sparkles } from "lucide-react";
+import { MessageCircle, MapPin, FileText } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
-import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { User } from '@/entities/User';
 
 export default function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
-  const [showCharterHint, setShowCharterHint] = useState(false);
-
-  useEffect(() => {
-    const checkCharterStatus = async () => {
-      try {
-        const user = await User.me();
-        const myAnswers = await base44.entities.CharterAnswer.filter({ 
-          match_id: matchId, 
-          user_id: user.id 
-        });
-        
-        if (myAnswers.length === 0 || !myAnswers[0].is_complete) {
-          setShowCharterHint(true);
-        }
-      } catch (e) {}
-    };
-    checkCharterStatus();
-  }, [matchId]);
   const handleProfileClick = (e) => {
     e.stopPropagation();
     onClickProfile();
@@ -76,18 +55,9 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
           <motion.div 
             whileTap={{ scale: 0.85 }}
             onClick={handleCharterClick}
-            className="relative text-white bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full hover:brightness-110 transition-all shadow-md"
+            className="text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md"
           >
             <FileText className="w-5 h-5" />
-            {showCharterHint && (
-              <motion.div
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="absolute -top-1 -right-1"
-              >
-                <Sparkles className="w-4 h-4 text-yellow-200" fill="currentColor" />
-              </motion.div>
-            )}
           </motion.div>
           <motion.div 
             whileTap={{ scale: 0.85 }}
