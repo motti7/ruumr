@@ -86,7 +86,7 @@ export default function LikesYouPage() {
                             className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 relative group cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}`);
+                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
                             }}
                         >
                              <div className="aspect-[3/4] relative">

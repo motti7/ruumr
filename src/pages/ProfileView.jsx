@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Profile } from "@/entities/all";
+import { Profile, Swipe, Match } from "@/entities/all";
+import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+import MatchAnimation from '../components/discover/MatchAnimation';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -73,6 +75,11 @@ export default function ProfileViewPage() {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [matchData, setMatchData] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState(null);
+  const [showActions, setShowActions] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -84,6 +91,7 @@ export default function ProfileViewPage() {
       // Use location.search from the hook for reliability in SPA
       const urlParams = new URLSearchParams(location.search);
       const userId = urlParams.get("userId");
+      const fromLikes = urlParams.get("fromLikes");
 
       if (!userId) {
         console.error("No userId in URL");
@@ -100,10 +108,105 @@ export default function ProfileViewPage() {
       }
 
       setProfile(profiles[0]);
+      
+      // Load current user data if coming from likes page
+      if (fromLikes === 'true') {
+        const user = await User.me();
+        const myProfiles = await Profile.filter({ user_id: user.id });
+        setCurrentUser(user);
+        setUserProfile(myProfiles[0]);
+        setShowActions(true);
+      }
     } catch (error) {
       console.error("Error loading profile:", error);
     }
     setIsLoading(false);
+  };
+  
+  const handleSwipe = async (action) => {
+    if (!currentUser || !userProfile || !profile) return;
+    
+    setActionFeedback(action);
+    setTimeout(() => setActionFeedback(null), 600);
+
+    try {
+      // Create swipe
+      const swipeData = {
+        swiper_id: userProfile.user_id,
+        swiper_name: userProfile.name,
+        swiped_id: profile.user_id,
+        swiped_name: profile.name,
+        action
+      };
+      
+      await Swipe.create(swipeData);
+      console.log("✅ Swipe saved successfully:", swipeData);
+
+      // Check for match if liked
+      if (action === 'like') {
+        try {
+          console.log(`🔍 Checking if ${profile.name} liked me back...`);
+
+          const reverseSwipes = await Swipe.filter({ 
+            swiper_id: profile.user_id, 
+            swiped_id: userProfile.user_id, 
+            action: 'like' 
+          });
+
+          console.log(`📊 Found ${reverseSwipes?.length || 0} reverse swipes`);
+
+          if (reverseSwipes && reverseSwipes.length > 0) {
+            console.log(`💕 IT'S A MATCH!`);
+
+            const existingMatches = await Match.filter({
+              $or: [
+                { user1_id: userProfile.user_id, user2_id: profile.user_id },
+                { user1_id: profile.user_id, user2_id: userProfile.user_id }
+              ]
+            });
+
+            if (existingMatches.length === 0) {
+              await Match.create({
+                user1_id: userProfile.user_id,
+                user2_id: profile.user_id,
+                user1_name: userProfile.name,
+                user2_name: profile.name,
+                status: 'active'
+              });
+              console.log(`✅ Match created successfully!`);
+            }
+
+            setMatchData({ profile1: userProfile, profile2: profile });
+
+            // Try to call backend function for emails
+            try {
+              const { base44 } = require('@/api/base44Client');
+              if (base44.functions?.handleSwipe) {
+                await base44.functions.handleSwipe({
+                  swiper_id: userProfile.user_id, 
+                  swiped_id: profile.user_id, 
+                  action,
+                  origin: window.location.origin
+                });
+              }
+            } catch (e) {
+              console.log("📧 Email notification skipped");
+            }
+          }
+        } catch (matchError) {
+          console.error("❌ Error in match detection:", matchError);
+        }
+      }
+      
+      // Navigate back after action
+      setTimeout(() => {
+        navigate(createPageUrl('LikesYou'));
+      }, action === 'like' && matchData ? 4000 : 1000);
+      
+    } catch (error) { 
+      console.error("❌ Swipe save failed:", error); 
+      alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
+    }
   };
 
   const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
@@ -184,6 +287,37 @@ export default function ProfileViewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20" dir="rtl">
+      <AnimatePresence>
+        {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {actionFeedback && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
+                actionFeedback === 'like' 
+                  ? 'bg-red-500' 
+                  : 'bg-black'
+              }`}
+            >
+              {actionFeedback === 'like' ? (
+                <Heart className="w-16 h-16 text-white" fill="white" />
+              ) : (
+                <X className="w-16 h-16 text-white" strokeWidth={4} />
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10">
         <button onClick={() => navigate(-1)} className="p-2">
           <ArrowRight className="w-6 h-6 text-gray-600" />
@@ -352,6 +486,28 @@ export default function ProfileViewPage() {
           </div>
         </div>
       </div>
+      
+      {showActions && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+          <div className="max-w-md mx-auto flex items-center justify-center gap-6">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleSwipe('dislike')}
+              className="w-16 h-16 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shadow-lg hover:border-gray-400 transition-colors"
+            >
+              <X className="w-8 h-8 text-gray-600" strokeWidth={3} />
+            </motion.button>
+            
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleSwipe('like')}
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow"
+            >
+              <Heart className="w-10 h-10 text-white" fill="white" />
+            </motion.button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
