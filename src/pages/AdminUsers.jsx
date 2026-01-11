@@ -30,24 +30,34 @@ export default function AdminUsersPage() {
         const checkAdminAndLoad = async () => {
             try {
                 const me = await User.me();
+                console.log('🔍 Current user:', me);
+                console.log('🔍 Is admin?', me.role === 'admin');
+                
                 if (me.role !== 'admin') {
-                    navigate(createPageUrl('Home'));
+                    console.log('❌ Not admin, redirecting to Discover');
+                    navigate(createPageUrl('Discover'), { replace: true });
                     return;
                 }
+                
+                console.log('✅ Admin confirmed, loading data...');
                 setIsAdmin(true);
                 await loadData();
                 
                 // Send test email to Motti automatically
                 console.log('🚀 Calling backend function to send email...');
-                const emailResult = await base44.functions.sendEmailToMotti();
-                console.log('📬 Email result:', emailResult);
+                try {
+                    const emailResult = await base44.functions.sendEmailToMotti();
+                    console.log('📬 Email result:', emailResult);
+                } catch (emailError) {
+                    console.error('📧 Email error (non-critical):', emailError);
+                }
             } catch (e) {
-                console.error(e);
-                navigate(createPageUrl('Home'));
+                console.error('❌ Error in checkAdminAndLoad:', e);
+                navigate(createPageUrl('Discover'), { replace: true });
             }
         };
         checkAdminAndLoad();
-    }, []);
+    }, [navigate]);
 
     const loadData = async () => {
         setLoading(true);
