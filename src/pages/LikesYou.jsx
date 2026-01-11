@@ -57,17 +57,24 @@ export default function LikesYouPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
-            <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center justify-between">
-                <h1 className="text-2xl font-black text-gray-900">לייקים שקיבלתי</h1>
-                <button 
-                    onClick={() => navigate(createPageUrl('LikesSent'))}
-                    className="text-sm font-bold text-[--theme-orange] hover:underline"
-                >
-                    לייקים ששלחתי
-                </button>
+            <div className="sticky top-16 bg-gray-50 z-10 p-4 pb-2">
+                <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-3xl font-black text-gray-900">לייקים</h1>
+                    <button 
+                        onClick={() => navigate(createPageUrl('LikesSent'))}
+                        className="text-sm font-bold text-[--theme-orange] hover:underline"
+                    >
+                        לייקים ששלחתי
+                    </button>
+                </div>
+                {profiles.length > 0 && (
+                    <p className="font-medium text-[--theme-orange]">
+                        {profiles.length} {profiles.length === 1 ? "לייק חדש" : "לייקים חדשים"}
+                    </p>
+                )}
             </div>
 
-            <div className="p-4 grid grid-cols-2 gap-4">
+            <div className="px-4 grid grid-cols-2 gap-4">
                 {profiles.length === 0 ? (
                     <div className="col-span-2 text-center py-20">
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
