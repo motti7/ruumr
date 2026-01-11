@@ -211,7 +211,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 overflow-auto bg-gradient-to-br from-orange-900 via-red-900 to-orange-800"
+        className="fixed inset-0 z-50 overflow-auto bg-gradient-to-br from-orange-800 via-red-800 to-orange-700"
         dir="rtl"
       >
         <div className="min-h-screen p-4 pb-32 flex flex-col items-center justify-center">
@@ -282,7 +282,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
   const currentUserName = currentUser === 'user1' ? user1Name : user2Name;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-orange-900 to-red-900 overflow-hidden" dir="rtl">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-800 to-red-800 overflow-hidden" dir="rtl">
       <AnimatePresence mode="wait">
         {showMatch && (
           <motion.div
@@ -389,7 +389,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
               transition={{ type: "spring", damping: 20, stiffness: 100 }}
               className="w-full max-w-md"
             >
-              <div className="bg-gradient-to-br from-orange-600 to-red-600 rounded-3xl shadow-2xl overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl shadow-2xl overflow-hidden">
                 <div className="p-8 text-center">
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}

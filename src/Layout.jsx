@@ -35,7 +35,7 @@ function CharterHintButton() {
         </svg>
       </button>
       {showHint && (
-        <div className="absolute top-full right-0 mt-2 w-64 bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 rounded-2xl shadow-xl z-[100]">
+        <div className="absolute top-full right-0 mt-2 w-64 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-2xl shadow-xl z-[100]">
           <p className="text-xs font-bold leading-tight mb-3">
             🤝 חוזה שותפות<br/>
             <span className="text-[10px] font-normal opacity-90">שאלון אינטראקטיבי - מה חשוב לך בחיים משותפים?</span>
@@ -46,7 +46,7 @@ function CharterHintButton() {
           >
             הבנתי! 👍
           </button>
-          <div className="absolute -top-2 right-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-orange-600"></div>
+          <div className="absolute -top-2 right-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-orange-500"></div>
         </div>
       )}
     </div>
