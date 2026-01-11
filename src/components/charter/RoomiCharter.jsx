@@ -342,22 +342,13 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
 
       {/* Close Button */}
       <button
-        onClick={onClose}
-        className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20"
+        onClick={() => onClose?.()}
+        className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
       >
         <X className="w-6 h-6 text-white" />
       </button>
 
-      {/* User Indicator */}
-      <div className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10">
-        <motion.div
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="bg-white/20 backdrop-blur-xl px-6 py-2 rounded-full border-2 border-white/40"
-        >
-          <p className="text-white font-black text-lg">{currentUserName} 👤</p>
-        </motion.div>
-      </div>
+
 
       <div className="h-full flex items-center justify-center p-6 pt-32">
         <AnimatePresence mode="wait">
@@ -410,7 +401,7 @@ export default function RoomiCharter({ user1Name, user2Name, onClose }) {
                   <h2 className="text-5xl font-black text-white leading-tight mb-2">
                     {currentQuestion.title}
                   </h2>
-                  <p className="text-xl text-white/80 font-bold">{currentUserName}, מה אתה/ת מעדיפ/ה?</p>
+                  <p className="text-xl text-white/80 font-bold">מה אתה/ת מעדיפ/ה?</p>
                 </div>
                 
                 <div className="p-6 space-y-4">

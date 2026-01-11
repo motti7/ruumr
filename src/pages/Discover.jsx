@@ -299,8 +299,8 @@ export default function DiscoverPage() {
                 ✕
               </button>
               <p className="text-sm font-bold leading-tight">
-                🎮 משחק חדש!<br/>
-                <span className="text-xs font-normal opacity-90">בדוק תאימות עם השותפ/ה הבא/ה בסגנון טינדר</span>
+                🤝 חוזה שותפות<br/>
+                <span className="text-xs font-normal opacity-90">תשאלון אינטראקטיבי - מה חשוב לך בחיים משותפים?</span>
               </p>
             </motion.div>
           )}
