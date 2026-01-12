@@ -56,7 +56,11 @@ function CharterHintButton() {
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
-  const navigate = useNavigate(); // Import this hook if not imported!
+  const [seenMatchesCount, setSeenMatchesCount] = useState(() => {
+    const saved = localStorage.getItem('roomi_seen_matches_count');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const navigate = useNavigate();
 
   useEffect(() => {
        const checkBanned = async () => {
@@ -106,7 +110,7 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: matchesCount },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: matchesCount > seenMatchesCount ? matchesCount - seenMatchesCount : 0 },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
