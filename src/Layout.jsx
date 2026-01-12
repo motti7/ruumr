@@ -28,25 +28,25 @@ function CharterHintButton() {
     <div className="relative">
       <button
         onClick={() => window.dispatchEvent(new Event('openCharter'))}
-        className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+        className="bg-gradient-to-r from-purple-500 to-pink-500 p-2.5 rounded-full shadow-lg hover:scale-110 transition-all hover:shadow-purple-300/50 hover:shadow-xl"
       >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       </button>
       {showHint && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-orange-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
           <p className="text-xs font-bold leading-tight mb-3">
-            🤝 חוזה שותפות<br/>
-            <span className="text-[10px] font-normal opacity-90">הגדירו ביחד את כללי הדירה המשותפת</span>
+            🤝 שותפות<br/>
+            <span className="text-[10px] font-normal opacity-90">משחק אינטראקטיבי עם השותפים שלך!</span>
           </p>
           <button
             onClick={handleDismiss}
-            className="w-full bg-white text-orange-500 text-xs font-bold py-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="w-full bg-white text-purple-500 text-xs font-bold py-2 rounded-full hover:bg-gray-100 transition-colors"
           >
             הבנתי! 👍
           </button>
-          <div className="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-orange-400"></div>
+          <div className="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-purple-500"></div>
         </div>
       )}
     </div>
@@ -107,6 +107,14 @@ export default function Layout({ children, currentPageName }) {
            return () => clearInterval(interval);
        }
        }, [currentPageName, matchesCount]);
+
+  // Update seen matches count when user visits Matches page
+  useEffect(() => {
+    if (currentPageName === 'Matches' && matchesCount > 0) {
+      localStorage.setItem('roomi_seen_matches_count', matchesCount.toString());
+      setSeenMatchesCount(matchesCount);
+    }
+  }, [currentPageName, matchesCount]);
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
