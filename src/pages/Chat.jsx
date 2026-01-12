@@ -7,6 +7,7 @@ import { ArrowRight, Send, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import CharterResults from "../components/charter/CharterResults";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -120,6 +121,8 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <CharterResults matchId={match.id} />
+        
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-[--theme-orange] to-[--theme-orange-dark] rounded-full flex items-center justify-center mb-4">
