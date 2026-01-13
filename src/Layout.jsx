@@ -56,6 +56,14 @@ function CharterHintButton() {
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
+  const [seenMatchIds, setSeenMatchIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('roomi_seen_match_ids');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,7 +85,8 @@ export default function Layout({ children, currentPageName }) {
                const user = await UserEntity.me();
                const matches = await Match.filter({ user1_id: user.id }); 
                const matches2 = await Match.filter({ user2_id: user.id });
-               const total = matches.length + matches2.length;
+               const allMatches = [...matches, ...matches2];
+               const total = allMatches.length;
 
                if (total > matchesCount && matchesCount !== 0) {
                    // New match detected!
@@ -104,9 +113,25 @@ export default function Layout({ children, currentPageName }) {
        }
        }, [currentPageName, matchesCount]);
 
+  // Mark match as seen when viewing Chat page
+  useEffect(() => {
+    if (currentPageName === 'Chat') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const matchId = urlParams.get('matchId');
+      if (matchId && !seenMatchIds.includes(matchId)) {
+        const newSeenIds = [...seenMatchIds, matchId];
+        setSeenMatchIds(newSeenIds);
+        localStorage.setItem('roomi_seen_match_ids', JSON.stringify(newSeenIds));
+      }
+    }
+  }, [currentPageName, seenMatchIds]);
+
+  // Calculate unseen matches count
+  const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
+
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: matchesCount },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
