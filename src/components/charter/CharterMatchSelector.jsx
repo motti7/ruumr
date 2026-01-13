@@ -65,7 +65,7 @@ export default function CharterMatchSelector({ onClose }) {
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 pb-8">
+        <div className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 p-6 pb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-black text-white">חוזה שותפות 🤝</h1>
             <button
@@ -76,7 +76,7 @@ export default function CharterMatchSelector({ onClose }) {
             </button>
           </div>
           <p className="text-white/90 text-sm">
-            בחר/י עם מי תרצה/י לשחק במשחק חוזה השותפות
+            בחר אם מי תרצה לבדוק התאמה
           </p>
         </div>
 
