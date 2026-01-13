@@ -55,9 +55,13 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
           <motion.div 
             whileTap={{ scale: 0.85 }}
             onClick={handleCharterClick}
-            className="text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md"
+            className="text-white bg-white p-3 rounded-full hover:brightness-110 transition-all shadow-md"
           >
-            <Puzzle className="w-5 h-5" />
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <path d="M8 3H3v5h2v2h3V8h2V6h-2V3zm8 0h5v5h-2v2h-3V8h-2V6h2V3z" fill="#FF5722"/>
+              <path d="M3 11v5h2v-2h3v2h2v-3H8v-2H3zm13 0v5h-2v-2h-3v2h-2v-3h2v-2h5z" fill="#E64A19"/>
+              <path d="M8 16v5H3v-5h2v2h3v-2h3zm8 0v5h5v-5h-2v2h-3v-2h-3z" fill="#FF5722"/>
+            </svg>
           </motion.div>
           <motion.div 
             whileTap={{ scale: 0.85 }}
