@@ -10,44 +10,13 @@ import { Message } from "@/entities/Message";
 import { useState, useEffect } from "react";
 
 function CharterHintButton() {
-  const [showHint, setShowHint] = useState(false);
-
-  useEffect(() => {
-    const hasSeenHint = localStorage.getItem('roomi_charter_hint_seen');
-    if (!hasSeenHint) {
-      setShowHint(true);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    localStorage.setItem('roomi_charter_hint_seen', 'true');
-    setShowHint(false);
-  };
-
   return (
-    <div className="relative">
-      <button
-        onClick={() => window.dispatchEvent(new Event('openCharter'))}
-        className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
-      >
-        <Puzzle className="w-4 h-4 text-white" />
-      </button>
-      {showHint && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-orange-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
-          <p className="text-xs font-bold leading-tight mb-3">
-            🤝 חוזה שותפות<br/>
-            <span className="text-[10px] font-normal opacity-90">הגדירו ביחד את כללי הדירה המשותפת</span>
-          </p>
-          <button
-            onClick={handleDismiss}
-            className="w-full bg-white text-orange-500 text-xs font-bold py-2 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            הבנתי! 👍
-          </button>
-          <div className="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-orange-400"></div>
-        </div>
-      )}
-    </div>
+    <button
+      onClick={() => window.dispatchEvent(new Event('openCharter'))}
+      className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+    >
+      <Puzzle className="w-4 h-4 text-white" />
+    </button>
   );
 }
 
