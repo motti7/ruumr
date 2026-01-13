@@ -259,9 +259,9 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Settings")}>
                             <Settings className="w-6 h-6 text-gray-400"/>
                         </Link>
-                        <button onClick={() => window.location.href = createPageUrl("Discover")} className="flex items-center gap-2">
+                        <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
                              <h1 className="text-3xl logo-font">Roomi</h1>
-                        </button>
+                        </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
                                 <CharterHintButton />
