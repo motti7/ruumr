@@ -76,7 +76,7 @@ export default function CharterMatchSelector({ onClose }) {
             </button>
           </div>
           <p className="text-white/90 text-sm">
-            בחר אם מי תרצה לבדוק התאמה
+            בחר עם מי תרצה/י לבדוק התאמה
           </p>
         </div>
 
