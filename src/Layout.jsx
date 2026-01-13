@@ -28,13 +28,9 @@ function CharterHintButton() {
     <div className="relative">
       <button
         onClick={() => window.dispatchEvent(new Event('openCharter'))}
-        className="bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+        className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
       >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-          <path d="M8 3H3v5h2v2h3V8h2V6h-2V3zm8 0h5v5h-2v2h-3V8h-2V6h2V3z" fill="#FF5722"/>
-          <path d="M3 11v5h2v-2h3v2h2v-3H8v-2H3zm13 0v5h-2v-2h-3v2h-2v-3h2v-2h5z" fill="#E64A19"/>
-          <path d="M8 16v5H3v-5h2v2h3v-2h3zm8 0v5h5v-5h-2v2h-3v-2h-3z" fill="#FF5722"/>
-        </svg>
+        <Puzzle className="w-4 h-4 text-white" />
       </button>
       {showHint && (
         <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-orange-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
