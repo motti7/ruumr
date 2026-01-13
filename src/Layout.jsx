@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, MessageCircle, User, Settings, Home, Smartphone, ThumbsUp } from "lucide-react";
+import { Compass, MessageCircle, User, Settings, Home, Smartphone, ThumbsUp, Puzzle } from "lucide-react";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
@@ -30,9 +30,7 @@ function CharterHintButton() {
         onClick={() => window.dispatchEvent(new Event('openCharter'))}
         className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
       >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Puzzle className="w-4 h-4 text-white" />
       </button>
       {showHint && (
         <div className="absolute top-full left-0 mt-2 w-64 bg-gradient-to-r from-orange-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl z-[100]">
