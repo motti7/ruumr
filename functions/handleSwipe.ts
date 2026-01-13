@@ -75,8 +75,8 @@ export default async function(context) {
                     console.log(`📨 Sending email to User 1: ${u1.email}`);
                     await base44.integrations.Core.SendEmail({
                         to: u1.email,
-                        subject: `🎉 יש לך התאמה חדשה עם ${p2.name}!`,
-                        body: `היי ${p1.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p2.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
+                        subject: "🏘️ יש לך התאמה חדשה!",
+                        body: `יש לך מאץ' עם ${p2.name}! זה הזמן להיכנס לצ'אט ולהתחיל לתכנן את החיים המשותפים.<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
                     });
                     console.log("✅ Email sent to User 1");
                 } else {
@@ -91,8 +91,8 @@ export default async function(context) {
                     console.log(`📨 Sending email to User 2: ${u2.email}`);
                     await base44.integrations.Core.SendEmail({
                         to: u2.email,
-                        subject: `🎉 יש לך התאמה חדשה עם ${p1.name}!`,
-                        body: `היי ${p2.name},<br><br>יש לך התאמה חדשה ב-Roomi עם ${p1.name}!<br><br>היכנס/י לאפליקציה כדי להתחיל לצ'וטט:<br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
+                        subject: "🏘️ יש לך התאמה חדשה!",
+                        body: `יש לך מאץ' עם ${p1.name}! זה הזמן להיכנס לצ'אט ולהתחיל לתכנן את החיים המשותפים.<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
                     });
                     console.log("✅ Email sent to User 2");
                 } else {
@@ -124,19 +124,18 @@ export default async function(context) {
                     
                     console.log(`💕 Likes check for ${swiped_id}: Total=${totalLikes}, LastNotified=${lastNotificationCount}, New=${newLikesSinceLastNotification}`);
                     
-                    // Send notification every 2 new likes
-                    if (newLikesSinceLastNotification >= 2) {
+                    // Send notification every 3 new likes
+                    if (newLikesSinceLastNotification >= 3) {
                         const swipedProfile = await base44.asServiceRole.entities.Profile.filter({ user_id: swiped_id });
                         const profile = swipedProfile[0];
                         
                         if (swipedUser.email && profile) {
                             const appUrl = origin || "https://roomi.me";
-                            const likeWord = newLikesSinceLastNotification === 2 ? 'שני פרופילים' : `${newLikesSinceLastNotification} פרופילים`;
                             
                             await base44.integrations.Core.SendEmail({
                                 to: swipedUser.email,
-                                subject: `💫 ${likeWord} סימנו התעניינות בך!`,
-                                body: `היי ${profile.name} 👋<br><br>${likeWord} סימנו התעניינות בך לאחרונה ב-Roomi! 😍<br><br>בוא/י לגלות מי מחכה לך 💕<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">גלה מי זה ✨</a>`
+                                subject: "🔥 הפרופיל שלך אש!",
+                                body: `3 אנשים חדשים אהבו את הוייב שלך ב-Roomi. היכנס/י לאפליקציה כדי לראות מי אלה.<br><br><a href="${appUrl}" style="display:inline-block;background:#FF5722;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;margin-top:10px;">פתח את Roomi</a>`
                             });
                             
                             // Update the notification counter
