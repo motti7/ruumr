@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, MapPin, FileText } from "lucide-react";
+import { MessageCircle, MapPin, Puzzle } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
 export default function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
@@ -57,7 +57,7 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
             onClick={handleCharterClick}
             className="text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md"
           >
-            <FileText className="w-5 h-5" />
+            <Puzzle className="w-5 h-5" />
           </motion.div>
           <motion.div 
             whileTap={{ scale: 0.85 }}
