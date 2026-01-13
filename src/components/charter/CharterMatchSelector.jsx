@@ -5,33 +5,18 @@ import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
 import RoomiCharter from './RoomiCharter';
 import SmartImage from '@/components/shared/SmartImage';
-import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-
-const TOTAL_QUESTIONS = 9;
 
 export default function CharterMatchSelector({ onClose }) {
-  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [user, setUser] = useState(null);
-  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
 
   useEffect(() => {
     const loadMatches = async () => {
       try {
         const userData = await User.me();
         setUser(userData);
-
-        // בדיקה אם המשתמש כבר ענה על כל השאלון
-        const myAnswers = await base44.entities.CharterAnswer.filter({ user_id: userData.id });
-        const uniqueQuestions = new Set(myAnswers.map(a => a.question_id));
-        
-        if (uniqueQuestions.size >= TOTAL_QUESTIONS) {
-          setAlreadyCompleted(true);
-        }
 
         const userMatches = await Match.filter({ user1_id: userData.id });
         const userMatches2 = await Match.filter({ user2_id: userData.id });
@@ -91,10 +76,7 @@ export default function CharterMatchSelector({ onClose }) {
             </button>
           </div>
           <p className="text-white/90 text-sm">
-            {alreadyCompleted 
-              ? 'בחר/י התאמה כדי לדון על העדפות חוזה השותפות'
-              : 'בחר/י התאמה כדי להגדיר את חוזה השותפות המשותף'
-            }
+            בחר/י עם מי תרצה/י לשחק במשחק חוזה השותפות
           </p>
         </div>
 
@@ -124,13 +106,7 @@ export default function CharterMatchSelector({ onClose }) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  onClick={() => {
-                    if (alreadyCompleted) {
-                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
-                    } else {
-                      setSelectedMatch(match);
-                    }
-                  }}
+                  onClick={() => setSelectedMatch(match)}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-shadow active:scale-95"
                 >
                   <div className="aspect-[3/4] relative">
