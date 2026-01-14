@@ -231,6 +231,13 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
       </div>
 
       <button
+        onClick={() => navigate(createPageUrl('Discover'))}
+        className="absolute top-4 right-4 z-20 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
+      >
+        <h1 className="text-2xl logo-font text-white">Roomi</h1>
+      </button>
+      
+      <button
         onClick={() => onClose?.()}
         className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
       >
