@@ -123,17 +123,7 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <CharterResults matchId={match.id} />
         
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-[--theme-orange] to-[--theme-orange-dark] rounded-full flex items-center justify-center mb-4">
-              <span className="text-4xl">💬</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">התאמה חדשה!</h3>
-            <p className="text-gray-500 px-8">
-              שלח/י הודעה ל{otherProfile.name} והתחילו לתכנן את הדירה החדשה שלכם
-            </p>
-          </div>
-        ) : (
+        {messages.length === 0 ? null : (
           messages.map((msg, idx) => {
             const isMyMessage = msg.sender_id === user.id;
             return (
