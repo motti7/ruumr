@@ -56,27 +56,6 @@ export default function ChatPage() {
         setOtherProfile(profiles[0]);
       }
 
-      // בדיקה אם שני המשתמשים מילאו את החרטר
-      const { base44 } = require('@/api/base44Client');
-      const allQuestions = 8; // סה"כ שאלות בחרטר
-      
-      const myAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId,
-        user_id: userData.id 
-      });
-      
-      const theirAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId,
-        user_id: otherUserId 
-      });
-
-      // אם אני לא מילאתי - מפנה לחרטר
-      if (myAnswers.length < allQuestions) {
-        window.dispatchEvent(new Event('openCharter'));
-        navigate(createPageUrl("Matches"));
-        return;
-      }
-
       const matchMessages = await Message.filter({ match_id: matchId }, "created_date");
       setMessages(matchMessages);
     } catch (error) {

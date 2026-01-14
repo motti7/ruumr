@@ -223,7 +223,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: answered ? '100%' : '0%' }}
-                className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
+                className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
               />
             </div>
           );
