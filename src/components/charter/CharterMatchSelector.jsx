@@ -26,9 +26,18 @@ export default function CharterMatchSelector({ onClose }) {
           allMatches.map(async (match) => {
             const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
             const profiles = await Profile.filter({ user_id: otherUserId });
+            
+            // בדיקה אם המשתמש הנוכחי כבר ענה על כל השאלות
+            const { base44 } = require('@/api/base44Client');
+            const myAnswers = await base44.entities.CharterAnswer.filter({ 
+              match_id: match.id,
+              user_id: userData.id 
+            });
+            
             return {
               ...match,
-              profile: profiles[0] || null
+              profile: profiles[0] || null,
+              myAnswersCount: myAnswers.length
             };
           })
         );
@@ -45,6 +54,13 @@ export default function CharterMatchSelector({ onClose }) {
   if (selectedMatch) {
     const myProfile = { name: user?.full_name || 'אני' };
     const theirProfile = selectedMatch.profile;
+    
+    // אם כבר ענה על כל השאלות - מוביל לצ'אט
+    if (selectedMatch.myAnswersCount >= 8) {
+      const navigate = require('react-router-dom').useNavigate();
+      navigate(require('@/utils').createPageUrl('Chat') + `?matchId=${selectedMatch.id}`);
+      return null;
+    }
     
     return (
       <RoomiCharter

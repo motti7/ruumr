@@ -3,11 +3,12 @@ import { Match, Profile, Message } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Send, Loader2 } from "lucide-react";
+import { ArrowRight, Send, Loader2, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CharterResults from "../components/charter/CharterResults";
+import { base44 } from "@/api/base44Client";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [showWaitingBanner, setShowWaitingBanner] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -55,6 +57,21 @@ export default function ChatPage() {
       if (profiles.length > 0) {
         setOtherProfile(profiles[0]);
       }
+
+      // בדיקה אם שני המשתמשים מילאו את החרטר
+      const allQuestions = 8;
+      const myAnswers = await base44.entities.CharterAnswer.filter({ 
+        match_id: matchId,
+        user_id: userData.id 
+      });
+      
+      const theirAnswers = await base44.entities.CharterAnswer.filter({ 
+        match_id: matchId,
+        user_id: otherUserId 
+      });
+
+      // הצגת באנר המתנה אם השותף השני לא ענה
+      setShowWaitingBanner(theirAnswers.length < allQuestions);
 
       const matchMessages = await Message.filter({ match_id: matchId }, "created_date");
       setMessages(matchMessages);
@@ -121,7 +138,23 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <CharterResults matchId={match.id} />
+        {showWaitingBanner && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mb-4"
+          >
+            <Clock className="w-12 h-12 text-white mx-auto mb-3" />
+            <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
+            <p className="text-white/90 text-sm">
+              {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.
+              <br />
+              נשלח לו/ה תזכורת!
+            </p>
+          </motion.div>
+        )}
+        
+        {!showWaitingBanner && <CharterResults matchId={match.id} />}
         
         {messages.length === 0 ? null : (
           messages.map((msg, idx) => {

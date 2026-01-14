@@ -59,13 +59,6 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
           >
             <Puzzle className="w-5 h-5" />
           </motion.div>
-          <motion.div 
-            whileTap={{ scale: 0.85 }}
-            onClick={handleChatClick}
-            className="text-[--theme-orange] bg-orange-50 p-3 rounded-full hover:bg-orange-100 transition-colors"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </motion.div>
         </div>
       </div>
     </motion.div>
