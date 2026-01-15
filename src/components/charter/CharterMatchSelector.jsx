@@ -55,13 +55,6 @@ export default function CharterMatchSelector({ onClose }) {
     const myProfile = { name: user?.full_name || 'אני' };
     const theirProfile = selectedMatch.profile;
     
-    // אם כבר ענה על כל השאלות - מוביל לצ'אט
-    if (selectedMatch.myAnswersCount >= 8) {
-      const navigate = require('react-router-dom').useNavigate();
-      navigate(require('@/utils').createPageUrl('Chat') + `?matchId=${selectedMatch.id}`);
-      return null;
-    }
-    
     return (
       <RoomiCharter
         matchId={selectedMatch.id}
