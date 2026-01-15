@@ -18,8 +18,8 @@ export default function CharterMatchSelector({ onClose }) {
         const userData = await User.me();
         setUser(userData);
 
-        const userMatches = await Match.filter({ user1_id: userData.id });
-        const userMatches2 = await Match.filter({ user2_id: userData.id });
+        const userMatches = await Match.filter({ user1_id: userData.id, status: 'active' });
+        const userMatches2 = await Match.filter({ user2_id: userData.id, status: 'active' });
         const allMatches = [...userMatches, ...userMatches2];
 
         const matchesWithProfiles = await Promise.all(
