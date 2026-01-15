@@ -110,9 +110,10 @@ export default function CharterMatchSelector({ onClose }) {
             </div>
           ) : matches.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-6xl mb-4">😔</div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">אין התאמות עדיין</h3>
-              <p className="text-gray-500">צריך להתאים עם מישהו קודם כדי לשחק</p>
+              <div className="relative w-24 h-24 mx-auto mb-4">
+                <Puzzle className="w-24 h-24 text-[--theme-orange]" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-700 mb-2">צריך להתאים עם מישהו קודם</h3>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
