@@ -4,7 +4,7 @@ import { User } from "@/entities/User";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { Puzzle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
 
 export default function MatchesPage() {
@@ -87,7 +87,7 @@ export default function MatchesPage() {
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-            <MessageCircle className="w-6 h-6 text-white" />
+            <Puzzle className="w-6 h-6 text-white" />
         </motion.div>
       </div>
     );

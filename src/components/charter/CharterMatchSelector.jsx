@@ -98,7 +98,7 @@ export default function CharterMatchSelector({ onClose }) {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <MessageCircle className="w-6 h-6 text-white" />
+                <Puzzle className="w-6 h-6 text-white" />
               </motion.div>
             </div>
           ) : matches.length === 0 ? (
