@@ -23,6 +23,21 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadData();
+    
+    // Subscribe to CharterAnswer changes for real-time updates
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get("matchId");
+    
+    if (matchId) {
+      const unsubscribe = base44.entities.CharterAnswer.subscribe((event) => {
+        if (event.data?.match_id === matchId) {
+          // Reload data when charter answers change
+          loadData();
+        }
+      });
+      
+      return () => unsubscribe();
+    }
   }, []);
 
   useEffect(() => {
