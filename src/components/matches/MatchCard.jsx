@@ -21,12 +21,15 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
     try {
       const { base44 } = require('@/api/base44Client');
       const user = await base44.auth.me();
-      const myAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId,
-        user_id: user.id 
+      
+      // קבל את כל התשובות למטש הזה
+      const allAnswers = await base44.entities.CharterAnswer.filter({ 
+        match_id: matchId
       });
       
-      // אם כבר עניתי על כל השאלות - עבור לצ'אט
+      const myAnswers = allAnswers.filter(a => a.user_id === user.id);
+      
+      // אם כבר עניתי על כל השאלות - תמיד עבור לצ'אט (גם אם השני לא סיים)
       if (myAnswers.length >= 8) {
         onClickChat();
       } else {
