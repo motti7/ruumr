@@ -14,9 +14,27 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
     onClickChat();
   };
 
-  const handleCharterClick = (e) => {
+  const handleCharterClick = async (e) => {
     e.stopPropagation();
-    onClickCharter();
+    
+    // בדוק אם כבר השלמתי את השאלון
+    try {
+      const { base44 } = require('@/api/base44Client');
+      const user = await base44.auth.me();
+      const myAnswers = await base44.entities.CharterAnswer.filter({ 
+        match_id: matchId,
+        user_id: user.id 
+      });
+      
+      // אם כבר עניתי על כל השאלות - עבור לצ'אט
+      if (myAnswers.length >= 8) {
+        onClickChat();
+      } else {
+        onClickCharter();
+      }
+    } catch (e) {
+      onClickCharter();
+    }
   };
 
   return (

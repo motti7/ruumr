@@ -138,7 +138,7 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {showWaitingBanner && (
+        {showWaitingBanner ? (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -152,34 +152,32 @@ export default function ChatPage() {
               נשלח לו/ה תזכורת!
             </p>
           </motion.div>
+        ) : (
+          <CharterResults matchId={match.id} />
         )}
-        
-        {!showWaitingBanner && <CharterResults matchId={match.id} />}
-        
-        {messages.length === 0 ? null : (
-          messages.map((msg, idx) => {
-            const isMyMessage = msg.sender_id === user.id;
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}
+
+        {messages.map((msg, idx) => {
+          const isMyMessage = msg.sender_id === user.id;
+          return (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[75%] px-4 py-2 rounded-2xl ${
+                  isMyMessage
+                    ? "gradient-orange text-white"
+                    : "bg-white text-gray-900 border border-gray-200"
+                }`}
               >
-                <div
-                  className={`max-w-[75%] px-4 py-2 rounded-2xl ${
-                    isMyMessage
-                      ? "gradient-orange text-white"
-                      : "bg-white text-gray-900 border border-gray-200"
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
-                </div>
-              </motion.div>
-            );
-          })
-        )}
+                <p className="text-sm leading-relaxed">{msg.content}</p>
+              </div>
+            </motion.div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
