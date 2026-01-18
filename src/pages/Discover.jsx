@@ -241,7 +241,7 @@ export default function DiscoverPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-white">
         <motion.div
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-900 flex items-center justify-center"
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
