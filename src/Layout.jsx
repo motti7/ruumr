@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, MessageCircle, User, Settings, Home, Smartphone, ThumbsUp, Puzzle } from "lucide-react";
+import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle } from "lucide-react";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
@@ -98,7 +98,7 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 

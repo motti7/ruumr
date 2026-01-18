@@ -27,22 +27,16 @@ export default function CharterMatchSelector({ onClose }) {
             const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
             const profiles = await Profile.filter({ user_id: otherUserId });
             
-            // בדיקה אם המשתמש הנוכחי כבר ענה על כל השאלות
-            const { base44 } = require('@/api/base44Client');
-            const myAnswers = await base44.entities.CharterAnswer.filter({ 
-              match_id: match.id,
-              user_id: userData.id 
-            });
-            
             return {
               ...match,
-              profile: profiles[0] || null,
-              myAnswersCount: myAnswers.length
+              profile: profiles[0] || null
             };
           })
         );
         
-        setMatches(matchesWithProfiles.filter(m => m.profile));
+        const validMatches = matchesWithProfiles.filter(m => m.profile);
+        console.log("Found matches:", validMatches.length, validMatches);
+        setMatches(validMatches);
       } catch (error) {
         console.error("Error loading matches:", error);
       }
@@ -74,7 +68,7 @@ export default function CharterMatchSelector({ onClose }) {
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-yellow-400 p-6 pb-8">
+        <div className="bg-gradient-to-r from-orange-500 to-black p-6 pb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-black text-white">חוזה שותפות 🤝</h1>
             <button

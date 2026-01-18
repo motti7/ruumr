@@ -215,30 +215,14 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 overflow-hidden" dir="rtl">
-      <div className="absolute top-0 left-0 right-0 p-3 flex gap-1 z-10">
-        {allQuestions.map((q, i) => {
-          const answered = myAnswers[q.id];
-          return (
-            <div key={i} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: answered ? '100%' : '0%' }}
-                className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
-              />
-            </div>
-          );
-        })}
-      </div>
-
       <button
-        onClick={() => navigate(createPageUrl('Discover'))}
-        className="absolute top-4 right-4 z-20 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
-      >
-        <h1 className="text-2xl logo-font text-white">Roomi</h1>
-      </button>
-      
-      <button
-        onClick={() => onClose?.()}
+        onClick={() => {
+          if (onClose) {
+            onClose();
+          } else {
+            navigate(-1);
+          }
+        }}
         className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
       >
         <X className="w-6 h-6 text-white" />
