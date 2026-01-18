@@ -45,7 +45,7 @@ export default function LikesYouPage() {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
                 <motion.div
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-700 flex items-center justify-center"
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-900 flex items-center justify-center"
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
