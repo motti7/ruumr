@@ -22,20 +22,26 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
       const { base44 } = require('@/api/base44Client');
       const user = await base44.auth.me();
       
-      // קבל את כל התשובות למטש הזה
-      const allAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId
+      console.log('Checking charter status for match:', matchId, 'user:', user.id);
+      
+      // קבל את התשובות שלי בלבד
+      const myAnswers = await base44.entities.CharterAnswer.filter({ 
+        match_id: matchId,
+        user_id: user.id
       });
       
-      const myAnswers = allAnswers.filter(a => a.user_id === user.id);
+      console.log('My answers count:', myAnswers.length, myAnswers);
       
-      // אם כבר עניתי על כל השאלות - תמיד עבור לצ'אט (גם אם השני לא סיים)
+      // אם כבר עניתי על כל השאלות (8 שאלות) - תמיד עבור לצ'אט
       if (myAnswers.length >= 8) {
+        console.log('Charter completed - going to chat');
         onClickChat();
       } else {
+        console.log('Charter not completed - going to charter');
         onClickCharter();
       }
     } catch (e) {
+      console.error('Error checking charter status:', e);
       onClickCharter();
     }
   };
