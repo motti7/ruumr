@@ -17,31 +17,24 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
   const handleCharterClick = async (e) => {
     e.stopPropagation();
     
-    // בדוק אם כבר השלמתי את השאלון
     try {
       const { base44 } = require('@/api/base44Client');
-      const user = await base44.auth.me();
+      const { User } = require('@/entities/User');
+      const user = await User.me();
       
-      console.log('Checking charter status for match:', matchId, 'user:', user.id);
-      
-      // קבל את התשובות שלי בלבד
       const myAnswers = await base44.entities.CharterAnswer.filter({ 
         match_id: matchId,
         user_id: user.id
       });
       
-      console.log('My answers count:', myAnswers.length, myAnswers);
-      
-      // אם כבר עניתי על כל השאלות (8 שאלות) - תמיד עבור לצ'אט
-      if (myAnswers.length >= 8) {
-        console.log('Charter completed - going to chat');
+      if (myAnswers && myAnswers.length >= 8) {
         onClickChat();
-      } else {
-        console.log('Charter not completed - going to charter');
-        onClickCharter();
+        return;
       }
-    } catch (e) {
-      console.error('Error checking charter status:', e);
+      
+      onClickCharter();
+    } catch (error) {
+      console.error('Charter check error:', error);
       onClickCharter();
     }
   };
