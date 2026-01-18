@@ -173,91 +173,74 @@ export default function CharterResults({ matchId }) {
     loadResults();
   }, [matchId]);
 
-  if (isLoading) {
+  if (isLoading || !results || results.waiting) {
     return null;
-  }
-
-  if (!results) {
-    return null;
-  }
-
-  if (results.waiting) {
-    return (
-      <div className="bg-gradient-to-r from-orange-100 to-orange-200 rounded-2xl p-6 mb-4">
-        <div className="text-center">
-          <div className="text-6xl mb-3">⏳</div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">חוזה השותפות בתהליך</h3>
-          <p className="text-gray-600 text-sm">
-            {!results.user1Complete && !results.user2Complete && "שני הצדדים צריכים למלא את החוזה"}
-            {results.user1Complete && !results.user2Complete && "מחכים שהשותף/ה שלך ימלא/תמלא את החוזה"}
-            {!results.user1Complete && results.user2Complete && "הצד השני כבר מילא, עכשיו תורך!"}
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-4"
-    >
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 mb-3">
-        <div className="text-center">
-          <div className="text-6xl mb-3">🤝</div>
-          <h2 className="text-3xl font-black text-white mb-2">חוזה השותפות שלכם</h2>
-          <div className="text-6xl font-black text-yellow-300 my-3">{results.compatibilityPercent}%</div>
-          <p className="text-white/90 text-lg font-bold">
-            {results.compatibilityPercent >= 80 && "משגע! התאמה מושלמת 🔥"}
-            {results.compatibilityPercent >= 60 && results.compatibilityPercent < 80 && "יפה מאוד! יש כאן שותפות 👌"}
-            {results.compatibilityPercent < 60 && "צריך לדבר על הנושאים האלה 💬"}
+    <>
+      {/* הודעת מערכת - סיכום */}
+      <div className="flex justify-start mb-3">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 max-w-[85%] shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-400 text-center mb-2">סיכום השאלון המשותף</p>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+              <span className="text-lg font-black text-white">{results.compatibilityPercent}%</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-700 text-center leading-relaxed">
+            {results.compatibilityPercent >= 80 && "יש לכם המון מכנה משותף! זה נראה כמו שותפות מעולה 🎉"}
+            {results.compatibilityPercent >= 60 && results.compatibilityPercent < 80 && "בגדול מסכימים! יש כמה נושאים לשיחה אבל זה נראה טוב 👌"}
+            {results.compatibilityPercent < 60 && "יש כמה הבדלים, אבל זה בסדר - חשוב לדבר על זה ולהגיע להבנות 💬"}
           </p>
         </div>
       </div>
 
       {results.agreements.length > 0 && (
-        <div className="bg-green-50 rounded-2xl p-4 mb-3">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <h3 className="font-bold text-green-900">הסכמות ({results.agreements.length})</h3>
-          </div>
-          <div className="space-y-2">
-            {results.agreements.map((item, i) => (
-              <div key={i} className="bg-white rounded-xl p-3 flex items-center gap-3">
-                <span className="text-2xl">{item.emoji}</span>
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900 text-sm">{item.title}</p>
-                  <p className="text-gray-600 text-xs mt-1">{item.answer}</p>
+        <div className="flex justify-start mb-3">
+          <div className="bg-white rounded-2xl px-4 py-3 max-w-[85%] shadow-sm border border-gray-100">
+            <p className="text-sm text-gray-700 leading-relaxed mb-2">
+              <strong className="text-green-600">✓ דברים שמסכימים עליהם:</strong>
+            </p>
+            <div className="space-y-1.5">
+              {results.agreements.map((item, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className="text-lg">{item.emoji}</span>
+                  <div>
+                    <p className="text-gray-700 text-xs font-medium">{item.title}</p>
+                    <p className="text-gray-500 text-[10px]">{item.answer}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-2 text-center">זה הבסיס לשותפות מעולה 💚</p>
           </div>
         </div>
       )}
 
       {results.disagreements.length > 0 && (
-        <div className="bg-yellow-50 rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Handshake className="w-5 h-5 text-yellow-600" />
-            <h3 className="font-bold text-yellow-900">צריך לדבר על זה ({results.disagreements.length})</h3>
-          </div>
-          <div className="space-y-2">
-            {results.disagreements.map((item, i) => (
-              <div key={i} className="bg-white rounded-xl p-3">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">{item.emoji}</span>
-                  <p className="font-bold text-gray-900 text-sm">{item.title}</p>
+        <div className="flex justify-start mb-3">
+          <div className="bg-white rounded-2xl px-4 py-3 max-w-[85%] shadow-sm border border-gray-100">
+            <p className="text-sm text-gray-700 leading-relaxed mb-2">
+              <strong className="text-yellow-600">💬 נושאים לשיחה:</strong>
+            </p>
+            <div className="space-y-2">
+              {results.disagreements.map((item, i) => (
+                <div key={i} className="text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{item.emoji}</span>
+                    <p className="text-gray-700 text-xs font-medium">{item.title}</p>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mr-7">
+                    💡 {item.compromise}
+                  </p>
                 </div>
-                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-3">
-                  <p className="text-xs font-bold text-gray-700 mb-1">💡 הצעה לפשרה:</p>
-                  <p className="text-gray-800 text-sm font-medium">{item.compromise}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-2 text-center">כדאי לדבר על זה ולהגיע להבנות 🤝</p>
           </div>
         </div>
       )}
-    </motion.div>
+    </>
   );
 }
