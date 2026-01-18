@@ -86,6 +86,7 @@ export default function CharterPage() {
 
   return (
     <RoomiCharter
+      matchId={match.id}
       user1Name={user1Profile.name}
       user2Name={user2Profile.name}
       onComplete={handleComplete}
