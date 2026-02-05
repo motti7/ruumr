@@ -128,15 +128,15 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 antialiased" dir="rtl">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-behavior-none" dir="rtl">
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                <div className="bg-white rounded-2xl p-6 max-w-sm text-center shadow-2xl">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Smartphone className="w-8 h-8 text-red-500" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">אופס! יש בעיה עם התמונות</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="text-xl font-bold mb-2 dark:text-white">אופס! יש בעיה עם התמונות</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
                         חלק מהתמונות בפרופיל שלך לא עלו כראוי ולא ניתן לראות אותן. אנא העלה אותן מחדש כדי שכולם יוכלו לראות אותך.
                     </p>
                     <button 
@@ -160,6 +160,7 @@ export default function Layout({ children, currentPageName }) {
         <meta name="theme-color" content="#FF5722" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
         <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
@@ -206,18 +207,18 @@ export default function Layout({ children, currentPageName }) {
         </script>
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
-        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
+        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
             {currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
                 <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                     {children}
                 </div>
             ) : (
-                <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-xl flex flex-col items-center">
+                <div className="max-w-md w-full bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-xl flex flex-col items-center">
                     <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6">
                         <Smartphone className="w-10 h-10 text-[--theme-orange]" />
                     </div>
-                    <h1 className="text-2xl font-black text-gray-800 mb-2">האפליקציה זמינה בנייד בלבד</h1>
-                    <p className="text-gray-500 mb-8 text-lg">
+                    <h1 className="text-2xl font-black text-gray-800 dark:text-white mb-2">האפליקציה זמינה בנייד בלבד</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 text-lg">
                         Ruumr היא חוויה שנועדה למובייל.
                         <br/>
                         אנא פתח/י את האפליקציה מהטלפון שלך.
@@ -254,46 +255,53 @@ export default function Layout({ children, currentPageName }) {
             </style>
             
             {shouldShowNav && (
-                <header className="bg-white sticky top-0 z-50 border-b border-gray-200">
+                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between relative">
-                        <Link to={createPageUrl("Settings")}>
-                            <Settings className="w-6 h-6 text-gray-400"/>
+                        <Link to={createPageUrl("Settings")} className="select-none">
+                            <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                         </Link>
-                        <Link to={createPageUrl("Discover")}>
+                        <Link to={createPageUrl("Discover")} className="select-none">
                              <img 
                                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png"
                                  alt="Ruumr"
-                                 className="h-9"
+                                 className="h-9 select-none"
+                                 draggable="false"
                              />
                         </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
                                 <CharterHintButton />
                             )}
-                            <Link to={createPageUrl("Profile")}>
-                                <User className="w-6 h-6 text-gray-400"/>
+                            <Link to={createPageUrl("Profile")} className="select-none">
+                                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                             </Link>
                         </div>
                     </div>
                 </header>
             )}
 
-            <main className={`max-w-md mx-auto bg-gray-50 ${shouldShowNav ? 'pb-20' : ''}`}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 ${shouldShowNav ? 'pb-20' : ''}`}>
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed bottom-0 right-1/2 transform translate-x-1/2 max-w-md w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50">
+                <nav className="fixed bottom-0 right-1/2 transform translate-x-1/2 max-w-md w-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         const Icon = item.icon;
+                        const handleClick = (e) => {
+                            if (isActive) {
+                                e.preventDefault();
+                                navigate(item.path);
+                            }
+                        };
                         return (
-                        <Link key={item.name} to={item.path} className="flex-1">
+                        <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 ${
-                                isActive ? 'text-[--theme-orange]' : 'text-gray-400'
+                            className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 select-none ${
+                                isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
                             } relative`}
                             >
                             <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
