@@ -259,13 +259,11 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Settings")}>
                             <Settings className="w-6 h-6 text-gray-400"/>
                         </Link>
-                        <Link to={createPageUrl("Discover")} className="flex items-center gap-1">
-                             <h1 className="text-3xl logo-font">Ruumr</h1>
+                        <Link to={createPageUrl("Discover")}>
                              <img 
                                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png"
                                  alt="Ruumr"
-                                 className="h-8 w-8 object-cover object-right"
-                                 style={{ objectPosition: 'right center' }}
+                                 className="h-9"
                              />
                         </Link>
                         <div className="flex items-center gap-2">
