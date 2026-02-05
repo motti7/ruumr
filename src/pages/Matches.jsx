@@ -12,6 +12,9 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullStart, setPullStart] = useState(0);
+  const [pullDistance, setPullDistance] = useState(0);
 
   const loadMatches = useCallback(async () => {
     setIsLoading(true);
@@ -79,9 +82,38 @@ export default function MatchesPage() {
     loadMatches();
   }, [loadMatches]);
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadMatches();
+    setIsRefreshing(false);
+  };
+
+  const handleTouchStart = (e) => {
+    if (window.scrollY === 0) {
+      setPullStart(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (pullStart > 0 && window.scrollY === 0) {
+      const distance = e.touches[0].clientY - pullStart;
+      if (distance > 0) {
+        setPullDistance(Math.min(distance, 100));
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 60) {
+      handleRefresh();
+    }
+    setPullStart(0);
+    setPullDistance(0);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <motion.div
             className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
             animate={{ scale: [1, 1.2, 1] }}
@@ -94,9 +126,39 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
-      <div className="sticky top-16 bg-gray-50 z-10 p-4 pb-2">
-        <h1 className="text-3xl font-black text-gray-900 mb-2">התאמות</h1>
+    <div 
+      className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" 
+      dir="rtl"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {pullDistance > 0 && (
+        <div 
+          className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 transition-opacity"
+          style={{ opacity: pullDistance / 60 }}
+        >
+          <motion.div
+            className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
+            animate={{ rotate: pullDistance * 3.6 }}
+          >
+            <Puzzle className="w-4 h-4 text-white" />
+          </motion.div>
+        </div>
+      )}
+      {isRefreshing && (
+        <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
+          <motion.div
+            className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Puzzle className="w-4 h-4 text-white" />
+          </motion.div>
+        </div>
+      )}
+      <div className="sticky top-16 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
+        <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">התאמות</h1>
         {matches.length > 0 && (
           <p className="font-medium text-[--theme-orange]">
             {matches.length} {matches.length === 1 ? "התאמה חדשה" : "התאמות חדשות"}
@@ -111,8 +173,8 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 flex flex-col items-center"
           >
-            <h2 className="text-2xl font-black text-gray-800 mb-3">אין התאמות עדיין</h2>
-            <p className="text-gray-500 mb-8 leading-relaxed px-4">
+            <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
               כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
             </p>
             <Link
