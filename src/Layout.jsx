@@ -58,9 +58,9 @@ export default function Layout({ children, currentPageName }) {
                if (total > matchesCount && matchesCount !== 0) {
                    // New match detected!
                    if (Notification.permission === 'granted') {
-                       new Notification('Roomi', {
+                       new Notification('Ruumr', {
                            body: 'יש לך התאמה חדשה!',
-                           icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png'
+                           icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
                        });
                    }
                }
@@ -160,40 +160,40 @@ export default function Layout({ children, currentPageName }) {
         <meta name="theme-color" content="#FF5722" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <meta property="og:site_name" content="Roomi" />
+        <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <meta property="og:site_name" content="Ruumr" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://roomi.me" />
+        <meta property="og:url" content="https://ruumr.me" />
         <meta property="og:locale" content="he_IL" />
-        <title>Roomi - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
-        <meta name="description" content="Roomi - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
-        <meta property="og:title" content="Roomi - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
-        <meta property="og:description" content="מחפשים שותפים? רומי היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
-        <meta property="og:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <meta property="og:image:secure_url" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <title>Ruumr - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
+        <meta name="description" content="Ruumr - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
+        <meta property="og:title" content="Ruumr - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
+        <meta property="og:description" content="מחפשים שותפים? Ruumr היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
+        <meta property="og:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <meta property="og:image:secure_url" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
         <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:alt" content="Roomi - אפליקציה למציאת שותפים" />
-        <link rel="image_src" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <meta name="thumbnail" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
+        <meta property="og:image:alt" content="Ruumr - אפליקציה למציאת שותפים" />
+        <link rel="image_src" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <meta name="thumbnail" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@Roomi" />
-        <meta name="twitter:title" content="Roomi - למצוא שותפים בכיף" />
+        <meta name="twitter:site" content="@Ruumr" />
+        <meta name="twitter:title" content="Ruumr - למצוא שותפים בכיף" />
         <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
-        <meta name="twitter:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png" />
-        <meta name="twitter:image:alt" content="Roomi Logo" />
+        <meta name="twitter:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
+        <meta name="twitter:image:alt" content="Ruumr Logo" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Roomi",
-            "url": "https://roomi.me",
-            "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/dc7eb6235_file_00000000eac871fd9aad5337be4a9889.png",
+            "name": "Ruumr",
+            "url": "https://ruumr.me",
+            "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png",
             "description": "האפליקציה החכמה למציאת שותפים ודירות בישראל",
             "applicationCategory": "LifestyleApplication",
             "operatingSystem": "Web",
@@ -218,7 +218,7 @@ export default function Layout({ children, currentPageName }) {
                     </div>
                     <h1 className="text-2xl font-black text-gray-800 mb-2">האפליקציה זמינה בנייד בלבד</h1>
                     <p className="text-gray-500 mb-8 text-lg">
-                        Roomi היא חוויה שנועדה למובייל.
+                        Ruumr היא חוויה שנועדה למובייל.
                         <br/>
                         אנא פתח/י את האפליקציה מהטלפון שלך.
                     </p>
@@ -260,7 +260,11 @@ export default function Layout({ children, currentPageName }) {
                             <Settings className="w-6 h-6 text-gray-400"/>
                         </Link>
                         <Link to={createPageUrl("Discover")} className="flex items-center gap-2">
-                             <h1 className="text-3xl logo-font">Roomi</h1>
+                             <img 
+                                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png"
+                                 alt="Ruumr"
+                                 className="h-9"
+                             />
                         </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
