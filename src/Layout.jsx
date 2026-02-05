@@ -261,12 +261,7 @@ export default function Layout({ children, currentPageName }) {
                             <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                         </Link>
                         <Link to={createPageUrl("Discover")} className="select-none">
-                             <img 
-                                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png"
-                                 alt="Ruumr"
-                                 className="h-9 select-none"
-                                 draggable="false"
-                             />
+                             <h1 className="text-3xl logo-font">Ruumr</h1>
                         </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
