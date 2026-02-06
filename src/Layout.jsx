@@ -13,9 +13,9 @@ function CharterHintButton() {
   return (
     <button
       onClick={() => window.dispatchEvent(new Event('openCharter'))}
-      className="bg-[--theme-orange] p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+      className="hover:scale-110 transition-transform"
     >
-      <Puzzle className="w-4 h-4 text-white" />
+      <Puzzle className="w-6 h-6 text-[--theme-orange]" />
     </button>
   );
 }
