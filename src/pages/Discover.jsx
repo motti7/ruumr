@@ -239,15 +239,14 @@ export default function DiscoverPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white">
+      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900">
         <motion.div
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-            <Home className="w-6 h-6 text-white" />
+            <Home className="w-12 h-12 text-[--theme-orange]" />
         </motion.div>
-        <p className="text-gray-500 font-medium mt-4">מחפש שותפים...</p>
+        <p className="text-gray-500 dark:text-gray-400 font-medium mt-4">מחפש שותפים...</p>
       </div>
     );
   }
