@@ -261,7 +261,7 @@ export default function Layout({ children, currentPageName }) {
                             <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                         </Link>
                         <Link to={createPageUrl("Discover")} className="select-none">
-                             <h1 className="text-3xl logo-font">Ruumr</h1>
+                             <h1 className="text-3xl logo-font">ruumr</h1>
                         </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
