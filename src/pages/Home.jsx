@@ -371,10 +371,10 @@ export default function HomePage() {
             </div>
 
             {/* Testimonial */}
-            <blockquote className="text-2xl md:text-3xl font-bold text-white mb-6 leading-relaxed">
+            <blockquote className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-relaxed">
               "מצאתי את השותפה המושלמת תוך יומיים! האפליקציה ממש שינתה לי את החיפוש"
             </blockquote>
-            <p className="text-lg text-white font-semibold">
+            <p className="text-lg text-gray-600 font-semibold">
               - נועה, תל אביב
             </p>
           </motion.div>
