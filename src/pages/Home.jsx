@@ -88,27 +88,36 @@ export default function HomePage() {
               className="relative max-w-sm mx-auto"
             >
               <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-gray-800">
-                <div className="aspect-[9/19] bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
-                  <div className="text-center">
-                    <HomeIcon className="w-24 h-24 text-[--theme-orange] mx-auto mb-4" />
-                    <p className="text-gray-500 font-bold">Ruumr App</p>
-                  </div>
+                <div className="aspect-[9/19] bg-white">
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/bf6c854ca_Screenshot_2026-02-07-20-32-17-71_40deb401b9ffe8e1df2f1cc5ba480b12.jpg"
+                    alt="Ruumr App Screenshot"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
-              {/* Floating Elements */}
+              {/* Floating Orange Monsters */}
               <motion.div
-                animate={{ y: [0, -10, 0] }}
+                animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-8 -right-8 w-20 h-20 bg-red-500 rounded-full flex items-center justify-center shadow-xl"
+                className="absolute -top-12 -right-12 w-32 h-32 z-10"
               >
-                <Heart className="w-10 h-10 text-white" fill="white" />
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
+                  alt="Ruumr Monster"
+                  className="w-full h-full object-contain drop-shadow-2xl"
+                />
               </motion.div>
               <motion.div
-                animate={{ y: [0, 10, 0] }}
+                animate={{ y: [0, 10, 0], rotate: [0, -5, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -bottom-8 -left-8 w-20 h-20 bg-[--theme-orange] rounded-full flex items-center justify-center shadow-xl"
+                className="absolute -bottom-12 -left-12 w-32 h-32 z-10"
               >
-                <Users className="w-10 h-10 text-white" />
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
+                  alt="Ruumr Monster"
+                  className="w-full h-full object-contain drop-shadow-2xl"
+                />
               </motion.div>
             </motion.div>
           </motion.div>
