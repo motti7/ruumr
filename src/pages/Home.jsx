@@ -192,7 +192,7 @@ export default function HomePage() {
               className="text-center"
             >
               <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
-                <AnimatedCounter targetValue="10000" suffix="+" delay={200} />
+                <AnimatedCounter targetValue="100" suffix="+" delay={200} />
               </div>
               <p className="text-xl text-gray-600 font-semibold">משתמשים פעילים</p>
             </motion.div>
@@ -205,7 +205,7 @@ export default function HomePage() {
               className="text-center"
             >
               <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
-                <AnimatedCounter targetValue="2500" suffix="+" delay={200} />
+                <AnimatedCounter targetValue="50" suffix="+" delay={200} />
               </div>
               <p className="text-xl text-gray-600 font-semibold">התאמות מוצלחות</p>
             </motion.div>
