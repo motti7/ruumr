@@ -227,7 +227,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section with Characters */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange]/80 to-orange-600/80 relative overflow-hidden">
+      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange] to-orange-600 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
