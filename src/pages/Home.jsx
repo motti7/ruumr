@@ -80,7 +80,7 @@ export default function HomePage() {
           >
             <h2 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
               למצוא שותפים<br />
-              <span className="text-[--theme-orange]">בכיף</span>
+              <span className="text-[--theme-orange]">באמת</span>
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
               האפליקציה החכמה למציאת שותפים לדירה בישראל. 
