@@ -227,7 +227,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section with Characters */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange] to-orange-600 relative overflow-hidden">
+      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange]/80 to-orange-600/80 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
@@ -272,7 +272,7 @@ export default function HomePage() {
                 className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-[--theme-orange] font-black text-xl shadow-2xl"
               >
                 <Download className="w-6 h-6" />
-                התחל עכשיו בחינם
+                התחל עכשיו
               </motion.button>
             </motion.div>
           </div>
