@@ -173,6 +173,16 @@ export default function HomePage() {
 
       {/* Testimonial Section */}
       <section className="py-20 px-6 bg-gradient-to-br from-[#FF6B47] via-[#FF5722] to-[#FF7043] relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/c4156cb77_file_0000000026d071f49a3529fad81e60e4.png"
+            alt="Happy user"
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-[#FF5722]/80 to-[#FF5722]/60"></div>
+        </div>
+
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -198,13 +208,13 @@ export default function HomePage() {
             </div>
 
             {/* Quote */}
-            <h3 className="text-3xl md:text-4xl font-black text-white mb-6 leading-tight px-4">
+            <h3 className="text-3xl md:text-4xl font-black text-white mb-6 leading-tight px-4 drop-shadow-lg">
               "ממש כמו טיינדר, רק לשותפים!<br />
               מצאתי את השותפה המושלמת תוך<br />
               יומיים. זה שינה לי את החיים."
             </h3>
             
-            <p className="text-white/90 text-lg mb-10">
+            <p className="text-white text-lg mb-10 drop-shadow-md">
               אפליקצית Ruumr למציאת שותפים
             </p>
 
@@ -231,11 +241,6 @@ export default function HomePage() {
               להורדה עכשיו
             </motion.button>
           </motion.div>
-        </div>
-
-        {/* Background Image Effect */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
         </div>
       </section>
 
