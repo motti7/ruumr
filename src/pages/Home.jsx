@@ -201,7 +201,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/c4156cb77_file_0000000026d071f49a3529fad81e60e4.png"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/1e73b135a_1770503793926.png"
             alt="Happy user"
             className="w-full h-full object-cover opacity-60"
           />
@@ -307,7 +307,7 @@ export default function HomePage() {
       <footer className="py-12 px-6 bg-gray-900 text-white">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-3xl logo-font text-[--theme-orange] mb-4">ruumr</h1>
-          <p className="text-gray-400 mb-6">למצוא שותפים באמת 🏠</p>
+          <p className="text-gray-400 mb-6">למצוא שותפים באמת</p>
           <div className="flex justify-center gap-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">תנאי שימוש</a>
             <a href="#" className="hover:text-white transition-colors">מדיניות פרטיות</a>
