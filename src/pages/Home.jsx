@@ -96,29 +96,35 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-              {/* Peeking Orange Monsters */}
+              {/* Peeking Orange Monsters - Only partial visibility */}
               <motion.div
-                animate={{ x: [0, -5, 0], y: [0, -8, 0] }}
+                animate={{ x: [0, -3, 0], y: [0, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-0 -right-20 w-40 h-40 z-0 overflow-hidden"
+                className="absolute top-4 -right-16 w-32 h-48 overflow-hidden z-0"
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
-                  alt="Ruumr Monster"
-                  className="w-full h-full object-cover scale-150"
-                  style={{ objectPosition: 'left center' }}
+                  alt="Ruumr Monster Peeking"
+                  className="h-full w-auto object-contain"
+                  style={{ 
+                    marginLeft: '-60%',
+                    filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.2))'
+                  }}
                 />
               </motion.div>
               <motion.div
-                animate={{ x: [0, 5, 0], y: [0, 8, 0] }}
+                animate={{ x: [0, 3, 0], y: [0, 5, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute bottom-8 -left-20 w-40 h-40 z-0 overflow-hidden"
+                className="absolute bottom-12 -left-16 w-32 h-48 overflow-hidden z-0"
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
-                  alt="Ruumr Monster"
-                  className="w-full h-full object-cover scale-150"
-                  style={{ objectPosition: 'right center' }}
+                  alt="Ruumr Monster Peeking"
+                  className="h-full w-auto object-contain"
+                  style={{ 
+                    marginRight: '-60%',
+                    filter: 'drop-shadow(-2px 2px 8px rgba(0,0,0,0.2))'
+                  }}
                 />
               </motion.div>
             </motion.div>
