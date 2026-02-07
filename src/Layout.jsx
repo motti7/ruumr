@@ -102,7 +102,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'Home'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
