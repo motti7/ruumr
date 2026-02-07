@@ -86,8 +86,28 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3 }}
               className="relative max-w-sm mx-auto"
+              style={{ zIndex: 20 }}
             >
-              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-gray-800">
+              {/* Left Monster - Behind phone */}
+              <motion.div
+                animate={{ x: [0, 5, 0], y: [0, -3, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -left-20 top-1/2 -translate-y-1/2"
+                style={{ zIndex: 10 }}
+              >
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
+                  alt="Ruumr Monster"
+                  className="w-48 h-48 object-contain"
+                  style={{ 
+                    clipPath: 'inset(0 35% 0 0)',
+                    filter: 'drop-shadow(4px 4px 12px rgba(0,0,0,0.3))'
+                  }}
+                />
+              </motion.div>
+
+              {/* Phone mockup */}
+              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-gray-800" style={{ zIndex: 30 }}>
                 <div className="aspect-[9/19] bg-white">
                   <img 
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/bf6c854ca_Screenshot_2026-02-07-20-32-17-71_40deb401b9ffe8e1df2f1cc5ba480b12.jpg"
@@ -96,34 +116,21 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-              {/* Peeking Orange Monsters - Only partial visibility */}
+
+              {/* Right Monster - Behind phone */}
               <motion.div
-                animate={{ x: [0, -3, 0], y: [0, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-4 -right-16 w-32 h-48 overflow-hidden z-0"
-              >
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
-                  alt="Ruumr Monster Peeking"
-                  className="h-full w-auto object-contain"
-                  style={{ 
-                    marginLeft: '-60%',
-                    filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.2))'
-                  }}
-                />
-              </motion.div>
-              <motion.div
-                animate={{ x: [0, 3, 0], y: [0, 5, 0] }}
+                animate={{ x: [0, -5, 0], y: [0, 3, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute bottom-12 -left-16 w-32 h-48 overflow-hidden z-0"
+                className="absolute -right-20 top-1/2 -translate-y-1/2"
+                style={{ zIndex: 10 }}
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
-                  alt="Ruumr Monster Peeking"
-                  className="h-full w-auto object-contain"
+                  alt="Ruumr Monster"
+                  className="w-48 h-48 object-contain"
                   style={{ 
-                    marginRight: '-60%',
-                    filter: 'drop-shadow(-2px 2px 8px rgba(0,0,0,0.2))'
+                    clipPath: 'inset(0 0 0 35%)',
+                    filter: 'drop-shadow(-4px 4px 12px rgba(0,0,0,0.3))'
                   }}
                 />
               </motion.div>
@@ -189,76 +196,12 @@ export default function HomePage() {
       </section>
 
       {/* Testimonial Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#FF6B47] via-[#FF5722] to-[#FF7043] relative overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/c4156cb77_file_0000000026d071f49a3529fad81e60e4.png"
-            alt="Happy user"
-            className="w-full h-full object-cover opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-[#FF5722]/40 to-[#FF5722]/30"></div>
-        </div>
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            {/* Stars */}
-            <div className="flex justify-center gap-2 mb-8">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <svg className="w-10 h-10 text-white fill-current" viewBox="0 0 24 24">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                  </svg>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Quote */}
-            <h3 className="text-3xl md:text-4xl font-black text-white mb-6 leading-tight px-4 drop-shadow-lg">
-              "ממש כמו טיינדר, רק לשותפים!<br />
-              מצאתי את השותפה המושלמת תוך<br />
-              יומיים. זה שינה לי את החיים."
-            </h3>
-            
-            <p className="text-white text-lg mb-10 drop-shadow-md">
-              אפליקצית Ruumr למציאת שותפים
-            </p>
-
-            {/* Download Button with Smart Detection */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-                if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                  window.open('https://apps.apple.com/app/ruumr', '_blank');
-                } else if (/android/i.test(userAgent)) {
-                  window.open('https://play.google.com/store/apps/details?id=com.ruumr.app', '_blank');
-                } else {
-                  // Desktop - default to iOS
-                  window.open('https://apps.apple.com/app/ruumr', '_blank');
-                }
-              }}
-              className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-[--theme-orange] font-black text-xl shadow-2xl"
-            >
-              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 12c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5S7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7z"/>
-              </svg>
-              להורדה עכשיו
-            </motion.button>
-          </motion.div>
-        </div>
+      <section className="py-20 px-6 relative overflow-hidden h-96">
+        <img 
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/c4156cb77_file_0000000026d071f49a3529fad81e60e4.png"
+          alt="Happy user"
+          className="w-full h-full object-cover"
+        />
       </section>
 
       {/* CTA Section */}
