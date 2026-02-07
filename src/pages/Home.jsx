@@ -192,7 +192,7 @@ export default function HomePage() {
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/b75d88c41_1770504293370.png"
             alt="Ruumr Characters"
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-20"
           />
         </div>
 
@@ -213,7 +213,7 @@ export default function HomePage() {
                 כבר מחכה לך
               </h3>
               <p className="text-xl text-white/95 mb-8 leading-relaxed drop-shadow-md">
-                הצטרף לאלפי משתמשים שכבר מצאו את הדירה והשותפים המושלמים שלהם
+                הצטרף לאלפי משתמשים שכבר מצאו את הדירה והשותפים המושלמים שלהם.
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
