@@ -140,6 +140,90 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="py-20 px-6 bg-gradient-to-br from-orange-50 to-white">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-4xl font-black text-center text-gray-900 mb-16">המספרים מדברים בעד עצמם</h3>
+          <div className="grid md:grid-cols-4 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
+                className="text-5xl font-black text-[--theme-orange] mb-3"
+              >
+                +100
+              </motion.div>
+              <p className="text-gray-600 font-medium leading-relaxed">שותפים עם התאמה פוטנציאלית באזור שלך מחכים לך</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
+                className="text-5xl font-black text-[--theme-orange] mb-3"
+              >
+                50+
+              </motion.div>
+              <p className="text-gray-600 font-medium leading-relaxed">שידוכים מוצלחים שכבר נעשו דרך האפליקציה</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100, delay: 0.4 }}
+                className="text-5xl font-black text-[--theme-orange] mb-3"
+              >
+                95%
+              </motion.div>
+              <p className="text-gray-600 font-medium leading-relaxed">שיעור שביעות רצון ממשתמשים שמצאו שותפים</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100, delay: 0.5 }}
+                className="text-5xl font-black text-[--theme-orange] mb-3"
+              >
+                24/7
+              </motion.div>
+              <p className="text-gray-600 font-medium leading-relaxed">חיפוש אוטומטי של התאמות חדשות עבורך</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
@@ -268,38 +352,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange] to-orange-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-4xl md:text-5xl font-black text-white mb-6">
-              מוכנים למצוא את השותף המושלם?
-            </h3>
-            <p className="text-xl text-white/90 mb-10">
-              הורידו עכשיו והתחילו את המסע שלכם למציאת דירה עם שותפים מעולים
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://apps.apple.com/app/ruumr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto"
+      {/* CTA Section with Characters */}
+      <section className="py-20 px-6 bg-white relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/b75d88c41_1770504293370.png"
+            alt="Ruumr Characters"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            {/* Empty space for characters on the left */}
+            <div></div>
+            
+            {/* Content on the right */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="text-right"
+            >
+              <h3 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                השותף הבא שלך<br />
+                כבר מחכה לך
+              </h3>
+              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+                הצטרף לאלפי משתמשים שכבר מצאו את הדירה והשותפים המושלמים שלהם
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                    window.open('https://apps.apple.com/app/ruumr', '_blank');
+                  } else if (/android/i.test(userAgent)) {
+                    window.open('https://play.google.com/store/apps/details?id=com.ruumr.app', '_blank');
+                  } else {
+                    window.open('https://apps.apple.com/app/ruumr', '_blank');
+                  }
+                }}
+                className="inline-flex items-center gap-3 px-10 py-5 rounded-full gradient-orange text-white font-black text-xl shadow-2xl"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-[--theme-orange] font-bold text-lg shadow-2xl flex items-center justify-center gap-3"
-                >
-                  <Download className="w-6 h-6" />
-                  הורד עכשיו
-                </motion.button>
-              </a>
-            </div>
-          </motion.div>
+                <Download className="w-6 h-6" />
+                התחל עכשיו בחינם
+              </motion.button>
+            </motion.div>
+          </div>
         </div>
       </section>
 
