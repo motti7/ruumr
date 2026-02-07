@@ -96,27 +96,29 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-              {/* Floating Orange Monsters */}
+              {/* Peeking Orange Monsters */}
               <motion.div
-                animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
+                animate={{ x: [0, -5, 0], y: [0, -8, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-12 -right-12 w-32 h-32 z-10"
+                className="absolute top-0 -right-20 w-40 h-40 z-0 overflow-hidden"
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
                   alt="Ruumr Monster"
-                  className="w-full h-full object-contain drop-shadow-2xl"
+                  className="w-full h-full object-cover scale-150"
+                  style={{ objectPosition: 'left center' }}
                 />
               </motion.div>
               <motion.div
-                animate={{ y: [0, 10, 0], rotate: [0, -5, 0] }}
+                animate={{ x: [0, 5, 0], y: [0, 8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -bottom-12 -left-12 w-32 h-32 z-10"
+                className="absolute bottom-8 -left-20 w-40 h-40 z-0 overflow-hidden"
               >
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
                   alt="Ruumr Monster"
-                  className="w-full h-full object-contain drop-shadow-2xl"
+                  className="w-full h-full object-cover scale-150"
+                  style={{ objectPosition: 'right center' }}
                 />
               </motion.div>
             </motion.div>
@@ -187,9 +189,9 @@ export default function HomePage() {
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/c4156cb77_file_0000000026d071f49a3529fad81e60e4.png"
             alt="Happy user"
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-[#FF5722]/80 to-[#FF5722]/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-[#FF5722]/40 to-[#FF5722]/30"></div>
         </div>
 
         <div className="max-w-5xl mx-auto relative z-10">
