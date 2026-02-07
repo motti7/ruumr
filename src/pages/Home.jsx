@@ -136,7 +136,7 @@ export default function HomePage() {
                 style={{ zIndex: 10 }}
               >
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/703316c2e_1767350127370.jpg"
                   alt="Ruumr Monster"
                   className="w-48 h-48 object-contain"
                   style={{ 
@@ -166,7 +166,7 @@ export default function HomePage() {
                 style={{ zIndex: 10 }}
               >
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/2f9bf59c1_1767350127370.jpg"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/703316c2e_1767350127370.jpg"
                   alt="Ruumr Monster"
                   className="w-48 h-48 object-contain"
                   style={{ 
