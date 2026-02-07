@@ -1,6 +1,46 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Download, Heart, Home as HomeIcon, Users, Shield, Sparkles } from 'lucide-react';
+
+// Counter animation component
+function AnimatedCounter({ targetValue, suffix = '', delay = 0 }) {
+  const [count, setCount] = useState(0);
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    const timeout = setTimeout(() => {
+      let start = 0;
+      const end = parseInt(targetValue);
+      const duration = 2000; // 2 seconds
+      const increment = end / (duration / 16); // 60fps
+
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setCount(end);
+          clearInterval(timer);
+        } else {
+          setCount(Math.floor(start));
+        }
+      }, 16);
+
+      return () => clearInterval(timer);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [isInView, targetValue, delay]);
+
+  return (
+    <span ref={ref}>
+      {suffix && suffix === '+' && <span>+</span>}
+      {count}
+      {suffix && suffix !== '+' && <span>{suffix}</span>}
+    </span>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -159,7 +199,7 @@ export default function HomePage() {
                 transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
                 className="text-5xl font-black text-[--theme-orange] mb-3"
               >
-                +100
+                <AnimatedCounter targetValue="100" suffix="+" delay={200} />
               </motion.div>
               <p className="text-gray-600 font-medium leading-relaxed">שותפים עם התאמה פוטנציאלית באזור שלך מחכים לך</p>
             </motion.div>
@@ -178,7 +218,7 @@ export default function HomePage() {
                 transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
                 className="text-5xl font-black text-[--theme-orange] mb-3"
               >
-                50+
+                <AnimatedCounter targetValue="50" suffix="+" delay={300} />
               </motion.div>
               <p className="text-gray-600 font-medium leading-relaxed">שידוכים מוצלחים שכבר נעשו דרך האפליקציה</p>
             </motion.div>
@@ -197,7 +237,7 @@ export default function HomePage() {
                 transition={{ type: "spring", stiffness: 100, delay: 0.4 }}
                 className="text-5xl font-black text-[--theme-orange] mb-3"
               >
-                95%
+                <AnimatedCounter targetValue="95" suffix="%" delay={400} />
               </motion.div>
               <p className="text-gray-600 font-medium leading-relaxed">שיעור שביעות רצון ממשתמשים שמצאו שותפים</p>
             </motion.div>
@@ -216,9 +256,9 @@ export default function HomePage() {
                 transition={{ type: "spring", stiffness: 100, delay: 0.5 }}
                 className="text-5xl font-black text-[--theme-orange] mb-3"
               >
-                24/7
+                <AnimatedCounter targetValue="3" delay={500} />
               </motion.div>
-              <p className="text-gray-600 font-medium leading-relaxed">חיפוש אוטומטי של התאמות חדשות עבורך</p>
+              <p className="text-gray-600 font-medium leading-relaxed">ימים בממוצע למציאת שותף מתאים</p>
             </motion.div>
           </div>
         </div>
