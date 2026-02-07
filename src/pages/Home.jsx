@@ -353,13 +353,13 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section with Characters */}
-      <section className="py-20 px-6 bg-white relative overflow-hidden">
+      <section className="py-20 px-6 bg-gradient-to-br from-[--theme-orange] to-orange-600 relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/b75d88c41_1770504293370.png"
             alt="Ruumr Characters"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover opacity-40"
           />
         </div>
 
@@ -375,11 +375,11 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-right"
             >
-              <h3 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+              <h3 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight drop-shadow-lg">
                 השותף הבא שלך<br />
                 כבר מחכה לך
               </h3>
-              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+              <p className="text-xl text-white/95 mb-8 leading-relaxed drop-shadow-md">
                 הצטרף לאלפי משתמשים שכבר מצאו את הדירה והשותפים המושלמים שלהם
               </p>
               <motion.button
@@ -395,7 +395,7 @@ export default function HomePage() {
                     window.open('https://apps.apple.com/app/ruumr', '_blank');
                   }
                 }}
-                className="inline-flex items-center gap-3 px-10 py-5 rounded-full gradient-orange text-white font-black text-xl shadow-2xl"
+                className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-[--theme-orange] font-black text-xl shadow-2xl"
               >
                 <Download className="w-6 h-6" />
                 התחל עכשיו בחינם
