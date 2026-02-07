@@ -113,6 +113,7 @@ export default function HomePage() {
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/bf6c854ca_Screenshot_2026-02-07-20-32-17-71_40deb401b9ffe8e1df2f1cc5ba480b12.jpg"
                     alt="Ruumr App Screenshot"
                     className="w-full h-full object-cover"
+                    style={{ objectPosition: 'center top' }}
                   />
                 </div>
               </div>
