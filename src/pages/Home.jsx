@@ -181,8 +181,49 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-orange-50 to-white">
-...
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
+                <AnimatedCounter targetValue="10000" suffix="+" delay={200} />
+              </div>
+              <p className="text-xl text-gray-600 font-semibold">משתמשים פעילים</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
+                <AnimatedCounter targetValue="2500" suffix="+" delay={200} />
+              </div>
+              <p className="text-xl text-gray-600 font-semibold">התאמות מוצלחות</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center"
+            >
+              <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
+                <AnimatedCounter targetValue="50" suffix="+" delay={200} />
+              </div>
+              <p className="text-xl text-gray-600 font-semibold">ערים בישראל</p>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* CTA Section with Characters */}
@@ -292,11 +333,6 @@ export default function HomePage() {
             </motion.div>
           </div>
         </div>
-      </section>
-
-      {/* Testimonial Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#FF6B47] via-[#FF5722] to-[#FF7043] relative overflow-hidden">
-...
       </section>
 
       {/* Footer */}
