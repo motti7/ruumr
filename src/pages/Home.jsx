@@ -343,6 +343,7 @@ export default function HomePage() {
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/10e42fd63_1770503793926.png"
             alt="Happy User"
             className="w-full h-full object-cover opacity-40"
+            style={{ filter: 'sepia(0.5) saturate(1.5) hue-rotate(-10deg)' }}
           />
         </div>
 
