@@ -44,7 +44,7 @@ export default function HomePage() {
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
               האפליקציה החכמה למציאת שותפים לדירה בישראל. 
-              התאמה על בסיס וייב, תקציב ואורח חיים משותפים.
+              התאמה על בסיס וייב, תקציב ואורח חיים משותף.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -307,7 +307,7 @@ export default function HomePage() {
       <footer className="py-12 px-6 bg-gray-900 text-white">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-3xl logo-font text-[--theme-orange] mb-4">ruumr</h1>
-          <p className="text-gray-400 mb-6">למצוא שותפים בכיף 🏠</p>
+          <p className="text-gray-400 mb-6">למצוא שותפים באמת 🏠</p>
           <div className="flex justify-center gap-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">תנאי שימוש</a>
             <a href="#" className="hover:text-white transition-colors">מדיניות פרטיות</a>
