@@ -335,6 +335,52 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-20 px-6 bg-gradient-to-br from-orange-100 to-white relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/10e42fd63_1770503793926.png"
+            alt="Happy User"
+            className="w-full h-full object-cover opacity-40"
+          />
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            {/* Stars */}
+            <div className="flex justify-center gap-2 mb-6">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <svg className="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                  </svg>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Testimonial */}
+            <blockquote className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-relaxed">
+              "מצאתי את השותפה המושלמת תוך שבוע! האפליקציה ממש שינתה לי את החיפוש"
+            </blockquote>
+            <p className="text-lg text-gray-600 font-semibold">
+              - נועה, תל אביב
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-12 px-6 bg-gray-900 text-white">
         <div className="max-w-6xl mx-auto text-center">
