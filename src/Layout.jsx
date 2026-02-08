@@ -73,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
 
            } catch(e) {}
        };
-       if (!['Onboarding'].includes(currentPageName)) {
+       if (!['Onboarding', 'Home'].includes(currentPageName)) {
            checkNotifications();
            const interval = setInterval(checkNotifications, 10000); // Poll every 10s
            return () => clearInterval(interval);
