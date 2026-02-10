@@ -126,28 +126,9 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3 }}
               className="relative max-w-sm mx-auto"
-              style={{ zIndex: 20 }}
             >
-              {/* Left Monster - Behind phone */}
-              <motion.div
-                animate={{ x: [0, 5, 0], y: [0, -3, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -left-20 top-1/2 -translate-y-1/2"
-                style={{ zIndex: 10 }}
-              >
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/703316c2e_1767350127370.jpg"
-                  alt="Ruumr Monster"
-                  className="w-48 h-48 object-contain"
-                  style={{ 
-                    clipPath: 'inset(0 35% 0 0)',
-                    filter: 'drop-shadow(4px 4px 12px rgba(0,0,0,0.3))'
-                  }}
-                />
-              </motion.div>
-
               {/* Phone mockup */}
-              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-gray-800" style={{ zIndex: 30 }}>
+              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-8 border-gray-800">
                 <div className="aspect-[9/19] bg-white">
                   <img 
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/bf6c854ca_Screenshot_2026-02-07-20-32-17-71_40deb401b9ffe8e1df2f1cc5ba480b12.jpg"
@@ -157,24 +138,6 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-
-              {/* Right Monster - Behind phone */}
-              <motion.div
-                animate={{ x: [0, -5, 0], y: [0, 3, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -right-20 top-1/2 -translate-y-1/2"
-                style={{ zIndex: 10 }}
-              >
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/703316c2e_1767350127370.jpg"
-                  alt="Ruumr Monster"
-                  className="w-48 h-48 object-contain"
-                  style={{ 
-                    clipPath: 'inset(0 0 0 35%)',
-                    filter: 'drop-shadow(-4px 4px 12px rgba(0,0,0,0.3))'
-                  }}
-                />
-              </motion.div>
             </motion.div>
           </motion.div>
         </div>
