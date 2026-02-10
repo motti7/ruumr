@@ -353,7 +353,7 @@ export default function HomePage() {
           <div className="flex justify-center gap-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">תנאי שימוש</a>
             <a href="#" className="hover:text-white transition-colors">מדיניות פרטיות</a>
-            <a href="#" className="hover:text-white transition-colors">צור קשר</a>
+            <a href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">צור קשר</a>
           </div>
           <p className="text-gray-500 text-sm mt-6">© 2026 Ruumr. כל הזכויות שמורות.</p>
         </div>
