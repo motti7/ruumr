@@ -194,7 +194,7 @@ export default function HomePage() {
               <div className="text-6xl md:text-7xl font-black text-[--theme-orange] mb-3">
                 <AnimatedCounter targetValue="100" suffix="+" delay={200} />
               </div>
-              <p className="text-xl text-gray-600 font-semibold">משתמשים פעילים</p>
+              <p className="text-xl text-gray-600 font-semibold">משתמשים פעילים בכל רגע נתון</p>
             </motion.div>
 
             <motion.div
