@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Download, Heart, Home as HomeIcon, Users, Shield, Sparkles } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
 
 // Counter animation component
 function AnimatedCounter({ targetValue, suffix = '', delay = 0 }) {
@@ -45,66 +44,8 @@ function AnimatedCounter({ targetValue, suffix = '', delay = 0 }) {
 
 export default function HomePage() {
   return (
-    <>
-      <Helmet>
-        <title>Ruumr - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
-        <meta name="description" content="Ruumr - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ruumrapp.com/" />
-        <meta property="og:title" content="Ruumr - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
-        <meta property="og:description" content="מחפשים שותפים? Ruumr היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
-        <meta property="og:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta property="og:image:secure_url" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta property="og:image:width" content="512" />
-        <meta property="og:image:height" content="512" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:alt" content="Ruumr - אפליקציה למציאת שותפים" />
-        <meta property="og:site_name" content="Ruumr" />
-        <meta property="og:locale" content="he_IL" />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://ruumrapp.com/" />
-        <meta name="twitter:title" content="Ruumr - למצוא שותפים בכיף" />
-        <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
-        <meta name="twitter:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta name="twitter:image:alt" content="Ruumr Logo" />
-
-        {/* Additional Meta Tags */}
-        <meta name="keywords" content="שותפים לדירה, מציאת שותפים, דירות, שיתופיות, סטודנטים, צעירים, רומר, ruumr, חיפוש שותפים בישראל" />
-        <meta name="author" content="Ruumr" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://ruumrapp.com/" />
-        
-        {/* Structured Data */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Ruumr",
-            "url": "https://ruumrapp.com",
-            "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png",
-            "description": "האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים.",
-            "applicationCategory": "LifestyleApplication",
-            "operatingSystem": "iOS, Android",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "ILS"
-            },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.8",
-              "ratingCount": "150"
-            }
-          })}
-        </script>
-      </Helmet>
-
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50" dir="rtl">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50" dir="rtl">
+      {/* Header */}
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-orange-100 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-3xl logo-font text-[--theme-orange]">ruumr</h1>
@@ -468,7 +409,6 @@ export default function HomePage() {
           background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
         }
       `}</style>
-      </div>
-    </>
+    </div>
   );
 }
