@@ -4,7 +4,7 @@ import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Mail } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Mail, Database } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 
@@ -92,6 +92,7 @@ export default function SettingsPage() {
               <p className="font-bold text-lg mb-2 text-gray-800">חשבון</p>
               <div className="divide-y divide-gray-100">
                 <SettingsItem icon={<Lock className="w-5 h-5 text-gray-500"/>} title="ניהול הרשאות" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Permissions")} />
+                <SettingsItem icon={<Database className="w-5 h-5 text-gray-500"/>} title="מחיקת נתונים מלאה" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("DataDeletion")} />
               </div>
           </div>
 
