@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Trash2, CheckCircle2 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
+import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
@@ -18,15 +19,34 @@ export default function DataDeletionPage() {
       return;
     }
 
+    if (!confirm("האם את/ה בטוח/ה שברצונך למחוק את החשבון לצמיתות? פעולה זו בלתי הפיכה.")) {
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const user = await User.me();
       
+      // Delete all user data
+      const mySwipes = await Swipe.filter({ swiper_id: user.id });
+      await Promise.all(mySwipes.map(s => Swipe.delete(s.id)));
+      
+      const swipesOnMe = await Swipe.filter({ swiped_id: user.id });
+      await Promise.all(swipesOnMe.map(s => Swipe.delete(s.id)));
+      
+      const myMatches1 = await Match.filter({ user1_id: user.id });
+      const myMatches2 = await Match.filter({ user2_id: user.id });
+      await Promise.all([...myMatches1, ...myMatches2].map(m => Match.delete(m.id)));
+      
+      const myProfiles = await Profile.filter({ user_id: user.id });
+      await Promise.all(myProfiles.map(p => Profile.delete(p.id)));
+      
+      // Send email to admin to delete Google login credentials
       await base44.integrations.Core.SendEmail({
         to: "moti.yeheskel@gmail.com",
-        subject: `בקשת מחיקת נתונים מלאה - ${user.email}`,
+        subject: `מחיקת פרטי כניסה גוגל - ${user.email}`,
         body: `
-          משתמש ביקש למחוק את כל הנתונים שלו, כולל פרטי כניסה עם גוגל.
+          משתמש מחק את חשבונו ומבקש למחוק גם את פרטי הכניסה עם גוגל.
           
           פרטי המשתמש:
           - אימייל: ${user.email}
@@ -36,14 +56,21 @@ export default function DataDeletionPage() {
           סיבת המחיקה:
           ${reason}
           
-          יש לטפל בבקשה זו בהקדם האפשרי.
+          יש למחוק את פרטי הכניסה עם גוגל של משתמש זה.
         `
       });
 
       setSubmitted(true);
+      
+      // Logout after 3 seconds
+      setTimeout(() => {
+        User.logout();
+        window.location.href = createPageUrl('Home');
+      }, 3000);
+      
     } catch (error) {
       console.error(error);
-      alert("שגיאה בשליחת הבקשה. נסה שוב.");
+      alert("שגיאה במחיקת החשבון. נסה שוב.");
     }
     setIsSubmitting(false);
   };
@@ -55,9 +82,9 @@ export default function DataDeletionPage() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 mb-4">הבקשה נשלחה בהצלחה</h2>
+          <h2 className="text-2xl font-black text-gray-900 mb-4">החשבון נמחק בהצלחה</h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            בקשתך למחיקת נתונים התקבלה. נטפל בה תוך 30 יום ונעדכן אותך באימייל.
+            כל הנתונים שלך נמחקו מהמערכת. בקשה למחיקת פרטי הכניסה עם גוגל נשלחה למנהל המערכת.
           </p>
           <Link to={createPageUrl("Settings")}>
             <Button className="w-full gradient-orange text-white font-bold">
@@ -112,10 +139,10 @@ export default function DataDeletionPage() {
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-2">
-            <p className="font-bold text-gray-800">מה קורה אחרי שליחת הבקשה?</p>
+            <p className="font-bold text-gray-800">מה קורה אחרי המחיקה?</p>
             <ul className="list-disc mr-5 space-y-1">
-              <li>הבקשה תטופל תוך 30 יום</li>
-              <li>תקבל/י אישור למייל כשהמחיקה תושלם</li>
+              <li>כל הנתונים שלך יימחקו מיידית</li>
+              <li>פרטי הכניסה עם גוגל יימחקו תוך 30 יום</li>
               <li>לא תוכל/י להתחבר לאפליקציה יותר</li>
               <li>המחיקה היא סופית ולא ניתנת לשחזור</li>
             </ul>
