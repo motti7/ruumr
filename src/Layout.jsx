@@ -34,6 +34,11 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+       // Skip all checks for Home page (landing page - no auth required)
+       if (currentPageName === 'Home') {
+           return;
+       }
+
        const checkBanned = async () => {
            try {
                const user = await UserEntity.me();
@@ -107,6 +112,11 @@ export default function Layout({ children, currentPageName }) {
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
   useEffect(() => {
+      // Skip for Home page (landing page)
+      if (currentPageName === 'Home' || currentPageName === 'Onboarding') {
+          return;
+      }
+
       const checkPhotos = async () => {
           try {
               const user = await UserEntity.me();
@@ -121,11 +131,8 @@ export default function Layout({ children, currentPageName }) {
               }
           } catch(e) {}
       };
-      // Only check once on mount if we are not in Onboarding (to avoid annoying new users)
-      if (currentPageName !== 'Onboarding') {
-          checkPhotos();
-      }
-  }, []);
+      checkPhotos();
+  }, [currentPageName]);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-behavior-none" dir="rtl">
@@ -208,7 +215,7 @@ export default function Layout({ children, currentPageName }) {
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
-            {currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
+            {currentPageName === 'Home' || currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
                 <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                     {children}
                 </div>
