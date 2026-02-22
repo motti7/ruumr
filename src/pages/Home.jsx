@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Download, Heart, Home as HomeIcon, Users, Shield, Sparkles } from 'lucide-react';
+import { Download, Heart, Home as HomeIcon, Users, Shield, Sparkles, Zap } from 'lucide-react';
 
 // Counter animation component
 function AnimatedCounter({ targetValue, suffix = '', delay = 0 }) {
@@ -271,11 +271,11 @@ export default function HomePage() {
               className="text-center p-8 rounded-2xl bg-orange-50 hover:shadow-lg transition-shadow"
             >
               <div className="w-16 h-16 bg-[--theme-orange] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-white" />
+                <Zap className="w-8 h-8 text-white" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">בטוח ומאומת</h4>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">קל ופשוט</h4>
               <p className="text-gray-600 leading-relaxed">
-                כל המשתמשים עוברים אימות טלפון וניתן להוסיף אימות זהות מלא
+                סתם לסווייפ ימינה או שמאלה ותמצא את השותף המושלם שלך תוך דקות
               </p>
             </motion.div>
 

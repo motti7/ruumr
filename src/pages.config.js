@@ -53,6 +53,7 @@ import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
 import Chat from './pages/Chat';
+import DataDeletion from './pages/DataDeletion';
 import Discover from './pages/Discover';
 import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
@@ -67,7 +68,6 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
-import DataDeletion from './pages/DataDeletion';
 import __Layout from './Layout.jsx';
 
 
@@ -78,6 +78,7 @@ export const PAGES = {
     "Banned": Banned,
     "Charter": Charter,
     "Chat": Chat,
+    "DataDeletion": DataDeletion,
     "Discover": Discover,
     "HelpCenter": HelpCenter,
     "Home": Home,
@@ -92,7 +93,6 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
-    "DataDeletion": DataDeletion,
 }
 
 export const pagesConfig = {
