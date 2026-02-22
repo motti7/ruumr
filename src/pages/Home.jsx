@@ -275,7 +275,7 @@ export default function HomePage() {
               </div>
               <h4 className="text-2xl font-bold text-gray-900 mb-3">קל ופשוט</h4>
               <p className="text-gray-600 leading-relaxed">
-                סתם לסווייפ ימינה או שמאלה ותמצא את השותף המושלם שלך תוך דקות
+                פשוט החליקו ימינה או שמאלה, ותמצאו את השותף המושלם תוך דקות
               </p>
             </motion.div>
 
