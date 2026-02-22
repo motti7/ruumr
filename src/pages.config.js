@@ -56,7 +56,6 @@ import Chat from './pages/Chat';
 import DataDeletion from './pages/DataDeletion';
 import Discover from './pages/Discover';
 import HelpCenter from './pages/HelpCenter';
-import Home from './pages/Home';
 import LikesSent from './pages/LikesSent';
 import LikesYou from './pages/LikesYou';
 import Matches from './pages/Matches';
@@ -68,6 +67,7 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -81,7 +81,6 @@ export const PAGES = {
     "DataDeletion": DataDeletion,
     "Discover": Discover,
     "HelpCenter": HelpCenter,
-    "Home": Home,
     "LikesSent": LikesSent,
     "LikesYou": LikesYou,
     "Matches": Matches,
@@ -93,6 +92,7 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
+    "Home": Home,
 }
 
 export const pagesConfig = {
