@@ -34,11 +34,6 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-       // Skip all checks for Home page (landing page - no auth required)
-       if (currentPageName === 'Home') {
-           return;
-       }
-
        const checkBanned = async () => {
            try {
                const user = await UserEntity.me();
@@ -77,8 +72,8 @@ export default function Layout({ children, currentPageName }) {
                }
 
            } catch(e) {}
-       };
-       if (!['Onboarding', 'Home'].includes(currentPageName)) {
+           };
+           if (currentPageName !== 'Onboarding') {
            checkNotifications();
            const interval = setInterval(checkNotifications, 10000); // Poll every 10s
            return () => clearInterval(interval);
@@ -107,13 +102,13 @@ export default function Layout({ children, currentPageName }) {
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Chat', 'Home'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
   useEffect(() => {
-      // Skip for Home page (landing page)
-      if (currentPageName === 'Home' || currentPageName === 'Onboarding') {
+      // Skip for Onboarding page
+      if (currentPageName === 'Onboarding') {
           return;
       }
 
@@ -170,52 +165,11 @@ export default function Layout({ children, currentPageName }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
         <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta property="og:site_name" content="Ruumr" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ruumr.me" />
-        <meta property="og:locale" content="he_IL" />
-        <title>Ruumr - למצוא שותפים בכיף | מציאת דירות ושותפים בישראל</title>
-        <meta name="description" content="Ruumr - האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין משותפים. מחפשים שותפים לדירה? הצטרפו לקהילה הגדולה של סטודנטים וצעירים." />
-        <meta property="og:title" content="Ruumr - למצוא שותפים בכיף | האפליקציה המובילה לחיפוש שותפים" />
-        <meta property="og:description" content="מחפשים שותפים? Ruumr היא הדרך הקלה והחכמה למצוא את השותף המושלם. אלגוריתם התאמה חכם, ממשק נוח וקהילה איכותית." />
-        <meta property="og:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta property="og:image:secure_url" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta property="og:image:width" content="512" />
-        <meta property="og:image:height" content="512" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:alt" content="Ruumr - אפליקציה למציאת שותפים" />
-        <link rel="image_src" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta name="thumbnail" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@Ruumr" />
-        <meta name="twitter:title" content="Ruumr - למצוא שותפים בכיף" />
-        <meta name="twitter:description" content="האפליקציה החכמה למציאת שותפים ודירות בישראל. התאמה על בסיס וייב, אורח חיים ותחומי עניין." />
-        <meta name="twitter:image" content="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <meta name="twitter:image:alt" content="Ruumr Logo" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Ruumr",
-            "url": "https://ruumr.me",
-            "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png",
-            "description": "האפליקציה החכמה למציאת שותפים ודירות בישראל",
-            "applicationCategory": "LifestyleApplication",
-            "operatingSystem": "Web",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "ILS"
-            }
-          })}
-        </script>
+        <title>Ruumr</title>
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
-            {currentPageName === 'Home' || currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
+            {currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
                 <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                     {children}
                 </div>
