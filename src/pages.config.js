@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AdminFixMatches from './pages/AdminFixMatches';
 import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
@@ -70,7 +69,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "AdminFixMatches": AdminFixMatches,
     "AdminUsers": AdminUsers,
     "Banned": Banned,
     "Charter": Charter,
@@ -92,7 +90,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "AdminFixMatches",
+    mainPage: "AdminUsers",
     Pages: PAGES,
     Layout: __Layout,
 };
