@@ -232,7 +232,7 @@ export default function CharterResults({ matchId }) {
                     <p className="text-gray-700 text-xs font-medium">{item.title}</p>
                   </div>
                   <p className="text-[10px] text-gray-500 mr-7">
-                    💡 {item.compromise}
+                    💡 <strong>הצעת פשרה:</strong> {item.compromise}
                   </p>
                 </div>
               ))}
