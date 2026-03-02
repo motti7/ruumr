@@ -50,33 +50,60 @@ Deno.serve(async (req) => {
                 match_id = existingMatches[0].id;
             }
 
-            // Send push notifications to both users
-            console.log("🔔 Sending match push notifications...");
+            // Get user emails for email notifications
+            const allUsers = await base44.asServiceRole.entities.User.list();
+            const user1 = allUsers.find(u => u.id === swiper_id);
+            const user2 = allUsers.find(u => u.id === swiped_id);
+
+            // Send push + email notifications to both users
+            console.log("🔔 Sending match notifications...");
             
             try {
-                // Send to user 1
                 await base44.functions.invoke('sendPushNotification', {
                     user_id: swiper_id,
                     title: "🎉 יש לך התאמה חדשה!",
                     message: `מאץ' עם ${p2?.name || 'מישהו'}! זה הזמן לשוחח ולתכנן את החיים המשותפים`,
                     data: { type: 'match', match_id }
                 });
-                console.log(`✅ Match notification sent to user ${swiper_id}`);
             } catch (e) {
-                console.error(`❌ Failed to send match notification to user ${swiper_id}:`, e);
+                console.error(`❌ Push to swiper failed:`, e);
+            }
+
+            if (user1?.email) {
+                try {
+                    await base44.asServiceRole.integrations.Core.SendEmail({
+                        to: user1.email,
+                        subject: `🎉 יש לך התאמה חדשה ב-Ruumr!`,
+                        body: `שלום ${p1?.name || ''}!<br><br>מזל טוב! יש לך התאמה חדשה עם <strong>${p2?.name || 'מישהו'}</strong> ב-Ruumr 🏠<br><br>היכנס/י לאפליקציה ותתחילו לשוחח!<br><br>צוות Ruumr`
+                    });
+                    console.log(`✅ Match email sent to ${user1.email}`);
+                } catch (e) {
+                    console.error(`❌ Email to swiper failed:`, e);
+                }
             }
 
             try {
-                // Send to user 2
                 await base44.functions.invoke('sendPushNotification', {
                     user_id: swiped_id,
                     title: "🎉 יש לך התאמה חדשה!",
                     message: `מאץ' עם ${p1?.name || 'מישהו'}! זה הזמן לשוחח ולתכנן את החיים המשותפים`,
                     data: { type: 'match', match_id }
                 });
-                console.log(`✅ Match notification sent to user ${swiped_id}`);
             } catch (e) {
-                console.error(`❌ Failed to send match notification to user ${swiped_id}:`, e);
+                console.error(`❌ Push to swiped failed:`, e);
+            }
+
+            if (user2?.email) {
+                try {
+                    await base44.asServiceRole.integrations.Core.SendEmail({
+                        to: user2.email,
+                        subject: `🎉 יש לך התאמה חדשה ב-Ruumr!`,
+                        body: `שלום ${p2?.name || ''}!<br><br>מזל טוב! יש לך התאמה חדשה עם <strong>${p1?.name || 'מישהו'}</strong> ב-Ruumr 🏠<br><br>היכנס/י לאפליקציה ותתחילו לשוחח!<br><br>צוות Ruumr`
+                    });
+                    console.log(`✅ Match email sent to ${user2.email}`);
+                } catch (e) {
+                    console.error(`❌ Email to swiped failed:`, e);
+                }
             }
 
             return Response.json({ match: true, match_id });
