@@ -1,11 +1,6 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function Home() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    navigate(createPageUrl("Discover"), { replace: true });
-  }, []);
-  return null;
+  return <Navigate to={createPageUrl("Discover")} replace />;
 }
