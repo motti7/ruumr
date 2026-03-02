@@ -26,25 +26,38 @@ Deno.serve(async (req) => {
         const senderProfiles = await base44.asServiceRole.entities.Profile.filter({ user_id: sender_id });
         const senderName = senderProfiles[0]?.name || 'מישהו';
 
-        // Send push notification to receiver
+        // Get receiver email
+        const allUsers = await base44.asServiceRole.entities.User.list();
+        const receiverUser = allUsers.find(u => u.id === receiver_id);
+
+        // Send push notification
         try {
             await base44.functions.invoke('sendPushNotification', {
                 user_id: receiver_id,
                 title: `💬 הודעה חדשה מ-${senderName}`,
-                message: content.substring(0, 100), // First 100 chars
-                data: { 
-                    type: 'message', 
-                    match_id,
-                    sender_id
-                }
+                message: content.substring(0, 100),
+                data: { type: 'message', match_id, sender_id }
             });
-            
-            console.log(`✅ Message notification sent to user ${receiver_id}`);
-            return Response.json({ success: true });
         } catch (e) {
-            console.error(`❌ Failed to send message notification:`, e);
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            console.error(`❌ Failed to send push notification:`, e);
         }
+
+        // Send email notification
+        if (receiverUser?.email) {
+            try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
+                    to: receiverUser.email,
+                    subject: `💬 הודעה חדשה מ-${senderName} ב-Ruumr`,
+                    body: `שלום!<br><br>${senderName} שלח/ה לך הודעה ב-Ruumr:<br><br><strong>"${content.substring(0, 200)}"</strong><br><br>היכנס/י לאפליקציה כדי לענות 🏠<br><br>צוות Ruumr`
+                });
+                console.log(`✅ Email notification sent to ${receiverUser.email}`);
+            } catch (e) {
+                console.error(`❌ Failed to send email:`, e);
+            }
+        }
+
+        console.log(`✅ Message notification sent to user ${receiver_id}`);
+        return Response.json({ success: true });
     } catch (error) {
         console.error("Error in sendMessageNotification:", error);
         return Response.json({ error: error.message }, { status: 500 });
