@@ -135,16 +135,30 @@ Deno.serve(async (req) => {
                                 message: `${newLikesSinceLastNotification} אנשים אהבו את הפרופיל שלך לאחרונה!`,
                                 data: { type: 'likes', count: newLikesSinceLastNotification }
                             });
-                            
-                            // Update the notification counter
-                            await base44.asServiceRole.entities.User.update(swipedUser.id, {
-                                last_likes_notification_count: totalLikes
-                            });
-                            
-                            console.log(`✅ Likes notification sent to user ${swiped_id}`);
                         } catch (e) {
-                            console.error(`❌ Failed to send likes notification:`, e);
+                            console.error(`❌ Failed to send likes push:`, e);
                         }
+
+                        // Send email for likes too
+                        if (swipedUser?.email) {
+                            try {
+                                await base44.asServiceRole.integrations.Core.SendEmail({
+                                    to: swipedUser.email,
+                                    subject: `🔥 ${newLikesSinceLastNotification} אנשים אהבו אותך ב-Ruumr!`,
+                                    body: `שלום!<br><br>🔥 <strong>${newLikesSinceLastNotification} אנשים</strong> אהבו את הפרופיל שלך לאחרונה ב-Ruumr!<br><br>היכנס/י לאפליקציה לראות מי אוהב אותך 👀<br><br>צוות Ruumr`
+                                });
+                                console.log(`✅ Likes email sent to ${swipedUser.email}`);
+                            } catch (e) {
+                                console.error(`❌ Failed to send likes email:`, e);
+                            }
+                        }
+
+                        // Update the notification counter
+                        await base44.asServiceRole.entities.User.update(swipedUser.id, {
+                            last_likes_notification_count: totalLikes
+                        });
+                        
+                        console.log(`✅ Likes notification sent to user ${swiped_id}`);
                     }
                 }
             } catch (notificationError) {
