@@ -66,6 +66,7 @@ import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
 import Home from './pages/Home';
+import AdminCharter from './pages/AdminCharter';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +90,7 @@ export const PAGES = {
     "Terms": Terms,
     "Verification": Verification,
     "Home": Home,
+    "AdminCharter": AdminCharter,
 }
 
 export const pagesConfig = {
