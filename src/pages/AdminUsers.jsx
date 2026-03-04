@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
         <div className="p-8 bg-gray-50 min-h-screen" dir="rtl">
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-black text-gray-900">ניהול משתמשים</h1>
+                    <h1 className="text-3xl font-black text-gray-900">ניהול משתמשים <span className="text-lg font-normal text-gray-500">({filteredUsers.length} משתמשים)</span></h1>
                     <div className="flex gap-2">
                         {selectedUsers.length > 0 && (
                             <Button onClick={() => setShowEmailDialog(true)} className="bg-[--theme-orange] hover:bg-[--theme-orange-dark]">
