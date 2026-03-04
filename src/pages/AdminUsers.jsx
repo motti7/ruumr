@@ -42,15 +42,6 @@ export default function AdminUsersPage() {
                 console.log('✅ Admin confirmed, loading data...');
                 setIsAdmin(true);
                 await loadData();
-                
-                // Send test email to Motti automatically
-                console.log('🚀 Calling backend function to send email...');
-                try {
-                    const emailResult = await base44.functions.sendEmailToMotti();
-                    console.log('📬 Email result:', emailResult);
-                } catch (emailError) {
-                    console.error('📧 Email error (non-critical):', emailError);
-                }
             } catch (e) {
                 console.error('❌ Error in checkAdminAndLoad:', e);
                 navigate(createPageUrl('Discover'), { replace: true });
