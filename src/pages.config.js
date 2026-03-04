@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminCharter from './pages/AdminCharter';
 import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
@@ -54,6 +55,7 @@ import Chat from './pages/Chat';
 import DataDeletion from './pages/DataDeletion';
 import Discover from './pages/Discover';
 import HelpCenter from './pages/HelpCenter';
+import Home from './pages/Home';
 import LikesSent from './pages/LikesSent';
 import LikesYou from './pages/LikesYou';
 import Matches from './pages/Matches';
@@ -65,12 +67,11 @@ import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
 import Terms from './pages/Terms';
 import Verification from './pages/Verification';
-import Home from './pages/Home';
-import AdminCharter from './pages/AdminCharter';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminCharter": AdminCharter,
     "AdminUsers": AdminUsers,
     "Banned": Banned,
     "Charter": Charter,
@@ -78,6 +79,7 @@ export const PAGES = {
     "DataDeletion": DataDeletion,
     "Discover": Discover,
     "HelpCenter": HelpCenter,
+    "Home": Home,
     "LikesSent": LikesSent,
     "LikesYou": LikesYou,
     "Matches": Matches,
@@ -89,8 +91,6 @@ export const PAGES = {
     "Settings": Settings,
     "Terms": Terms,
     "Verification": Verification,
-    "Home": Home,
-    "AdminCharter": AdminCharter,
 }
 
 export const pagesConfig = {

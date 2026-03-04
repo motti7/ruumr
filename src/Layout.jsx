@@ -169,24 +169,9 @@ export default function Layout({ children, currentPageName }) {
         <style>{`body { background-color: #f3f4f6; }`}</style>
 
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
-            {currentPageName === 'Onboarding' || currentPageName === 'Terms' || currentPageName === 'HelpCenter' ? (
-                <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
-                    {children}
-                </div>
-            ) : (
-                <div className="max-w-md w-full bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-xl flex flex-col items-center">
-                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-                        <Smartphone className="w-10 h-10 text-[--theme-orange]" />
-                    </div>
-                    <h1 className="text-2xl font-black text-gray-800 dark:text-white mb-2">האפליקציה זמינה בנייד בלבד</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mb-8 text-lg">
-                        Ruumr היא חוויה שנועדה למובייל.
-                        <br/>
-                        אנא פתח/י את האפליקציה מהטלפון שלך.
-                    </p>
-
-                </div>
-            )}
+            <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
+                {children}
+            </div>
         </div>
 
         <div className="sm:hidden">
