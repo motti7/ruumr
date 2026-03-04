@@ -4,7 +4,7 @@ import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Mail, Database } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 
