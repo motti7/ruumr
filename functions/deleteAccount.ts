@@ -53,7 +53,10 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.entities.CharterAnswer.delete(ca.id);
         }
 
-        console.log(`✅ Account deleted for user ${userEmail} (${userId})`);
+        // Delete the User record itself (removes from admin users page + auth)
+        await base44.asServiceRole.entities.User.delete(userId);
+
+        console.log(`✅ Account fully deleted for user ${userEmail} (${userId})`);
         return Response.json({ success: true });
     } catch (error) {
         console.error("Error deleting account:", error);

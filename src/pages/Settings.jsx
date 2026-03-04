@@ -69,7 +69,6 @@ export default function SettingsPage() {
               <p className="font-bold text-lg mb-2 text-gray-800">חשבון</p>
               <div className="divide-y divide-gray-100">
                 <SettingsItem icon={<Lock className="w-5 h-5 text-gray-500"/>} title="ניהול הרשאות" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Permissions")} />
-                <SettingsItem icon={<Database className="w-5 h-5 text-gray-500"/>} title="מחיקת נתונים מלאה" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("DataDeletion")} />
               </div>
           </div>
 
