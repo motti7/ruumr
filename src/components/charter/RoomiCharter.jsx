@@ -179,6 +179,27 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         setCurrentLevelIndex(currentLevelIndex + 1);
         setCurrentQuestionIndex(0);
       } else {
+        // שליחת נוטיפיקציה לשותף שעוד לא מילא
+        try {
+          const otherUserId = currentUser => currentUser; // will be resolved below
+          // get match to find partner
+          const matches = await base44.entities.Match.filter({ id: matchId });
+          if (matches.length > 0) {
+            const matchData = matches[0];
+            const partnerId = matchData.user1_id === currentUserId ? matchData.user2_id : matchData.user1_id;
+            // check if partner already answered
+            const partnerAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: partnerId });
+            if (partnerAnswers.length < allQuestions.length) {
+              await base44.functions.invoke('sendPushNotification', {
+                user_id: partnerId,
+                title: '📋 השאלון מחכה לך!',
+                message: 'השותף שלך כבר מילא את שאלון הדירה – עכשיו התור שלך!',
+                data: { matchId }
+              });
+            }
+          }
+        } catch(e) { console.log("Push notification skipped", e); }
+
         // סיימנו - עובר לצ'אט
         confetti({
           particleCount: 200,
