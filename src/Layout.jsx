@@ -93,6 +93,18 @@ export default function Layout({ children, currentPageName }) {
     }
   }, [currentPageName, seenMatchIds]);
 
+  // Listen for charter click updates (seen matches updated from Matches page)
+  useEffect(() => {
+    const handler = () => {
+      try {
+        const saved = localStorage.getItem('roomi_seen_match_ids');
+        setSeenMatchIds(saved ? JSON.parse(saved) : []);
+      } catch {}
+    };
+    window.addEventListener('roomi_seen_updated', handler);
+    return () => window.removeEventListener('roomi_seen_updated', handler);
+  }, []);
+
   // Calculate unseen matches count
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
 
