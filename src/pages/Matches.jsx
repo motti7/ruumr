@@ -214,6 +214,12 @@ export default function MatchesPage() {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
                   onClickCharter={() => {
+                     // Mark match as seen (removes from unseen count badge)
+                     const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+                     if (!seenIds.includes(match.id)) {
+                       localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
+                       window.dispatchEvent(new Event('roomi_seen_updated'));
+                     }
                      navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                   }}
                 />
