@@ -85,6 +85,15 @@ export default function MatchesPage() {
     loadMatches();
   }, [loadMatches]);
 
+  // Listen for seen updates (e.g. from Charter click)
+  useEffect(() => {
+    const handler = () => {
+      try { setSeenMatchIds(JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]')); } catch {}
+    };
+    window.addEventListener('roomi_seen_updated', handler);
+    return () => window.removeEventListener('roomi_seen_updated', handler);
+  }, []);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await loadMatches();
