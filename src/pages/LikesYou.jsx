@@ -13,6 +13,9 @@ export default function LikesYouPage() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [pullStart, setPullStart] = useState(0);
     const [pullDistance, setPullDistance] = useState(0);
+    const [seenLikeIds, setSeenLikeIds] = useState(() => {
+      try { return JSON.parse(localStorage.getItem('roomi_seen_like_ids') || '[]'); } catch { return []; }
+    });
     const navigate = useNavigate();
 
     const loadLikes = async () => {
