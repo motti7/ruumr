@@ -112,6 +112,16 @@ export default function ProfileViewPage() {
       }
 
       setProfile(profiles[0]);
+
+      // Check if there's a match between current user and this profile (to allow writing a review)
+      try {
+        const currentUser = await User.me();
+        const m1 = await Match.filter({ user1_id: currentUser.id, user2_id: userId });
+        const m2 = await Match.filter({ user2_id: currentUser.id, user1_id: userId });
+        if ((m1.length > 0 || m2.length > 0)) {
+          setIsExMatch(true);
+        }
+      } catch(e) {}
       
       // Load current user data if coming from likes page
       if (fromLikes === 'true') {
