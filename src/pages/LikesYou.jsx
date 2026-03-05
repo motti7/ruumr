@@ -162,6 +162,10 @@ export default function LikesYouPage() {
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
+                                // Mark like as seen
+                                const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
+                                setSeenLikeIds(newSeen);
+                                localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
                                 navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
                             }}
                         >
