@@ -3,10 +3,12 @@ import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 import MatchAnimation from '../components/discover/MatchAnimation';
+import ReviewsSection from '../components/reviews/ReviewsSection';
+import WriteReviewModal from '../components/reviews/WriteReviewModal';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
