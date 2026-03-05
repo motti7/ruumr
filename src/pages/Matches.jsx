@@ -171,11 +171,14 @@ export default function MatchesPage() {
       )}
       <div className="sticky top-16 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
         <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">התאמות</h1>
-        {matches.length > 0 && (
-          <p className="font-medium text-[--theme-orange]">
-            {matches.length} {matches.length === 1 ? "התאמה חדשה" : "התאמות חדשות"}
-          </p>
-        )}
+        {(() => {
+          const unseen = matches.filter(m => !seenMatchIds.includes(m.id)).length;
+          return unseen > 0 ? (
+            <p className="font-medium text-[--theme-orange]">
+              {unseen} {unseen === 1 ? "התאמה חדשה" : "התאמות חדשות"}
+            </p>
+          ) : null;
+        })()}
       </div>
 
       <div className="px-4">
