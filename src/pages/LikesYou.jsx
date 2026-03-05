@@ -133,11 +133,14 @@ export default function LikesYouPage() {
                         לייקים ששלחתי
                     </button>
                 </div>
-                {profiles.length > 0 && (
-                    <p className="font-medium text-[--theme-orange]">
-                        {profiles.length} {profiles.length === 1 ? "לייק חדש" : "לייקים חדשים"}
-                    </p>
-                )}
+                {(() => {
+                    const unseen = profiles.filter(p => !seenLikeIds.includes(p.user_id)).length;
+                    return unseen > 0 ? (
+                        <p className="font-medium text-[--theme-orange]">
+                            {unseen} {unseen === 1 ? "לייק חדש" : "לייקים חדשים"}
+                        </p>
+                    ) : null;
+                })()}
             </div>
 
             <div className="px-4 grid grid-cols-2 gap-4">
