@@ -94,7 +94,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "AdminUsers",
+    mainPage: "Discover",
     Pages: PAGES,
     Layout: __Layout,
 };
