@@ -461,6 +461,27 @@ export default function ProfileViewPage() {
           <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
         </div>
 
+        <ReviewsSection userId={profile.user_id} />
+
+        {isExMatch && (
+          <button
+            onClick={() => setShowReviewModal(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[--theme-orange] text-[--theme-orange] font-bold text-sm"
+          >
+            <Star className="w-5 h-5" />
+            כתוב/י חוות דעת על השותפות
+          </button>
+        )}
+
+        {showReviewModal && (
+          <WriteReviewModal
+            reviewedUserId={profile.user_id}
+            reviewedName={profile.name}
+            onClose={() => setShowReviewModal(false)}
+            onSubmitted={() => {}}
+          />
+        )}
+
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-3">פרטים נוספים</h4>
           <div className="grid grid-cols-2 gap-3">
