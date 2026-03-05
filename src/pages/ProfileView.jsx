@@ -82,6 +82,8 @@ export default function ProfileViewPage() {
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showActions, setShowActions] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isExMatch, setIsExMatch] = useState(false);
 
   useEffect(() => {
     loadProfile();
