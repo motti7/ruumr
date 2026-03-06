@@ -38,8 +38,8 @@ export default function WriteReviewButton() {
 
   return (
     <>
-      <button onClick={handleOpen} className="hover:scale-110 transition-transform">
-        <Star className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+      <button onClick={handleOpen} className="hover:scale-110 transition-transform group">
+        <Star className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-[--theme-orange] transition-colors" />
       </button>
 
       <AnimatePresence>
