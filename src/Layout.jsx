@@ -217,10 +217,10 @@ export default function Layout({ children, currentPageName }) {
                 <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between relative">
                         <div className="flex items-center gap-3">
-                            <WriteReviewButton />
                             <Link to={createPageUrl("Settings")} className="select-none">
                                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                             </Link>
+                            <WriteReviewButton />
                         </div>
                         <Link to={createPageUrl("Discover")} className="select-none">
                              <h1 className="text-3xl logo-font">ruumr</h1>
