@@ -152,7 +152,7 @@ export default function CharterResults({ matchId }) {
         {/* Agreements */}
         {agreements.length > 0 && (
           <div className="px-4 pt-3 pb-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">מסכימים על הכל ✅</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">מסכימים ✅</p>
             <div className="space-y-1.5">
               {agreements.map((item, i) => (
                 <motion.div
