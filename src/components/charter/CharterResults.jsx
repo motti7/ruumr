@@ -37,17 +37,15 @@ function CompatibilityRing({ percent }) {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
-  const color = percent >= 80 ? '#22c55e' : percent >= 60 ? '#f97316' : '#ef4444';
-
   return (
     <div className="relative w-20 h-20 flex items-center justify-center">
       <svg className="absolute inset-0 -rotate-90" width="80" height="80">
-        <circle cx="40" cy="40" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="6" />
+        <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="7" />
         <motion.circle
           cx="40" cy="40" r={radius}
           fill="none"
-          stroke={color}
-          strokeWidth="6"
+          stroke="white"
+          strokeWidth="7"
           strokeLinecap="round"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
@@ -55,7 +53,7 @@ function CompatibilityRing({ percent }) {
           transition={{ duration: 1.2, ease: "easeOut" }}
         />
       </svg>
-      <span className="text-xl font-black" style={{ color }}>{percent}%</span>
+      <span className="text-xl font-black text-white drop-shadow">{percent}%</span>
     </div>
   );
 }
