@@ -127,9 +127,9 @@ export default function CharterResults({ matchId }) {
   const { compatibilityPercent, agreements, disagreements } = results;
 
   const vibe =
-    compatibilityPercent >= 80 ? { label: "התאמה מושלמת! 🔥", color: "from-orange-400 to-orange-500" } :
-    compatibilityPercent >= 60 ? { label: "כמעט מושלם 👌", color: "from-orange-400 to-orange-500" } :
-    { label: "יש על מה לדבר 💬", color: "from-orange-400 to-orange-500" };
+    compatibilityPercent >= 80 ? { label: "התאמה מושלמת! 🔥", color: "from-[#FF5722] to-[#E64A19]" } :
+    compatibilityPercent >= 60 ? { label: "כמעט מושלם 👌", color: "from-[#FF5722] to-[#E64A19]" } :
+    { label: "יש על מה לדבר 💬", color: "from-[#FF5722] to-[#E64A19]" };
 
   return (
     <motion.div
