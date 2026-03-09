@@ -3,8 +3,8 @@ import { Match, Profile, Message } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Send, Loader2, Clock } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, Send, Loader2, Clock, CheckCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CharterResults from "../components/charter/CharterResults";
@@ -19,30 +19,30 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [showWaitingBanner, setShowWaitingBanner] = useState(false);
+  const [otherIsTyping, setOtherIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const typingStatusIdRef = useRef(null);
+  const matchIdRef = useRef(null);
+  const userRef = useRef(null);
 
   useEffect(() => {
     loadData();
-    
-    // Subscribe to CharterAnswer changes for real-time updates
-    const urlParams = new URLSearchParams(window.location.search);
-    const matchId = urlParams.get("matchId");
-    
-    if (matchId) {
-      const unsubscribe = base44.entities.CharterAnswer.subscribe((event) => {
-        if (event.data?.match_id === matchId) {
-          // Reload data when charter answers change
-          loadData();
-        }
-      });
-      
-      return () => unsubscribe();
-    }
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, otherIsTyping]);
+
+  // Cleanup typing status on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(typingTimeoutRef.current);
+      if (typingStatusIdRef.current) {
+        base44.entities.TypingStatus.delete(typingStatusIdRef.current).catch(() => {});
+      }
+    };
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -50,46 +50,75 @@ export default function ChatPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const matchId = urlParams.get("matchId");
 
-      if (!matchId) {
-        navigate(createPageUrl("Matches"));
-        return;
-      }
+      if (!matchId) { navigate(createPageUrl("Matches")); return; }
+
+      matchIdRef.current = matchId;
 
       const userData = await User.me();
       setUser(userData);
+      userRef.current = userData;
 
       const matches = await Match.filter({ id: matchId });
-      if (matches.length === 0) {
-        navigate(createPageUrl("Matches"));
-        return;
-      }
+      if (matches.length === 0) { navigate(createPageUrl("Matches")); return; }
 
       const matchData = matches[0];
       setMatch(matchData);
 
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
       const profiles = await Profile.filter({ user_id: otherUserId });
-      if (profiles.length > 0) {
-        setOtherProfile(profiles[0]);
-      }
+      if (profiles.length > 0) setOtherProfile(profiles[0]);
 
-      // בדיקה אם שני המשתמשים מילאו את החרטר
       const allQuestions = 8;
-      const myAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId,
-        user_id: userData.id 
-      });
-      
-      const theirAnswers = await base44.entities.CharterAnswer.filter({ 
-        match_id: matchId,
-        user_id: otherUserId 
-      });
-
-      // הצגת באנר המתנה אם השותף השני לא ענה
+      const theirAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId });
       setShowWaitingBanner(theirAnswers.length < allQuestions);
 
       const matchMessages = await Message.filter({ match_id: matchId }, "created_date");
       setMessages(matchMessages);
+
+      // Mark unread messages as read
+      matchMessages.forEach(msg => {
+        if (msg.sender_id !== userData.id && !msg.is_read) {
+          Message.update(msg.id, { is_read: true }).catch(() => {});
+        }
+      });
+
+      // Subscribe to messages in real-time
+      const unsubMsg = base44.entities.Message.subscribe((event) => {
+        if (event.data?.match_id === matchId) {
+          if (event.type === 'create') {
+            const newMsg = event.data;
+            setMessages(prev => {
+              if (prev.find(m => m.id === newMsg.id)) return prev;
+              // Auto-mark as read if incoming
+              if (newMsg.sender_id !== userRef.current?.id && !newMsg.is_read) {
+                Message.update(newMsg.id, { is_read: true }).catch(() => {});
+                newMsg.is_read = true;
+              }
+              return [...prev, newMsg];
+            });
+          } else if (event.type === 'update') {
+            setMessages(prev => prev.map(m => m.id === event.id ? { ...m, ...event.data } : m));
+          }
+        }
+      });
+
+      // Subscribe to CharterAnswer changes
+      const unsubCharter = base44.entities.CharterAnswer.subscribe((event) => {
+        if (event.data?.match_id === matchId) loadData();
+      });
+
+      // Subscribe to typing status
+      const unsubTyping = base44.entities.TypingStatus.subscribe((event) => {
+        if (event.data?.match_id === matchId && event.data?.user_id !== userRef.current?.id) {
+          if (event.type === 'create' || event.type === 'update') {
+            setOtherIsTyping(true);
+          } else if (event.type === 'delete') {
+            setOtherIsTyping(false);
+          }
+        }
+      });
+
+      return () => { unsubMsg(); unsubCharter(); unsubTyping(); };
     } catch (error) {
       console.error("Error loading chat:", error);
       navigate(createPageUrl("Matches"));
@@ -97,18 +126,45 @@ export default function ChatPage() {
     setIsLoading(false);
   };
 
+  const handleTyping = async (value) => {
+    setNewMessage(value);
+    const matchId = matchIdRef.current;
+    const userData = userRef.current;
+    if (!matchId || !userData) return;
+
+    // Send typing indicator
+    if (!typingStatusIdRef.current) {
+      try {
+        const created = await base44.entities.TypingStatus.create({ match_id: matchId, user_id: userData.id });
+        typingStatusIdRef.current = created.id;
+      } catch {}
+    }
+
+    // Clear after 3s of no typing
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      if (typingStatusIdRef.current) {
+        try {
+          await base44.entities.TypingStatus.delete(typingStatusIdRef.current);
+        } catch {}
+        typingStatusIdRef.current = null;
+      }
+    }, 3000);
+  };
+
   const handleSendMessage = async () => {
     const messageContent = newMessage.trim();
     if (!messageContent || !match || !user) return;
 
-    try {
-      const messageData = {
-        match_id: match.id,
-        sender_id: user.id,
-        content: messageContent,
-        is_read: false
-      };
+    // Clear typing status
+    clearTimeout(typingTimeoutRef.current);
+    if (typingStatusIdRef.current) {
+      base44.entities.TypingStatus.delete(typingStatusIdRef.current).catch(() => {});
+      typingStatusIdRef.current = null;
+    }
 
+    try {
+      const messageData = { match_id: match.id, sender_id: user.id, content: messageContent, is_read: false };
       const createdMessage = await Message.create(messageData);
       setMessages(prev => [...prev, createdMessage]);
       setNewMessage("");
@@ -133,8 +189,12 @@ export default function ChatPage() {
     );
   }
 
+  // Find last message sent by me to show read receipt
+  const lastMyMsgIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => m.sender_id === user?.id).slice(-1)[0]?.i;
+
   return (
     <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
         <button onClick={() => navigate(createPageUrl("Matches"))} className="p-2">
           <ArrowRight className="w-6 h-6 text-gray-600" />
@@ -147,14 +207,31 @@ export default function ChatPage() {
           />
           <div>
             <h2 className="font-bold text-gray-900">{otherProfile.name}</h2>
-            <p className="text-sm text-gray-500">{otherProfile.location}</p>
+            <AnimatePresence mode="wait">
+              {otherIsTyping ? (
+                <motion.p
+                  key="typing"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-xs text-[--theme-orange] font-medium"
+                >
+                  מקליד/ה...
+                </motion.p>
+              ) : (
+                <motion.p key="location" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-gray-500">
+                  {otherProfile.location}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {showWaitingBanner ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mb-4"
@@ -162,9 +239,7 @@ export default function ChatPage() {
             <Clock className="w-12 h-12 text-white mx-auto mb-3" />
             <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
             <p className="text-white/90 text-sm">
-              {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.
-              <br />
-              נשלח לו/ה תזכורת!
+              {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
             </p>
           </motion.div>
         ) : (
@@ -173,34 +248,65 @@ export default function ChatPage() {
 
         {messages.map((msg, idx) => {
           const isMyMessage = msg.sender_id === user.id;
+          const isLastMyMsg = idx === lastMyMsgIndex;
           return (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
+              key={msg.id || idx}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}
+              className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}
             >
               <div
                 className={`max-w-[75%] px-4 py-2 rounded-2xl ${
-                  isMyMessage
-                    ? "gradient-orange text-white"
-                    : "bg-white text-gray-900 border border-gray-200"
+                  isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>
               </div>
+              {isMyMessage && isLastMyMsg && (
+                <div className="flex items-center gap-1 mt-0.5 px-1">
+                  <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
+                  <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
+                    {msg.is_read ? 'נקרא' : 'נשלח'}
+                  </span>
+                </div>
+              )}
             </motion.div>
           );
         })}
+
+        {/* Typing indicator bubble */}
+        <AnimatePresence>
+          {otherIsTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex justify-start"
+            >
+              <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-1">
+                {[0, 0.15, 0.3].map((delay, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-2 h-2 rounded-full bg-gray-400"
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="bg-white border-t border-gray-200 p-4">
         <div className="flex items-center gap-3">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => handleTyping(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="הקלד/י הודעה..."
             className="flex-1 bg-gray-100 border-0"
