@@ -482,6 +482,36 @@ export default function ProfileViewPage() {
           />
         )}
 
+        {profile.interests && profile.interests.length > 0 && (
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                {id: 'sport', label: '⚽ ספורט'},
+                {id: 'music', label: '🎵 מוזיקה'},
+                {id: 'cooking', label: '🍳 בישול'},
+                {id: 'travel', label: '✈️ טיולים'},
+                {id: 'art', label: '🎨 אמנות'},
+                {id: 'gaming', label: '🎮 גיימינג'},
+                {id: 'fitness', label: '💪 כושר'},
+                {id: 'yoga', label: '🧘 יוגה'},
+                {id: 'photography', label: '📸 צילום'},
+                {id: 'reading', label: '📚 קריאה'},
+                {id: 'movies', label: '🎬 סרטים'},
+                {id: 'nature', label: '🌿 טבע'},
+                {id: 'nightlife', label: '🌙 חיי לילה'},
+                {id: 'tech', label: '💻 טכנולוגיה'},
+                {id: 'fashion', label: '👗 אופנה'},
+                {id: 'pets', label: '🐾 חיות'},
+              ].filter(i => profile.interests.includes(i.id)).map(interest => (
+                <span key={interest.id} className="px-3 py-1.5 rounded-full text-sm font-medium bg-orange-50 border border-[--theme-orange] text-[--theme-orange]">
+                  {interest.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-3">פרטים נוספים</h4>
           <div className="grid grid-cols-2 gap-3">

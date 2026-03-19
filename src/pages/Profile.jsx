@@ -650,6 +650,56 @@ export default function ProfilePage() {
             </div>
         </div>
 
+        {/* תחומי עניין */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              {id: 'sport', label: '⚽ ספורט'},
+              {id: 'music', label: '🎵 מוזיקה'},
+              {id: 'cooking', label: '🍳 בישול'},
+              {id: 'travel', label: '✈️ טיולים'},
+              {id: 'art', label: '🎨 אמנות'},
+              {id: 'gaming', label: '🎮 גיימינג'},
+              {id: 'fitness', label: '💪 כושר'},
+              {id: 'yoga', label: '🧘 יוגה'},
+              {id: 'photography', label: '📸 צילום'},
+              {id: 'reading', label: '📚 קריאה'},
+              {id: 'movies', label: '🎬 סרטים'},
+              {id: 'nature', label: '🌿 טבע'},
+              {id: 'nightlife', label: '🌙 חיי לילה'},
+              {id: 'tech', label: '💻 טכנולוגיה'},
+              {id: 'fashion', label: '👗 אופנה'},
+              {id: 'pets', label: '🐾 חיות'},
+            ].map(interest => {
+              const selected = (formData.interests || []).includes(interest.id);
+              return (
+                <button
+                  key={interest.id}
+                  disabled={!isEditing}
+                  onClick={() => {
+                    const current = formData.interests || [];
+                    setFormField('interests', selected
+                      ? current.filter(i => i !== interest.id)
+                      : [...current, interest.id]
+                    );
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                    selected
+                      ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]'
+                      : 'border-gray-200 bg-white text-gray-600'
+                  } ${!isEditing ? 'cursor-default' : 'cursor-pointer'}`}
+                >
+                  {interest.label}
+                </button>
+              );
+            })}
+          </div>
+          {!isEditing && (!formData.interests || formData.interests.length === 0) && (
+            <p className="text-gray-400 text-sm text-center mt-2">לחץ על "ערוך" להוספת תחומי עניין</p>
+          )}
+        </div>
+
         <div className="space-y-4">
             <div className="text-right">
                 <label className="block text-right font-bold text-gray-700 mb-2">
