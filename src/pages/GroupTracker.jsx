@@ -274,7 +274,7 @@ export default function GroupTrackerPage() {
             className="w-full py-4 rounded-2xl gradient-orange text-white font-black text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
           >
             <Search className="w-5 h-5" />
-            {teamMembers.length === 0 ? 'התחל לחפש שותפים' : `מצא עוד ${remaining} ${remaining === 1 ? 'שותף/ה' : 'שותפים'}`}
+            {`חפש שותפים`}
           </button>
         )}
       </div>
