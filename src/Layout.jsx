@@ -113,7 +113,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
-    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
+    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: null, customIcon: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/99bf91766_group.png" }
   ];
 
   const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
