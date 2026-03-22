@@ -87,7 +87,9 @@ export default function GroupTrackerPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="w-8 h-8 border-4 border-orange-200 border-t-[--theme-orange] rounded-full animate-spin" />
+        <div className="rounded-full border-2 border-[--theme-orange] p-3 animate-pulse">
+          <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/99bf91766_group.png" className="w-12 h-12 object-contain" />
+        </div>
       </div>
     );
   }
