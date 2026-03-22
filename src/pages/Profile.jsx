@@ -654,7 +654,7 @@ export default function ProfilePage() {
         <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
           <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
           <div className="flex flex-wrap gap-2">
-            [
+            {[
               {id: 'cooking', label: '🍳 בישול משותף'},
               {id: 'netflix', label: '📺 ערבי נטפליקס'},
               {id: 'gaming', label: '🎮 גיימינג'},
