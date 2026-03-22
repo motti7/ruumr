@@ -348,6 +348,12 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
+                            {profile.team_target && (
+                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    {1 + (profile.team_members?.length || 0)}/{profile.team_target}
+                                </div>
+                            )}
                         </div>
 
                         {profile.social_link && (
