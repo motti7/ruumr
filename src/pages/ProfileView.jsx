@@ -129,7 +129,10 @@ export default function ProfileViewPage() {
         const myProfiles = await Profile.filter({ user_id: user.id });
         setCurrentUser(user);
         setUserProfile(myProfiles[0]);
-        setShowActions(true);
+
+        // Check if I already swiped on this user — if so, hide actions
+        const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
+        setShowActions(existingSwipe.length === 0);
       }
     } catch (error) {
       console.error("Error loading profile:", error);
