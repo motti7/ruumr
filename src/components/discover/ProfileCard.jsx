@@ -367,6 +367,12 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                     {1 + (profile.team_members?.length || 0)}/{profile.team_target}
                                 </div>
                             )}
+                            {avgRating !== null && (
+                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
+                                    {avgRating.toFixed(1)}
+                                </div>
+                            )}
                         </div>
 
                         {profile.social_link && (
