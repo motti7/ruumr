@@ -134,6 +134,48 @@ const ProfileDetail = ({ profile, onClose }) => {
                     </div>
                 )}
 
+                {/* Team Status */}
+                {(profile.team_target || profile.team_members?.length > 0) && (
+                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
+                        <h4 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
+                            <Users className="w-5 h-5" />
+                            מצב חיפוש הצוות
+                        </h4>
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="bg-white/20 rounded-full px-3 py-1 text-white text-sm font-bold">
+                                {1 + (profile.team_members?.length || 0)} / {profile.team_target || '?'} אנשים
+                            </div>
+                            {profile.team_target && (
+                                <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-white rounded-full"
+                                        style={{ width: `${Math.min(100, ((1 + (profile.team_members?.length || 0)) / profile.team_target) * 100)}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {profile.team_members && profile.team_members.length > 0 && (
+                            <div>
+                                <p className="text-white/70 text-xs mb-2">שותפים שכבר מצא/ה:</p>
+                                <div className="flex gap-2 flex-wrap">
+                                    {profile.team_members.map((member, i) => (
+                                        <div key={i} className="flex items-center gap-1.5 bg-white/15 rounded-full px-2 py-1">
+                                            {member.photo ? (
+                                                <img src={member.photo} className="w-5 h-5 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center text-[9px] text-white font-bold">
+                                                    {member.name?.[0]}
+                                                </div>
+                                            )}
+                                            <span className="text-white text-xs font-medium">{member.name?.split(' ')[0]}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <div className="pb-10"></div>
             </div>
         </motion.div>
