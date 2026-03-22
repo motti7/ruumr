@@ -178,7 +178,7 @@ export default function OnboardingPage() {
   const isHasApartment = formData.current_status === 'has_apartment';
   let displayStep = step;
   if (!isHasApartment && step > 6) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 11 : 10;
+  const displayTotal = isHasApartment ? 12 : 11;
   
   const prevStep = () => {
     if (step === 8 && formData.current_status === 'seeking_apartment') {
