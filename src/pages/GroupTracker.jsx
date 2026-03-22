@@ -146,15 +146,12 @@ export default function GroupTrackerPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             />
           </div>
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
-            <span>רק אני</span>
-            <span>הצוות מלא</span>
-          </div>
+
         </div>
 
         {/* Team Members */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="font-bold text-gray-700 mb-4 text-right">חברי הצוות</p>
+          <p className="font-bold text-gray-700 mb-4 text-right">ה Team</p>
           <div className="flex flex-wrap gap-3 justify-center">
             {/* Me */}
             <div className="flex flex-col items-center gap-1">
