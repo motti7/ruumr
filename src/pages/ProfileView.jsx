@@ -487,24 +487,24 @@ export default function ProfileViewPage() {
             <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
             <div className="flex flex-wrap gap-2">
               {[
-                {id: 'sport', label: '⚽ ספורט'},
-                {id: 'music', label: '🎵 מוזיקה'},
-                {id: 'cooking', label: '🍳 בישול'},
-                {id: 'travel', label: '✈️ טיולים'},
-                {id: 'art', label: '🎨 אמנות'},
-                {id: 'gaming', label: '🎮 גיימינג'},
-                {id: 'fitness', label: '💪 כושר'},
-                {id: 'yoga', label: '🧘 יוגה'},
-                {id: 'photography', label: '📸 צילום'},
-                {id: 'reading', label: '📚 קריאה'},
-                {id: 'movies', label: '🎬 סרטים'},
-                {id: 'nature', label: '🌿 טבע'},
-                {id: 'nightlife', label: '🌙 חיי לילה'},
-                {id: 'tech', label: '💻 טכנולוגיה'},
-                {id: 'fashion', label: '👗 אופנה'},
-                {id: 'pets', label: '🐾 חיות'},
+                {id: 'sport', label: '⚽ ספורט', color: 'bg-green-50 text-green-700 border-green-200'},
+                {id: 'music', label: '🎵 מוזיקה', color: 'bg-purple-50 text-purple-700 border-purple-200'},
+                {id: 'cooking', label: '🍳 בישול', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
+                {id: 'travel', label: '✈️ טיולים', color: 'bg-sky-50 text-sky-700 border-sky-200'},
+                {id: 'art', label: '🎨 אמנות', color: 'bg-pink-50 text-pink-700 border-pink-200'},
+                {id: 'gaming', label: '🎮 גיימינג', color: 'bg-indigo-50 text-indigo-700 border-indigo-200'},
+                {id: 'fitness', label: '💪 כושר', color: 'bg-orange-50 text-orange-700 border-orange-200'},
+                {id: 'yoga', label: '🧘 יוגה', color: 'bg-teal-50 text-teal-700 border-teal-200'},
+                {id: 'photography', label: '📸 צילום', color: 'bg-gray-100 text-gray-700 border-gray-300'},
+                {id: 'reading', label: '📚 קריאה', color: 'bg-amber-50 text-amber-700 border-amber-200'},
+                {id: 'movies', label: '🎬 סרטים', color: 'bg-red-50 text-red-700 border-red-200'},
+                {id: 'nature', label: '🌿 טבע', color: 'bg-lime-50 text-lime-700 border-lime-200'},
+                {id: 'nightlife', label: '🌙 חיי לילה', color: 'bg-violet-50 text-violet-700 border-violet-200'},
+                {id: 'tech', label: '💻 טכנולוגיה', color: 'bg-cyan-50 text-cyan-700 border-cyan-200'},
+                {id: 'fashion', label: '👗 אופנה', color: 'bg-rose-50 text-rose-700 border-rose-200'},
+                {id: 'pets', label: '🐾 חיות', color: 'bg-orange-50 text-orange-700 border-orange-200'},
               ].filter(i => profile.interests.includes(i.id)).map(interest => (
-                <span key={interest.id} className="px-3 py-1.5 rounded-full text-sm font-medium bg-orange-50 border border-[--theme-orange] text-[--theme-orange]">
+                <span key={interest.id} className={`px-3 py-1.5 rounded-full text-sm font-medium border ${interest.color}`}>
                   {interest.label}
                 </span>
               ))}

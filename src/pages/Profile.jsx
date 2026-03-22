@@ -651,7 +651,7 @@ export default function ProfilePage() {
         </div>
 
         {/* תחומי עניין */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
           <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
           <div className="flex flex-wrap gap-2">
             {[
