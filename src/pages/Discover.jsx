@@ -240,13 +240,9 @@ export default function DiscoverPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-white">
-        <motion.div
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-            <Home className="w-6 h-6 text-white" />
-        </motion.div>
+        <div className="rounded-full border-2 border-[--theme-orange] p-3 animate-pulse">
+          <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-12 h-12 object-contain" style={{ filter: 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' }} />
+        </div>
         <p className="text-gray-500 font-medium mt-4">מחפש שותפים...</p>
       </div>
     );
