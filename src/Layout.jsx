@@ -263,7 +263,9 @@ export default function Layout({ children, currentPageName }) {
                             } relative`}
                             >
                             {item.customIcon ? (
-                                <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(70%)' }} alt={item.name} />
+                                <div className={`rounded-full p-1 border-2 ${isActive ? 'border-[--theme-orange]' : 'border-gray-300'}`}>
+                                    <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
+                                </div>
                             ) : (
                                 <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
                             )}
