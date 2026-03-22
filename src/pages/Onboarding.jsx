@@ -690,7 +690,36 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר...">
+            <Step step={9} currentStep={step} title="תחומי עניין">
+                <p className="text-center text-gray-500 mb-4">בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {INTERESTS_LIST.map(interest => {
+                        const selected = (formData.interests || []).includes(interest.id);
+                        return (
+                            <button
+                                key={interest.id}
+                                type="button"
+                                onClick={() => {
+                                    const current = formData.interests || [];
+                                    setFormField('interests', selected
+                                        ? current.filter(i => i !== interest.id)
+                                        : [...current, interest.id]
+                                    );
+                                }}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold border-2 transition-all ${
+                                    selected
+                                        ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm'
+                                        : 'border-gray-200 bg-white text-gray-600'
+                                }`}
+                            >
+                                {interest.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </Step>
+
+            <Step step={10} currentStep={step} title="אם היית שיר...">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <h2 className="text-xl font-medium text-gray-500 -mt-4">איזה שיר הוא אתה?</h2>
                     
