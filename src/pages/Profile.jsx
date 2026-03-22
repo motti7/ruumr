@@ -654,23 +654,23 @@ export default function ProfilePage() {
         <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
           <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
           <div className="flex flex-wrap gap-2">
-            {[
-              {id: 'sport', label: '⚽ ספורט'},
-              {id: 'music', label: '🎵 מוזיקה'},
-              {id: 'cooking', label: '🍳 בישול'},
-              {id: 'travel', label: '✈️ טיולים'},
-              {id: 'art', label: '🎨 אמנות'},
+            [
+              {id: 'cooking', label: '🍳 בישול משותף'},
+              {id: 'netflix', label: '📺 ערבי נטפליקס'},
               {id: 'gaming', label: '🎮 גיימינג'},
-              {id: 'fitness', label: '💪 כושר'},
-              {id: 'yoga', label: '🧘 יוגה'},
-              {id: 'photography', label: '📸 צילום'},
-              {id: 'reading', label: '📚 קריאה'},
-              {id: 'movies', label: '🎬 סרטים'},
-              {id: 'nature', label: '🌿 טבע'},
+              {id: 'hosting', label: '🎉 אירוח חברים'},
               {id: 'nightlife', label: '🌙 חיי לילה'},
-              {id: 'tech', label: '💻 טכנולוגיה'},
-              {id: 'fashion', label: '👗 אופנה'},
-              {id: 'pets', label: '🐾 חיות'},
+              {id: 'sport', label: '⚽ ספורט'},
+              {id: 'fitness', label: '💪 כושר'},
+              {id: 'nature', label: '🌿 טיולים בטבע'},
+              {id: 'homebody', label: '🏠 נשאר/ת בבית'},
+              {id: 'music', label: '🎵 מוזיקה'},
+              {id: 'morning_person', label: '☀️ אדם של בוקר'},
+              {id: 'night_owl', label: '🦉 ינשוף לילה'},
+              {id: 'food_delivery', label: '🍕 הזמנות אוכל'},
+              {id: 'shopping', label: '🛒 קניות משותפות'},
+              {id: 'pets', label: '🐾 חיות מחמד'},
+              {id: 'wfh', label: '💻 עובד/ת מהבית'},
             ].map(interest => {
               const selected = (formData.interests || []).includes(interest.id);
               return (
