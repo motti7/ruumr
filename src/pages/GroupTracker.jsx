@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
+import { Profile } from "@/entities/Profile";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus } from "lucide-react";
-
-const TEAM_KEY = 'ruumr_team_members';
-const TARGET_KEY = 'ruumr_target_count';
+import { Plus, X, UserPlus, Search } from "lucide-react";
 
 export default function GroupTrackerPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [myProfile, setMyProfile] = useState(null);
   const [allMatches, setAllMatches] = useState([]);
-  const [teamIds, setTeamIds] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(TEAM_KEY) || '[]'); } catch { return []; }
-  });
-  const [targetCount, setTargetCount] = useState(() => {
-    return parseInt(localStorage.getItem(TARGET_KEY) || '3');
-  });
+  const [teamIds, setTeamIds] = useState([]);
+  const [targetCount, setTargetCount] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddPanel, setShowAddPanel] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +27,13 @@ export default function GroupTrackerPage() {
 
         const profiles = await base44.entities.Profile.filter({ user_id: userData.id });
         if (profiles.length === 0) { navigate(createPageUrl('Onboarding')); return; }
-        setProfile(profiles[0]);
+        const prof = profiles[0];
+        setMyProfile(prof);
+        setTargetCount(prof.team_target || 3);
+
+        // Load saved team from profile
+        const savedTeamIds = (prof.team_members || []).map(m => m.match_id).filter(Boolean);
+        setTeamIds(savedTeamIds);
 
         const m1 = await base44.entities.Match.filter({ user1_id: userData.id, status: 'active' });
         const m2 = await base44.entities.Match.filter({ user2_id: userData.id, status: 'active' });
@@ -50,21 +51,31 @@ export default function GroupTrackerPage() {
     load();
   }, []);
 
-  const addToTeam = (matchId) => {
+  const saveToProfile = async (newTeamIds, newTarget) => {
+    if (!myProfile) return;
+    setIsSaving(true);
+    const teamMembers = allMatches
+      .filter(m => newTeamIds.includes(m.id))
+      .map(m => ({ match_id: m.id, name: m.name, photo: m.photo }));
+    await Profile.update(myProfile.id, { team_members: teamMembers, team_target: newTarget });
+    setIsSaving(false);
+  };
+
+  const addToTeam = async (matchId) => {
     const next = [...teamIds, matchId];
     setTeamIds(next);
-    localStorage.setItem(TEAM_KEY, JSON.stringify(next));
+    await saveToProfile(next, targetCount);
   };
 
-  const removeFromTeam = (matchId) => {
+  const removeFromTeam = async (matchId) => {
     const next = teamIds.filter(id => id !== matchId);
     setTeamIds(next);
-    localStorage.setItem(TEAM_KEY, JSON.stringify(next));
+    await saveToProfile(next, targetCount);
   };
 
-  const handleTargetChange = (val) => {
+  const handleTargetChange = async (val) => {
     setTargetCount(val);
-    localStorage.setItem(TARGET_KEY, String(val));
+    await saveToProfile(teamIds, val);
   };
 
   const teamMembers = allMatches.filter(m => teamIds.includes(m.id));
@@ -119,7 +130,9 @@ export default function GroupTrackerPage() {
                 {remaining === 0 ? '🎉 הצוות מלא!' : `חסרים עוד ${remaining} ${remaining === 1 ? 'אדם' : 'אנשים'}`}
               </p>
             </div>
-            <div className="text-4xl">{remaining === 0 ? '🏠' : currentCount === 1 ? '🙋' : '👥'}</div>
+            <div className="text-5xl">
+              {remaining === 0 ? '🏆' : currentCount === 1 ? '🙋' : '👥'}
+            </div>
           </div>
           <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
             <motion.div
@@ -142,8 +155,8 @@ export default function GroupTrackerPage() {
             {/* Me */}
             <div className="flex flex-col items-center gap-1">
               <div className="w-14 h-14 rounded-full overflow-hidden border-3 border-[--theme-orange] shadow-md ring-2 ring-orange-200">
-                {profile?.photos?.[0] ? (
-                  <img src={profile.photos[0]} className="w-full h-full object-cover" alt="אני" />
+                {myProfile?.photos?.[0] ? (
+                  <img src={myProfile.photos[0]} className="w-full h-full object-cover" alt="אני" />
                 ) : (
                   <div className="w-full h-full gradient-orange flex items-center justify-center text-white font-black text-xl">
                     {user?.full_name?.[0] || '?'}
@@ -153,9 +166,8 @@ export default function GroupTrackerPage() {
               <span className="text-xs font-bold text-[--theme-orange]">אני</span>
             </div>
 
-            {/* Team members */}
             <AnimatePresence>
-              {teamMembers.map((match, i) => (
+              {teamMembers.map((match) => (
                 <motion.div
                   key={match.id}
                   initial={{ opacity: 0, scale: 0.5 }}
@@ -244,20 +256,23 @@ export default function GroupTrackerPage() {
           )}
         </div>
 
+        {/* Full team celebration */}
         {remaining === 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-            <p className="text-2xl mb-1">🎉</p>
-            <p className="font-black text-green-700 text-lg">הצוות מלא!</p>
-            <p className="text-green-600 text-sm">מצאת את כל השותפים שרצית</p>
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-orange-200 rounded-2xl p-5 text-center">
+            <p className="text-4xl mb-2">🏆</p>
+            <p className="font-black text-orange-700 text-xl">הצוות מלא!</p>
+            <p className="text-orange-600 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
           </div>
         )}
 
-        {remaining > 0 && allMatches.length === 0 && (
+        {/* CTA - find more partners */}
+        {remaining > 0 && (
           <button
             onClick={() => navigate(createPageUrl('Discover'))}
-            className="w-full py-4 rounded-2xl gradient-orange text-white font-black text-lg shadow-lg active:scale-95 transition-transform"
+            className="w-full py-4 rounded-2xl gradient-orange text-white font-black text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
           >
-            התחל לחפש שותפים
+            <Search className="w-5 h-5" />
+            {teamMembers.length === 0 ? 'התחל לחפש שותפים' : `מצא עוד ${remaining} ${remaining === 1 ? 'שותף/ה' : 'שותפים'}`}
           </button>
         )}
       </div>

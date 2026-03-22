@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
