@@ -187,7 +187,19 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [avgRating, setAvgRating] = useState(null);
     const audioRef = useRef(null);
+
+    useEffect(() => {
+        const loadRating = async () => {
+            const reviews = await base44.entities.Review.filter({ reviewed_id: profile.user_id });
+            if (reviews.length > 0) {
+                const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+                setAvgRating(avg);
+            }
+        };
+        loadRating();
+    }, [profile.user_id]);
     
     useEffect(() => {
         if (!audioRef.current || !profile.song_preview_url) return;
