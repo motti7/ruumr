@@ -262,7 +262,11 @@ export default function Layout({ children, currentPageName }) {
                                 isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
                             } relative`}
                             >
-                            <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
+                            {item.customIcon ? (
+                                <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(70%)' }} alt={item.name} />
+                            ) : (
+                                <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
+                            )}
                             {item.badgeCount > 0 && (
                                 <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
                                     {item.badgeCount}
