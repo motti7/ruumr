@@ -813,7 +813,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={10} currentStep={step} title="התמונות שלי">
+            <Step step={11} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
@@ -845,7 +845,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={11} currentStep={step} title="אימות פרופיל">
+            <Step step={12} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
