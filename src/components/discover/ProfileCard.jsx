@@ -140,7 +140,7 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                         <h4 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            מצב חיפוש הצוות
+                            מצב חיפוש ה Team
                         </h4>
                         <div className="flex items-center gap-3 mb-3">
                             <div className="bg-white/20 rounded-full px-3 py-1 text-white text-sm font-bold">
@@ -157,7 +157,7 @@ const ProfileDetail = ({ profile, onClose }) => {
                         </div>
                         {profile.team_members && profile.team_members.length > 0 && (
                             <div>
-                                <p className="text-white/70 text-xs mb-2">שותפים שכבר מצא/ה:</p>
+                                <p className="text-white/70 text-xs mb-2">חברי ה Team שכבר מצא/ה:</p>
                                 <div className="flex gap-2 flex-wrap">
                                     {profile.team_members.map((member, i) => (
                                         <div key={i} className="flex items-center gap-1.5 bg-white/15 rounded-full px-2 py-1">
