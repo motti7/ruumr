@@ -30,6 +30,12 @@ Deno.serve(async (req) => {
         const allUsers = await base44.asServiceRole.entities.User.list();
         const receiverUser = allUsers.find(u => u.id === receiver_id);
 
+        // Respect notify_matches setting for message notifications
+        if (receiverUser?.notify_matches === false) {
+            console.log(`🔕 User ${receiver_id} has disabled match/message notifications`);
+            return Response.json({ success: true, skipped: true });
+        }
+
         // Send push notification
         try {
             await base44.functions.invoke('sendPushNotification', {
