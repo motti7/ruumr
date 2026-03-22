@@ -154,9 +154,11 @@ export default function OnboardingPage() {
         return true; // Should ideally skip if seeking
       case 8: // About
         return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 9: // Spotify
+      case 9: // Interests
         return true; // Optional
-      case 10: // Photos
+      case 10: // Spotify
+        return true; // Optional
+      case 11: // Photos
         return formData.photos.filter(p => p).length >= 2;
       default:
         return true;
