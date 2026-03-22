@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle, Users } from "lucide-react";
+import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
