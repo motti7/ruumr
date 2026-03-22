@@ -38,8 +38,8 @@ export default function WriteReviewButton() {
 
   return (
     <>
-      <button onClick={handleOpen} className="hover:scale-110 transition-transform group">
-        <Star className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-[--theme-orange] transition-colors" />
+      <button onClick={handleOpen} className="hover:scale-110 transition-transform">
+        <Star className="w-6 h-6 text-yellow-400" fill="#facc15" />
       </button>
 
       <AnimatePresence>
@@ -56,13 +56,13 @@ export default function WriteReviewButton() {
               animate={{ y: 0 }}
               exit={{ y: 300 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-safe"
+              className="bg-yellow-50 rounded-t-3xl w-full max-w-md p-6 pb-safe border-t-4 border-yellow-300"
               style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom) + 80px)' }}
               dir="rtl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-5">
-                <h3 className="text-xl font-black text-gray-900">כתוב חוות דעת</h3>
+                <h3 className="text-xl font-black text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> כתוב חוות דעת</h3>
                 <button onClick={() => setShowPicker(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
 

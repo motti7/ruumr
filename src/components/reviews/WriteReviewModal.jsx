@@ -42,7 +42,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
           animate={{ y: 0 }}
           exit={{ y: 300 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white rounded-t-3xl w-full max-w-md p-6"
+          className="bg-yellow-50 rounded-t-3xl w-full max-w-md p-6 border-t-4 border-yellow-300"
           dir="rtl"
           onClick={(e) => e.stopPropagation()}
         >
@@ -61,8 +61,8 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
               >
                 <Star
                   className="w-10 h-10 transition-colors"
-                  fill={(hoverRating || rating) >= star ? "#FF5722" : "none"}
-                  stroke={(hoverRating || rating) >= star ? "#FF5722" : "#d1d5db"}
+                  fill={(hoverRating || rating) >= star ? "#facc15" : "none"}
+                  stroke={(hoverRating || rating) >= star ? "#ca8a04" : "#d1d5db"}
                 />
               </button>
             ))}
