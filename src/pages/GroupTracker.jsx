@@ -97,7 +97,16 @@ export default function GroupTrackerPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-28" dir="rtl">
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
-        <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
+          <button
+            onClick={() => navigate(createPageUrl('GroupCompatibility'))}
+            className="flex items-center gap-2 gradient-orange text-white font-bold px-4 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
+          >
+            <Puzzle className="w-4 h-4" />
+            Group Vibe Check
+          </button>
+        </div>
         <p className="text-gray-500 text-sm mt-1">מעקב אחר תהליך מציאת השותפים</p>
       </div>
 
