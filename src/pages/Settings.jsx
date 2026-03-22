@@ -82,8 +82,16 @@ export default function SettingsPage() {
           <div className="bg-white p-4 rounded-xl border border-gray-200">
               <p className="font-bold text-lg mb-2 text-gray-800">התראות</p>
               <div className="divide-y divide-gray-100">
-                <SettingsItem icon={<Bell className="w-5 h-5 text-[--theme-orange]"/>} title="התאמות חדשות" action={<TinderSwitch defaultChecked />} />
-                <SettingsItem icon={<Bell className="w-5 h-5 text-[--theme-orange]"/>} title="הודעות חדשות" action={<TinderSwitch defaultChecked />} />
+                <SettingsItem 
+                  icon={<Heart className="w-5 h-5 text-[--theme-orange]"/>} 
+                  title="לייקים חדשים" 
+                  action={<TinderSwitch defaultChecked={notifyLikes} onChange={handleNotifyLikesChange} />} 
+                />
+                <SettingsItem 
+                  icon={<Bell className="w-5 h-5 text-[--theme-orange]"/>} 
+                  title="התאמות והודעות חדשות" 
+                  action={<TinderSwitch defaultChecked={notifyMatches} onChange={handleNotifyMatchesChange} />} 
+                />
               </div>
           </div>
         
