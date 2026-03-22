@@ -83,6 +83,7 @@ export default function OnboardingPage() {
     apartment_photos: Array(6).fill(null),
     existing_roommates: 0,
     apartment_total_budget: 5000,
+    interests: [],
     // Song Info
     itunes_track_id: '',
     song_preview_url: null,
