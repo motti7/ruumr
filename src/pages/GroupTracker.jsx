@@ -259,12 +259,12 @@ export default function GroupTrackerPage() {
 
         {/* Full team celebration */}
         {remaining === 0 && (
-          <div className="bg-gradient-to-br from-yellow-100 to-orange-100 border border-orange-300 rounded-2xl p-5 text-center">
+          <div className="gradient-orange rounded-2xl p-5 text-center">
             <div className="flex justify-center mb-2">
-              <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-14 h-14 object-contain" style={{ filter: 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' }} />
+              <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-14 h-14 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
             </div>
-            <p className="font-black text-orange-700 text-xl">הצוות מלא!</p>
-            <p className="text-orange-600 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
+            <p className="font-black text-white text-xl">ה Team מוכן 😎</p>
+            <p className="text-white/80 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
           </div>
         )}
 
