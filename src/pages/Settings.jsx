@@ -30,6 +30,28 @@ const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onCl
 
 
 export default function SettingsPage() {
+  const [notifyLikes, setNotifyLikes] = useState(true);
+  const [notifyMatches, setNotifyMatches] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const userData = await User.me();
+      setNotifyLikes(userData.notify_likes !== false);
+      setNotifyMatches(userData.notify_matches !== false);
+    };
+    load();
+  }, []);
+
+  const handleNotifyLikesChange = async (val) => {
+    setNotifyLikes(val);
+    await base44.auth.updateMe({ notify_likes: val });
+  };
+
+  const handleNotifyMatchesChange = async (val) => {
+    setNotifyMatches(val);
+    await base44.auth.updateMe({ notify_matches: val });
+  };
+
   const handleLogout = async () => {
     await User.logout();
     window.location.href = createPageUrl('Home');
