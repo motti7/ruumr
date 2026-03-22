@@ -877,7 +877,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 11 && (
+        {step < 12 && (
             <div className="mt-6">
                 <Button 
                     onClick={nextStep} 
