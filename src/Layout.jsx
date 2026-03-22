@@ -112,7 +112,8 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
-    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp }
+    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
+    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: Users }
   ];
 
   const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
