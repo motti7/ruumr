@@ -16,7 +16,26 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 10; 
+const TOTAL_STEPS = 11; 
+
+const INTERESTS_LIST = [
+  {id: 'sport', label: '⚽ ספורט'},
+  {id: 'music', label: '🎵 מוזיקה'},
+  {id: 'cooking', label: '🍳 בישול'},
+  {id: 'travel', label: '✈️ טיולים'},
+  {id: 'art', label: '🎨 אמנות'},
+  {id: 'gaming', label: '🎮 גיימינג'},
+  {id: 'fitness', label: '💪 כושר'},
+  {id: 'yoga', label: '🧘 יוגה'},
+  {id: 'photography', label: '📸 צילום'},
+  {id: 'reading', label: '📚 קריאה'},
+  {id: 'movies', label: '🎬 סרטים'},
+  {id: 'nature', label: '🌿 טבע'},
+  {id: 'nightlife', label: '🌙 חיי לילה'},
+  {id: 'tech', label: '💻 טכנולוגיה'},
+  {id: 'fashion', label: '👗 אופנה'},
+  {id: 'pets', label: '🐾 חיות'},
+];
 
 const Step = ({ children, step, currentStep, title }) => (
   <AnimatePresence mode="wait">
