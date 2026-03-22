@@ -19,22 +19,22 @@ import ImageLightbox from '@/components/shared/ImageLightbox';
 const TOTAL_STEPS = 11; 
 
 const INTERESTS_LIST = [
-  {id: 'sport', label: '⚽ ספורט'},
-  {id: 'music', label: '🎵 מוזיקה'},
-  {id: 'cooking', label: '🍳 בישול'},
-  {id: 'travel', label: '✈️ טיולים'},
-  {id: 'art', label: '🎨 אמנות'},
+  {id: 'cooking', label: '🍳 בישול משותף'},
+  {id: 'netflix', label: '📺 ערבי נטפליקס'},
   {id: 'gaming', label: '🎮 גיימינג'},
-  {id: 'fitness', label: '💪 כושר'},
-  {id: 'yoga', label: '🧘 יוגה'},
-  {id: 'photography', label: '📸 צילום'},
-  {id: 'reading', label: '📚 קריאה'},
-  {id: 'movies', label: '🎬 סרטים'},
-  {id: 'nature', label: '🌿 טבע'},
+  {id: 'hosting', label: '🎉 אירוח חברים'},
   {id: 'nightlife', label: '🌙 חיי לילה'},
-  {id: 'tech', label: '💻 טכנולוגיה'},
-  {id: 'fashion', label: '👗 אופנה'},
-  {id: 'pets', label: '🐾 חיות'},
+  {id: 'sport', label: '⚽ ספורט'},
+  {id: 'fitness', label: '💪 כושר'},
+  {id: 'nature', label: '🌿 טיולים בטבע'},
+  {id: 'homebody', label: '🏠 נשאר/ת בבית'},
+  {id: 'music', label: '🎵 מוזיקה'},
+  {id: 'morning_person', label: '☀️ אדם של בוקר'},
+  {id: 'night_owl', label: '🦉 ינשוף לילה'},
+  {id: 'food_delivery', label: '🍕 הזמנות אוכל'},
+  {id: 'shopping', label: '🛒 קניות משותפות'},
+  {id: 'pets', label: '🐾 חיות מחמד'},
+  {id: 'wfh', label: '💻 עובד/ת מהבית'},
 ];
 
 const Step = ({ children, step, currentStep, title }) => (
