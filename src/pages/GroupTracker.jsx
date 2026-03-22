@@ -260,7 +260,7 @@ export default function GroupTrackerPage() {
 
         {/* Full team celebration */}
         {remaining === 0 && (
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-orange-200 rounded-2xl p-5 text-center">
+          <div className="bg-gradient-to-br from-yellow-100 to-orange-100 border border-orange-300 rounded-2xl p-5 text-center">
             <p className="text-4xl mb-2">🏆</p>
             <p className="font-black text-orange-700 text-xl">הצוות מלא!</p>
             <p className="text-orange-600 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
