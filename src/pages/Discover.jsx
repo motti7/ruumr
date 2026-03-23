@@ -240,7 +240,9 @@ export default function DiscoverPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-white">
-        <Home className="w-7 h-7 text-[--theme-orange] animate-pulse" />
+        <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
+          <Home className="w-7 h-7 text-white" />
+        </div>
         <p className="text-gray-500 font-medium mt-4">מחפש שותפים...</p>
       </div>
     );

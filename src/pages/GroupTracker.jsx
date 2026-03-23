@@ -87,7 +87,9 @@ export default function GroupTrackerPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <UsersRound className="w-7 h-7 text-[--theme-orange] animate-pulse" />
+        <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
+          <UsersRound className="w-7 h-7 text-white" />
+        </div>
       </div>
     );
   }
