@@ -252,33 +252,7 @@ export default function GroupCompatibilityPage() {
                     <StatusIcon className="w-3 h-3" />
                     {status.text}
                   </div>
-                  {/* Progress bars */}
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400 w-10">אני</span>
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full gradient-orange rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${((compat?.myAnswered || 0) / TOTAL_Q) * 100}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-400">{compat?.myAnswered || 0}/{TOTAL_Q}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400 w-10">{member.name?.split(' ')[0]}</span>
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-blue-400 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${((compat?.theirAnswered || 0) / TOTAL_Q) * 100}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-400">{compat?.theirAnswered || 0}/{TOTAL_Q}</span>
-                    </div>
-                  </div>
+
                 </div>
 
                 {/* Score ring or CTA */}
