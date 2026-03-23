@@ -4,14 +4,18 @@ import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Puzzle, CheckCircle2, Clock, ChevronRight, Users } from "lucide-react";
+import { ArrowRight, Puzzle, CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
 
-const CHARTER_DATA_QUESTIONS = [
-  { id: "q_smoking" }, { id: "q_partners" }, { id: "q_pets" },
-  { id: "q_cleaning_strictness" }, { id: "q_shopping" },
-  { id: "q_dishes" }, { id: "q_ac" }, { id: "q_hosting" }
+const CHARTER_QUESTIONS = [
+  { id: "q_smoking", title: "עישון בדירה", emoji: "🚬", option_a: "בכיף, חופשי בסלון", option_b: "רק בחוץ/במרפסת", compromise: "מעשנים רק במרפסת (עם דלת סגורה!)" },
+  { id: "q_partners", title: "בני/בנות זוג", emoji: "😍", option_a: "בית פתוח – שיישנו פה חופשי", option_b: "גג פעמיים בשבוע", compromise: "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות." },
+  { id: "q_pets", title: "בעלי חיים", emoji: "🐶", option_a: "מת על חיות, תביאו הכל", option_b: "אלרגי / לא מתחבר", compromise: "חייבים להסכים מראש – אין פשרה." },
+  { id: "q_cleaning_strictness", title: "ניקיון – עד כמה מקפידים?", emoji: "🧹", option_a: "חייב להיות מצוחצח תמיד", option_b: "מנקים כשרואים לכלוך", compromise: "ניקיון יסודי פעם בשבוע, שאר הזמן – סביר." },
+  { id: "q_shopping", title: "קניות לבית", emoji: "🛒", option_a: "שותפות מלאה – קונים יחד", option_b: "הפרדה – כל אחד לעצמו", compromise: "קופה משותפת לדברים בסיסיים, אוכל בנפרד." },
+  { id: "q_dishes", title: "כלים בכיור", emoji: "🍽️", option_a: "שוטפים מיד אחרי האוכל!", option_b: "שוטפים כשמצטבר", compromise: "חוק ה-24 שעות: הכיור ריק לפני השינה." },
+  { id: "q_ac", title: "מלחמות המזגן", emoji: "❄️", option_a: "מקפיא! 18 מעלות", option_b: "חסכוני – 24 מעלות", compromise: "23 מעלות ביום, בלילה כל אחד בחדרו מחליט." },
+  { id: "q_hosting", title: "חברים ומסיבות", emoji: "🎉", option_a: "תמיד שמח, הבית פתוח", option_b: "צריך שקט, לתאם מראש", compromise: "מותר לארח, אבל אחרי 23:00 שקט בסלון." },
 ];
-const TOTAL_Q = CHARTER_DATA_QUESTIONS.length;
 
 function CompatibilityRing({ percent, size = 80 }) {
   const r = (size / 2) - 8;
@@ -32,6 +36,83 @@ function CompatibilityRing({ percent, size = 80 }) {
         transition={{ duration: 1.2, ease: "easeOut" }}
       />
     </svg>
+  );
+}
+
+function BreakdownPanel({ myMap, theirMap, memberName }) {
+  const [open, setOpen] = useState(false);
+
+  const agrees = [];
+  const disagrees = [];
+
+  CHARTER_QUESTIONS.forEach(q => {
+    const mine = myMap[q.id];
+    const theirs = theirMap[q.id];
+    if (!mine || !theirs) return;
+    if (mine === theirs) {
+      agrees.push(q);
+    } else {
+      disagrees.push(q);
+    }
+  });
+
+  return (
+    <div className="mt-3 border-t border-gray-100 pt-3">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between text-xs font-bold text-gray-500 hover:text-gray-700"
+      >
+        <span>פירוט הסכמות / חוסר הסכמות</span>
+        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 space-y-2">
+              {agrees.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-green-600 mb-1.5">✅ מסכימים ({agrees.length})</p>
+                  <div className="space-y-1">
+                    {agrees.map(q => (
+                      <div key={q.id} className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2">
+                        <span className="text-base">{q.emoji}</span>
+                        <span className="text-xs font-medium text-gray-700">{q.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {disagrees.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-red-500 mb-1.5">❌ לא מסכימים ({disagrees.length})</p>
+                  <div className="space-y-2">
+                    {disagrees.map(q => (
+                      <div key={q.id} className="bg-red-50 rounded-xl px-3 py-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base">{q.emoji}</span>
+                          <span className="text-xs font-bold text-gray-700">{q.title}</span>
+                        </div>
+                        <div className="flex gap-2 text-[10px] text-gray-500 mb-1">
+                          <span className="bg-[--theme-orange]/10 text-[--theme-orange] px-2 py-0.5 rounded-full font-medium">אני: {myMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
+                          <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{memberName}: {theirMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 font-medium">💡 פשרה: {q.compromise}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -56,24 +137,21 @@ export default function GroupCompatibilityPage() {
         setMyProfile(prof);
 
         const savedTeam = prof.team_members || [];
-        if (savedTeam.length === 0) {
-          setIsLoading(false);
-          return;
-        }
+        if (savedTeam.length === 0) { setIsLoading(false); return; }
 
         setTeamMembers(savedTeam);
 
-        // For each team member, load charter answers for both sides
         const compatibilityMap = {};
         await Promise.all(savedTeam.map(async (member) => {
           const matchId = member.match_id;
           if (!matchId) return;
 
-          const [myAnswers, theirAnswers] = await Promise.all([
+          const [myAnswers, allAnswers] = await Promise.all([
             base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: userData.id }),
             base44.entities.CharterAnswer.filter({ match_id: matchId })
-              .then(all => all.filter(a => a.user_id !== userData.id))
           ]);
+
+          const theirAnswers = allAnswers.filter(a => a.user_id !== userData.id);
 
           const myMap = {};
           myAnswers.forEach(a => { myMap[a.question_id] = a.answer; });
@@ -86,7 +164,7 @@ export default function GroupCompatibilityPage() {
 
           let matches = 0;
           let compared = 0;
-          CHARTER_DATA_QUESTIONS.forEach(q => {
+          CHARTER_QUESTIONS.forEach(q => {
             if (myMap[q.id] && theirMap[q.id]) {
               compared++;
               if (myMap[q.id] === theirMap[q.id]) matches++;
@@ -97,7 +175,9 @@ export default function GroupCompatibilityPage() {
             myAnswered: myCount,
             theirAnswered: theirCount,
             percent: compared > 0 ? Math.round((matches / compared) * 100) : null,
-            compared
+            compared,
+            myMap,
+            theirMap,
           };
         }));
 
@@ -112,8 +192,8 @@ export default function GroupCompatibilityPage() {
 
   const getStatusLabel = (compat) => {
     if (!compat) return { text: "טרם התחיל", color: "text-gray-400", icon: Clock };
-    if (compat.myAnswered < TOTAL_Q) return { text: "ממתין לתשובות שלך", color: "text-orange-500", icon: Clock };
-    if (compat.theirAnswered < TOTAL_Q) return { text: "ממתין לשותף/ה", color: "text-blue-500", icon: Clock };
+    if (compat.myAnswered < 8) return { text: "ממתין לתשובות שלך", color: "text-orange-500", icon: Clock };
+    if (compat.theirAnswered < 8) return { text: "ממתין לשותף/ה", color: "text-blue-500", icon: Clock };
     if (compat.percent >= 75) return { text: "התאמה מעולה! 🔥", color: "text-green-500", icon: CheckCircle2 };
     if (compat.percent >= 50) return { text: "התאמה סבירה", color: "text-orange-500", icon: CheckCircle2 };
     return { text: "יש הבדלים משמעותיים", color: "text-red-500", icon: CheckCircle2 };
@@ -223,7 +303,9 @@ export default function GroupCompatibilityPage() {
           const compat = compatibility[member.match_id];
           const status = getStatusLabel(compat);
           const StatusIcon = status.icon;
-          const myDone = compat ? compat.myAnswered >= TOTAL_Q : false;
+          const myDone = compat ? compat.myAnswered >= 8 : false;
+          const theirDone = compat ? compat.theirAnswered >= 8 : false;
+          const bothDone = myDone && theirDone;
 
           return (
             <motion.div
@@ -246,67 +328,55 @@ export default function GroupCompatibilityPage() {
                 </div>
 
                 {/* Info */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-bold text-gray-900">{member.name?.split(' ')[0]}</p>
                   <div className={`flex items-center gap-1 text-xs font-medium mt-0.5 ${status.color}`}>
                     <StatusIcon className="w-3 h-3" />
                     {status.text}
                   </div>
-                  {/* Progress bars */}
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400 w-10">אני</span>
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full gradient-orange rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${((compat?.myAnswered || 0) / TOTAL_Q) * 100}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-400">{compat?.myAnswered || 0}/{TOTAL_Q}</span>
+
+                  {/* Status chips instead of progress bars */}
+                  {!bothDone && (
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${myDone ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {myDone ? '✓ מילאתי' : '⏳ לא מילאתי'}
+                      </span>
+                      <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${theirDone ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {theirDone ? `✓ ${member.name?.split(' ')[0]} מילא/ה` : `⏳ ${member.name?.split(' ')[0]} טרם מילא/ה`}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400 w-10">{member.name?.split(' ')[0]}</span>
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-blue-400 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${((compat?.theirAnswered || 0) / TOTAL_Q) * 100}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-400">{compat?.theirAnswered || 0}/{TOTAL_Q}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Score ring or CTA */}
                 <div className="flex-shrink-0 flex flex-col items-center gap-1">
-                  {compat?.percent !== null && compat?.percent !== undefined ? (
+                  {bothDone && compat?.percent !== null ? (
                     <div className="relative flex items-center justify-center">
                       <CompatibilityRing percent={compat.percent} size={64} />
                       <span className="absolute text-sm font-black text-gray-800">{compat.percent}%</span>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => navigate(createPageUrl('Charter') + `?matchId=${member.match_id}`)}
-                      className="gradient-orange text-white text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1 shadow"
-                    >
-                      <Puzzle className="w-3 h-3" />
-                      התחל
-                    </button>
-                  )}
-                  {!myDone && compat?.myAnswered < TOTAL_Q && (
-                    <button
-                      onClick={() => navigate(createPageUrl('Charter') + `?matchId=${member.match_id}`)}
-                      className="text-[10px] font-bold text-[--theme-orange] mt-1 underline"
-                    >
-                      {compat?.myAnswered > 0 ? "המשך שאלון" : "מלא שאלון"}
-                    </button>
+                    !myDone && (
+                      <button
+                        onClick={() => navigate(createPageUrl('Charter') + `?matchId=${member.match_id}`)}
+                        className="gradient-orange text-white text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1 shadow"
+                      >
+                        <Puzzle className="w-3 h-3" />
+                        {compat?.myAnswered > 0 ? "המשך" : "התחל"}
+                      </button>
+                    )
                   )}
                 </div>
               </div>
+
+              {/* Breakdown – only show when both filled */}
+              {bothDone && compat?.myMap && compat?.theirMap && (
+                <BreakdownPanel
+                  myMap={compat.myMap}
+                  theirMap={compat.theirMap}
+                  memberName={member.name?.split(' ')[0]}
+                />
+              )}
             </motion.div>
           );
         })}
