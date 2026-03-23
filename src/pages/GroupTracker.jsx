@@ -87,8 +87,11 @@ export default function GroupTrackerPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
-          <UsersRound className="w-7 h-7 text-white" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
+            <UsersRound className="w-7 h-7 text-white" />
+          </div>
+          <p className="text-gray-500 font-medium text-sm">טוען את הצוות שלך...</p>
         </div>
       </div>
     );
@@ -101,7 +104,7 @@ export default function GroupTrackerPage() {
           <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
           <button
             onClick={() => navigate(createPageUrl('GroupCompatibility'))}
-            className="flex items-center gap-2 gradient-orange text-white font-bold px-4 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
+            className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-4 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
           >
             <Puzzle className="w-4 h-4" />
             Group Vibe Check
