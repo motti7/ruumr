@@ -61,8 +61,8 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
               >
                 <Star
                   className="w-10 h-10 transition-colors"
-                  fill={(hoverRating || rating) >= star ? "#facc15" : "none"}
-                  stroke={(hoverRating || rating) >= star ? "#ca8a04" : "#d1d5db"}
+                  fill={(hoverRating || rating) >= star ? "#f472b6" : "none"}
+                  stroke={(hoverRating || rating) >= star ? "#ec4899" : "#d1d5db"}
                 />
               </button>
             ))}
