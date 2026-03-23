@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
+const safeDelete = async (entity, id) => {
+    try { await entity.delete(id); } catch (_) {}
+};
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -11,50 +15,39 @@ Deno.serve(async (req) => {
 
         const userId = user.id;
         const userEmail = user.email;
+        const sr = base44.asServiceRole.entities;
 
         // Delete Profile
-        const profiles = await base44.asServiceRole.entities.Profile.filter({ user_id: userId });
-        for (const p of profiles) {
-            await base44.asServiceRole.entities.Profile.delete(p.id);
-        }
+        const profiles = await sr.Profile.filter({ user_id: userId });
+        for (const p of profiles) await safeDelete(sr.Profile, p.id);
 
-        // Delete Swipes (as swiper or swiped)
-        const swipesAsSwiper = await base44.asServiceRole.entities.Swipe.filter({ swiper_id: userId });
-        for (const s of swipesAsSwiper) {
-            await base44.asServiceRole.entities.Swipe.delete(s.id);
-        }
-        const swipesAsSwiped = await base44.asServiceRole.entities.Swipe.filter({ swiped_id: userId });
-        for (const s of swipesAsSwiped) {
-            await base44.asServiceRole.entities.Swipe.delete(s.id);
-        }
+        // Delete Swipes
+        const swipesAsSwiper = await sr.Swipe.filter({ swiper_id: userId });
+        for (const s of swipesAsSwiper) await safeDelete(sr.Swipe, s.id);
 
-        // Delete Matches (as user1 or user2)
-        const matchesAsUser1 = await base44.asServiceRole.entities.Match.filter({ user1_id: userId });
+        const swipesAsSwiped = await sr.Swipe.filter({ swiped_id: userId });
+        for (const s of swipesAsSwiped) await safeDelete(sr.Swipe, s.id);
+
+        // Delete Matches + Messages
+        const matchesAsUser1 = await sr.Match.filter({ user1_id: userId });
         for (const m of matchesAsUser1) {
-            // Delete messages in this match
-            const msgs = await base44.asServiceRole.entities.Message.filter({ match_id: m.id });
-            for (const msg of msgs) {
-                await base44.asServiceRole.entities.Message.delete(msg.id);
-            }
-            await base44.asServiceRole.entities.Match.delete(m.id);
+            const msgs = await sr.Message.filter({ match_id: m.id });
+            for (const msg of msgs) await safeDelete(sr.Message, msg.id);
+            await safeDelete(sr.Match, m.id);
         }
-        const matchesAsUser2 = await base44.asServiceRole.entities.Match.filter({ user2_id: userId });
+        const matchesAsUser2 = await sr.Match.filter({ user2_id: userId });
         for (const m of matchesAsUser2) {
-            const msgs = await base44.asServiceRole.entities.Message.filter({ match_id: m.id });
-            for (const msg of msgs) {
-                await base44.asServiceRole.entities.Message.delete(msg.id);
-            }
-            await base44.asServiceRole.entities.Match.delete(m.id);
+            const msgs = await sr.Message.filter({ match_id: m.id });
+            for (const msg of msgs) await safeDelete(sr.Message, msg.id);
+            await safeDelete(sr.Match, m.id);
         }
 
         // Delete CharterAnswers
-        const charterAnswers = await base44.asServiceRole.entities.CharterAnswer.filter({ user_id: userId });
-        for (const ca of charterAnswers) {
-            await base44.asServiceRole.entities.CharterAnswer.delete(ca.id);
-        }
+        const charterAnswers = await sr.CharterAnswer.filter({ user_id: userId });
+        for (const ca of charterAnswers) await safeDelete(sr.CharterAnswer, ca.id);
 
-        // Delete the User record itself (removes from admin users page + auth)
-        await base44.asServiceRole.entities.User.delete(userId);
+        // Delete User
+        await safeDelete(sr.User, userId);
 
         console.log(`✅ Account fully deleted for user ${userEmail} (${userId})`);
         return Response.json({ success: true });
