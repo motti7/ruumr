@@ -243,7 +243,7 @@ export default function Layout({ children, currentPageName }) {
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed bottom-4 right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 z-50 rounded-2xl shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                <nav className="fixed bottom-2 right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 z-50 rounded-2xl shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path;
