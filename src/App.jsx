@@ -80,8 +80,8 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
-        <Router>
+        <SplashScreen onDone={() => setSplashDone(true)} />
+        {splashDone && <Router>
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>
