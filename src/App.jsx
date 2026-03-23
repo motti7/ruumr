@@ -81,10 +81,12 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <SplashScreen onDone={() => setSplashDone(true)} />
-        {splashDone && <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
+        {splashDone && (
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+        )}
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
