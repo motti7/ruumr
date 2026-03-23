@@ -1,0 +1,24 @@
+{
+  "name": "Ruumr",
+  "short_name": "Ruumr",
+  "description": "Find your perfect roommates",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8420A",
+  "theme_color": "#E8420A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
