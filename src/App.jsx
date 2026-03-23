@@ -67,6 +67,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/GroupTracker" element={<LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper>} />
       <Route path="/GroupCompatibility" element={<LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper>} />
+      <Route path="/GroupChat" element={<LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

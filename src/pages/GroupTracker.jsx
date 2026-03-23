@@ -102,13 +102,22 @@ export default function GroupTrackerPage() {
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
-          <button
-            onClick={() => navigate(createPageUrl('GroupCompatibility'))}
-            className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-4 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
-          >
-            <Puzzle className="w-4 h-4" />
-            Group Vibe Check
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(createPageUrl('GroupChat'))}
+              className="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
+            >
+              <MessageCircle className="w-4 h-4" />
+              צ'אט
+            </button>
+            <button
+              onClick={() => navigate(createPageUrl('GroupCompatibility'))}
+              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
+            >
+              <Puzzle className="w-4 h-4" />
+              Vibe Check
+            </button>
+          </div>
         </div>
         <p className="text-gray-500 text-sm mt-1">מעקב אחר תהליך מציאת השותפים</p>
       </div>
