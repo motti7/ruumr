@@ -110,10 +110,10 @@ export default function Layout({ children, currentPageName }) {
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
 
   const navigationItems = [
-    { name: "גלה", path: createPageUrl("Discover"), icon: null, customIcon: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" },
+    { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
-    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: null, customIcon: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/99bf91766_group.png" }
+    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ];
 
   const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
