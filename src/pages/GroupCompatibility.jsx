@@ -158,7 +158,7 @@ export default function GroupCompatibilityPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="gradient-orange rounded-2xl p-5 text-center text-white"
+            className="bg-yellow-400 rounded-2xl p-5 text-center text-white"
           >
             <p className="text-white/80 text-sm font-bold mb-1">ציון הצוות הכולל</p>
             <p className="text-6xl font-black">{overallScore}%</p>
