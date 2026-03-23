@@ -5,7 +5,7 @@ import { Profile } from "@/entities/Profile";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus, Search, Puzzle, UsersRound } from "lucide-react";
+import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle } from "lucide-react";
 
 export default function GroupTrackerPage() {
   const navigate = useNavigate();

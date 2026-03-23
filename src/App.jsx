@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import GroupTracker from './pages/GroupTracker';
 import GroupCompatibility from './pages/GroupCompatibility';
+import GroupChat from './pages/GroupChat';
 import SplashScreen from './components/SplashScreen';
 
 const { Pages, Layout, mainPage } = pagesConfig;
