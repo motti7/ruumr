@@ -28,18 +28,31 @@ export default function SplashScreen({ onDone }) {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex items-center gap-3"
           >
-            <span
-              style={{
-                fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
-                fontWeight: 800,
-                fontSize: "72px",
-                color: "white",
-                letterSpacing: "-1px",
-                lineHeight: 1,
-              }}
-            >
-              ruumr
-            </span>
+            <div className="flex flex-col items-center gap-2">
+              <span
+                style={{
+                  fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
+                  fontWeight: 800,
+                  fontSize: "72px",
+                  color: "white",
+                  letterSpacing: "-1px",
+                  lineHeight: 1,
+                }}
+              >
+                ruumr
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
+                  fontWeight: 400,
+                  fontSize: "16px",
+                  color: "rgba(255,255,255,0.85)",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                find your perfect roommates
+              </span>
+            </div>
           </motion.div>
         </motion.div>
       )}
