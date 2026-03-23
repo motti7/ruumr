@@ -156,7 +156,7 @@ export default function GroupTrackerPage() {
             <div className="text-5xl flex items-center justify-center">
               {remaining === 0 ? (
                 <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-12 h-12 object-contain" style={{ filter: 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' }} />
-              ) : currentCount === 1 ? '🙋' : '👥'}
+              ) : currentCount === 1 ? '🙋' : <UsersRound className="w-12 h-12 text-yellow-400" fill="#facc15" />}
             </div>
           </div>
           <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
