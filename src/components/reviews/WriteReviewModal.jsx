@@ -43,6 +43,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
           exit={{ y: 300 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="bg-pink-50 rounded-t-3xl w-full max-w-md p-6 border-t-4 border-pink-300"
+          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom) + 80px)' }}
           dir="rtl"
           onClick={(e) => e.stopPropagation()}
         >
