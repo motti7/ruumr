@@ -72,10 +72,12 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  const [splashDone, setSplashDone] = React.useState(false);
 
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
+        {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
         <Router>
           <NavigationTracker />
           <AuthenticatedApp />
