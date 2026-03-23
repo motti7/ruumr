@@ -72,7 +72,7 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-  const [splashDone, setSplashDone] = React.useState(false);
+  const [splashDone, setSplashDone] = useState(false);
 
   return (
     <AuthProvider>
