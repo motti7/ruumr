@@ -74,14 +74,20 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
 
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
+        <AnimatePresence>
+          {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+        </AnimatePresence>
+        {!showSplash && (
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+        )}
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
