@@ -286,7 +286,7 @@ export default function DiscoverPage() {
       </AnimatePresence>
 
       <div className="absolute w-full flex items-start justify-center px-3 pt-20">
-        <div style={{ height: 'calc(100vh - 200px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+        <div style={{ height: 'calc(100vh - 150px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => (
