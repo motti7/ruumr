@@ -23,7 +23,7 @@ export default function DiscoverPage() {
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
-  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 50 });
+  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 });
   const [allProfiles, setAllProfiles] = useState([]);
 
   const loadData = useCallback(async () => {
