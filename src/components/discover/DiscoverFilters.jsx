@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SlidersHorizontal, X, Check } from "lucide-react";
+import { SlidersHorizontal, X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-
-const CITIES = ["תל אביב", "ירושלים", "חיפה", "ראשון לציון", "פתח תקווה", "אשדוד", "נתניה", "באר שבע", "בני ברק", "רמת גן", "הרצליה", "חולון", "רחובות"];
 
 export default function DiscoverFilters({ filters, onChange }) {
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState(filters);
+  const [cityInput, setCityInput] = useState("");
 
   const activeCount = [
     local.cities?.length > 0,
@@ -23,24 +22,31 @@ export default function DiscoverFilters({ filters, onChange }) {
   const reset = () => {
     const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 50 };
     setLocal(defaults);
+    setCityInput("");
     onChange(defaults);
     setOpen(false);
   };
 
-  const toggleCity = (city) => {
-    setLocal(prev => ({
-      ...prev,
-      cities: prev.cities.includes(city)
-        ? prev.cities.filter(c => c !== city)
-        : [...prev.cities, city]
-    }));
+  const addCity = (city) => {
+    const trimmed = city.trim();
+    if (!trimmed || local.cities.includes(trimmed)) return;
+    setLocal(prev => ({ ...prev, cities: [...prev.cities, trimmed] }));
+    setCityInput("");
+  };
+
+  const removeCity = (city) => {
+    setLocal(prev => ({ ...prev, cities: prev.cities.filter(c => c !== city) }));
+  };
+
+  const handleCityKeyDown = (e) => {
+    if (e.key === "Enter") addCity(cityInput);
   };
 
   return (
     <>
       {/* Trigger Button */}
       <button
-        onClick={() => { setLocal(filters); setOpen(true); }}
+        onClick={() => { setLocal(filters); setCityInput(""); setOpen(true); }}
         className="relative flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-md border border-gray-100 text-sm font-semibold text-gray-700 active:scale-95 transition-transform"
       >
         <SlidersHorizontal className="w-4 h-4 text-[--theme-orange]" />
@@ -80,27 +86,44 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </button>
               </div>
 
-              {/* Cities */}
+              {/* City free-text */}
               <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-3 block">אזור מגורים</label>
-                <div className="flex flex-wrap gap-2">
-                  {CITIES.map(city => {
-                    const selected = local.cities.includes(city);
-                    return (
-                      <button
+                <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
+                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={cityInput}
+                    onChange={e => setCityInput(e.target.value)}
+                    onKeyDown={handleCityKeyDown}
+                    placeholder="הקלד עיר ולחץ הוסף..."
+                    className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[--theme-orange] transition-colors"
+                    dir="rtl"
+                  />
+                  <button
+                    onClick={() => addCity(cityInput)}
+                    disabled={!cityInput.trim()}
+                    className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
+                  >
+                    הוסף
+                  </button>
+                </div>
+                {local.cities.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {local.cities.map(city => (
+                      <span
                         key={city}
-                        onClick={() => toggleCity(city)}
-                        className={`px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${
-                          selected
-                            ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]'
-                            : 'border-gray-200 bg-white text-gray-600'
-                        }`}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 border-2 border-[--theme-orange] text-[--theme-orange] text-sm font-semibold"
                       >
                         {city}
-                      </button>
-                    );
-                  })}
-                </div>
+                        <button onClick={() => removeCity(city)} className="ml-1">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Budget */}
@@ -117,8 +140,8 @@ export default function DiscoverFilters({ filters, onChange }) {
                   className="py-3"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>₪10,000</span>
                   <span>₪1,000</span>
+                  <span>₪10,000</span>
                 </div>
               </div>
 
@@ -136,8 +159,8 @@ export default function DiscoverFilters({ filters, onChange }) {
                   className="py-3"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>50</span>
                   <span>18</span>
+                  <span>50</span>
                 </div>
               </div>
 
