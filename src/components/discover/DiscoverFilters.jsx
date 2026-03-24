@@ -123,19 +123,17 @@ export default function DiscoverFilters({ filters, onChange }) {
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
                   תקציב מקסימלי: <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
-                <div dir="ltr">
-                  <Slider
-                    value={[10000 - local.maxBudget + 1000]}
-                    min={1000}
-                    max={10000}
-                    step={100}
-                    onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: 10000 - v + 1000 }))}
-                    className="py-3"
-                  />
-                </div>
+                <Slider
+                  value={[local.maxBudget]}
+                  min={1000}
+                  max={10000}
+                  step={100}
+                  onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
+                  className="py-3"
+                />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>₪10,000</span>
                   <span>₪1,000</span>
+                  <span>₪10,000</span>
                 </div>
               </div>
 
@@ -146,17 +144,17 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </label>
                 <div dir="ltr">
                   <Slider
-                    value={[50 - local.maxAge + 18, 50 - local.minAge + 18]}
+                    value={[local.minAge, local.maxAge]}
                     min={18}
                     max={50}
                     step={1}
-                    onValueChange={([a, b]) => setLocal(prev => ({ ...prev, minAge: 50 - b + 18, maxAge: 50 - a + 18 }))}
+                    onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
                     className="py-3"
                   />
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>50</span>
                   <span>18</span>
+                  <span>50</span>
                 </div>
               </div>
 
