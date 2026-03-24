@@ -106,23 +106,38 @@ export default function DiscoverFilters({ filters, onChange }) {
                 <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
                   <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={cityInput}
-                    onChange={e => setCityInput(e.target.value)}
-                    onKeyDown={handleCityKeyDown}
-                    placeholder="הקלד עיר ולחץ הוסף..."
-                    className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[--theme-orange] transition-colors"
-                    dir="rtl"
-                  />
-                  <button
-                    onClick={() => addCity(cityInput)}
-                    disabled={!cityInput.trim()}
-                    className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
-                  >
-                    הוסף
-                  </button>
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cityInput}
+                      onChange={handleCityInputChange}
+                      onKeyDown={handleCityKeyDown}
+                      placeholder="הקלד עיר..."
+                      className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[--theme-orange] transition-colors"
+                      dir="rtl"
+                    />
+                    <button
+                      onClick={() => addCity(cityInput)}
+                      disabled={!cityInput.trim()}
+                      className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
+                    >
+                      הוסף
+                    </button>
+                  </div>
+                  {citySuggestions.length > 0 && (
+                    <div className="absolute top-full right-0 left-0 mt-1 bg-white border border-gray-200 rounded-2xl shadow-lg z-10 overflow-hidden">
+                      {citySuggestions.map(city => (
+                        <button
+                          key={city}
+                          onMouseDown={(e) => { e.preventDefault(); addCity(city); }}
+                          className="w-full text-right px-4 py-2.5 text-sm text-gray-800 hover:bg-orange-50 hover:text-[--theme-orange] transition-colors font-medium"
+                        >
+                          {city}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {local.cities.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
