@@ -104,7 +104,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* City free-text */}
               <div className="mb-6">
                 <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים
+                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים רצוי
                 </label>
                 <div className="relative">
                   <div className="flex gap-2">
