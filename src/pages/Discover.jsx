@@ -11,6 +11,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Heart, X, Home } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
+import DiscoverFilters from "../components/discover/DiscoverFilters";
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
