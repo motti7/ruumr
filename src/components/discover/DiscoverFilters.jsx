@@ -3,10 +3,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
+const ISRAEL_CITIES = [
+  "תל אביב", "ירושלים", "חיפה", "ראשון לציון", "פתח תקווה", "אשדוד", "נתניה", "באר שבע",
+  "בני ברק", "חולון", "רמת גן", "אשקלון", "רחובות", "בת ים", "בית שמש", "כפר סבא",
+  "הרצליה", "חדרה", "מודיעין", "לוד", "נס ציונה", "רמלה", "רעננה", "פ\"ת", "גבעתיים",
+  "קריית גת", "אילת", "נהריה", "עפולה", "רהט", "קריית ביאליק", "קריית ים", "קריית מוצקין",
+  "אום אל פחם", "הוד השרון", "טבריה", "קריית אתא", "קריית שמונה", "יבנה", "גבעת שמואל",
+  "ראש העין", "נצרת", "נצרת עילית", "עכו", "כפר יונה", "אור יהודה", "מזכרת בתיה",
+  "קרית אונו", "גדרה", "מעלה אדומים"
+];
+
 export default function DiscoverFilters({ filters, onChange }) {
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState(filters);
   const [cityInput, setCityInput] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState([]);
 
   useEffect(() => {
     const handler = () => { setLocal(filters); setCityInput(""); setOpen(true); };
