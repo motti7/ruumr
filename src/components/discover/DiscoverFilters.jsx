@@ -144,17 +144,17 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </label>
                 <div dir="ltr">
                   <Slider
-                    value={[local.minAge, local.maxAge]}
+                    value={[50 - local.maxAge + 18, 50 - local.minAge + 18]}
                     min={18}
                     max={50}
                     step={1}
-                    onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
+                    onValueChange={([a, b]) => setLocal(prev => ({ ...prev, minAge: 50 - b + 18, maxAge: 50 - a + 18 }))}
                     className="py-3"
                   />
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>18</span>
                   <span>50</span>
+                  <span>18</span>
                 </div>
               </div>
 
