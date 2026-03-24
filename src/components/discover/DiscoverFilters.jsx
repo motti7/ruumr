@@ -49,6 +49,7 @@ export default function DiscoverFilters({ filters, onChange }) {
     if (!trimmed || local.cities.includes(trimmed)) return;
     setLocal(prev => ({ ...prev, cities: [...prev.cities, trimmed] }));
     setCityInput("");
+    setCitySuggestions([]);
   };
 
   const removeCity = (city) => {
@@ -57,6 +58,17 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   const handleCityKeyDown = (e) => {
     if (e.key === "Enter") addCity(cityInput);
+  };
+
+  const handleCityInputChange = (e) => {
+    const val = e.target.value;
+    setCityInput(val);
+    if (val.trim().length >= 1) {
+      const matches = ISRAEL_CITIES.filter(c => c.includes(val.trim()) && !local.cities.includes(c));
+      setCitySuggestions(matches.slice(0, 5));
+    } else {
+      setCitySuggestions([]);
+    }
   };
 
   return (
