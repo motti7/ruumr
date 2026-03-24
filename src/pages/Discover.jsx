@@ -305,6 +305,11 @@ export default function DiscoverPage() {
         )}
       </AnimatePresence>
 
+      {/* Filters Button */}
+      <div className="absolute top-[72px] left-4 z-20">
+        <DiscoverFilters filters={filters} onChange={applyFilters} />
+      </div>
+
       <div className="absolute w-full flex items-start justify-center px-3 pt-20">
         <div style={{ height: 'calc(100vh - 150px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
