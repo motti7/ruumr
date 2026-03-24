@@ -50,20 +50,6 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   return (
     <>
-      {/* Trigger Button */}
-      <button
-        onClick={() => { setLocal(filters); setCityInput(""); setOpen(true); }}
-        className="relative flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-md border border-gray-100 text-sm font-semibold text-gray-700 active:scale-95 transition-transform"
-      >
-        <SlidersHorizontal className="w-4 h-4 text-[--theme-orange]" />
-        פילטרים
-        {activeCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-[--theme-orange] text-white text-[9px] font-black rounded-full flex items-center justify-center">
-            {activeCount}
-          </span>
-        )}
-      </button>
-
       {/* Bottom Sheet */}
       <AnimatePresence>
         {open && (
