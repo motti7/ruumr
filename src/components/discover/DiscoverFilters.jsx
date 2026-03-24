@@ -15,7 +15,7 @@ const ISRAEL_CITIES = [
 
 export default function DiscoverFilters({ filters, onChange }) {
   const [open, setOpen] = useState(false);
-  const [local, setLocal] = useState(filters);
+  const [local, setLocal] = useState({ ...filters, maxAge: filters.maxAge ?? 60 });
   const [cityInput, setCityInput] = useState("");
   const [citySuggestions, setCitySuggestions] = useState([]);
 
@@ -186,14 +186,14 @@ export default function DiscoverFilters({ filters, onChange }) {
                   <Slider
                     value={[local.minAge, local.maxAge]}
                     min={18}
-                    max={50}
+                    max={60}
                     step={1}
                     onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
                     className="py-3"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
                     <span>18</span>
-                    <span>50</span>
+                    <span>60</span>
                   </div>
                 </div>
               </div>
