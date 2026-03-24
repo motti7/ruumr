@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
+import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, SlidersHorizontal } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
@@ -10,13 +10,13 @@ import { User as UserEntity } from "@/entities/User";
 import { Message } from "@/entities/Message";
 import { useState, useEffect } from "react";
 
-function CharterHintButton() {
+function FilterHintButton() {
   return (
     <button
-      onClick={() => window.dispatchEvent(new Event('openCharter'))}
+      onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
       className="hover:scale-110 transition-transform"
     >
-      <Puzzle className="w-6 h-6 text-[--theme-orange]" />
+      <SlidersHorizontal className="w-6 h-6 text-[--theme-orange]" />
     </button>
   );
 }
@@ -228,7 +228,7 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                         <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
-                                <CharterHintButton />
+                                <FilterHintButton />
                             )}
                             <Link to={createPageUrl("Profile")} className="select-none">
                                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
