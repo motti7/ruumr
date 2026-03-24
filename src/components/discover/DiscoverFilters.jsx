@@ -178,7 +178,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* Age Range */}
               <div className="mb-8">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  טווח גילאים: <span className="text-[--theme-orange]">{local.minAge}–{local.maxAge}</span>
+                  טווח גילאים: <span className="text-[--theme-orange]">{local.maxAge}–{local.minAge}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
