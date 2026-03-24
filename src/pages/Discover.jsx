@@ -86,6 +86,7 @@ export default function DiscoverPage() {
         return overlap;
       });
       
+      setAllProfiles(availableProfiles);
       setProfiles(availableProfiles);
     } catch (error) {
       console.error("Error loading data:", error);
