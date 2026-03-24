@@ -180,15 +180,15 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* Age Range */}
               <div className="mb-8">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  טווח גילאים: <span className="text-[--theme-orange]">{local.minAge}-{local.maxAge}</span>
+                  טווח גילאים: <span className="text-[--theme-orange]">18-{local.maxAge}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
-                    value={[local.minAge, local.maxAge]}
+                    value={[local.maxAge]}
                     min={18}
                     max={50}
                     step={1}
-                    onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
+                    onValueChange={([v]) => setLocal(prev => ({ ...prev, minAge: 18, maxAge: v }))}
                     className="py-3"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
