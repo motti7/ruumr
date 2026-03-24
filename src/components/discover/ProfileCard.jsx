@@ -368,8 +368,8 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 </div>
                             )}
                             {avgRating !== null && (
-                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                    <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
+                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-yellow-400 text-xs font-bold flex items-center gap-1">
+                                    <Star className="w-3 h-3" fill="#facc15" stroke="#facc15" />
                                     {avgRating.toFixed(1)}
                                 </div>
                             )}
