@@ -239,6 +239,22 @@ export default function DiscoverPage() {
     }
   };
 
+  const applyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentIndex(0);
+    const filtered = allProfiles.filter(p => {
+      if (newFilters.cities.length > 0) {
+        const profileCities = p.search_cities || (p.location ? [p.location] : []);
+        const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
+        if (!match) return false;
+      }
+      if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
+      if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
+      return true;
+    });
+    setProfiles(filtered);
+  };
+
   const hasProfiles = profiles.length > 0 && currentIndex < profiles.length;
 
   if (isLoading) {
