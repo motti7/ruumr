@@ -161,24 +161,26 @@ export default function DiscoverFilters({ filters, onChange }) {
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
                   תקציב מקסימלי: <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
-                <Slider
-                  value={[local.maxBudget]}
-                  min={1000}
-                  max={10000}
-                  step={100}
-                  onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
-                  className="py-3"
-                />
-                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>₪1,000</span>
-                  <span>₪10,000</span>
+                <div dir="ltr">
+                  <Slider
+                    value={[local.maxBudget]}
+                    min={1000}
+                    max={10000}
+                    step={100}
+                    onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
+                    className="py-3"
+                  />
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>₪1,000</span>
+                    <span>₪10,000</span>
+                  </div>
                 </div>
               </div>
 
               {/* Age Range */}
               <div className="mb-8">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  טווח גילאים: <span className="text-[--theme-orange]">{local.maxAge}–{local.minAge}</span>
+                  טווח גילאים: <span className="text-[--theme-orange]">{local.minAge}–{local.maxAge}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
@@ -189,10 +191,10 @@ export default function DiscoverFilters({ filters, onChange }) {
                     onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
                     className="py-3"
                   />
-                </div>
-                <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
-                  <span>18</span>
-                  <span>50</span>
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>18</span>
+                    <span>50</span>
+                  </div>
                 </div>
               </div>
 
