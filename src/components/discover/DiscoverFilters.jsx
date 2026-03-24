@@ -151,8 +151,8 @@ export default function DiscoverFilters({ filters, onChange }) {
                   className="py-3"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>18</span>
                   <span>50</span>
+                  <span>18</span>
                 </div>
               </div>
 
