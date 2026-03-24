@@ -16,7 +16,17 @@ function FilterHintButton() {
       onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
       className="hover:scale-110 transition-transform"
     >
-      <SlidersHorizontal className="w-6 h-6 text-[--theme-orange]" />
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Line 1 */}
+        <line x1="3" y1="7" x2="23" y2="7" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
+        <circle cx="9" cy="7" r="3" fill="#FF5722"/>
+        {/* Line 2 */}
+        <line x1="3" y1="13" x2="23" y2="13" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
+        <circle cx="17" cy="13" r="3" fill="#FF5722"/>
+        {/* Line 3 */}
+        <line x1="3" y1="19" x2="23" y2="19" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
+        <circle cx="11" cy="19" r="3" fill="#FF5722"/>
+      </svg>
     </button>
   );
 }
