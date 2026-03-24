@@ -123,17 +123,19 @@ export default function DiscoverFilters({ filters, onChange }) {
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
                   תקציב מקסימלי: <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
-                <Slider
-                  value={[local.maxBudget]}
-                  min={1000}
-                  max={10000}
-                  step={100}
-                  onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
-                  className="py-3"
-                />
+                <div dir="ltr">
+                  <Slider
+                    value={[10000 - local.maxBudget + 1000]}
+                    min={1000}
+                    max={10000}
+                    step={100}
+                    onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: 10000 - v + 1000 }))}
+                    className="py-3"
+                  />
+                </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>₪1,000</span>
                   <span>₪10,000</span>
+                  <span>₪1,000</span>
                 </div>
               </div>
 
