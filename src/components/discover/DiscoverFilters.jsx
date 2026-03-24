@@ -26,7 +26,7 @@ export default function DiscoverFilters({ filters, onChange }) {
   };
 
   const reset = () => {
-    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 34 };
+    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 50 };
     setLocal(defaults);
     setCityInput("");
     onChange(defaults);
