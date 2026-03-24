@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -7,6 +7,12 @@ export default function DiscoverFilters({ filters, onChange }) {
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState(filters);
   const [cityInput, setCityInput] = useState("");
+
+  useEffect(() => {
+    const handler = () => { setLocal(filters); setCityInput(""); setOpen(true); };
+    window.addEventListener('openDiscoverFilters', handler);
+    return () => window.removeEventListener('openDiscoverFilters', handler);
+  }, [filters]);
 
   const activeCount = [
     local.cities?.length > 0,
