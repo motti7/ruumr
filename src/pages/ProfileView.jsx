@@ -3,8 +3,9 @@ import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Loader2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X, Star } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
 import MatchAnimation from '../components/discover/MatchAnimation';
 import ReviewsSection from '../components/reviews/ReviewsSection';
@@ -289,7 +290,11 @@ export default function ProfileViewPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="w-40 h-64 rounded-2xl" />
+          <Skeleton className="w-48 h-4 rounded-full" />
+          <Skeleton className="w-32 h-4 rounded-full" />
+        </div>
       </div>
     );
   }
@@ -336,7 +341,11 @@ export default function ProfileViewPage() {
       </AnimatePresence>
 
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="p-2">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="חזור"
+        >
           <ArrowRight className="w-6 h-6 text-gray-600" />
         </button>
         <h2 className="font-bold text-gray-900 text-lg">{profile.name}</h2>
