@@ -14,8 +14,6 @@ export default function LikesYouPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState(null);
-    const [pullStart, setPullStart] = useState(0);
-    const [pullDistance, setPullDistance] = useState(0);
     const [seenLikeIds, setSeenLikeIds] = useState(() => {
       try { return JSON.parse(localStorage.getItem('roomi_seen_like_ids') || '[]'); } catch { return []; }
     });
