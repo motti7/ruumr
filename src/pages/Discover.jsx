@@ -135,16 +135,16 @@ export default function DiscoverPage() {
 
   }, [currentIndex, profiles]);
 
-  const handleSwipe = async (action) => {
+  const handleSwipe = useCallback(async (action) => {
     if (currentIndex >= profiles.length || !userProfile) return;
 
     const swipedProfile = profiles[currentIndex];
-
-    // Optimistic UI update FIRST
     const prevIndex = currentIndex;
-    setCurrentIndex(prev => prev + 1);
-    setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
+    const optimisticSwipe = { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action };
 
+    // Standardized optimistic UI pattern: update state BEFORE server call
+    setCurrentIndex(prev => prev + 1);
+    setLastSwipes(prev => [...prev, optimisticSwipe]);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
 
@@ -156,81 +156,59 @@ export default function DiscoverPage() {
           swiped_name: swipedProfile.name,
           action
       };
-      
+
       await Swipe.create(swipeData);
 
-      // 2. Check for match - CRITICAL LOGIC!
+      // Check for match only on 'like'
       if (action === 'like') {
-          try {
-              console.log(`🔍 Checking if ${swipedProfile.name} liked me back...`);
+          const reverseSwipes = await Swipe.filter({ 
+              swiper_id: swipedProfile.user_id, 
+              swiped_id: userProfile.user_id, 
+              action: 'like' 
+          });
 
-              // Check if the other person also liked me
-              const reverseSwipes = await Swipe.filter({ 
-                  swiper_id: swipedProfile.user_id, 
-                  swiped_id: userProfile.user_id, 
-                  action: 'like' 
+          if (reverseSwipes?.length > 0) {
+              const existingMatches = await Match.filter({
+                  $or: [
+                      { user1_id: userProfile.user_id, user2_id: swipedProfile.user_id },
+                      { user1_id: swipedProfile.user_id, user2_id: userProfile.user_id }
+                  ]
               });
 
-              console.log(`📊 Found ${reverseSwipes?.length || 0} reverse swipes`);
-
-              if (reverseSwipes && reverseSwipes.length > 0) {
-                  console.log(`💕 IT'S A MATCH! Creating match...`);
-
-                  // It's a match! Check if already exists
-                  const existingMatches = await Match.filter({
-                      $or: [
-                          { user1_id: userProfile.user_id, user2_id: swipedProfile.user_id },
-                          { user1_id: swipedProfile.user_id, user2_id: userProfile.user_id }
-                      ]
+              if (existingMatches.length === 0) {
+                  await Match.create({
+                      user1_id: userProfile.user_id,
+                      user2_id: swipedProfile.user_id,
+                      user1_name: userProfile.name,
+                      user2_name: swipedProfile.name,
+                      status: 'active'
                   });
-
-                  if (existingMatches.length === 0) {
-                      await Match.create({
-                          user1_id: userProfile.user_id,
-                          user2_id: swipedProfile.user_id,
-                          user1_name: userProfile.name,
-                          user2_name: swipedProfile.name,
-                          status: 'active'
-                      });
-                      console.log(`✅ Match created successfully!`);
-                  } else {
-                      console.log(`⏭️ Match already exists in database`);
-                  }
-
-                  // Show animation
-                  setMatchData({ profile1: userProfile, profile2: swipedProfile });
-
-                  // Try to call backend function for emails (optional)
-                  try {
-                      const { base44 } = require('@/api/base44Client');
-                      if (base44.functions?.handleSwipe) {
-                          await base44.functions.handleSwipe({
-                              swiper_id: userProfile.user_id, 
-                              swiped_id: swipedProfile.user_id, 
-                              action,
-                              origin: window.location.origin
-                          });
-                          console.log(`📧 Email notifications sent`);
-                      }
-                  } catch (e) {
-                      console.log("📧 Email notification skipped (match was created)");
-                  }
-              } else {
-                  console.log(`👍 Like saved, waiting for them to like back...`);
               }
-          } catch (matchError) {
-              console.error("❌ CRITICAL ERROR in match detection:", matchError);
-              alert("שגיאה בזיהוי התאמה. אנא צור קשר עם התמיכה.");
+
+              setMatchData({ profile1: userProfile, profile2: swipedProfile });
+
+              // Async email notification (fire-and-forget)
+              try {
+                  const { base44 } = require('@/api/base44Client');
+                  base44.functions?.handleSwipe?.({
+                      swiper_id: userProfile.user_id, 
+                      swiped_id: swipedProfile.user_id, 
+                      action,
+                      origin: window.location.origin
+                  }).catch(() => {});
+              } catch (e) {
+                  // Silent fail for email notifications
+              }
           }
       }
     } catch (error) { 
-        console.error("❌ CRITICAL: Swipe save failed:", error);
-        // Rollback optimistic update
+        console.error("Swipe save failed:", error);
+        // Rollback optimistic update on server failure
         setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
         alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
     }
-  };
+  }, [currentIndex, profiles.length, userProfile]);
   
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
