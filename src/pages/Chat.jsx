@@ -197,9 +197,7 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
-        <button onClick={() => navigate(createPageUrl("Matches"))} className="p-2">
-          <ArrowRight className="w-6 h-6 text-gray-600" />
-        </button>
+        <BackButton className="text-gray-600" />
         <div className="flex items-center gap-3 flex-1">
           <img
             src={otherProfile.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop"}
