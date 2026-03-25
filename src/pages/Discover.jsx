@@ -224,10 +224,11 @@ export default function DiscoverPage() {
           }
       }
     } catch (error) { 
-        console.error("❌ CRITICAL: Swipe save failed:", error); 
+        console.error("❌ CRITICAL: Swipe save failed:", error);
+        // Rollback optimistic update
+        setCurrentIndex(prevIndex);
+        setLastSwipes(prev => prev.slice(0, -1));
         alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
-        // Revert UI since swipe wasn't saved
-        setCurrentIndex(prev => Math.max(0, prev));
     }
   };
   
