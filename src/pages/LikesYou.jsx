@@ -79,14 +79,14 @@ export default function LikesYouPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-                <motion.div
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                    <ThumbsUp className="w-6 h-6 text-white" />
-                </motion.div>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 p-4">
+                <div className="grid grid-cols-2 gap-4 pt-20">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="rounded-xl overflow-hidden">
+                            <Skeleton className="aspect-[3/4]" />
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
