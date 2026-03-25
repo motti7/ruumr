@@ -68,14 +68,15 @@ const ProfileDetail = ({ profile, onClose }) => {
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                    <h4 className="font-bold mb-2 text-white text-lg">קצת עליי</h4>
-                    <p className="text-base text-white/95 leading-relaxed mb-3">{profile.about_me}</p>
+                    <h4 className="font-bold mb-2 text-white text-lg" id="about-section">קצת עליי</h4>
+                    <p className="text-base text-white/95 leading-relaxed mb-3" aria-describedby="about-section">{profile.about_me}</p>
                     {profile.social_link && (
                         <a 
                           href={ensureProtocol(profile.social_link)} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-6 py-3 rounded-full hover:brightness-110 transition-colors shadow-lg mt-2"
+                          aria-label={`בקר בעמוד החברתי של ${profile.name}`}
                         >
                           {getSocialIcon(profile.social_link)}
                           בואו להכיר אותי
@@ -84,8 +85,8 @@ const ProfileDetail = ({ profile, onClose }) => {
                 </div>
                 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                    <h4 className="font-bold mb-2 text-white text-lg">מה אני מחפש/ת</h4>
-                    <p className="text-base text-white/95 leading-relaxed">{profile.looking_for_description}</p>
+                    <h4 className="font-bold mb-2 text-white text-lg" id="looking-section">מה אני מחפש/ת</h4>
+                    <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
