@@ -8,6 +8,8 @@ if (process.env.NODE_ENV === 'development') {
   import('@/lib/accessibilityAudit.js');
   import('@/lib/performanceAudit.js');
   import('@/lib/modalTapTargetAudit.js');
+  import('@/lib/performanceTest.js');
+  import('@/lib/lighthouseAudit.js');
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
