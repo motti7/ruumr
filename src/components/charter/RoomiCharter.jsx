@@ -244,7 +244,8 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
             navigate(-1);
           }
         }}
-        className="absolute top-4 left-4 z-20 w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
+        className="absolute top-4 left-4 z-20 min-w-[44px] min-h-[44px] bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
+        aria-label="סגור"
       >
         <X className="w-6 h-6 text-white" />
       </button>

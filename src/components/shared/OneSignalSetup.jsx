@@ -2,14 +2,23 @@ import { useEffect } from 'react';
 
 export default function OneSignalSetup() {
     useEffect(() => {
-        // Initialize OneSignal
+        // Initialize OneSignal with environment variables
+        const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+        const safariWebId = import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID;
+        
+        // Skip initialization if keys are not configured
+        if (!appId) {
+            console.warn('OneSignal: VITE_ONESIGNAL_APP_ID not configured');
+            return;
+        }
+
         if (typeof window !== 'undefined' && window.OneSignal) {
             window.OneSignal = window.OneSignal || [];
             
             window.OneSignal.push(function() {
                 window.OneSignal.init({
-                    appId: "YOUR_ONESIGNAL_APP_ID", // צריך להחליף ב-App ID אמיתי מ-OneSignal
-                    safari_web_id: "web.onesignal.auto.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                    appId: appId,
+                    safari_web_id: safariWebId || "web.onesignal.auto",
                     notifyButton: {
                         enable: false, // לא מציגים את הכפתור המובנה
                     },
@@ -37,15 +46,23 @@ export const OneSignalHelpers = {
     async sendNotification(userId, title, message, url) {
         // זה צריך להיעשות מהצד server
         // אבל אפשר להשתמש ב-OneSignal REST API
+        const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+        const restApiKey = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
+        
+        if (!appId || !restApiKey) {
+            console.error('OneSignal: Missing VITE_ONESIGNAL_APP_ID or VITE_ONESIGNAL_REST_API_KEY');
+            return null;
+        }
+
         try {
             const response = await fetch('https://onesignal.com/api/v1/notifications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic YOUR_REST_API_KEY' // מפתח REST API מ-OneSignal
+                    'Authorization': `Basic ${restApiKey}`
                 },
                 body: JSON.stringify({
-                    app_id: 'YOUR_ONESIGNAL_APP_ID',
+                    app_id: appId,
                     include_external_user_ids: [userId],
                     headings: { en: title },
                     contents: { en: message },
