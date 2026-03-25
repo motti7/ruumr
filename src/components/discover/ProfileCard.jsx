@@ -89,22 +89,22 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl">
+                <div className="grid grid-cols-2 gap-3" role="list">
+                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">דת</span>
-                        <span className="font-bold text-white text-base">{religionText[profile.religion] || '-'}</span>
+                        <span className="font-bold text-white text-base" aria-label={`דתיות: ${religionText[profile.religion] || 'לא צוין'}`}>{religionText[profile.religion] || '-'}</span>
                     </div>
-                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl">
+                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">וייב</span>
-                        <span className="font-bold text-white text-base">{vibeText[profile.vibe_level - 1] || '-'}</span>
+                        <span className="font-bold text-white text-base" aria-label={`וייב: ${vibeText[profile.vibe_level - 1] || 'לא צוין'}`}>{vibeText[profile.vibe_level - 1] || '-'}</span>
                     </div>
-                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl">
+                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">כשרות</span>
-                        <span className="font-bold text-white text-base">{preferenceText[profile.kosher_preference] || '-'}</span>
+                        <span className="font-bold text-white text-base" aria-label={`כשרות: ${preferenceText[profile.kosher_preference] || 'לא צוין'}`}>{preferenceText[profile.kosher_preference] || '-'}</span>
                     </div>
-                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl">
+                    <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">שבת</span>
-                        <span className="font-bold text-white text-base">{preferenceText[profile.shabbat_preference] || '-'}</span>
+                        <span className="font-bold text-white text-base" aria-label={`שמירת שבת: ${preferenceText[profile.shabbat_preference] || 'לא צוין'}`}>{preferenceText[profile.shabbat_preference] || '-'}</span>
                     </div>
                 </div>
 
