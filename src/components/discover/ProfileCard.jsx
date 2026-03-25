@@ -35,10 +35,14 @@ const ProfileDetail = ({ profile, onClose }) => {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-0 bg-gradient-to-b from-black/50 to-black/80 backdrop-blur-md overflow-y-auto z-[200] pb-24"
             onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`פרטים מלאים של ${profile.name}`}
         >
             <button 
                 onClick={onClose} 
                 className="fixed top-20 left-6 z-[300] p-4 rounded-full bg-white shadow-2xl hover:bg-gray-100 transition-colors"
+                aria-label="סגור פרטים"
             >
                 <X className="text-gray-800 w-7 h-7" />
             </button>
