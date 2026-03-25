@@ -197,15 +197,21 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     const audioRef = useRef(null);
 
     useEffect(() => {
+        if (!isActive) return; // Only load when card is visible
+        
         const loadRating = async () => {
-            const reviews = await base44.entities.Review.filter({ reviewed_id: profile.user_id });
-            if (reviews.length > 0) {
-                const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-                setAvgRating(avg);
+            try {
+                const reviews = await base44.entities.Review.filter({ reviewed_id: profile.user_id });
+                if (reviews.length > 0) {
+                    const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+                    setAvgRating(avg);
+                }
+            } catch (e) {
+                console.error("Failed to load rating:", e);
             }
         };
         loadRating();
-    }, [profile.user_id]);
+    }, [profile.user_id, isActive]);
     
     useEffect(() => {
         if (!audioRef.current || !profile.song_preview_url) return;
