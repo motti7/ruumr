@@ -602,14 +602,18 @@ export default function ProfilePage() {
                 <label className="block text-right font-bold text-gray-700 mb-2">
                   מחפש/ת
                 </label>
-                <Select disabled={!isEditing} value={formData.looking_for_gender} onValueChange={(v) => setFormField('looking_for_gender', v)}>
-                    <SelectTrigger className="w-full bg-white mt-1 border-gray-300 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                    <SelectContent className="bg-white">
-                        <SelectItem value="male" className="text-gray-900">שותף</SelectItem>
-                        <SelectItem value="female" className="text-gray-900">שותפה</SelectItem>
-                        <SelectItem value="any" className="text-gray-900">לא משנה</SelectItem>
-                    </SelectContent>
-                </Select>
+                <BottomSheetSelect
+                    disabled={!isEditing}
+                    value={formData.looking_for_gender}
+                    onValueChange={(v) => setFormField('looking_for_gender', v)}
+                    label="מחפש/ת"
+                    className="mt-1"
+                    options={[
+                      { value: "male", label: "שותף" },
+                      { value: "female", label: "שותפה" },
+                      { value: "any", label: "לא משנה" },
+                    ]}
+                />
             </div>
             <div>
                 <label className="block text-right font-bold text-gray-700 mb-3">
