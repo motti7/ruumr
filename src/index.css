@@ -76,6 +76,8 @@ button:focus-visible {
 
 @layer base {
   :root {
+    --theme-orange: #FF5722;
+    --theme-orange-dark: #E64A19;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
