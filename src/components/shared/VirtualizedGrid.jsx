@@ -30,20 +30,31 @@ export default function VirtualizedGrid({
   containerClassName = 'px-4 py-4',
   emptyState = null,
   overscan = 3,
+  enableVariableHeights = true, // NEW: support variable row heights
 }) {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: overscan * columns });
   const [containerWidth, setContainerWidth] = useState(0);
+  const [itemHeights, setItemHeights] = useState({}); // NEW: track individual item heights
 
   // Calculate item width based on columns and container width
   const itemWidth = containerWidth > 0 ? (containerWidth - gap * (columns - 1)) / columns : 0;
 
-  // Calculate row height including gap
-  const rowHeight = itemHeight + gap;
+  // NEW: Calculate dynamic average height from actual rendered items
+  const getAverageHeight = () => {
+    if (!enableVariableHeights || Object.keys(itemHeights).length === 0) {
+      return itemHeight + gap;
+    }
+    const heights = Object.values(itemHeights);
+    const sum = heights.reduce((a, b) => a + b, 0);
+    return (sum / heights.length) + gap;
+  };
 
-  // Total rows needed
+  const dynamicRowHeight = getAverageHeight();
+
+  // Total rows needed (based on dynamic height)
   const totalRows = Math.ceil(items.length / columns);
-  const totalHeight = totalRows * rowHeight;
+  const totalHeight = totalRows * dynamicRowHeight;
 
   // Handle scroll to update visible range
   const handleScroll = useCallback(() => {
