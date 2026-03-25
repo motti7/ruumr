@@ -276,32 +276,34 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     
     const controls = useAnimation();
 
-    // Memoize the media array to avoid rebuilding on every render
+    const isVideoUrl = useCallback((url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url), []);
+
     const media = useMemo(() => {
         const regularPhotos = profile.photos?.filter(p => p) || [];
-        const apartmentPhotos =
-            profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p)
-                ? profile.apartment_photos.filter(p => p)
-                : [];
+        const apartmentPhotos = profile.current_status === 'has_apartment'
+            ? (profile.apartment_photos?.filter(p => p) || [])
+            : [];
 
-        const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
-
-        let all = regularPhotos.map(item =>
+        let allMedia = regularPhotos.map(item =>
             typeof item === 'string'
                 ? (isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item })
                 : item
         );
 
-        if (profile.video_url) all.splice(1, 0, { type: 'video', url: profile.video_url });
+        if (profile.video_url) {
+            allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
+        }
 
-        all = [...all, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
-        return all;
-    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status]);
+        allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
+        return allMedia;
+    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status, isVideoUrl]);
 
-    // Preload all images for this profile into the central cache
+    // Preload adjacent images via the cache service
     useEffect(() => {
-        const urls = media.filter(m => m.type === 'image').map(m => m.url);
-        preloadImages(urls, 'low');
+        const imageUrls = media
+            .filter(m => m.type === 'image')
+            .map(m => m.url);
+        preloadImages(imageUrls, 'low');
     }, [media]);
 
     const handleDragEnd = useCallback(async (event, info) => {
@@ -317,9 +319,9 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
         } else {
             controls.start({ x: 0 });
         }
-    }, [controls, onSwipe]);
+    };
 
-    const handleTap = useCallback((e) => {
+    const handleTap = (e) => {
         // Ignore tap if expanded or not active
         if (!isActive || isExpanded) return;
 
