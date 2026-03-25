@@ -7,6 +7,7 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
+import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function LikesYouPage() {
     const [profiles, setProfiles] = useState([]);
@@ -54,28 +55,7 @@ export default function LikesYouPage() {
         setIsRefreshing(false);
     };
 
-    const handleTouchStart = (e) => {
-        if (window.scrollY === 0) {
-            setPullStart(e.touches[0].clientY);
-        }
-    };
 
-    const handleTouchMove = (e) => {
-        if (pullStart > 0 && window.scrollY === 0) {
-            const distance = e.touches[0].clientY - pullStart;
-            if (distance > 0) {
-                setPullDistance(Math.min(distance, 100));
-            }
-        }
-    };
-
-    const handleTouchEnd = () => {
-        if (pullDistance > 60) {
-            handleRefresh();
-        }
-        setPullStart(0);
-        setPullDistance(0);
-    };
 
     if (isLoading) {
         return (
@@ -92,38 +72,8 @@ export default function LikesYouPage() {
     }
 
     return (
-        <div 
-            className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" 
-            dir="rtl"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        >
-            {pullDistance > 0 && (
-                <div 
-                    className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 transition-opacity"
-                    style={{ opacity: pullDistance / 60 }}
-                >
-                    <motion.div
-                        className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
-                        animate={{ rotate: pullDistance * 3.6 }}
-                    >
-                        <ThumbsUp className="w-4 h-4 text-white" />
-                    </motion.div>
-                </div>
-            )}
-            {isRefreshing && (
-                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-                    <motion.div
-                        className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                        <ThumbsUp className="w-4 h-4 text-white" />
-                    </motion.div>
-                </div>
-            )}
-            <div className="sticky top-16 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 flex flex-col" dir="rtl">
+            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white">לייקים</h1>
                     <button 
@@ -153,49 +103,50 @@ export default function LikesYouPage() {
                 </div>
             )}
 
-            <div className="px-4 grid grid-cols-2 gap-4">
-                {profiles.length === 0 && !error ? (
-                    <div className="col-span-2 text-center py-20">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ThumbsUp className="w-10 h-10 text-gray-300" />
+            <PullToRefresh onRefresh={handleRefresh}>
+                <div className="px-4 grid grid-cols-2 gap-4">
+                    {profiles.length === 0 && !error ? (
+                        <div className="col-span-2 text-center py-20">
+                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ThumbsUp className="w-10 h-10 text-gray-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">עדיין אין לייקים</h3>
+                            <p className="text-gray-500 dark:text-gray-400">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">עדיין אין לייקים</h3>
-                        <p className="text-gray-500 dark:text-gray-400">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
-                    </div>
-                ) : (
-                    profiles.map((profile, i) => (
-                        <motion.div 
-                            key={profile.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Mark like as seen
-                                const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
-                                setSeenLikeIds(newSeen);
-                                localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
-                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
-                            }}
-                        >
-                             <div className="aspect-[3/4] relative">
-                                 <SmartImage 
-                                     src={profile.photos?.[0]} 
-                                     className="w-full h-full" 
-                                     alt={profile.name}
-                                     priority={true}
-                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
-                                    <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
-                                    <p className="text-white/80 text-xs">{profile.location}</p>
-                                </div>
-                             </div>
-                             {/* Blur effect if not premium? Na, let's show them. */}
-                        </motion.div>
-                    ))
-                )}
-            </div>
+                    ) : (
+                        profiles.map((profile, i) => (
+                            <motion.div 
+                                key={profile.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    // Mark like as seen
+                                    const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
+                                    setSeenLikeIds(newSeen);
+                                    localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
+                                    navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
+                                }}
+                            >
+                                 <div className="aspect-[3/4] relative">
+                                     <SmartImage 
+                                         src={profile.photos?.[0]} 
+                                         className="w-full h-full" 
+                                         alt={profile.name}
+                                         priority={true}
+                                     />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                                        <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
+                                        <p className="text-white/80 text-xs">{profile.location}</p>
+                                    </div>
+                                 </div>
+                            </motion.div>
+                        ))
+                    )}
+                </div>
+            </PullToRefresh>
         </div>
     );
 }
