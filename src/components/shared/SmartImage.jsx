@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Loader2, ImageOff } from "lucide-react";
 import { getCacheStatus, preloadImage } from "@/lib/imageCache";
 
 /**
- * SmartImage — image renderer backed by the central imageCache service.
- * If the URL is already in the cache it renders instantly (no flash).
- * Otherwise it triggers a load, shows a skeleton, then fades in.
- * 
- * Import Skeleton if you want skeletal loading indicator:
- * import { Skeleton } from '@/components/ui/skeleton';
+ * SmartImage — image renderer with Intersection Observer lazy loading.
+ * Only loads images when within 200px of viewport (significant low-memory savings).
+ * Backed by central imageCache service for instant rendering.
  */
 export default function SmartImage({
     src,
@@ -21,9 +18,30 @@ export default function SmartImage({
 }) {
     const initialStatus = src ? (getCacheStatus(src) ?? 'loading') : 'error';
     const [status, setStatus] = useState(initialStatus);
+    const [isInViewport, setIsInViewport] = useState(priority); // Priority images always load
+    const containerRef = useRef(null);
 
+    // Intersection Observer: trigger load only when 200px near viewport
     useEffect(() => {
-        if (!src) { setStatus('error'); return; }
+        if (priority || !containerRef.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsInViewport(true);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { rootMargin: '200px' }
+        );
+
+        observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, [priority]);
+
+    // Load image only if in viewport or priority
+    useEffect(() => {
+        if (!src || !isInViewport) return;
 
         const cached = getCacheStatus(src);
         if (cached === 'loaded') { setStatus('loaded'); return; }
@@ -34,7 +52,7 @@ export default function SmartImage({
             const result = getCacheStatus(src);
             setStatus(result === 'loaded' ? 'loaded' : 'error');
         });
-    }, [src, priority]);
+    }, [src, isInViewport, priority]);
 
     if (!src || status === 'error') {
         return (
