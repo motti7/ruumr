@@ -1,43 +1,34 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin, Puzzle } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-export default function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
-  const handleProfileClick = (e) => {
+const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
+  const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
     onClickProfile();
-  };
+  }, [onClickProfile]);
 
-  const handleChatClick = (e) => {
+  const handleCharterClick = useCallback(async (e) => {
     e.stopPropagation();
-    onClickChat();
-  };
-
-  const handleCharterClick = async (e) => {
-    e.stopPropagation();
-    
     try {
       const { base44 } = require('@/api/base44Client');
       const { User } = require('@/entities/User');
       const user = await User.me();
-      
-      const myAnswers = await base44.entities.CharterAnswer.filter({ 
+      const myAnswers = await base44.entities.CharterAnswer.filter({
         match_id: matchId,
         user_id: user.id
       });
-      
       if (myAnswers && myAnswers.length >= 8) {
         onClickChat();
         return;
       }
-      
       onClickCharter();
     } catch (error) {
       console.error('Charter check error:', error);
       onClickCharter();
     }
-  };
+  }, [matchId, onClickChat, onClickCharter]);
 
   return (
     <motion.div
@@ -57,9 +48,8 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
               priority={false}
             />
           </div>
-          {/* Online status removed */}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-gray-900 text-lg mb-1">{match.name}</h3>
           <div className="flex items-center text-gray-500 text-sm mb-2">
@@ -70,12 +60,12 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
             <span>תקציב: ₪{match.budget_max?.toLocaleString()}</span>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
-          <motion.div 
+          <motion.div
             whileTap={{ scale: 0.85 }}
             onClick={handleCharterClick}
-            className="text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md"
+            className="text-white bg-[--theme-orange] dark:bg-orange-500 p-3 rounded-full hover:brightness-110 transition-all shadow-md"
           >
             <Puzzle className="w-5 h-5" />
           </motion.div>
@@ -83,4 +73,6 @@ export default function MatchCard({ match, isOnline, onClickProfile, onClickChat
       </div>
     </motion.div>
   );
-}
+});
+
+export default MatchCard;
