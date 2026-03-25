@@ -244,12 +244,14 @@ export default function Layout({ children, currentPageName }) {
                             </Link>
                         </div>
                         <div className="flex-1 flex items-center justify-end gap-2">
-                            {currentPageName === 'Discover' && (
-                                <FilterHintButton />
-                            )}
                             <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
                                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                             </Link>
+                        </div>
+                        <div className="flex-1 flex items-center justify-start gap-2">
+                            {currentPageName === 'Discover' && (
+                                <FilterHintButton />
+                            )}
                         </div>
                     </div>
                 </header>
