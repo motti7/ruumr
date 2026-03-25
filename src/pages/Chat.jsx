@@ -155,6 +155,15 @@ export default function ChatPage() {
     }, 3000);
   };
 
+  // Optimistic mutation for sending messages
+  const messageMutation = useMutationWithOptimistic(
+    (messageData) => Message.create(messageData),
+    {
+      queryKey: ['chat', matchIdRef.current],
+      updateFn: (oldMessages = [], newMessage) => [...oldMessages, newMessage],
+    }
+  );
+
   const handleSendMessage = async () => {
     const messageContent = newMessage.trim();
     if (!messageContent || !match || !user) return;
@@ -166,21 +175,17 @@ export default function ChatPage() {
       typingStatusIdRef.current = null;
     }
 
-    // Optimistic UI: add a temporary message
-    const tempId = `temp_${Date.now()}`;
-    const optimisticMsg = { id: tempId, match_id: match.id, sender_id: user.id, content: messageContent, is_read: false, _pending: true };
-    setMessages(prev => [...prev, optimisticMsg]);
     setNewMessage("");
 
     try {
-      const createdMessage = await Message.create({ match_id: match.id, sender_id: user.id, content: messageContent, is_read: false });
-      // Replace temp message with real one
-      setMessages(prev => prev.map(m => m.id === tempId ? createdMessage : m));
+      await messageMutation.mutateAsync({
+        match_id: match.id,
+        sender_id: user.id,
+        content: messageContent,
+        is_read: false,
+      });
     } catch (error) {
       console.error("Error sending message:", error);
-      // Rollback: remove optimistic message and restore input
-      setMessages(prev => prev.filter(m => m.id !== tempId));
-      setNewMessage(messageContent);
     }
   };
 
