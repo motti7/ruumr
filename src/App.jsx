@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
@@ -11,11 +11,19 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import GroupTracker from './pages/GroupTracker';
-import GroupCompatibility from './pages/GroupCompatibility';
-import GroupChat from './pages/GroupChat';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
+
+// Lazy-load heavy pages for route-based code splitting
+const GroupTracker = lazy(() => import('./pages/GroupTracker'));
+const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
+const GroupChat = lazy(() => import('./pages/GroupChat'));
+
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-white">
+    <div className="w-8 h-8 border-4 border-gray-200 border-t-[#FF5722] rounded-full animate-spin" />
+  </div>
+);
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
