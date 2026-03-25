@@ -180,12 +180,12 @@ export default function LikesYouPage() {
                             }}
                         >
                              <div className="aspect-[3/4] relative">
-                                <SmartImage 
-                                    src={profile.photos?.[0]} 
-                                    className="w-full h-full" 
-                                    alt={profile.name}
-                                    priority={false}
-                                />
+                                 <SmartImage 
+                                     src={profile.photos?.[0]} 
+                                     className="w-full h-full" 
+                                     alt={profile.name}
+                                     priority={true}
+                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
                                     <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
                                     <p className="text-white/80 text-xs">{profile.location}</p>
