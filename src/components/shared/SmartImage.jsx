@@ -56,14 +56,14 @@ export default function SmartImage({
 
     if (!src || status === 'error') {
         return (
-            <div className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`}>
+            <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`}>
                 <ImageOff className="w-8 h-8 text-gray-300" />
             </div>
         );
     }
 
     return (
-        <div className={`relative overflow-hidden bg-gray-100 ${className}`} onClick={onClick}>
+        <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 ${className}`} onClick={onClick}>
             {status === 'loading' && (
                 showSkeleton ? (
                     <div className="absolute inset-0 z-0">
