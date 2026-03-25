@@ -140,11 +140,15 @@ export default function DiscoverPage() {
 
     const swipedProfile = profiles[currentIndex];
 
+    // Optimistic UI update FIRST
+    const prevIndex = currentIndex;
+    setCurrentIndex(prev => prev + 1);
+    setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
+
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
 
     try {
-      // 1. ALWAYS Create Swipe Entity First (CRITICAL - must not fail!)
       const swipeData = {
           swiper_id: userProfile.user_id,
           swiper_name: userProfile.name,
@@ -154,11 +158,6 @@ export default function DiscoverPage() {
       };
       
       await Swipe.create(swipeData);
-      console.log("✅ Swipe saved successfully:", swipeData);
-
-      // Optimistic UI update
-      setCurrentIndex(prev => prev + 1);
-      setLastSwipes(prev => [...prev, { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action }]);
 
       // 2. Check for match - CRITICAL LOGIC!
       if (action === 'like') {
