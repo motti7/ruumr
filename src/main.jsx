@@ -3,6 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
+// Register audit tools in development
+if (process.env.NODE_ENV === 'development') {
+  import('@/lib/accessibilityAudit.js');
+  import('@/lib/performanceAudit.js');
+  import('@/lib/modalTapTargetAudit.js');
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
   <App />
@@ -17,6 +24,3 @@ if (import.meta.hot) {
     window.parent?.postMessage({ type: 'sandbox:afterUpdate' }, '*');
   });
 }
-
-
-

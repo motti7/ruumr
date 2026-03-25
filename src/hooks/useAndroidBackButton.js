@@ -5,10 +5,41 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const ROOT_PATHS = ['/', '/Discover', '/Matches', '/LikesYou', '/GroupTracker'];
 
 /**
- * Handles Android hardware back button via the popstate event with robust state drift prevention.
- * - On root screens: minimizes the app (history.go(-1) exits PWA/WebView)
+ * Native Android back handler bridge
+ * Communicates with native WebView/PWA via window.AndroidBridge or postMessage
+ */
+class AndroidBackBridge {
+  static isNativeAndroid() {
+    return typeof window !== 'undefined' && (
+      window.AndroidBridge !== undefined ||
+      window.webkit?.messageHandlers?.androidBack !== undefined
+    );
+  }
+
+  static onBackPress() {
+    if (window.AndroidBridge?.onBackPress) {
+      window.AndroidBridge.onBackPress();
+    } else if (window.webkit?.messageHandlers?.androidBack) {
+      window.webkit.messageHandlers.androidBack.postMessage({});
+    } else if (window.parent && window.parent !== window) {
+      // Fallback: postMessage to parent frame (e.g., Capacitor)
+      window.parent.postMessage({ type: 'androidBackPress' }, '*');
+    }
+  }
+
+  static registerBackHandler(callback) {
+    if (window.AndroidBridge) {
+      window.AndroidBridge.registerBackHandler = callback;
+    }
+  }
+}
+
+/**
+ * Handles Android hardware back button via popstate event with native Android integration.
+ * - Communicates with native Android via AndroidBridge
+ * - On root screens: calls native back handler (minimizes app / exits WebView)
  * - On other screens: navigates back in history
- * - Accepts an optional `onBack` override (e.g. to close a modal first)
+ * - Accepts optional `onBack` override (e.g. to close a modal first)
  * - Guards against state drift by tracking call order and preventing double-handling
  */
 export default function useAndroidBackButton(onBack = null) {
@@ -16,6 +47,7 @@ export default function useAndroidBackButton(onBack = null) {
   const location = useLocation();
   const isHandlingRef = useRef(false);
   const lastPathRef = useRef(null);
+  const isNativeAndroidRef = useRef(AndroidBackBridge.isNativeAndroid());
 
   useEffect(() => {
     // Push a state so we can intercept the back press
@@ -38,8 +70,11 @@ export default function useAndroidBackButton(onBack = null) {
         const isRoot = ROOT_PATHS.includes(location.pathname);
 
         if (isRoot) {
-          // On root screen — minimize app (don't re-push, let it close)
-          // For WebView/TWA this exits; for browser it goes back in history naturally
+          // On root screen — call native handler (minimizes app / exits WebView)
+          if (isNativeAndroidRef.current) {
+            AndroidBackBridge.onBackPress();
+          }
+          // For non-native environments, natural history.back() is sufficient
         } else {
           // Verify path state consistency before navigating
           if (lastPathRef.current === location.pathname) {
