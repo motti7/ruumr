@@ -274,7 +274,7 @@ export default function Layout({ children, currentPageName }) {
                         <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center py-2 px-3 transition-colors duration-200 select-none ${
+                            className={`flex flex-col items-center py-2 px-3 min-h-[44px] justify-center transition-colors duration-200 select-none ${
                                 isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
                             } relative`}
                             >
