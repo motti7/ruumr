@@ -103,48 +103,47 @@ export default function LikesYouPage() {
             )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-                <div className="px-4 grid grid-cols-2 gap-4">
-                    {profiles.length === 0 && !error ? (
-                        <div className="col-span-2 text-center py-20">
-                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <VirtualizedGrid
+                    items={profiles}
+                    columns={2}
+                    itemHeight={380}
+                    gap={16}
+                    renderItem={(profile) => (
+                        <div
+                            className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // Mark like as seen
+                                const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
+                                setSeenLikeIds(newSeen);
+                                localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
+                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
+                            }}
+                        >
+                            <div className="aspect-[3/4] relative">
+                                <SmartImage 
+                                    src={profile.photos?.[0]} 
+                                    className="w-full h-full" 
+                                    alt={profile.name}
+                                    priority={false}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                                    <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
+                                    <p className="text-white/80 text-xs">{profile.location}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    emptyState={
+                        <div className="col-span-2 text-center py-20 px-4">
+                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <ThumbsUp className="w-10 h-10 text-gray-300" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">עדיין אין לייקים</h3>
                             <p className="text-gray-500 dark:text-gray-400">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
                         </div>
-                    ) : (
-                        profiles.map((profile, i) => (
-                            <motion.div 
-                                key={profile.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // Mark like as seen
-                                    const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
-                                    setSeenLikeIds(newSeen);
-                                    localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
-                                    navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
-                                }}
-                            >
-                                 <div className="aspect-[3/4] relative">
-                                     <SmartImage 
-                                         src={profile.photos?.[0]} 
-                                         className="w-full h-full" 
-                                         alt={profile.name}
-                                         priority={true}
-                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
-                                        <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
-                                        <p className="text-white/80 text-xs">{profile.location}</p>
-                                    </div>
-                                 </div>
-                            </motion.div>
-                        ))
-                    )}
-                </div>
+                    }
+                />
             </PullToRefresh>
         </div>
     );
