@@ -250,7 +250,7 @@ export default function Layout({ children, currentPageName }) {
                                     <FilterHintButton />
                                 </div>
                             )}
-                            <Link to={createPageUrl("Profile")} className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
+                            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
                                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                             </Link>
                         </div>
