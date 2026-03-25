@@ -6,6 +6,9 @@ import { getCacheStatus, preloadImage } from "@/lib/imageCache";
  * SmartImage — image renderer backed by the central imageCache service.
  * If the URL is already in the cache it renders instantly (no flash).
  * Otherwise it triggers a load, shows a skeleton, then fades in.
+ * 
+ * Import Skeleton if you want skeletal loading indicator:
+ * import { Skeleton } from '@/components/ui/skeleton';
  */
 export default function SmartImage({
     src,
@@ -13,6 +16,7 @@ export default function SmartImage({
     className = "",
     priority = false,
     onClick,
+    showSkeleton = false,
     ...props
 }) {
     const initialStatus = src ? (getCacheStatus(src) ?? 'loading') : 'error';
@@ -43,9 +47,16 @@ export default function SmartImage({
     return (
         <div className={`relative overflow-hidden bg-gray-100 ${className}`} onClick={onClick}>
             {status === 'loading' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse z-0">
-                    <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                </div>
+                showSkeleton ? (
+                    <div className="absolute inset-0 z-0">
+                        {/* Skeleton component should be imported by parent if used */}
+                        <div className="w-full h-full animate-pulse bg-gray-200" />
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse z-0">
+                        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                    </div>
+                )
             )}
             <img
                 src={src}
