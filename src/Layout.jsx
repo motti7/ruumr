@@ -239,13 +239,11 @@ export default function Layout({ children, currentPageName }) {
                             <WriteReviewButton />
                         </div>
                         <Link to={createPageUrl("Discover")} className="select-none">
-                             <h1 className="text-3xl logo-font">ruumr</h1>
+                             <h1 className="text-4xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent drop-shadow-lg" style={{textShadow: '0 2px 8px rgba(255, 87, 34, 0.3)'}}>ruumr</h1>
                         </Link>
-                        <div className="flex items-center gap-0">
+                        <div className="flex items-center gap-2">
                             {currentPageName === 'Discover' && (
-                                <div className="mr-6">
-                                    <FilterHintButton />
-                                </div>
+                                <FilterHintButton />
                             )}
                             <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
                                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
