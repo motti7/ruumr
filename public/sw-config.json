@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "precachePaths": [
+    "/index.html",
+    "/",
+    "/favicon.ico",
+    "/manifest.json"
+  ],
+  "networkFirstPaths": [
+    "/api/",
+    "/functions/",
+    "/entities/"
+  ],
+  "cacheFirstPaths": [
+    "/images/",
+    "/fonts/"
+  ],
+  "staleWhileRevalidatePaths": [
+    "/data/"
+  ],
+  "cacheStrategy": {
+    "maxAge": 2592000000,
+    "maxItems": 500,
+    "indexedDBExpiry": 604800000
+  },
+  "offlineAssets": {
+    "fallbackIcon": "/favicon.ico",
+    "fallbackImage": "/placeholder.png",
+    "offlineHtmlFallback": "<!DOCTYPE html><html><body><h1>Offline Mode</h1><p>App cache available</p></body></html>"
+  },
+  "compression": {
+    "images": true,
+    "enableBrotli": true,
+    "minSizeForCompression": 1024
+  }
+}
