@@ -463,7 +463,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
             }
         } else if (profile.current_status === 'has_apartment') {
              return (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-24 pointer-events-none">
                     <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
                         <Home className="w-5 h-5 ml-2" />
                         תמונת הדירה שלי
