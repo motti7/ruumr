@@ -378,14 +378,16 @@ export default function ProfilePage() {
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">מגדר</label>
                   {isEditing ? (
-                    <Select value={formData.gender} onValueChange={(v) => setFormField('gender', v)}>
-                      <SelectTrigger className="w-full text-right bg-white" dir="rtl"><SelectValue/></SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="male" className="bg-white hover:bg-gray-100 focus:bg-gray-100">זכר</SelectItem>
-                        <SelectItem value="female" className="bg-white hover:bg-gray-100 focus:bg-gray-100">נקבה</SelectItem>
-                        <SelectItem value="other" className="bg-white hover:bg-gray-100 focus:bg-gray-100">אחר</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <BottomSheetSelect
+                      value={formData.gender}
+                      onValueChange={(v) => setFormField('gender', v)}
+                      label="מגדר"
+                      options={[
+                        { value: "male", label: "זכר" },
+                        { value: "female", label: "נקבה" },
+                        { value: "other", label: "אחר" },
+                      ]}
+                    />
                   ) : (
                      <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? 'זכר' : 'נקבה'}</p>
                   )}
