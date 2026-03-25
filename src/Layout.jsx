@@ -236,9 +236,6 @@ export default function Layout({ children, currentPageName }) {
                             <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
                                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
                             </Link>
-                            {currentPageName === 'Discover' && (
-                                <FilterHintButton />
-                            )}
                         </div>
                         <Link to={createPageUrl("Discover")} className="select-none flex-1 flex justify-center">
                              <h1 className="text-4xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent drop-shadow-lg" style={{textShadow: '0 2px 8px rgba(255, 87, 34, 0.3)'}}>ruumr</h1>
