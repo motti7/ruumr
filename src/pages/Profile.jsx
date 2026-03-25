@@ -723,13 +723,17 @@ export default function ProfilePage() {
                 <label className="block text-right font-bold text-gray-700 mb-2">
                   סטטוס דירה
                 </label>
-                <Select disabled={!isEditing} value={formData.current_status} onValueChange={(v) => setFormField('current_status', v)}>
-                    <SelectTrigger className="w-full bg-white mt-1 border-gray-300 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                    <SelectContent className="bg-white">
-                        <SelectItem value="seeking_apartment" className="text-gray-900">מחפש/ת דירה</SelectItem>
-                        <SelectItem value="has_apartment" className="text-gray-900">יש לי דירה</SelectItem>
-                    </SelectContent>
-                </Select>
+                <BottomSheetSelect
+                     disabled={!isEditing}
+                     value={formData.current_status}
+                     onValueChange={(v) => setFormField('current_status', v)}
+                     label="סטטוס דירה"
+                     className="mt-1"
+                     options={[
+                       { value: "seeking_apartment", label: "מחפש/ת דירה" },
+                       { value: "has_apartment", label: "יש לי דירה" },
+                     ]}
+                 />
             </div>
 
             {formData.current_status === 'has_apartment' && (
