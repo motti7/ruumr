@@ -101,8 +101,18 @@ export default function VirtualizedGrid({
 
   // Create grid layout with spacer divs
   const visibleItems = items.slice(visibleRange.start, visibleRange.end);
-  const topSpacerHeight = Math.floor(visibleRange.start / columns) * rowHeight;
-  const bottomSpacerHeight = Math.max(0, (totalRows - Math.ceil(visibleRange.end / columns)) * rowHeight);
+  const topSpacerHeight = Math.floor(visibleRange.start / columns) * dynamicRowHeight;
+  const bottomSpacerHeight = Math.max(0, (totalRows - Math.ceil(visibleRange.end / columns)) * dynamicRowHeight);
+
+  // NEW: Callback to measure item height when rendered
+  const handleItemMeasure = useCallback((index, height) => {
+    if (enableVariableHeights && height > 0) {
+      setItemHeights(prev => {
+        if (prev[index] === height) return prev;
+        return { ...prev, [index]: height };
+      });
+    }
+  }, [enableVariableHeights]);
 
   return (
     <div ref={containerRef} className={containerClassName}>
