@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
