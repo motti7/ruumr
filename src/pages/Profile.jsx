@@ -652,7 +652,7 @@ export default function ProfilePage() {
                 <label className="block text-right font-bold text-gray-700 mb-3">
                   וייב: <span className="text-[--theme-orange] font-black text-lg">{vibeText[formData.vibe_level-1] || 'מאוזן'}</span>
                 </label>
-                <div className="px-2">
+                <div className="px-2 py-3">
                   <div className="relative">
                     <input
                       type="range"
@@ -678,6 +678,19 @@ export default function ProfilePage() {
                         cursor: pointer;
                         border: 3px solid white;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        padding: 10px;
+                      }
+                      input[type="range"]::-webkit-slider-thumb::before {
+                        content: "";
+                        position: absolute;
+                        width: 44px;
+                        height: 44px;
+                        background: transparent;
+                        border-radius: 50%;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        pointer-events: auto;
                       }
                       input[type="range"]::-moz-range-thumb {
                         width: 24px;
@@ -687,6 +700,11 @@ export default function ProfilePage() {
                         cursor: pointer;
                         border: 3px solid white;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        padding: 10px;
+                      }
+                      /* Invisible expanded hit area */
+                      input[type="range"] {
+                        margin: 11px 0;
                       }
                     `}</style>
                   </div>
