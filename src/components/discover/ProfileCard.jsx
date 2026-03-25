@@ -545,7 +545,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 (currentPhotoIndex === 1 && !profile.video_url) || // וייב badge
                                 (currentPhotoIndex === 2 && profile.video_url) // וייב badge (shifted by video)
                             );
-                            return hasBadge ? '72px' : '16px';
+                            return hasBadge ? '64px' : '12px';
                         })() }}
                         aria-label="View Profile Info"
                     >
