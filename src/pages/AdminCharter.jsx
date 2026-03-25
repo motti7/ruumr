@@ -120,14 +120,6 @@ export default function AdminCharterPage() {
                       </td>
                     );
                   })}
-                <td className="px-3 py-3 text-center flex gap-2 justify-center">
-                  <button className="px-3 py-3 bg-yellow-400 text-gray-900 font-bold text-xs rounded-full whitespace-nowrap hover:bg-yellow-500 transition-colors">
-                    Vibe Check 🎯
-                  </button>
-                  <button className="px-3 py-3 bg-gray-900 text-white font-bold text-xs rounded-full whitespace-nowrap hover:bg-gray-800 transition-colors">
-                    צ'אט 💬
-                  </button>
-                </td>
                 </tr>
               ))}
             </tbody>
