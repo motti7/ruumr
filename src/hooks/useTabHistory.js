@@ -1,7 +1,11 @@
 /**
- * Stack-based navigation history per tab with state drift protection.
- * Each root tab maintains its own history stack so that switching tabs
- * and pressing back returns you to where you were within that tab.
+ * Enhanced stack-based navigation history with independent state preservation per tab.
+ * Each root tab maintains:
+ *   - Navigation stack (routes visited within tab)
+ *   - Scroll position (Y offset for each route)
+ *   - Route depth (breadcrumb level)
+ * 
+ * When switching tabs and returning, scroll position & depth are restored automatically.
  * Includes safeguards against concurrent state mutations.
  */
 import { useEffect, useRef } from 'react';
@@ -9,12 +13,48 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const TAB_ROOTS = ['/Discover', '/Matches', '/LikesYou', '/GroupTracker', '/'];
 
-// Shared stacks object (module-level, survives re-renders)
-const tabStacks = {};
+// Enhanced tab state: { stack: [], scrollPositions: {}, routeDepths: {} }
+const tabStates = {};
 const stackMutexRef = { locked: false };
 
 function getTabRoot(pathname) {
   return TAB_ROOTS.find(root => pathname === root || pathname.startsWith(root + '?')) ?? null;
+}
+
+function initializeTabState(tabRoot) {
+  if (!tabStates[tabRoot]) {
+    tabStates[tabRoot] = {
+      stack: [],
+      scrollPositions: {}, // route => scrollY
+      routeDepths: {},     // route => depth
+    };
+  }
+}
+
+function saveScrollPosition(route, scrollY) {
+  const root = getTabRoot(route);
+  if (root) {
+    initializeTabState(root);
+    tabStates[root].scrollPositions[route] = scrollY;
+  }
+}
+
+function getScrollPosition(route) {
+  const root = getTabRoot(route);
+  return root ? (tabStates[root]?.scrollPositions[route] ?? 0) : 0;
+}
+
+function setRouteDepth(route, depth) {
+  const root = getTabRoot(route);
+  if (root) {
+    initializeTabState(root);
+    tabStates[root].routeDepths[route] = depth;
+  }
+}
+
+function getRouteDepth(route) {
+  const root = getTabRoot(route);
+  return root ? (tabStates[root]?.routeDepths[route] ?? 0) : 0;
 }
 
 export default function useTabHistory() {
@@ -22,13 +62,24 @@ export default function useTabHistory() {
   const navigate = useNavigate();
   const prevPathRef = useRef(null);
   const isMountedRef = useRef(true);
+  const scrollTimerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
+      clearTimeout(scrollTimerRef.current);
     };
   }, []);
 
+  // Save scroll position before navigating away
+  useEffect(() => {
+    return () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      saveScrollPosition(location.pathname, scrollY);
+    };
+  }, [location.pathname]);
+
+  // Restore scroll position when returning to a route
   useEffect(() => {
     if (!isMountedRef.current) return;
 
@@ -40,29 +91,38 @@ export default function useTabHistory() {
     stackMutexRef.locked = true;
 
     try {
-      // Determine if we're entering a tab root
       const currentRoot = getTabRoot(current);
       const prevRoot = prev ? getTabRoot(prev) : null;
 
       if (currentRoot) {
-        // We just landed on a tab root — initialize or reset stack
-        if (!tabStacks[currentRoot]) tabStacks[currentRoot] = [];
-        tabStacks[currentRoot] = [current];
-      } else if (prev && prevRoot === null) {
-        // Navigating deeper from within a tab — push to the active tab stack
-        const activeTab = TAB_ROOTS.find(root =>
-          prev === root || (tabStacks[root] && tabStacks[root].includes(prev))
-        );
-        if (activeTab) {
-          if (!tabStacks[activeTab]) tabStacks[activeTab] = [];
-          // Prevent duplicate entries
-          if (tabStacks[activeTab][tabStacks[activeTab].length - 1] !== current) {
-            tabStacks[activeTab].push(current);
-          }
+        initializeTabState(currentRoot);
+        const state = tabStates[currentRoot];
+
+        if (!state.stack.includes(current)) {
+          state.stack = [current];
+          setRouteDepth(current, 0);
+        }
+      } else if (prev && prevRoot) {
+        initializeTabState(prevRoot);
+        const state = tabStates[prevRoot];
+
+        // Navigating deeper from within a tab
+        if (!state.stack.includes(current)) {
+          state.stack.push(current);
+          setRouteDepth(current, state.stack.length - 1);
         }
       }
 
       prevPathRef.current = current;
+
+      // Restore scroll position after route renders
+      clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          const savedScrollY = getScrollPosition(current);
+          window.scrollTo(0, savedScrollY);
+        }
+      }, 100);
     } finally {
       stackMutexRef.locked = false;
     }
@@ -70,21 +130,23 @@ export default function useTabHistory() {
 
   /**
    * Navigate back within the current tab's stack.
+   * Restores scroll position automatically.
    * Falls back to navigate(-1) if no stack entry found.
-   * Protected against concurrent calls.
    */
   const goBack = () => {
-    if (stackMutexRef.locked) return; // Prevent concurrent operations
+    if (stackMutexRef.locked) return;
     stackMutexRef.locked = true;
 
     try {
       const current = location.pathname;
       for (const root of TAB_ROOTS) {
-        const stack = tabStacks[root];
-        if (stack && stack.length > 1 && stack[stack.length - 1] === current) {
-          stack.pop();
-          const targetPath = stack[stack.length - 1];
+        const state = tabStates[root];
+        if (state?.stack && state.stack.length > 1 && state.stack[state.stack.length - 1] === current) {
+          state.stack.pop();
+          const targetPath = state.stack[state.stack.length - 1];
+          const savedScrollY = getScrollPosition(targetPath);
           navigate(targetPath);
+          // Scroll restoration happens in useEffect above
           return;
         }
       }
