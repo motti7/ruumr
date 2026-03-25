@@ -49,28 +49,34 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location?.pathname}>
+        <Route path="/" element={
+          <PageTransition>
+            <LayoutWrapper currentPageName={mainPageKey}>
+              <MainPage />
             </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/GroupTracker" element={<LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper>} />
-      <Route path="/GroupCompatibility" element={<LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper>} />
-      <Route path="/GroupChat" element={<LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper>} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+          </PageTransition>
+        } />
+        {Object.entries(Pages).map(([path, Page]) => (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={
+              <PageTransition>
+                <LayoutWrapper currentPageName={path}>
+                  <Page />
+                </LayoutWrapper>
+              </PageTransition>
+            }
+          />
+        ))}
+        <Route path="/GroupTracker" element={<PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition>} />
+        <Route path="/GroupCompatibility" element={<PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition>} />
+        <Route path="/GroupChat" element={<PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition>} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </AnimatePresence>
   );
 };
 
