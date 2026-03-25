@@ -236,7 +236,7 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Discover")} className="select-none">
                              <h1 className="text-3xl logo-font">ruumr</h1>
                         </Link>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0">
                             {currentPageName === 'Discover' && (
                                 <FilterHintButton />
                             )}
