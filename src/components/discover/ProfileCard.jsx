@@ -627,4 +627,6 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             </AnimatePresence>
         </>
     );
-}
+});
+
+export default ProfileCard;
