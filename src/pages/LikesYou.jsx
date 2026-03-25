@@ -22,26 +22,24 @@ export default function LikesYouPage() {
 
     const loadLikes = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const user = await User.me();
-            // Find swipes where swiped_id is me and action is like
             const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
             const swiperIds = likes.map(l => l.swiper_id);
             
             if (swiperIds.length > 0) {
-                // Fetch profiles for these users
-                // We can't use 'in' operator easily with current SDK maybe? 
-                // Let's try Promise.all or filter if supported. 
-                // SDK filter usually supports exact match. 
-                // I'll fetch all profiles and filter in memory if list is small, or fetch one by one.
-                // Given the constraints, fetching one by one is safer for specific IDs.
                 const profilesData = await Promise.all(
                     swiperIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
                 );
                 setProfiles(profilesData.filter(p => p));
+            } else {
+                setProfiles([]);
             }
         } catch (e) {
             console.error(e);
+            setError("שגיאה בטעינת הלייקים. אנא נסה שוב.");
+            setProfiles([]);
         }
         setIsLoading(false);
     };
