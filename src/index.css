@@ -254,6 +254,22 @@ a:focus-visible {
   border-radius: 2px;
 }
 
+/* ── Pseudo-Element Overlays for Sub-44px Interactive Elements ───── */
+/* Invisible 44x44px tap areas for small icons/buttons */
+.music-player-mute::after {
+  content: "";
+  position: absolute;
+  inset: 50% 50%;
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  border-radius: 50%;
+}
+
+/* Alternative: Using min-w/min-h classes is preferred (Tailwind native) */
+/* This CSS provides fallback for inline style pseudo-elements */
+
 /* High contrast for keyboard navigation */
 @media (prefers-contrast: more) {
   button:focus-visible,
