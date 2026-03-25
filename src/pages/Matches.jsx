@@ -15,6 +15,7 @@ export default function MatchesPage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]'); } catch { return []; }
   });
