@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CharterResults from "../components/charter/CharterResults";
+import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
+import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 
 export default function ChatPage() {
