@@ -49,9 +49,9 @@ const ProfileDetail = ({ profile, onClose }) => {
             
             <div className="p-6 pt-24 text-white space-y-6" onClick={(e) => e.stopPropagation()}>
                 <div className="text-center">
-                    <h3 className="text-3xl font-bold">{profile.name}, {profile.age}</h3>
+                    <h3 className="text-3xl font-bold" id="profile-header">{profile.name}, {profile.age}</h3>
                     <div className="flex items-center justify-center text-white/90 mt-3 text-base">
-                        <MapPin className="w-5 h-5 ml-1" />
+                        <MapPin className="w-5 h-5 ml-1" aria-hidden="true" />
                         <div className="flex flex-col items-center">
                              {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-1">
