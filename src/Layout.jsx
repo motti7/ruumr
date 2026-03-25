@@ -10,6 +10,7 @@ import { User as UserEntity } from "@/entities/User";
 import { Message } from "@/entities/Message";
 import { useState, useEffect } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
+import useTabHistory from "@/hooks/useTabHistory";
 
 function FilterHintButton() {
   return (
