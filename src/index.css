@@ -110,12 +110,18 @@ button:focus-visible {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+  /* ── Dark-mode orange overrides for WCAG AA contrast ─────────────────── */
+  /* --theme-orange in dark mode needs to be lighter to contrast against    */
+  /* dark backgrounds. #FF5722 on #1a1a1a = 3.9:1 (fails AA for text).     */
+  /* Using #FF7043 (deepOrange 400) gives ≥4.5:1 on dark surfaces.         */
+  :root.dark, .dark {
+    --theme-orange: #FF7043;
+    --theme-orange-dark: #F4511E;
+  }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    /* Orange theme tokens — boosted for WCAG AA contrast on dark backgrounds */
-    --theme-orange: #FF7043;
-    --theme-orange-dark: #F4511E;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
