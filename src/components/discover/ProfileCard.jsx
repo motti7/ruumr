@@ -276,32 +276,34 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     
     const controls = useAnimation();
 
-    // Memoize the media array to avoid rebuilding on every render
+    const isVideoUrl = useCallback((url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url), []);
+
     const media = useMemo(() => {
         const regularPhotos = profile.photos?.filter(p => p) || [];
-        const apartmentPhotos =
-            profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p)
-                ? profile.apartment_photos.filter(p => p)
-                : [];
+        const apartmentPhotos = profile.current_status === 'has_apartment'
+            ? (profile.apartment_photos?.filter(p => p) || [])
+            : [];
 
-        const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
-
-        let all = regularPhotos.map(item =>
+        let allMedia = regularPhotos.map(item =>
             typeof item === 'string'
                 ? (isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item })
                 : item
         );
 
-        if (profile.video_url) all.splice(1, 0, { type: 'video', url: profile.video_url });
+        if (profile.video_url) {
+            allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
+        }
 
-        all = [...all, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
-        return all;
-    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status]);
+        allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
+        return allMedia;
+    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status, isVideoUrl]);
 
-    // Preload all images for this profile into the central cache
+    // Preload adjacent images via the cache service
     useEffect(() => {
-        const urls = media.filter(m => m.type === 'image').map(m => m.url);
-        preloadImages(urls, 'low');
+        const imageUrls = media
+            .filter(m => m.type === 'image')
+            .map(m => m.url);
+        preloadImages(imageUrls, 'low');
     }, [media]);
 
     const handleDragEnd = useCallback(async (event, info) => {
@@ -478,22 +480,11 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
         return null;
     };
 
-    const handleExpandOpen = useCallback((e) => {
-        e.stopPropagation();
-        setIsExpanded(true);
-    }, []);
-
-    const handleExpandClose = useCallback(() => setIsExpanded(false), []);
-
-    const handleMuteToggle = useCallback((e) => {
-        e.stopPropagation();
-        setIsMuted(m => !m);
-    }, []);
-
     return (
         <>
             <motion.div
                 drag={isActive ? "x" : false}
+
                 dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                 dragElastic={0.7}
                 onDragEnd={handleDragEnd}
@@ -549,7 +540,10 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                     )}
 
                     <button
-                        onClick={handleExpandOpen}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsExpanded(true);
+                        }}
                         className="absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
                         style={{ top: (() => {
                             // Does the current photo have a top-right badge (גיל/וייב)?
