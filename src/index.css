@@ -170,3 +170,29 @@ input[type="radio"] {
   -webkit-user-select: none;
   touch-action: manipulation;
 }
+
+/* ── Global 44px minimum tap target ────────────────────────────────────── */
+/* Applies a pseudo-element overlay so we don't break visual layout */
+button,
+a,
+[role="button"],
+[role="option"],
+[role="menuitem"],
+[role="tab"] {
+  position: relative;
+}
+
+button::after,
+a::after,
+[role="button"]::after,
+[role="option"]::after,
+[role="menuitem"]::after,
+[role="tab"]::after {
+  content: "";
+  position: absolute;
+  inset: 50% 50%;
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* visual only, real element is still clickable */
+}
