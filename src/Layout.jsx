@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { User as UserEntity } from "@/entities/User";
 import { Message } from "@/entities/Message";
 import { useState, useEffect } from "react";
+import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 
 function FilterHintButton() {
   return (
