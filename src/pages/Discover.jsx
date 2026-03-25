@@ -27,6 +27,16 @@ export default function DiscoverPage() {
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 });
   const [allProfiles, setAllProfiles] = useState([]);
 
+  // Optimistic swipe mutation
+  const swipeMutation = useMutationWithOptimistic(
+    (swipeData) => Swipe.create(swipeData),
+    {
+      queryKey: ['swipes', userProfile?.user_id],
+      updateFn: (old = [], newSwipe) => [...old, newSwipe],
+      onError: () => alert("שגיאה בשמירת הסווייפ. אנא נסה שוב."),
+    }
+  );
+
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
