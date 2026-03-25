@@ -63,18 +63,18 @@ export default function VirtualizedGrid({
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const viewportHeight = window.innerHeight;
 
-    // Calculate which rows are visible
-    const startRow = Math.max(0, Math.floor((scrollTop - containerRef.current.offsetTop) / rowHeight) - overscan);
+    // Calculate which rows are visible (use dynamic height)
+    const startRow = Math.max(0, Math.floor((scrollTop - containerRef.current.offsetTop) / dynamicRowHeight) - overscan);
     const endRow = Math.min(
       totalRows,
-      Math.ceil((scrollTop - containerRef.current.offsetTop + viewportHeight) / rowHeight) + overscan
+      Math.ceil((scrollTop - containerRef.current.offsetTop + viewportHeight) / dynamicRowHeight) + overscan
     );
 
     const start = startRow * columns;
     const end = Math.min(items.length, endRow * columns);
 
     setVisibleRange({ start, end });
-  }, [items.length, columns, rowHeight, totalRows, overscan]);
+  }, [items.length, columns, dynamicRowHeight, totalRows, overscan]);
 
   // Update container width on mount and window resize
   useEffect(() => {
