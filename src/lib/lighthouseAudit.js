@@ -310,5 +310,3 @@ if (typeof window !== 'undefined') {
     });
   }
 }
-
-export { generateLighthouseReport, auditAccessibilityMetrics, auditPerformanceMetrics, auditBestPractices };
