@@ -73,7 +73,8 @@ export default function CharterMatchSelector({ onClose }) {
             <h1 className="text-2xl font-black text-white">חוזה שותפות 🤝</h1>
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 active:scale-95 transition-transform"
+              className="min-w-[44px] min-h-[44px] bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 active:scale-95 transition-transform"
+              aria-label="סגור"
             >
               <X className="w-6 h-6 text-white" />
             </button>
@@ -92,7 +93,7 @@ export default function CharterMatchSelector({ onClose }) {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Puzzle className="w-6 h-6 text-white" />
+                <Puzzle className="w-6 h-6 text-white" aria-hidden="true" />
               </motion.div>
             </div>
           ) : matches.length === 0 ? (
