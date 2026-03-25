@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, Send, UsersRound } from "lucide-react";
+import SmartImage from "@/components/shared/SmartImage";
 
 export default function GroupChatPage() {
   const navigate = useNavigate();
@@ -132,7 +133,11 @@ export default function GroupChatPage() {
     <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
-        <button onClick={() => navigate(createPageUrl('GroupTracker'))} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button 
+          onClick={() => navigate(createPageUrl('GroupTracker'))} 
+          className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
+          aria-label="חזור"
+        >
           <ArrowRight className="w-5 h-5 text-gray-600" />
         </button>
         <div className="flex items-center gap-2 flex-1">
@@ -141,7 +146,7 @@ export default function GroupChatPage() {
             {allParticipants.slice(0, 4).map((p, i) => (
               <div key={i} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
                 {p.photo ? (
-                  <img src={p.photo} className="w-full h-full object-cover" />
+                  <SmartImage src={p.photo} alt={p.name} className="w-full h-full" priority={false} />
                 ) : (
                   <div className="w-full h-full gradient-orange flex items-center justify-center text-white text-xs font-black">
                     {p.name?.[0]}
@@ -176,16 +181,16 @@ export default function GroupChatPage() {
             >
               {/* Avatar */}
               {!isMe && (
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 mb-1">
-                  {msg.sender_photo ? (
-                    <img src={msg.sender_photo} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-black">
-                      {msg.sender_name?.[0]}
-                    </div>
-                  )}
-                </div>
-              )}
+                 <div className="w-7 h-7 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 mb-1">
+                   {msg.sender_photo ? (
+                     <SmartImage src={msg.sender_photo} alt={msg.sender_name} className="w-full h-full" priority={false} />
+                   ) : (
+                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-black">
+                       {msg.sender_name?.[0]}
+                     </div>
+                   )}
+                 </div>
+               )}
               <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
                 {!isMe && (
                   <span className="text-[10px] text-gray-400 font-medium px-1">{msg.sender_name}</span>
@@ -218,12 +223,13 @@ export default function GroupChatPage() {
           className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none text-gray-800 placeholder-gray-400"
         />
         <button
-          onClick={sendMessage}
-          disabled={!input.trim() || isSending}
-          className="w-10 h-10 gradient-orange rounded-full flex items-center justify-center shadow-md disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
-        >
-          <Send className="w-4 h-4 text-white" />
-        </button>
+           onClick={sendMessage}
+           disabled={!input.trim() || isSending}
+           className="min-w-[44px] min-h-[44px] gradient-orange rounded-full flex items-center justify-center shadow-md disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
+           aria-label="שלח הודעה"
+         >
+           <Send className="w-4 h-4 text-white" />
+         </button>
       </div>
     </div>
   );
