@@ -14,6 +14,7 @@ import GroupTracker from './pages/GroupTracker';
 import GroupCompatibility from './pages/GroupCompatibility';
 import GroupChat from './pages/GroupChat';
 import SplashScreen from './components/SplashScreen';
+import PageTransition from './components/shared/PageTransition';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
