@@ -41,7 +41,7 @@ const ProfileDetail = ({ profile, onClose }) => {
         >
             <button 
                 onClick={onClose} 
-                className="fixed top-20 left-6 z-[300] p-4 rounded-full bg-white shadow-2xl hover:bg-gray-100 transition-colors"
+                className="fixed top-20 left-6 z-[300] p-4 rounded-full bg-white shadow-2xl hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="סגור פרטים"
             >
                 <X className="text-gray-800 w-7 h-7" />

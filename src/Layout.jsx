@@ -185,7 +185,8 @@ export default function Layout({ children, currentPageName }) {
                     </button>
                     <button 
                         onClick={() => setShowPhotoError(false)}
-                        className="mt-3 text-gray-400 text-sm font-medium"
+                        className="mt-3 text-gray-400 text-sm font-medium min-h-[44px] flex items-center justify-center px-4"
+                        aria-label="אזכיר לי אחר כך"
                     >
                         אזכיר לי אחר כך
                     </button>
