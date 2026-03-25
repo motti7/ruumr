@@ -2,16 +2,28 @@ import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 
 // Memoized wrapper for rendered items to prevent unnecessary re-renders
-const MemoizedGridItem = memo(({ item, index, renderItem }) => (
-  <motion.div
-    key={item.id || index}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: (index % 2) * 0.05 }}
-  >
-    {renderItem(item, index)}
-  </motion.div>
-));
+const MemoizedGridItem = memo(({ item, index, renderItem, onMeasure, enableVarHeights }) => {
+  const itemRef = useRef(null);
+
+  // NEW: Measure item height after render (for variable heights)
+  useEffect(() => {
+    if (!enableVarHeights || !itemRef.current) return;
+    const height = itemRef.current.offsetHeight;
+    onMeasure(index, height);
+  }, [index, onMeasure, enableVarHeights]);
+
+  return (
+    <motion.div
+      ref={itemRef}
+      key={item.id || index}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: (index % 2) * 0.05 }}
+    >
+      {renderItem(item, index)}
+    </motion.div>
+  );
+});
 
 MemoizedGridItem.displayName = 'MemoizedGridItem';
 
