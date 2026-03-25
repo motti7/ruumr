@@ -125,31 +125,41 @@ export default function MatchesPage() {
         })()}
       </div>
 
+      {error && (
+        <div className="mx-4 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          <div>
+            <p className="text-red-700 font-medium text-sm">{error}</p>
+            <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">נסה שוב</button>
+          </div>
+        </div>
+      )}
+
       <div className="px-4">
-        {matches.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16 flex flex-col items-center"
-          >
-            <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
-              כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
-            </p>
-            <Link
-              to={createPageUrl("Discover")}
-              className="inline-block"
-            >
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                whileHover={{ scale: 1.05 }}
-                className="gradient-orange text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform"
-              >
-                חפש שותפים
-              </motion.button>
-            </Link>
-          </motion.div>
-        ) : (
+         {matches.length === 0 && !error ? (
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="text-center py-16 flex flex-col items-center"
+           >
+             <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
+             <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
+               כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
+             </p>
+             <Link
+               to={createPageUrl("Discover")}
+               className="inline-block"
+             >
+               <motion.button
+                 whileTap={{ scale: 0.95 }}
+                 whileHover={{ scale: 1.05 }}
+                 className="gradient-orange text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform"
+               >
+                 חפש שותפים
+               </motion.button>
+             </Link>
+           </motion.div>
+         ) : (
           <div className="space-y-2 pb-4">
             {matches.map((match, index) => (
               <motion.div
