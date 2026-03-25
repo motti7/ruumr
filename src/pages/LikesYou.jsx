@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
-import { Loader2, ThumbsUp, ArrowRight } from "lucide-react";
+import { Loader2, ThumbsUp, ArrowRight, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
 
 export default function LikesYouPage() {
