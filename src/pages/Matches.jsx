@@ -113,39 +113,25 @@ export default function MatchesPage() {
   }
 
   return (
-    <div 
-      className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" 
-      dir="rtl"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      {pullDistance > 0 && (
-        <div 
-          className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 transition-opacity"
-          style={{ opacity: pullDistance / 60 }}
-        >
-          <motion.div
-            className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
-            animate={{ rotate: pullDistance * 3.6 }}
-          >
-            <Puzzle className="w-4 h-4 text-white" />
-          </motion.div>
-        </div>
-      )}
-      {isRefreshing && (
-        <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-          <motion.div
-            className="w-8 h-8 rounded-full bg-[--theme-orange] flex items-center justify-center"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          >
-            <Puzzle className="w-4 h-4 text-white" />
-          </motion.div>
-        </div>
-      )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir="rtl">
       <div className="sticky top-16 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">התאמות</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white">התאמות</h1>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full select-none touch-manipulation"
+            aria-label="רענן"
+          >
+            <motion.span
+              animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+              transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}
+            >
+              <Puzzle className={`w-6 h-6 ${isRefreshing ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
+            </motion.span>
+          </motion.button>
+        </div>
         {(() => {
           const unseen = matches.filter(m => !seenMatchIds.includes(m.id)).length;
           return unseen > 0 ? (
