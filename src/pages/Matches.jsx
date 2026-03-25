@@ -74,14 +74,22 @@ export default function MatchesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
-        <motion.div
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-800 flex items-center justify-center"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-            <Puzzle className="w-6 h-6 text-white" />
-        </motion.div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 p-4">
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-16 h-16 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <Skeleton className="w-12 h-12 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
