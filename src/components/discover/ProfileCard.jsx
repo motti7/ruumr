@@ -455,7 +455,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
             
             if (logicalPhotoIndex === 2) {
                 return (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-24 pointer-events-none">
                         <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
                         <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
                     </div>
