@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import RoomiCharter from '../components/charter/RoomiCharter';
 import { base44 } from '@/api/base44Client';
 
@@ -71,7 +71,10 @@ export default function CharterPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-[--theme-orange]" />
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="w-16 h-16 rounded-full" />
+          <Skeleton className="w-40 h-4 rounded-full" />
+        </div>
       </div>
     );
   }
