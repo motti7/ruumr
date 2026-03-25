@@ -796,16 +796,19 @@ export default function ProfilePage() {
             
             <div>
                 <label className="block text-right text-sm font-bold text-gray-700 mb-2">איזור חיפוש מועדף</label>
-                <Select disabled={!isEditing} value={formData.search_area} onValueChange={(v) => setFormField('search_area', v)}>
-                    <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                    <SelectContent className="bg-white">
-                        <SelectItem value="צפון" className="text-gray-900">צפון</SelectItem>
-                        <SelectItem value="מרכז" className="text-gray-900">מרכז</SelectItem>
-                        <SelectItem value="דרום" className="text-gray-900">דרום</SelectItem>
-                        <SelectItem value="שפלה" className="text-gray-900">שפלה</SelectItem>
-                        <SelectItem value="ירושלים" className="text-gray-900">ירושלים והסביבה</SelectItem>
-                    </SelectContent>
-                </Select>
+                <BottomSheetSelect
+                    disabled={!isEditing}
+                    value={formData.search_area}
+                    onValueChange={(v) => setFormField('search_area', v)}
+                    label="איזור חיפוש מועדף"
+                    options={[
+                      { value: "צפון", label: "צפון" },
+                      { value: "מרכז", label: "מרכז" },
+                      { value: "דרום", label: "דרום" },
+                      { value: "שפלה", label: "שפלה" },
+                      { value: "ירושלים", label: "ירושלים והסביבה" },
+                    ]}
+                />
             </div>
             
             <div>
