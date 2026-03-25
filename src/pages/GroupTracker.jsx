@@ -86,23 +86,21 @@ export default function GroupTrackerPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative w-16 h-16">
-            {/* Rotating outer circle */}
-            <motion.div
-              className="absolute inset-0 rounded-full border-3 border-transparent border-b-[--theme-orange] border-l-[--theme-orange]"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-            />
-            {/* Pulsing inner circle */}
-            <div className="absolute inset-3 rounded-full bg-gradient-to-br from-yellow-400 to-[--theme-orange] flex items-center justify-center">
-              <UsersRound className="w-6 h-6 text-white" fill="white" />
-            </div>
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+        <div className="relative w-20 h-20 mb-6">
+          {/* Outer rotating ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full border-3 border-transparent border-t-[--theme-orange] border-r-[--theme-orange]"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Inner pulsing circle */}
+          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[--theme-orange] to-red-400 flex items-center justify-center animate-pulse">
+            <UsersRound className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 font-bold text-sm">טוען את הצוות שלך...</p>
-          <p className="text-gray-400 text-xs">אנו בטוחים שתמצא את השותפים המושלמים</p>
         </div>
+        <p className="text-gray-600 font-bold text-lg">טוען את הצוות שלך...</p>
+        <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
       </div>
     );
   }
