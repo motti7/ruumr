@@ -1,9 +1,52 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, memo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Memoized message bubble to prevent re-renders on scroll
+const MemoizedMessageBubble = memo(({ message, index, renderMessage }) => (
+  <motion.div
+    key={message.id || `${index}`}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.2 }}
+  >
+    {renderMessage(message, index)}
+  </motion.div>
+));
+
+MemoizedMessageBubble.displayName = 'MemoizedMessageBubble';
+
+// Memoized typing indicator
+const TypingIndicator = memo(({ renderTypingIndicator }) => (
+  renderTypingIndicator ? (
+    renderTypingIndicator()
+  ) : (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className="flex justify-start"
+    >
+      <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-1">
+        {[0, 0.15, 0.3].map((delay, i) => (
+          <motion.div
+            key={i}
+            className="w-2 h-2 rounded-full bg-gray-400"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  )
+));
+
+TypingIndicator.displayName = 'TypingIndicator';
 
 /**
  * VirtualizedMessageList — renders only visible messages to optimize performance.
  * Automatically scrolls to bottom when new messages arrive.
+ * Memoized message bubbles prevent re-renders on scroll.
  * 
  * Props:
  *   - messages: Array of message objects
@@ -28,7 +71,7 @@ export default function VirtualizedMessageList({
   // Calculate visible range
   const [visibleRange, setVisibleRange] = React.useState({ start: 0, end: 20 });
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!scrollAreaRef.current) return;
 
     const { scrollTop, clientHeight } = scrollAreaRef.current;
@@ -36,7 +79,7 @@ export default function VirtualizedMessageList({
     const end = Math.min(messages.length, Math.ceil((scrollTop + clientHeight) / itemHeight) + 2);
 
     setVisibleRange({ start, end });
-  };
+  }, [itemHeight, messages.length]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -76,42 +119,19 @@ export default function VirtualizedMessageList({
       <div className="space-y-3 px-4">
         <AnimatePresence mode="popLayout">
           {visibleMessages.map((msg, idx) => (
-            <motion.div
+            <MemoizedMessageBubble
               key={msg.id || `${visibleRange.start}-${idx}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {renderMessage(msg, visibleRange.start + idx)}
-            </motion.div>
+              message={msg}
+              index={visibleRange.start + idx}
+              renderMessage={renderMessage}
+            />
           ))}
         </AnimatePresence>
 
         {/* Typing indicator */}
         <AnimatePresence>
           {otherIsTyping && (
-            renderTypingIndicator ? (
-              renderTypingIndicator()
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="flex justify-start"
-              >
-                <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-1">
-                  {[0, 0.15, 0.3].map((delay, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 rounded-full bg-gray-400"
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            )
+            <TypingIndicator renderTypingIndicator={renderTypingIndicator} />
           )}
         </AnimatePresence>
       </div>
