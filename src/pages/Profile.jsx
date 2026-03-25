@@ -602,7 +602,7 @@ export default function ProfilePage() {
                             <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "לחץ להוספת שיר לפרופיל"}</p>
                             
                             {formData.song_preview_url && (
-                                <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full [&::-webkit-media-controls-panel]:bg-white/10" style={{filter: 'invert(1) hue-rotate(180deg)'}} />
+                                <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
                             )}
                             
                             {!formData.song_name && !isEditing && (
