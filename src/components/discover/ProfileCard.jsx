@@ -393,7 +393,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 })()}
                             </a>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
                                 {profile.is_verified && (
@@ -442,7 +442,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                             <h3 className="text-xl font-bold text-white mb-2">התקציב שלי</h3>
                             <div className="text-white/95 text-4xl font-black">
                                 ₪{profile.budget_max?.toLocaleString()}
@@ -455,7 +455,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
             
             if (logicalPhotoIndex === 2) {
                 return (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
                         <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
                         <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
                     </div>
@@ -463,8 +463,8 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
             }
         } else if (profile.current_status === 'has_apartment') {
              return (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
-                <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                    <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
                         <Home className="w-5 h-5 ml-2" />
                         תמונת הדירה שלי
                     </div>
@@ -537,7 +537,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className={`absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation ${(profile.song_preview_url && profile.song_name && isActive) ? 'top-16' : 'top-10'}`}
+                        className="absolute top-16 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
                         aria-label="View Profile Info"
                     >
                         <Info className="w-5 h-5 text-[--theme-orange]" />
