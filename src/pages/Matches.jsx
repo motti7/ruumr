@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Puzzle } from "lucide-react";
 import MatchCard from "../components/matches/MatchCard";
+import PullToRefresh from "@/components/shared/PullToRefresh";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
