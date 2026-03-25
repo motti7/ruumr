@@ -346,6 +346,8 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
              return null; 
         }
 
+        const regularPhotos = profile.photos?.filter(p => p) || [];
+
         let logicalPhotoIndex = index;
         let isRegular = true;
 
