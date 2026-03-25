@@ -86,12 +86,22 @@ export default function GroupTrackerPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
-            <UsersRound className="w-7 h-7 text-white" />
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-16 h-16">
+            {/* Rotating outer circle */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-3 border-transparent border-b-[--theme-orange] border-l-[--theme-orange]"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+            />
+            {/* Pulsing inner circle */}
+            <div className="absolute inset-3 rounded-full bg-gradient-to-br from-yellow-400 to-[--theme-orange] flex items-center justify-center">
+              <UsersRound className="w-6 h-6 text-white" fill="white" />
+            </div>
           </div>
-          <p className="text-gray-500 font-medium text-sm">טוען את הצוות שלך...</p>
+          <p className="text-gray-600 font-bold text-sm">טוען את הצוות שלך...</p>
+          <p className="text-gray-400 text-xs">אנו בטוחים שתמצא את השותפים המושלמים</p>
         </div>
       </div>
     );

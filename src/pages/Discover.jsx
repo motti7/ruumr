@@ -9,7 +9,7 @@ import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Heart, X, Home } from "lucide-react";
+import { Heart, X, Home, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
@@ -248,11 +248,21 @@ export default function DiscoverPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white">
-        <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
-          <Home className="w-7 h-7 text-white" />
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+        <div className="relative w-20 h-20 mb-6">
+          {/* Outer rotating ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full border-3 border-transparent border-t-[--theme-orange] border-r-[--theme-orange]"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Inner pulsing circle */}
+          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[--theme-orange] to-red-400 flex items-center justify-center animate-pulse">
+            <Puzzle className="w-8 h-8 text-white" />
+          </div>
         </div>
-        <p className="text-gray-500 font-medium mt-4">מחפש שותפים...</p>
+        <p className="text-gray-600 font-bold text-lg">מחפש שותפים...</p>
+        <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
       </div>
     );
   }
