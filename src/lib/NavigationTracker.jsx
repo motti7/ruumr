@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { base44 } from '@/api/base44Client';
 import { pagesConfig } from '@/pages.config';
+import { navAuditLog } from './navigationAuditLog';
 
 export default function NavigationTracker() {
     const location = useLocation();
