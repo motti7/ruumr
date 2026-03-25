@@ -9,8 +9,6 @@
  *   window.generateLighthouseReport() (quick check in dev)
  */
 
-import { exec } from 'child_process';
-
 /**
  * Quick accessibility check (without full Lighthouse)
  */
