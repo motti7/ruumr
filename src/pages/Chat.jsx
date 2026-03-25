@@ -243,77 +243,55 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {showWaitingBanner ? (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mb-4"
-          >
-            <Clock className="w-12 h-12 text-white mx-auto mb-3" />
-            <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
-            <p className="text-white/90 text-sm">
-              {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
-            </p>
-          </motion.div>
-        ) : (
-          <CharterResults matchId={match.id} />
-        )}
+      <VirtualizedMessageList
+       messages={messages}
+       containerHeight="flex-1"
+       otherIsTyping={otherIsTyping}
+       renderMessage={(msg, idx) => {
+         const isMyMessage = msg.sender_id === user.id;
+         const isLastMyMsg = idx === lastMyMsgIndex;
+         return (
+           <div key={msg.id || idx} className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}>
+             <div
+               className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${
+                 isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
+               }`}
+             >
+               <p className="text-sm leading-relaxed">{msg.content}</p>
+             </div>
+             {isMyMessage && isLastMyMsg && (
+               <div className="flex items-center gap-1 mt-0.5 px-1">
+                 <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
+                 <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
+                   {msg.is_read ? 'נקרא' : 'נשלח'}
+                 </span>
+               </div>
+             )}
+           </div>
+         );
+       }}
+      />
 
-        {messages.map((msg, idx) => {
-          const isMyMessage = msg.sender_id === user.id;
-          const isLastMyMsg = idx === lastMyMsgIndex;
-          return (
-            <motion.div
-              key={msg.id || idx}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}
-            >
-              <div
-                className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${
-                  isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
-                } ${msg._pending ? 'opacity-60' : 'opacity-100'}`}
-              >
-                <p className="text-sm leading-relaxed">{msg.content}</p>
-              </div>
-              {isMyMessage && isLastMyMsg && (
-                <div className="flex items-center gap-1 mt-0.5 px-1">
-                  <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
-                  <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
-                    {msg.is_read ? 'נקרא' : 'נשלח'}
-                  </span>
-                </div>
-              )}
-            </motion.div>
-          );
-        })}
+      {/* Header banner */}
+      {showWaitingBanner && (
+       <motion.div
+         initial={{ opacity: 0, y: -20 }}
+         animate={{ opacity: 1, y: 0 }}
+         className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mx-4 mb-4"
+       >
+         <Clock className="w-12 h-12 text-white mx-auto mb-3" />
+         <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
+         <p className="text-white/90 text-sm">
+           {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
+         </p>
+       </motion.div>
+      )}
 
-        {/* Typing indicator bubble */}
-        <AnimatePresence>
-          {otherIsTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="flex justify-start"
-            >
-              <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-1">
-                {[0, 0.15, 0.3].map((delay, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-2 h-2 rounded-full bg-gray-400"
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay }}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div ref={messagesEndRef} />
-      </div>
+      {!showWaitingBanner && (
+       <div className="mx-4 mb-4">
+         <CharterResults matchId={match.id} />
+       </div>
+      )}
 
       {/* Input */}
       <div className="bg-white border-t border-gray-200 p-4">
