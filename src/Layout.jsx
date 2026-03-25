@@ -118,6 +118,9 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('roomi_seen_updated', handler);
   }, []);
 
+  // Stack-based tab history tracking
+  useTabHistory();
+
   // Android hardware back button support
   useAndroidBackButton();
 
