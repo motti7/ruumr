@@ -238,7 +238,7 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                         <div className="flex items-center gap-0">
                             {currentPageName === 'Discover' && (
-                                <div className="mr-2">
+                                <div className="mr-6">
                                     <FilterHintButton />
                                 </div>
                             )}
