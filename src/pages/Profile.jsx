@@ -429,16 +429,20 @@ export default function ProfilePage() {
               <div className="space-y-3">
                   <div>
                       <label className="block text-right text-sm font-medium text-gray-600 mb-1">זיקה לדת</label>
-                      <Select disabled={!isEditing} value={formData.religion} onValueChange={(v) => setFormField('religion', v)}>
-                          <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue placeholder="בחר..."/></SelectTrigger>
-                          <SelectContent className="bg-white">
-                              <SelectItem value="secular">חילוני/ת</SelectItem>
-                              <SelectItem value="traditional">מסורתי/ת</SelectItem>
-                              <SelectItem value="national_religious">דתי/ה לאומי/ת</SelectItem>
-                              <SelectItem value="religious">דתי/ה</SelectItem>
-                              <SelectItem value="haredi">חרדי/ת</SelectItem>
-                          </SelectContent>
-                      </Select>
+                      <BottomSheetSelect
+                           disabled={!isEditing}
+                           value={formData.religion}
+                           onValueChange={(v) => setFormField('religion', v)}
+                           label="זיקה לדת"
+                           placeholder="בחר..."
+                           options={[
+                             { value: "secular", label: "חילוני/ת" },
+                             { value: "traditional", label: "מסורתי/ת" },
+                             { value: "national_religious", label: "דתי/ה לאומי/ת" },
+                             { value: "religious", label: "דתי/ה" },
+                             { value: "haredi", label: "חרדי/ת" },
+                           ]}
+                       />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                       <div>
