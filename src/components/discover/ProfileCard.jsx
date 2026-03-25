@@ -184,7 +184,7 @@ const ProfileDetail = ({ profile, onClose }) => {
     );
 };
 
-export default function ProfileCard({ profile, onSwipe, isActive }) {
+const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
