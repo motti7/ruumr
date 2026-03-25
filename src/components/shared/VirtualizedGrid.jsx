@@ -1,10 +1,25 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
+
+// Memoized wrapper for rendered items to prevent unnecessary re-renders
+const MemoizedGridItem = memo(({ item, index, renderItem }) => (
+  <motion.div
+    key={item.id || index}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: (index % 2) * 0.05 }}
+  >
+    {renderItem(item, index)}
+  </motion.div>
+));
+
+MemoizedGridItem.displayName = 'MemoizedGridItem';
 
 /**
  * VirtualizedGrid — Efficient grid rendering for profile lists on low-end Android.
  * Only renders visible items + buffer, dramatically reducing DOM nodes.
  * Assumes uniform item dimensions for predictable scroll calculations.
+ * Uses memoization to prevent unnecessary re-renders of visible items.
  */
 export default function VirtualizedGrid({
   items = [],
@@ -95,14 +110,12 @@ export default function VirtualizedGrid({
         {visibleItems.map((item, idx) => {
           const absoluteIdx = visibleRange.start + idx;
           return (
-            <motion.div
+            <MemoizedGridItem
               key={item.id || absoluteIdx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-            >
-              {renderItem(item, absoluteIdx)}
-            </motion.div>
+              item={item}
+              index={absoluteIdx}
+              renderItem={renderItem}
+            />
           );
         })}
       </div>
