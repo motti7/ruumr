@@ -207,3 +207,62 @@ a::after,
   transform: translate(-50%, -50%);
   pointer-events: none; /* visual only, real element is still clickable */
 }
+
+/* ── Global Focus Styles for WCAG 2.1 Accessibility ───────────────────────── */
+/* Focus-visible provides keyboard-only focus styles (not mouse) */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="link"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced focus for inputs with border */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1), 0 0 0 5px hsl(var(--ring));
+}
+
+/* Focus for form elements */
+[type="checkbox"]:focus-visible,
+[type="radio"]:focus-visible,
+[type="range"]:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced button focus states */
+button:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Links with explicit focus */
+a:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* High contrast for keyboard navigation */
+@media (prefers-contrast: more) {
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-width: 4px;
+    outline-offset: 3px;
+  }
+}
