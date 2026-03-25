@@ -246,8 +246,37 @@ export default function ProfilePage() {
 
   const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
 
-  if (isLoading) return <div className="flex items-center justify-center h-96"><Loader2 className="w-12 h-12 animate-spin text-[--theme-orange]" /></div>;
-  if (!profile) return <div className="p-4 text-center">לא נמצא פרופיל.</div>;
+  if (isLoading) {
+    return (
+      <div className="bg-gray-50 min-h-screen pb-24 p-4">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-32" />
+          <div className="grid grid-cols-3 gap-2">
+            {[...Array(6)].map((_, i) => <Skeleton key={i} className="aspect-square rounded-lg" />)}
+          </div>
+          <div className="space-y-3 mt-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-20" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center p-4">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+          <p className="text-red-700 font-medium">שגיאה בטעינת הפרופיל</p>
+          <button onClick={() => window.location.reload()} className="text-red-600 text-sm font-bold hover:underline mt-2">
+            טען מחדש
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
