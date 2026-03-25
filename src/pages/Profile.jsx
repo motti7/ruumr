@@ -41,7 +41,10 @@ export default function ProfilePage() {
       } else {
         window.location.href = createPageUrl('Onboarding');
       }
-    } catch (error) { console.error("Error loading profile:", error); }
+    } catch (error) { 
+      console.error("Error loading profile:", error);
+      setProfile(null);
+    }
     setIsLoading(false);
   };
 
