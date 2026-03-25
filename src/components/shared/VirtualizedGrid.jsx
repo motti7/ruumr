@@ -148,6 +148,8 @@ export default function VirtualizedGrid({
               item={item}
               index={absoluteIdx}
               renderItem={renderItem}
+              onMeasure={handleItemMeasure}
+              enableVarHeights={enableVariableHeights}
             />
           );
         })}
