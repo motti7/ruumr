@@ -206,6 +206,7 @@ export default function MatchesPage() {
           </div>
         )}
       </div>
+      </PullToRefresh>
     </div>
   );
 }
