@@ -45,7 +45,7 @@ const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onC
               src={match.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"}
               alt={match.name}
               className="w-full h-full"
-              priority={false}
+              priority={true}
             />
           </div>
         </div>
