@@ -156,3 +156,17 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Prevent accidental text selection on interactive elements */
+button,
+a,
+[role="button"],
+label,
+select,
+input[type="range"],
+input[type="checkbox"],
+input[type="radio"] {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
