@@ -462,14 +462,18 @@ export default function ProfilePage() {
                       </div>
                       <div>
                           <label className="block text-right text-sm font-medium text-gray-600 mb-1">שמירת שבת</label>
-                          <Select disabled={!isEditing} value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)}>
-                              <SelectTrigger className="w-full bg-white border-gray-300 text-right" dir="rtl"><SelectValue placeholder="בחר..."/></SelectTrigger>
-                              <SelectContent className="bg-white">
-                                  <SelectItem value="for">בעד</SelectItem>
-                                  <SelectItem value="against">נגד</SelectItem>
-                                  <SelectItem value="flow">זורם/ת</SelectItem>
-                              </SelectContent>
-                          </Select>
+                          <BottomSheetSelect
+                              disabled={!isEditing}
+                              value={formData.shabbat_preference}
+                              onValueChange={(v) => setFormField('shabbat_preference', v)}
+                              label="שמירת שבת"
+                              placeholder="בחר..."
+                              options={[
+                                { value: "for", label: "בעד" },
+                                { value: "against", label: "נגד" },
+                                { value: "flow", label: "זורם/ת" },
+                              ]}
+                          />
                       </div>
                   </div>
               </div>
