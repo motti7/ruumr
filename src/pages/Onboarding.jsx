@@ -11,8 +11,8 @@ import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
+import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
@@ -438,14 +438,16 @@ export default function OnboardingPage() {
                         </div>
                         <div className="space-y-2 text-right">
                             <label className="text-sm font-bold text-gray-700">מגדר</label>
-                            <Select value={formData.gender} onValueChange={(v) => setFormField('gender', v)}>
-                                <SelectTrigger className="h-12 text-lg bg-gray-50 border-gray-200 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                                <SelectContent className="text-right" align="end">
-                                    <SelectItem value="male">זכר</SelectItem>
-                                    <SelectItem value="female">נקבה</SelectItem>
-                                    <SelectItem value="other">אחר</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <BottomSheetSelect
+                                value={formData.gender}
+                                onValueChange={(v) => setFormField('gender', v)}
+                                label="מגדר"
+                                options={[
+                                    { value: "male", label: "זכר" },
+                                    { value: "female", label: "נקבה" },
+                                    { value: "other", label: "אחר" },
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>
