@@ -143,8 +143,18 @@ export default function LikesYouPage() {
                 })()}
             </div>
 
+            {error && (
+                <div className="mx-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 mb-4">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                    <div>
+                        <p className="text-red-700 font-medium text-sm">{error}</p>
+                        <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">נסה שוב</button>
+                    </div>
+                </div>
+            )}
+
             <div className="px-4 grid grid-cols-2 gap-4">
-                {profiles.length === 0 ? (
+                {profiles.length === 0 && !error ? (
                     <div className="col-span-2 text-center py-20">
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ThumbsUp className="w-10 h-10 text-gray-300" />
