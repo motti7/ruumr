@@ -164,13 +164,21 @@ export default function ChatPage() {
       typingStatusIdRef.current = null;
     }
 
+    // Optimistic UI: add a temporary message
+    const tempId = `temp_${Date.now()}`;
+    const optimisticMsg = { id: tempId, match_id: match.id, sender_id: user.id, content: messageContent, is_read: false, _pending: true };
+    setMessages(prev => [...prev, optimisticMsg]);
+    setNewMessage("");
+
     try {
-      const messageData = { match_id: match.id, sender_id: user.id, content: messageContent, is_read: false };
-      const createdMessage = await Message.create(messageData);
-      setMessages(prev => [...prev, createdMessage]);
-      setNewMessage("");
+      const createdMessage = await Message.create({ match_id: match.id, sender_id: user.id, content: messageContent, is_read: false });
+      // Replace temp message with real one
+      setMessages(prev => prev.map(m => m.id === tempId ? createdMessage : m));
     } catch (error) {
       console.error("Error sending message:", error);
+      // Rollback: remove optimistic message and restore input
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      setNewMessage(messageContent);
     }
   };
 
