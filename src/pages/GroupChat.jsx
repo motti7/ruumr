@@ -75,19 +75,31 @@ export default function GroupChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Optimistic mutation for group messages
+  const messageMutation = useMutationWithOptimistic(
+    (messageData) => base44.entities.GroupMessage.create(messageData),
+    {
+      queryKey: ['groupchat', groupId],
+      updateFn: (oldMessages = [], newMessage) => [...oldMessages, newMessage],
+    }
+  );
+
   const sendMessage = async () => {
     if (!input.trim() || isSending || !groupId || !user) return;
-    setIsSending(true);
     const text = input.trim();
     setInput("");
-    await base44.entities.GroupMessage.create({
-      group_id: groupId,
-      sender_id: user.id,
-      sender_name: user.full_name || "אני",
-      sender_photo: myProfile?.photos?.[0] || null,
-      content: text,
-    });
-    setIsSending(false);
+    try {
+      await messageMutation.mutateAsync({
+        group_id: groupId,
+        sender_id: user.id,
+        sender_name: user.full_name || "אני",
+        sender_photo: myProfile?.photos?.[0] || null,
+        content: text,
+      });
+    } catch (error) {
+      console.error("Error sending group message:", error);
+      setInput(text);
+    }
   };
 
   const handleKeyDown = (e) => {
