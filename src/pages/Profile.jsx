@@ -439,7 +439,8 @@ export default function ProfilePage() {
                               key={type} 
                               disabled={!isEditing}
                               onClick={() => setFormField('pet_type', type)} 
-                              className={`p-2 border rounded-lg flex flex-col items-center justify-center transition-colors ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]' : 'border-gray-200 text-gray-600'} ${!isEditing && formData.pet_type !== type ? 'opacity-50' : ''}`}
+                              className={`py-3 px-2 min-h-[44px] border rounded-lg flex flex-col items-center justify-center transition-colors ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]' : 'border-gray-200 text-gray-600'} ${!isEditing && formData.pet_type !== type ? 'opacity-50' : ''}`}
+                              aria-label={`בחר ${{'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]}`}
                           >
                               <span className="text-sm font-medium">{
                                   {'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]
