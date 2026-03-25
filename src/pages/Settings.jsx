@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Heart, MessageCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
+import DeleteAccountModal from "../components/settings/DeleteAccountModal";
 
 const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onClick }) => {
   const content = (
@@ -32,6 +33,7 @@ const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onCl
 export default function SettingsPage() {
   const [notifyLikes, setNotifyLikes] = useState(true);
   const [notifyMatches, setNotifyMatches] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -56,24 +58,13 @@ export default function SettingsPage() {
     await User.logout();
     window.location.href = createPageUrl('Home');
   };
-  
-  const handleDeleteAccount = async () => {
-    if (confirm("האם את/ה בטוח/ה שברצונך למחוק את החשבון? פעולה זו בלתי הפיכה.")) {
-      try {
-        await base44.functions.deleteAccount();
-        alert("החשבון והמידע שלך נמחקו בהצלחה.");
-        await handleLogout();
-      } catch (e) {
-        console.error("Delete account error:", e);
-        alert("אירעה שגיאה במחיקת הנתונים. אנא נסה שנית או צור קשר עם התמיכה.");
-      }
-    }
-  };
 
 
 
   return (
     <div className="p-4 pb-24 bg-gray-50 min-h-screen" dir="rtl">
+      <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
+
       <div className="mb-6">
         <h1 className="text-3xl font-black text-gray-800">הגדרות</h1>
       </div>
@@ -112,7 +103,12 @@ export default function SettingsPage() {
           </div>
         
         <div className="pt-6 space-y-4">
-             <Button onClick={handleDeleteAccount} variant="ghost" className="w-full text-center text-red-500 font-bold text-lg">
+             <Button 
+               onClick={() => setShowDeleteModal(true)} 
+               variant="ghost" 
+               className="w-full text-center text-red-500 font-bold text-lg min-h-[44px]"
+               aria-label="פתח דיאלוג מחיקת חשבון"
+             >
                 <Trash2 className="w-5 h-5 ml-2" />
                 מחק חשבון
             </Button>
