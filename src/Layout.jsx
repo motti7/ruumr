@@ -14,7 +14,7 @@ function FilterHintButton() {
   return (
     <button
       onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
-      className="hover:scale-110 transition-transform"
+      className="hover:scale-110 transition-transform select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
     >
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Line 1 */}
