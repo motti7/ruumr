@@ -209,13 +209,9 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             <style>
-                {`
-                @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-                :root {
-                    --theme-orange: #FF5722;
-                    --theme-orange-dark: #E64A19;
-                }
-                .logo-font {
+            {`
+            @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+            .logo-font {
                     font-family: 'Pacifico', cursive;
                     color: var(--theme-orange);
                     font-weight: 400;
