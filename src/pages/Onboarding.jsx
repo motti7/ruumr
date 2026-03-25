@@ -579,40 +579,46 @@ export default function OnboardingPage() {
                     
                     <div className="space-y-2">
                         <label className="font-bold block mb-1">זיקה לדת</label>
-                        <Select value={formData.religion} onValueChange={(v) => setFormField('religion', v)}>
-                            <SelectTrigger className="h-12 bg-gray-50 border-gray-200 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                            <SelectContent align="end">
-                                <SelectItem value="secular">חילוני/ת</SelectItem>
-                                <SelectItem value="traditional">מסורתי/ת</SelectItem>
-                                <SelectItem value="national_religious">דתי/ה לאומי/ת</SelectItem>
-                                <SelectItem value="religious">דתי/ה</SelectItem>
-                                <SelectItem value="haredi">חרדי/ת</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <BottomSheetSelect
+                            value={formData.religion}
+                            onValueChange={(v) => setFormField('religion', v)}
+                            label="זיקה לדת"
+                            options={[
+                                { value: "secular", label: "חילוני/ת" },
+                                { value: "traditional", label: "מסורתי/ת" },
+                                { value: "national_religious", label: "דתי/ה לאומי/ת" },
+                                { value: "religious", label: "דתי/ה" },
+                                { value: "haredi", label: "חרדי/ת" },
+                            ]}
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="font-bold block mb-1 text-sm">כשרות</label>
-                            <Select value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)}>
-                                <SelectTrigger className="h-10 bg-gray-50 border-gray-200 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                                <SelectContent align="end">
-                                    <SelectItem value="for">בעד</SelectItem>
-                                    <SelectItem value="against">נגד</SelectItem>
-                                    <SelectItem value="flow">זורם</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <BottomSheetSelect
+                                value={formData.kosher_preference}
+                                onValueChange={(v) => setFormField('kosher_preference', v)}
+                                label="כשרות"
+                                options={[
+                                    { value: "for", label: "בעד" },
+                                    { value: "against", label: "נגד" },
+                                    { value: "flow", label: "זורם" },
+                                ]}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="font-bold block mb-1 text-sm">שבת</label>
-                            <Select value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)}>
-                                <SelectTrigger className="h-10 bg-gray-50 border-gray-200 text-right" dir="rtl"><SelectValue/></SelectTrigger>
-                                <SelectContent align="end">
-                                    <SelectItem value="for">בעד</SelectItem>
-                                    <SelectItem value="against">נגד</SelectItem>
-                                    <SelectItem value="flow">זורם</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <BottomSheetSelect
+                                value={formData.shabbat_preference}
+                                onValueChange={(v) => setFormField('shabbat_preference', v)}
+                                label="שמירת שבת"
+                                options={[
+                                    { value: "for", label: "בעד" },
+                                    { value: "against", label: "נגד" },
+                                    { value: "flow", label: "זורם" },
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>
