@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
 import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
