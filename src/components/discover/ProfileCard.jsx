@@ -598,7 +598,21 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                              </div>
                              <button 
                                 onClick={handleMuteToggle}
-                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors relative"
+                                aria-label={isMuted ? "ביטול השתקה" : "השתקה"}
+                                style={{
+                                  position: 'relative',
+                                  '::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    inset: '50% 50%',
+                                    minWidth: '44px',
+                                    minHeight: '44px',
+                                    transform: 'translate(-50%, -50%)',
+                                    pointerEvents: 'auto',
+                                    borderRadius: '50%'
+                                  }
+                                }}
                              >
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white"/> : <Volume2 className="w-4 h-4 text-[--theme-orange]"/>}
                              </button>

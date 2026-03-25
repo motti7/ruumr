@@ -298,7 +298,8 @@ export default function ProfilePage() {
           >
             <button
               onClick={() => setSelectedApartmentPhoto(null)}
-              className="absolute top-4 right-4 p-2 bg-white/20 rounded-full"
+              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+              aria-label="סגור"
             >
               <X className="w-6 h-6 text-white" />
             </button>
@@ -618,7 +619,8 @@ export default function ProfilePage() {
                     {isEditing && formData.song_name && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
-                            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2"
+                            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label="הסר שיר"
                         >
                             <X className="w-5 h-5" />
                         </button>

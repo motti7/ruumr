@@ -38,7 +38,11 @@ export default function WriteReviewButton() {
 
   return (
     <>
-      <button onClick={handleOpen} className="hover:scale-110 transition-transform">
+      <button 
+        onClick={handleOpen} 
+        className="hover:scale-110 transition-transform relative min-w-[44px] min-h-[44px] flex items-center justify-center"
+        aria-label="כתוב חוות דעת"
+      >
         <Star className="w-6 h-6 text-yellow-400" fill="#facc15" />
       </button>
 
