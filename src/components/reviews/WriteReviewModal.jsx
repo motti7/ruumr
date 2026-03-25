@@ -4,6 +4,7 @@ import { User } from "@/entities/User";
 import { Star, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose, onSubmitted }) {
   const [rating, setRating] = useState(0);
@@ -49,7 +50,13 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
         >
           <div className="flex justify-between items-center mb-5">
             <h3 className="text-xl font-black text-gray-900">כתוב חוות דעת על {reviewedName}</h3>
-            <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+            <button 
+              onClick={onClose}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-yellow-100 transition-colors"
+              aria-label="סגור"
+            >
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
           </div>
 
           <div className="flex justify-center gap-2 mb-5">
