@@ -11,8 +11,9 @@ export default function NavigationTracker() {
     const { Pages, mainPage } = pagesConfig;
     const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 
-    // Post navigation changes to parent window
+    // Record navigation in audit log and post to parent
     useEffect(() => {
+        navAuditLog.recordNavigation(location.pathname);
         window.parent?.postMessage({
             type: "app_changed_url",
             url: window.location.href
