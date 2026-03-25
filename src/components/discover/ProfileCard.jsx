@@ -393,7 +393,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                                 })()}
                             </a>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-8 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-24 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
                                 {profile.is_verified && (
