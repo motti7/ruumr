@@ -98,29 +98,6 @@ export default function MatchesPage() {
     setIsRefreshing(false);
   };
 
-  const handleTouchStart = (e) => {
-    if (window.scrollY === 0) {
-      setPullStart(e.touches[0].clientY);
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (pullStart > 0 && window.scrollY === 0) {
-      const distance = e.touches[0].clientY - pullStart;
-      if (distance > 0) {
-        setPullDistance(Math.min(distance, 100));
-      }
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (pullDistance > 60) {
-      handleRefresh();
-    }
-    setPullStart(0);
-    setPullDistance(0);
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
