@@ -15,8 +15,9 @@ export default function ImageLightbox({ src, onClose }) {
                 onClick={onClose}
             >
                 <button 
-                    className="absolute top-4 right-4 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                    className="absolute top-4 right-4 min-w-[44px] min-h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center"
                     onClick={onClose}
+                    aria-label="סגור"
                 >
                     <X className="w-6 h-6 text-white" />
                 </button>
