@@ -177,54 +177,58 @@ export default function GroupChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-400 text-sm mt-10">
-            <p className="text-3xl mb-2">👋</p>
-            <p>שלחו הודעה ראשונה לצוות!</p>
-          </div>
-        )}
-        {messages.map((msg) => {
-          const isMe = msg.sender_id === user?.id;
-          return (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
-            >
-              {/* Avatar */}
-              {!isMe && (
-                 <div className="w-7 h-7 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 mb-1">
-                   {msg.sender_photo ? (
-                     <SmartImage src={msg.sender_photo} alt={msg.sender_name} className="w-full h-full" priority={false} />
-                   ) : (
-                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-black">
-                       {msg.sender_name?.[0]}
-                     </div>
-                   )}
-                 </div>
-               )}
-              <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
-                {!isMe && (
-                  <span className="text-[10px] text-gray-400 font-medium px-1">{msg.sender_name}</span>
-                )}
-                <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  isMe
-                    ? 'gradient-orange text-white rounded-tr-sm'
-                    : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
-                }`}>
-                  {msg.content}
+      <VirtualizedMessageList
+       messages={messages}
+       containerHeight="flex-1"
+       renderMessage={(msg) => {
+         const isMe = msg.sender_id === user?.id;
+         return (
+           <motion.div
+             key={msg.id}
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+           >
+             {/* Avatar */}
+             {!isMe && (
+                <div className="w-7 h-7 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 mb-1">
+                  {msg.sender_photo ? (
+                    <SmartImage src={msg.sender_photo} alt={msg.sender_name} className="w-full h-full" priority={false} />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-black">
+                      {msg.sender_name?.[0]}
+                    </div>
+                  )}
                 </div>
-                <span className="text-[9px] text-gray-300 px-1">
-                  {new Date(msg.created_date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            </motion.div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+              )}
+             <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
+               {!isMe && (
+                 <span className="text-[10px] text-gray-400 font-medium px-1">{msg.sender_name}</span>
+               )}
+               <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                 isMe
+                   ? 'gradient-orange text-white rounded-tr-sm'
+                   : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
+               }`}>
+                 {msg.content}
+               </div>
+               <span className="text-[9px] text-gray-300 px-1">
+                 {new Date(msg.created_date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+               </span>
+             </div>
+           </motion.div>
+         );
+       }}
+      />
+
+      {messages.length === 0 && (
+       <div className="flex items-center justify-center flex-1">
+         <div className="text-center text-gray-400 text-sm">
+           <p className="text-3xl mb-2">👋</p>
+           <p>שלחו הודעה ראשונה לצוות!</p>
+         </div>
+       </div>
+      )}
 
       {/* Input */}
       <div className="bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3 flex-shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
