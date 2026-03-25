@@ -537,7 +537,16 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className={`absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation top-[${currentPhotoIndex === 0 || (currentPhotoIndex === 1 && !profile.video_url) || (currentPhotoIndex === 1 && profile.video_url) ? 'top-16' : 'top-4'}]`}
+                        className="absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
+                        style={{ top: (() => {
+                            // Does the current photo have a top-right badge (גיל/וייב)?
+                            const hasBadge = media[currentPhotoIndex]?.type !== 'video' && (
+                                currentPhotoIndex === 0 || // always has גיל badge
+                                (currentPhotoIndex === 1 && !profile.video_url) || // וייב badge
+                                (currentPhotoIndex === 2 && profile.video_url) // וייב badge (shifted by video)
+                            );
+                            return hasBadge ? '72px' : '16px';
+                        })() }}
                         aria-label="View Profile Info"
                     >
                         <Info className="w-5 h-5 text-[--theme-orange]" />
