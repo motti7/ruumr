@@ -537,7 +537,7 @@ export default function ProfileCard({ profile, onSwipe, isActive }) {
                             e.stopPropagation();
                             setIsExpanded(true);
                         }}
-                        className={`absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation ${profile.song_preview_url && profile.song_name && isActive ? 'top-[72px]' : 'top-5'}`}
+                        className={`absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation top-[${currentPhotoIndex === 0 || (currentPhotoIndex === 1 && !profile.video_url) || (currentPhotoIndex === 1 && profile.video_url) ? 'top-16' : 'top-4'}]`}
                         aria-label="View Profile Info"
                     >
                         <Info className="w-5 h-5 text-[--theme-orange]" />
