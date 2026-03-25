@@ -237,12 +237,12 @@ export default function Layout({ children, currentPageName }) {
                              <h1 className="text-3xl logo-font">ruumr</h1>
                         </Link>
                         <div className="flex items-center gap-0">
-                            <Link to={createPageUrl("Profile")} className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
-                                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-                            </Link>
                             {currentPageName === 'Discover' && (
                                 <FilterHintButton />
                             )}
+                            <Link to={createPageUrl("Profile")} className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
+                                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+                            </Link>
                         </div>
                     </div>
                 </header>
