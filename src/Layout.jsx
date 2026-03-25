@@ -241,16 +241,14 @@ export default function Layout({ children, currentPageName }) {
                         <Link to={createPageUrl("Discover")} className="select-none">
                              <h1 className="text-3xl logo-font">ruumr</h1>
                         </Link>
-                        <div className="flex items-center gap-0">
-                            {currentPageName === 'Discover' && (
-                                <div className="mr-6">
-                                    <FilterHintButton />
-                                </div>
-                            )}
-                            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
-                                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-                            </Link>
-                        </div>
+                        {currentPageName === 'Discover' && (
+                            <div className="ml-6">
+                                <FilterHintButton />
+                            </div>
+                        )}
+                        <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
+                            <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+                        </Link>
                     </div>
                 </header>
             )}
