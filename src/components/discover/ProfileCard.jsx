@@ -276,34 +276,32 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     
     const controls = useAnimation();
 
-    const isVideoUrl = useCallback((url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url), []);
-
+    // Memoize the media array to avoid rebuilding on every render
     const media = useMemo(() => {
         const regularPhotos = profile.photos?.filter(p => p) || [];
-        const apartmentPhotos = profile.current_status === 'has_apartment'
-            ? (profile.apartment_photos?.filter(p => p) || [])
-            : [];
+        const apartmentPhotos =
+            profile.current_status === 'has_apartment' && profile.apartment_photos?.filter(p => p)
+                ? profile.apartment_photos.filter(p => p)
+                : [];
 
-        let allMedia = regularPhotos.map(item =>
+        const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
+
+        let all = regularPhotos.map(item =>
             typeof item === 'string'
                 ? (isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item })
                 : item
         );
 
-        if (profile.video_url) {
-            allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
-        }
+        if (profile.video_url) all.splice(1, 0, { type: 'video', url: profile.video_url });
 
-        allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
-        return allMedia;
-    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status, isVideoUrl]);
+        all = [...all, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
+        return all;
+    }, [profile.photos, profile.apartment_photos, profile.video_url, profile.current_status]);
 
-    // Preload adjacent images via the cache service
+    // Preload all images for this profile into the central cache
     useEffect(() => {
-        const imageUrls = media
-            .filter(m => m.type === 'image')
-            .map(m => m.url);
-        preloadImages(imageUrls, 'low');
+        const urls = media.filter(m => m.type === 'image').map(m => m.url);
+        preloadImages(urls, 'low');
     }, [media]);
 
     const handleDragEnd = useCallback(async (event, info) => {
@@ -319,9 +317,9 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
         } else {
             controls.start({ x: 0 });
         }
-    };
+    }, [controls, onSwipe]);
 
-    const handleTap = (e) => {
+    const handleTap = useCallback((e) => {
         // Ignore tap if expanded or not active
         if (!isActive || isExpanded) return;
 
@@ -337,9 +335,9 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
         } else {
             setCurrentPhotoIndex(prev => (prev + 1) % media.length);
         }
-    };
+    }, [isActive, isExpanded, media.length]);
 
-    const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
+    const vibeText = useMemo(() => ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"], []);
 
     const getPhotoContent = (index) => {
         const isVideo = media[index].type === 'video';
