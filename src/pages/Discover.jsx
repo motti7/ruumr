@@ -168,7 +168,7 @@ export default function DiscoverPage() {
           action
       };
 
-      await Swipe.create(swipeData);
+      await swipeMutation.mutateAsync(swipeData);
 
       // Check for match only on 'like'
       if (action === 'like') {
