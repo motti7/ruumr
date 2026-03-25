@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, Send, UsersRound } from "lucide-react";
 import SmartImage from "@/components/shared/SmartImage";
+import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
+import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 
 export default function GroupChatPage() {
   const navigate = useNavigate();
