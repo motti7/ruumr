@@ -117,6 +117,9 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('roomi_seen_updated', handler);
   }, []);
 
+  // Android hardware back button support
+  useAndroidBackButton();
+
   // Calculate unseen matches count
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
 
