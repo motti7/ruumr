@@ -7,6 +7,7 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
+import VirtualizedGrid from '@/components/shared/VirtualizedGrid';
 import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function LikesYouPage() {
