@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, memo, useCallback } from "react";
+import React, { useEffect, useRef, useMemo, memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Memoized message bubble to prevent re-renders on scroll
