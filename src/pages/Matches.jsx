@@ -4,7 +4,8 @@ import { User } from "@/entities/User";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import { Puzzle } from "lucide-react";
+import { Puzzle, AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import MatchCard from "../components/matches/MatchCard";
 import PullToRefresh from "@/components/shared/PullToRefresh";
 
