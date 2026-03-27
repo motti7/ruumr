@@ -306,8 +306,8 @@ export default function DiscoverPage() {
 
       <DiscoverFilters filters={filters} onChange={applyFilters} />
 
-      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(max(env(safe-area-inset-top), 0px) + 80px)' }}>
-        <div style={{ height: 'calc(100vh - 150px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+      <div className="absolute w-full flex items-start justify-center px-3" style={{ top: '64px' }}>
+        <div style={{ height: 'calc(100vh - 64px - 110px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => (
