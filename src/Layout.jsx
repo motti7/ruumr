@@ -231,9 +231,7 @@ export default function Layout({ children, currentPageName }) {
             </style>
             
             {shouldShowNav && (
-                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700">
-                    {/* Status bar color strip */}
-                    <div style={{ height: 'env(safe-area-inset-top)', background: '#FF5722', minHeight: '0px' }} />
+                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     <div className="max-w-md mx-auto px-2 h-16 flex items-center justify-between">
                         <div className="flex-1 flex items-center gap-1">
                             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
