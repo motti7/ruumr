@@ -232,7 +232,7 @@ export default function Layout({ children, currentPageName }) {
             
             {shouldShowNav && (
                 <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-                    <div className="max-w-md mx-auto px-2 h-10 flex items-center justify-between">
+                    <div className="max-w-md mx-auto px-2 h-8 flex items-center justify-between">
                         <div className="flex-1 flex items-center gap-1">
                             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation">
                                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
