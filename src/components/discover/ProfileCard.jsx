@@ -377,7 +377,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (index === 0) {
                 return (
                     <>
-                        <div className="absolute top-16 right-4 z-10 flex flex-col items-end gap-2">
+                        <div className="absolute top-3 right-4 z-10 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
@@ -413,7 +413,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                 })()}
                             </a>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
                                 {profile.is_verified && (
@@ -562,7 +562,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
 
                     <button
                         onClick={handleExpandOpen}
-                        className="absolute right-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
+                        className="absolute left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
                         style={{ top: '12px' }}
                         aria-label="View Profile Info"
                     >
