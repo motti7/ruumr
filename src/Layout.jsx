@@ -231,39 +231,37 @@ export default function Layout({ children, currentPageName }) {
             </style>
             
             {shouldShowNav && (
-                // 1. הורדנו את ה-safe-area-inset-top המוגזם כדי לדחוף אותו למעלה, הקטנו גובה
-                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
-                    {/* 2. שינינו ל-flex justify-between במקום flex-1 לכל אזור */}
-                    <div className="max-w-md mx-auto px-4 flex items-center justify-between">
-                        
-                        {/* קבוצה ימין: הגדרות וכוכב */}
-                        <div className="flex items-center gap-4">
-                            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
-                                <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-                            </Link>
-                            <WriteReviewButton />
-                        </div>
+               <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
+                <div className="max-w-md mx-auto px-2 flex items-center justify-between">
+        
+        {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
+        <div className="flex items-center gap-2">
+            <WriteReviewButton /> {/* הכוכב עכשיו ראשון, ולכן הכי ימני */}
+            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
+                <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+            </Link>
+        </div>
 
-                        {/* אמצע: כותרת רומר - מיושרת לאמצע */}
-                        {/* 3. הורדנו את הצלליות הענקיות שעשו בלאגן בגובה, הקטנו גודל פונט מעט */}
-                        <div className="flex items-center justify-center">
-                            <Link to={createPageUrl("Discover")} className="select-none">
-                                 <h1 className="text-3xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
-                            </Link>
-                        </div>
+        {/* אמצע: כותרת רומר */}
+        <div className="flex items-center justify-center">
+            <Link to={createPageUrl("Discover")} className="select-none">
+                 <h1 className="text-3xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
+            </Link>
+        </div>
 
-                        {/* קבוצה שמאל: פרופיל וסינון */}
-                        <div className="flex items-center gap-4">
-                            {currentPageName === 'Discover' && (
-                                <FilterHintButton />
-                            )}
-                            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
-                                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-                            </Link>
-                        </div>
+        {/* קבוצה שמאל: פרופיל, ואז מסננים הכי שמאלי */}
+        <div className="flex items-center gap-2">
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
+                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+            </Link>
+            {/* המסנן אחרון, ולכן הכי שמאלי */}
+            {currentPageName === 'Discover' && (
+                <FilterHintButton /> 
+            )}
+        </div>
 
-                    </div>
-                </header>
+    </div>
+</header>
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
