@@ -12,7 +12,7 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
     setIsDeleting(true);
     try {
       await base44.functions.invoke("deleteAccount", {});
-      alert("החשבון שלך ב-ruumr נמחק לצמיתות.");
+      alert("החשבון והמידע שלך נמחקו בהצלחה.");
       await User.logout();
       window.location.href = createPageUrl("Home");
     } catch (error) {
