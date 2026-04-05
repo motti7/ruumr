@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import React, { useState, useEffect, useCallback } from "react";
+
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";

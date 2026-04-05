@@ -107,16 +107,7 @@ export default function VirtualizedGrid({
     };
   }, [handleScroll]);
 
-  if (items.length === 0) {
-    return <div ref={containerRef} className={containerClassName}>{emptyState}</div>;
-  }
-
-  // Create grid layout with spacer divs
-  const visibleItems = items.slice(visibleRange.start, visibleRange.end);
-  const topSpacerHeight = Math.floor(visibleRange.start / columns) * dynamicRowHeight;
-  const bottomSpacerHeight = Math.max(0, (totalRows - Math.ceil(visibleRange.end / columns)) * dynamicRowHeight);
-
-  // NEW: Callback to measure item height when rendered
+  // Callback to measure item height when rendered (must be before early return)
   const handleItemMeasure = useCallback((index, height) => {
     if (enableVariableHeights && height > 0) {
       setItemHeights(prev => {
@@ -125,6 +116,15 @@ export default function VirtualizedGrid({
       });
     }
   }, [enableVariableHeights]);
+
+  if (items.length === 0) {
+    return <div ref={containerRef} className={containerClassName}>{emptyState}</div>;
+  }
+
+  // Create grid layout with spacer divs
+  const visibleItems = items.slice(visibleRange.start, visibleRange.end);
+  const topSpacerHeight = Math.floor(visibleRange.start / columns) * dynamicRowHeight;
+  const bottomSpacerHeight = Math.max(0, (totalRows - Math.ceil(visibleRange.end / columns)) * dynamicRowHeight);
 
   return (
     <div ref={containerRef} className={containerClassName}>

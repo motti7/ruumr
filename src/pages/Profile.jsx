@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const [uploadingApartmentIndex, setUploadingApartmentIndex] = useState(null);
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
-  // Removed dedicated video input state
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   useEffect(() => { loadProfile(); }, []);
 
@@ -315,10 +315,7 @@ export default function ProfilePage() {
               onClick={() => {
                   if (!isEditing) {
                       setIsEditing(true);
-                      toast.info("לא לשכוח לשמור שינויים", {
-                          duration: 3000,
-                          position: "top-center"
-                      });
+                      alert("לא לשכוח לשמור שינויים");
                   } else {
                       handleSave();
                   }
