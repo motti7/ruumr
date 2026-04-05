@@ -377,9 +377,9 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (index === 0) {
                 return (
                     <>
-                        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+                        <div className="absolute top-16 right-4 z-10 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                {profile.age}
+                                גיל: {profile.age}
                             </div>
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
@@ -457,9 +457,9 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (logicalPhotoIndex === 1) {
                 return (
                     <>
-                        <div className="absolute top-4 right-4 z-10">
+                        <div className="absolute top-16 right-4 z-10">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                {vibeText[profile.vibe_level - 1] || 'לא צוין'}
+                                vibe: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
@@ -574,7 +574,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                 (currentPhotoIndex === 1 && !profile.video_url) || // וייב badge
                                 (currentPhotoIndex === 2 && profile.video_url) // וייב badge (shifted by video)
                             );
-                            return hasBadge ? '64px' : '12px';
+                            return hasBadge ? '112px' : '12px';
                         })() }}
                         aria-label="View Profile Info"
                     >
