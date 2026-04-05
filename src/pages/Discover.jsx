@@ -316,7 +316,7 @@ export default function DiscoverPage() {
                       className={`absolute inset-0 transition-all duration-300 ${
                         isTopCard
                           ? 'z-10 scale-100 translate-y-0 opacity-100'
-                          : '-z-10 scale-95 translate-y-12 opacity-80'
+                          : '-z-10 scale-95 translate-y-8 opacity-80'
                       }`}
                     >
                       <ProfileCard
