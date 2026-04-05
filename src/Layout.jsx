@@ -246,7 +246,7 @@ export default function Layout({ children, currentPageName }) {
         {/* אמצע: כותרת רומר */}
         <div className="flex items-center justify-center">
             <Link to={createPageUrl("Discover")} className="select-none">
-                 <h1 className="text-3xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
+                 <h1 className="text-4xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
             </Link>
         </div>
 
