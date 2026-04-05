@@ -377,7 +377,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (index === 0) {
                 return (
                     <>
-                        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+                        <div className="absolute top-16 right-4 z-10 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
@@ -422,11 +422,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                     </div>
                                 )}
                             </div>
-                            {profile.current_status === 'has_apartment' ? (
-                                <div className="text-white/90 text-base mb-3 font-medium">
-                                    ₪{profile.apartment_total_budget?.toLocaleString()} • {profile.existing_roommates} שותפים
-                                </div>
-                            ) : (
+                            {profile.current_status === 'has_apartment' ? null : (
                                 <div className="flex items-start text-white/90 text-base mb-3">
                                     <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
                                     <div className="flex flex-col">
@@ -457,7 +453,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (logicalPhotoIndex === 1) {
                 return (
                     <>
-                        <div className="absolute top-4 right-4 z-10">
+                        <div className="absolute top-16 right-4 z-10">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>

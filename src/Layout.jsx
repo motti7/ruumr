@@ -72,8 +72,8 @@ export default function Layout({ children, currentPageName }) {
                if (total > matchesCount && matchesCount !== 0) {
                    // New match detected!
                    if (Notification.permission === 'granted') {
-                       new Notification('Ruumr', {
-                           body: 'יש לך התאמה חדשה!',
+                       new Notification('ruumr', {
+                           body: 'יש לך התאמה חדשה! - ruumr',
                            icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
                        });
                    }
