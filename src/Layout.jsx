@@ -52,8 +52,8 @@ export default function Layout({ children, currentPageName }) {
            try {
                const user = await UserEntity.me();
                // Check if banned
-               const { base44 } = require('@/api/base44Client');
-               const banned = await base44.entities.BannedUser.filter({ email: user.email });
+               const { base44: b44 } = await import('@/api/base44Client');
+               const banned = await b44.entities.BannedUser.filter({ email: user.email });
                if (banned.length > 0) {
                    window.location.href = createPageUrl('Banned');
                }
@@ -148,7 +148,8 @@ export default function Layout({ children, currentPageName }) {
       const checkPhotos = async () => {
           try {
               const user = await UserEntity.me();
-              const profiles = await require('@/api/base44Client').base44.entities.Profile.filter({user_id: user.id});
+              const { base44: b44 } = await import('@/api/base44Client');
+              const profiles = await b44.entities.Profile.filter({user_id: user.id});
               if (profiles.length > 0) {
                   const p = profiles[0];
                   const hasBadPhotos = (p.photos && p.photos.some(ph => ph && ph.startsWith('blob:'))) ||

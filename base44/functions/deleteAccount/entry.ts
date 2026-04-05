@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.24';
 
 const safeDelete = async (entity, id) => {
     try { await entity.delete(id); } catch (_) {}

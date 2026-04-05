@@ -120,7 +120,7 @@ export default function OnboardingPage() {
     const trackStep = async () => {
       try {
         const user = await User.me();
-        const { PageView } = require('@/entities/PageView');
+        const { PageView } = await import('@/entities/PageView');
         await PageView.create({
           page_name: `Onboarding - Step ${step}`,
           user_id: user.id

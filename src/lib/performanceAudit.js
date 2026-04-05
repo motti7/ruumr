@@ -163,7 +163,7 @@ if (typeof window !== 'undefined') {
   window.estimateMemorySavings = estimateMemorySavings;
   window.checkIntersectionObserverActivity = checkIntersectionObserverActivity;
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     window.addEventListener('load', () => {
       console.log('💡 Image Performance Audit available. Run: await auditImagePerformance()');
     });

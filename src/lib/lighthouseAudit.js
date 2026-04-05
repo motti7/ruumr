@@ -302,7 +302,7 @@ if (typeof window !== 'undefined') {
   window.auditPerformanceMetrics = auditPerformanceMetrics;
   window.auditBestPractices = auditBestPractices;
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     window.addEventListener('load', () => {
       console.log('💡 Lighthouse Audit available. Run: window.generateLighthouseReport()');
     });

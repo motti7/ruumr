@@ -12,8 +12,10 @@ const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onC
   const handleCharterClick = useCallback(async (e) => {
     e.stopPropagation();
     try {
-      const { base44 } = require('@/api/base44Client');
-      const { User } = require('@/entities/User');
+      const [{ base44 }, { User }] = await Promise.all([
+        import('@/api/base44Client'),
+        import('@/entities/User')
+      ]);
       const user = await User.me();
       const myAnswers = await base44.entities.CharterAnswer.filter({
         match_id: matchId,

@@ -3,8 +3,19 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
+// Configure native status bar color via Capacitor (if available)
+if (window.Capacitor?.isNativePlatform?.()) {
+  try {
+    const { StatusBar, Style } = window.Capacitor.Plugins;
+    if (StatusBar) {
+      StatusBar.setBackgroundColor({ color: '#E8420A' });
+      StatusBar.setStyle({ style: 'DARK' });
+    }
+  } catch (_) {}
+}
+
 // Register audit tools in development
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   import('@/lib/accessibilityAudit.js');
   import('@/lib/performanceAudit.js');
   import('@/lib/modalTapTargetAudit.js');

@@ -179,7 +179,7 @@ if (typeof window !== 'undefined') {
   window.checkFocusVisibleInheritance = checkFocusVisibleInheritance;
   window.testKeyboardNavigation = testKeyboardNavigation;
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     window.addEventListener('load', () => {
       console.log('💡 Accessibility Audit available. Run: await auditAccessibility()');
     });

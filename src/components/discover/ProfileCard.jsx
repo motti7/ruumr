@@ -271,8 +271,11 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     }, [isActive, profile.song_preview_url]);
 
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.muted = isMuted;
+        if (!audioRef.current) return;
+        if (isMuted) {
+            audioRef.current.volume = 0;
+        } else {
+            audioRef.current.volume = 0.8;
         }
     }, [isMuted]);
 

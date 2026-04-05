@@ -142,7 +142,7 @@ if (typeof window !== 'undefined') {
   window.checkCSSMinificationSafety = checkCSSMinificationSafety;
   
   // Run on app load (optional)
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     window.addEventListener('load', () => {
       console.log('💡 Modal Tap Target Audit available. Run: await auditModalTapTargets()');
     });

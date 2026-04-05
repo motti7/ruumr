@@ -328,7 +328,7 @@ if (typeof window !== 'undefined') {
     return await suite.run();
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     window.addEventListener('load', () => {
       console.log('💡 Performance Test Suite available. Run: window.runPerformanceTest()');
       console.log('   Ensure 4x CPU throttling is enabled in Chrome DevTools');

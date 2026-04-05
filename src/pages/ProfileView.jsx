@@ -198,11 +198,11 @@ export default function ProfileViewPage() {
 
             // Try to call backend function for emails
             try {
-              const { base44 } = require('@/api/base44Client');
-              if (base44.functions?.handleSwipe) {
-                await base44.functions.handleSwipe({
-                  swiper_id: userProfile.user_id, 
-                  swiped_id: profile.user_id, 
+              const { base44: b44 } = await import('@/api/base44Client');
+              if (b44.functions?.handleSwipe) {
+                await b44.functions.handleSwipe({
+                  swiper_id: userProfile.user_id,
+                  swiped_id: profile.user_id,
                   action,
                   origin: window.location.origin
                 });

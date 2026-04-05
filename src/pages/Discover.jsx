@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
@@ -199,17 +200,14 @@ export default function DiscoverPage() {
               setMatchData({ profile1: userProfile, profile2: swipedProfile });
 
               // Async email notification (fire-and-forget)
-              try {
-                  const { base44 } = require('@/api/base44Client');
-                  base44.functions?.handleSwipe?.({
-                      swiper_id: userProfile.user_id, 
-                      swiped_id: swipedProfile.user_id, 
+              import('@/api/base44Client').then(({ base44: b44 }) => {
+                  b44.functions?.handleSwipe?.({
+                      swiper_id: userProfile.user_id,
+                      swiped_id: swipedProfile.user_id,
                       action,
                       origin: window.location.origin
-                  }).catch(() => {});
-              } catch (e) {
-                  // Silent fail for email notifications
-              }
+                  });
+              }).catch(() => {});
           }
       }
     } catch (error) { 
@@ -310,17 +308,28 @@ export default function DiscoverPage() {
         <div style={{ height: 'calc(100vh - 150px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
-              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => (
-                <ErrorBoundary key={`${profile.id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
-                    <ProfileCard
-                    profile={profile}
-                    onSwipe={handleSwipe}
-                    isActive={index === arr.length - 1}
-                    />
-                </ErrorBoundary>
-              ))
+              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
+                const isTopCard = index === arr.length - 1;
+                return (
+                  <ErrorBoundary key={`${profile.id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
+                    <div
+                      className={`absolute inset-0 transition-all duration-300 ${
+                        isTopCard
+                          ? 'z-10 scale-100 translate-y-0 opacity-100'
+                          : '-z-10 scale-95 translate-y-5 opacity-80'
+                      }`}
+                    >
+                      <ProfileCard
+                        profile={profile}
+                        onSwipe={handleSwipe}
+                        isActive={isTopCard}
+                      />
+                    </div>
+                  </ErrorBoundary>
+                );
+              })
             ) : (
-              <motion.div 
+              <motion.div
                 key="no-profiles"
                 initial={{ opacity: 0, scale: 0.9 }} 
                 animate={{ opacity: 1, scale: 1 }} 
