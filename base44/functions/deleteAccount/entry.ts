@@ -46,8 +46,8 @@ Deno.serve(async (req) => {
         const charterAnswers = await sr.CharterAnswer.filter({ user_id: userId });
         for (const ca of charterAnswers) await safeDelete(sr.CharterAnswer, ca.id);
 
-        // Delete User
-        await safeDelete(sr.User, userId);
+        // Delete the User record — this permanently removes the account
+        await sr.User.delete(userId);
 
         console.log(`✅ Account fully deleted for user ${userEmail} (${userId})`);
         return Response.json({ success: true });

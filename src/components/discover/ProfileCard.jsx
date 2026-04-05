@@ -379,7 +379,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                     <>
                         <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                גיל: {profile.age}
+                                {profile.age}
                             </div>
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
@@ -459,7 +459,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                     <>
                         <div className="absolute top-4 right-4 z-10">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
+                                {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">

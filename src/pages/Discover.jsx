@@ -314,10 +314,10 @@ export default function DiscoverPage() {
                   <ErrorBoundary key={`${profile.id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
                     <div
                       className={`absolute inset-0 transition-all duration-300 ${
-                        isTopCard
-                          ? 'z-10 scale-100 translate-y-0 opacity-100'
-                          : '-z-10 scale-95 translate-y-5 opacity-80'
-                      }`}
+                                      isTopCard
+                                        ? 'z-10 scale-100 translate-y-0 opacity-100'
+                                        : '-z-10 scale-[0.92] translate-y-10 opacity-90'
+                                    }`}
                     >
                       <ProfileCard
                         profile={profile}
