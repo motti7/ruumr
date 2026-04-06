@@ -411,7 +411,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                             {/* Info button below tags */}
                             <button
                                 onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1"
+                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1 self-end"
                                 aria-label="פרטים נוספים"
                             >
                                 <Info className="w-5 h-5 text-[--theme-orange]" />

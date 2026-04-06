@@ -1,13 +1,29 @@
-import React, { memo, useCallback } from "react";
-import { motion } from "framer-motion";
-import { MessageCircle, MapPin, Puzzle } from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId }) {
+const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
     onClickProfile();
   }, [onClickProfile]);
+
+  const handleDeleteClick = useCallback((e) => {
+    e.stopPropagation();
+    setShowConfirm(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback((e) => {
+    e.stopPropagation();
+    onDelete?.(matchId);
+  }, [matchId, onDelete]);
+
+  const handleCancelDelete = useCallback((e) => {
+    e.stopPropagation();
+    setShowConfirm(false);
+  }, []);
 
   const handleCharterClick = useCallback(async (e) => {
     e.stopPropagation();
@@ -65,7 +81,46 @@ const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onC
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <AnimatePresence mode="wait">
+            {showConfirm ? (
+              <motion.div
+                key="confirm"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex gap-1.5"
+              >
+                <button
+                  onClick={handleConfirmDelete}
+                  className="bg-red-500 text-white p-2.5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md"
+                  aria-label="אישור מחיקה"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCancelDelete}
+                  className="bg-gray-200 text-gray-600 p-2.5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md"
+                  aria-label="ביטול"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.button
+                key="delete"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                whileTap={{ scale: 0.85 }}
+                onClick={handleDeleteClick}
+                className="text-gray-400 bg-gray-100 p-3 rounded-full hover:bg-red-50 hover:text-red-400 transition-all shadow-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="הסר התאמה"
+              >
+                <Trash2 className="w-5 h-5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
           <motion.div
             whileTap={{ scale: 0.85 }}
             onClick={handleCharterClick}

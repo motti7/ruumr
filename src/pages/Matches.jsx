@@ -66,6 +66,19 @@ export default function MatchesPage() {
     return () => window.removeEventListener('roomi_seen_updated', handler);
   }, []);
 
+  const handleDeleteMatch = useCallback(async (matchId) => {
+    try {
+      await Match.delete(matchId);
+      setMatches(prev => prev.filter(m => m.id !== matchId));
+      // Also remove from seen
+      const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+      localStorage.setItem('roomi_seen_match_ids', JSON.stringify(seenIds.filter(id => id !== matchId)));
+      window.dispatchEvent(new Event('roomi_seen_updated'));
+    } catch (e) {
+      console.error("Error deleting match:", e);
+    }
+  }, []);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await loadMatches();
@@ -183,15 +196,16 @@ export default function MatchesPage() {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
                   onClickCharter={() => {
-                     // Mark match as seen (removes from unseen count badge)
-                     const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
-                     if (!seenIds.includes(match.id)) {
-                       localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
-                       window.dispatchEvent(new Event('roomi_seen_updated'));
-                     }
-                     navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                    // Mark match as seen (removes from unseen count badge)
+                    const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+                    if (!seenIds.includes(match.id)) {
+                      localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
+                      window.dispatchEvent(new Event('roomi_seen_updated'));
+                    }
+                    navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                   }}
-                />
+                  onDelete={handleDeleteMatch}
+                  />
               </motion.div>
             ))}
           </div>
