@@ -89,6 +89,20 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
+                {/* Remaining interests (those not shown on the card) */}
+                {profile.interests && profile.interests.length > 3 && (
+                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
+                        <h4 className="font-bold mb-3 text-white text-lg">תחומי עניין</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {profile.interests.slice(3).map((interest, i) => (
+                                <span key={i} className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium border border-white/30">
+                                    {interest}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3" role="list">
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">דת</span>
@@ -375,12 +389,19 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
 
         if (isRegular) {
             if (index === 0) {
+                const visibleInterests = profile.interests?.slice(0, 3) || [];
                 return (
                     <>
-                        <div className="absolute top-3 right-4 z-10 flex flex-col items-end gap-2">
+                        {/* Right column: age/vibe tags + info button */}
+                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
+                            {profile.vibe_level && (
+                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
+                                    {vibeText[profile.vibe_level - 1]}
+                                </div>
+                            )}
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Users className="w-3 h-3" />
@@ -393,6 +414,14 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                     {avgRating.toFixed(1)}
                                 </div>
                             )}
+                            {/* Info button below tags */}
+                            <button
+                                onClick={handleExpandOpen}
+                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1"
+                                aria-label="פרטים נוספים"
+                            >
+                                <Info className="w-5 h-5 text-[--theme-orange]" />
+                            </button>
                         </div>
 
                         {profile.social_link && (
@@ -443,6 +472,16 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                 <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
                                     <Home className="w-4 h-4 ml-1" />
                                     יש לי דירה!
+                                </div>
+                            )}
+                            {/* Top 3 interests */}
+                            {profile.interests && profile.interests.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {profile.interests.slice(0, 3).map((interest, i) => (
+                                        <span key={i} className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-medium border border-white/30">
+                                            {interest}
+                                        </span>
+                                    ))}
                                 </div>
                             )}
                         </div>
@@ -560,14 +599,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                         </div>
                     )}
 
-                    <button
-                        onClick={handleExpandOpen}
-                        className="absolute left-4 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group active:scale-95 touch-manipulation"
-                        style={{ top: '12px' }}
-                        aria-label="View Profile Info"
-                    >
-                        <Info className="w-5 h-5 text-[--theme-orange]" />
-                    </button>
+                    {/* Info button removed from here — rendered inside getPhotoContent for index 0 */}
 
                     {media.length > 0 ? getPhotoContent(currentPhotoIndex) : (
                          // Fallback content when no media
