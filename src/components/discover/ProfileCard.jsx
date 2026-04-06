@@ -389,19 +389,13 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
 
         if (isRegular) {
             if (index === 0) {
-                const visibleInterests = profile.interests?.slice(0, 3) || [];
                 return (
                     <>
-                        {/* Right column: age/vibe tags + info button */}
+                        {/* Right column: age tag + info button */}
                         <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
                             </div>
-                            {profile.vibe_level && (
-                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                    {vibeText[profile.vibe_level - 1]}
-                                </div>
-                            )}
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Users className="w-3 h-3" />
@@ -474,29 +468,49 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                     יש לי דירה!
                                 </div>
                             )}
-                            {/* Top 3 interests */}
-                            {profile.interests && profile.interests.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 mt-2">
-                                    {profile.interests.slice(0, 3).map((interest, i) => (
-                                        <span key={i} className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-medium border border-white/30">
-                                            {interest}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
+
                         </div>
                     </>
                 );
             } 
             
             if (logicalPhotoIndex === 1) {
+                const interests = profile.interests || [];
                 return (
                     <>
-                        <div className="absolute top-16 right-4 z-10">
+                        {/* Right column: vibe tag + info button */}
+                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
+                            <button
+                                onClick={handleExpandOpen}
+                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1"
+                                aria-label="פרטים נוספים"
+                            >
+                                <Info className="w-5 h-5 text-[--theme-orange]" />
+                            </button>
                         </div>
+                        {/* Interests scattered: top-left */}
+                        {interests.length > 0 && (
+                            <div className="absolute top-3 left-4 z-20 flex flex-col items-start gap-2">
+                                {interests.slice(0, 2).map((interest, i) => (
+                                    <span key={i} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
+                                        {interest}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {/* Interests: bottom-left above gradient */}
+                        {interests.length > 2 && (
+                            <div className="absolute bottom-32 left-4 z-20 flex flex-col items-start gap-2">
+                                {interests.slice(2, 4).map((interest, i) => (
+                                    <span key={i} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
+                                        {interest}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
                             <h3 className="text-xl font-bold text-white mb-2">התקציב שלי</h3>
                             <div className="text-white/95 text-4xl font-black">
@@ -510,10 +524,22 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             
             if (logicalPhotoIndex === 2) {
                 return (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
-                        <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
-                        <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
-                    </div>
+                    <>
+                        {/* Info button on right */}
+                        <div className="absolute top-3 right-4 z-20">
+                            <button
+                                onClick={handleExpandOpen}
+                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation"
+                                aria-label="פרטים נוספים"
+                            >
+                                <Info className="w-5 h-5 text-[--theme-orange]" />
+                            </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
+                            <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
+                            <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
+                        </div>
+                    </>
                 );
             }
         } else if (profile.current_status === 'has_apartment') {
