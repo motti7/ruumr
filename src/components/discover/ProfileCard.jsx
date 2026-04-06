@@ -391,7 +391,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
             if (index === 0) {
                 return (
                     <>
-                        {/* Right column: age tag + info button */}
+                        {/* Tags column - top right */}
                         <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 גיל: {profile.age}
@@ -408,15 +408,16 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                     {avgRating.toFixed(1)}
                                 </div>
                             )}
-                            {/* Info button below tags */}
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1 self-end"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
                         </div>
+                        {/* Info button - fixed to right edge, below tags */}
+                        <button
+                            onClick={handleExpandOpen}
+                            className="absolute right-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation"
+                            style={{ top: '120px' }}
+                            aria-label="פרטים נוספים"
+                        >
+                            <Info className="w-5 h-5 text-[--theme-orange]" />
+                        </button>
 
                         {profile.social_link && (
                             <a 
@@ -478,19 +479,21 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                 const interests = profile.interests || [];
                 return (
                     <>
-                        {/* Right column: vibe tag + info button */}
-                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
+                        {/* Vibe tag - top right */}
+                        <div className="absolute top-3 right-4 z-20">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
                         </div>
+                        {/* Info button - fixed to right edge, below vibe tag */}
+                        <button
+                            onClick={handleExpandOpen}
+                            className="absolute right-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation"
+                            style={{ top: '80px' }}
+                            aria-label="פרטים נוספים"
+                        >
+                            <Info className="w-5 h-5 text-[--theme-orange]" />
+                        </button>
                         {/* Interests scattered: top-left */}
                         {interests.length > 0 && (
                             <div className="absolute top-3 left-4 z-20 flex flex-col items-start gap-2">
