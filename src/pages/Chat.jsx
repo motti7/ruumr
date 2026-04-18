@@ -218,7 +218,7 @@ export default function ChatPage() {
   const lastMyMsgIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => m.sender_id === user?.id).slice(-1)[0]?.i;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir="rtl">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
         <BackButton className="text-gray-600" />
@@ -252,9 +252,10 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
       <VirtualizedMessageList
        messages={messages}
-       containerHeight="flex-1"
+       containerHeight="100%"
        otherIsTyping={otherIsTyping}
        renderMessage={(msg, idx) => {
          const isMyMessage = msg.sender_id === user.id;
@@ -280,6 +281,7 @@ export default function ChatPage() {
          );
        }}
       />
+      </div>
 
       {/* Header banner */}
       {showWaitingBanner && (
