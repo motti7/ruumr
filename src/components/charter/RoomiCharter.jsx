@@ -250,7 +250,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         <X className="w-6 h-6 text-white" />
       </button>
 
-      <div className="h-full flex items-center justify-center px-4 pt-16 pb-6 overflow-y-auto">
+      <div className="h-full flex items-center justify-center px-4 pt-16 pb-6 overflow-y-auto" style={{ alignItems: 'center' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion.id}
@@ -261,32 +261,32 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
             className="w-full max-w-md"
           >
             <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl shadow-2xl overflow-hidden">
-              <div className="px-6 pt-6 pb-4 text-center">
+              <div className="px-6 pt-9 pb-6 text-center">
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="text-6xl mb-3"
+                  className="text-6xl mb-4"
                 >
                   {currentQuestion.emoji}
                 </motion.div>
-                <h2 className="text-2xl font-black text-white leading-snug mb-1">
+                <h2 className="text-2xl font-black text-white leading-snug mb-2">
                   {currentQuestion.title}
                 </h2>
                 <p className="text-base text-white/80 font-bold">מה אתה/ת מעדיפ/ה?</p>
               </div>
               
-              <div className="px-6 pb-6 space-y-3">
+              <div className="px-6 pb-9 space-y-4">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleAnswer('a')}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-base p-4 rounded-2xl shadow-lg leading-snug text-right"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-base py-6 px-4 rounded-2xl shadow-lg leading-snug text-right"
                 >
                   {currentQuestion.option_a}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleAnswer('b')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-base p-4 rounded-2xl shadow-lg leading-snug text-right"
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-base py-6 px-4 rounded-2xl shadow-lg leading-snug text-right"
                 >
                   {currentQuestion.option_b}
                 </motion.button>
