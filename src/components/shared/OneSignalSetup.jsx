@@ -2,15 +2,9 @@ import { useEffect } from 'react';
 
 export default function OneSignalSetup() {
     useEffect(() => {
-        // Initialize OneSignal with environment variables
-        const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+        // OneSignal App ID (hardcoded — update requires new app version)
+        const appId = '3a9b850f-9934-49fe-8862-4776d1dc36e3';
         const safariWebId = import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID;
-        
-        // Skip initialization if keys are not configured
-        if (!appId) {
-            console.warn('OneSignal: VITE_ONESIGNAL_APP_ID not configured');
-            return;
-        }
 
         if (typeof window !== 'undefined' && window.OneSignal) {
             window.OneSignal = window.OneSignal || [];
@@ -46,11 +40,11 @@ export const OneSignalHelpers = {
     async sendNotification(userId, title, message, url) {
         // זה צריך להיעשות מהצד server
         // אבל אפשר להשתמש ב-OneSignal REST API
-        const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+        const appId = '3a9b850f-9934-49fe-8862-4776d1dc36e3';
         const restApiKey = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
         
-        if (!appId || !restApiKey) {
-            console.error('OneSignal: Missing VITE_ONESIGNAL_APP_ID or VITE_ONESIGNAL_REST_API_KEY');
+        if (!restApiKey) {
+            console.error('OneSignal: Missing VITE_ONESIGNAL_REST_API_KEY');
             return null;
         }
 
