@@ -58,6 +58,8 @@ export default function DiscoverPage() {
       const likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
       const likedMeIds = likedMeSwipes.map(s => String(s.swiper_id));
 
+      const isAdminViewer = user.email === 'mottishif7@gmail.com';
+
       const availableProfiles = allProfiles.filter(p => {
         // 1. Filter out self and already swiped
         if (String(p.user_id) === String(user.id) || swipedIds.includes(String(p.user_id))) return false;
@@ -65,18 +67,19 @@ export default function DiscoverPage() {
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
 
-        // 3. Gender Matching (Safe check)
-        // If data is missing, we assume match to not hide profiles unnecessarily in early stage
-        const myGender = currentUserProfile.gender || 'male'; 
-        const myPreference = currentUserProfile.looking_for_gender || 'any';
-        
-        const theirGender = p.gender || 'male';
-        const theirPreference = p.looking_for_gender || 'any';
+        // 3. Gender Matching (Admin bypasses gender filter for review purposes)
+        if (!isAdminViewer) {
+          const myGender = currentUserProfile.gender || 'male'; 
+          const myPreference = currentUserProfile.looking_for_gender || 'any';
+          
+          const theirGender = p.gender || 'male';
+          const theirPreference = p.looking_for_gender || 'any';
 
-        const theyWantMe = (theirPreference === 'any' || theirPreference === myGender);
-        const iWantThem = (myPreference === 'any' || myPreference === theirGender);
+          const theyWantMe = (theirPreference === 'any' || theirPreference === myGender);
+          const iWantThem = (myPreference === 'any' || myPreference === theirGender);
 
-        if (!theyWantMe || !iWantThem) return false;
+          if (!theyWantMe || !iWantThem) return false;
+        }
 
         // 4. Status Matching
         // Only block if BOTH clearly have an apartment (searching for roommate for THEIR apartment)
