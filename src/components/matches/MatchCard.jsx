@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete }) {
+const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
@@ -121,16 +121,25 @@ const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onC
               </motion.button>
             )}
           </AnimatePresence>
-          <motion.div
-            whileTap={{ scale: 0.85 }}
-            onClick={handleCharterClick}
-            className="text-white bg-[--theme-orange] dark:bg-orange-500 p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center"
-            role="button"
-            tabIndex={0}
-            aria-label="compatibility checker"
-          >
-            <Puzzle className="w-5 h-5" />
-          </motion.div>
+          <div className="relative">
+            <motion.div
+              whileTap={{ scale: 0.85 }}
+              onClick={handleCharterClick}
+              className={`p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                isOpened
+                  ? "text-gray-400 bg-gray-100"
+                  : "text-white bg-[--theme-orange] dark:bg-orange-500"
+              }`}
+              role="button"
+              tabIndex={0}
+              aria-label="compatibility checker"
+            >
+              <Puzzle className="w-5 h-5" />
+            </motion.div>
+            {!isOpened && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

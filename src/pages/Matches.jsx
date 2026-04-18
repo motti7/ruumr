@@ -195,6 +195,7 @@ export default function MatchesPage() {
                   onClickChat={() => {
                      navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                   }}
+                  isOpened={seenMatchIds.includes(match.id)}
                   onClickCharter={() => {
                     // Mark match as seen (removes from unseen count badge)
                     const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');

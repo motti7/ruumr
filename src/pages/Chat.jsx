@@ -61,26 +61,26 @@ export default function ChatPage() {
       setUser(userData);
       userRef.current = userData;
 
-      // Try to find the match by fetching all matches for the current user
+      // Find the match by fetching matches for the current user
       const [matchesAs1, matchesAs2] = await Promise.all([
         Match.filter({ user1_id: userData.id }),
         Match.filter({ user2_id: userData.id }),
       ]);
       const allMatches = [...matchesAs1, ...matchesAs2];
       const matchData = allMatches.find(m => m.id === matchId);
-      if (!matchData) { navigate(createPageUrl("Matches")); return; }
+      if (!matchData) { setIsLoading(false); navigate(createPageUrl("Matches")); return; }
       setMatch(matchData);
 
-
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
-      const profiles = await Profile.filter({ user_id: otherUserId });
+
+      const [profiles, theirAnswers, matchMessages] = await Promise.all([
+        Profile.filter({ user_id: otherUserId }),
+        base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId }),
+        Message.filter({ match_id: matchId }, "created_date"),
+      ]);
+
       if (profiles.length > 0) setOtherProfile(profiles[0]);
-
-      const allQuestions = 8;
-      const theirAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId });
-      setShowWaitingBanner(theirAnswers.length < allQuestions);
-
-      const matchMessages = await Message.filter({ match_id: matchId }, "created_date");
+      setShowWaitingBanner(theirAnswers.length < 8);
       setMessages(matchMessages);
 
       // Mark unread messages as read
@@ -97,7 +97,6 @@ export default function ChatPage() {
             const newMsg = event.data;
             setMessages(prev => {
               if (prev.find(m => m.id === newMsg.id)) return prev;
-              // Auto-mark as read if incoming
               if (newMsg.sender_id !== userRef.current?.id && !newMsg.is_read) {
                 Message.update(newMsg.id, { is_read: true }).catch(() => {});
                 newMsg.is_read = true;
@@ -110,9 +109,13 @@ export default function ChatPage() {
         }
       });
 
-      // Subscribe to CharterAnswer changes
+      // Subscribe to CharterAnswer changes — only update the waiting banner
       const unsubCharter = base44.entities.CharterAnswer.subscribe((event) => {
-        if (event.data?.match_id === matchId) loadData();
+        if (event.data?.match_id === matchId && event.data?.user_id === otherUserId) {
+          base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId })
+            .then(answers => setShowWaitingBanner(answers.length < 8))
+            .catch(() => {});
+        }
       });
 
       // Subscribe to typing status
@@ -126,12 +129,13 @@ export default function ChatPage() {
         }
       });
 
+      setIsLoading(false);
       return () => { unsubMsg(); unsubCharter(); unsubTyping(); };
     } catch (error) {
       console.error("Error loading chat:", error);
+      setIsLoading(false);
       navigate(createPageUrl("Matches"));
     }
-    setIsLoading(false);
   };
 
   const handleTyping = async (value) => {
