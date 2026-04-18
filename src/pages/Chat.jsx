@@ -251,6 +251,21 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* Waiting banner - shown at top before messages */}
+      {showWaitingBanner && (
+       <motion.div
+         initial={{ opacity: 0, y: -20 }}
+         animate={{ opacity: 1, y: 0 }}
+         className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mx-4 my-3"
+       >
+         <Clock className="w-12 h-12 text-white mx-auto mb-3" />
+         <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
+         <p className="text-white/90 text-sm">
+           {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
+         </p>
+       </motion.div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto">
       <VirtualizedMessageList
@@ -282,21 +297,6 @@ export default function ChatPage() {
        }}
       />
       </div>
-
-      {/* Header banner */}
-      {showWaitingBanner && (
-       <motion.div
-         initial={{ opacity: 0, y: -20 }}
-         animate={{ opacity: 1, y: 0 }}
-         className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mx-4 mb-4"
-       >
-         <Clock className="w-12 h-12 text-white mx-auto mb-3" />
-         <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
-         <p className="text-white/90 text-sm">
-           {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
-         </p>
-       </motion.div>
-      )}
 
       {!showWaitingBanner && (
        <div className="mx-4 mb-4">
