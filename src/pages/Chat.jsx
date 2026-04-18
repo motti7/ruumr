@@ -61,11 +61,16 @@ export default function ChatPage() {
       setUser(userData);
       userRef.current = userData;
 
-      const matches = await Match.filter({ id: matchId });
-      if (matches.length === 0) { navigate(createPageUrl("Matches")); return; }
-
-      const matchData = matches[0];
+      // Try to find the match by fetching all matches for the current user
+      const [matchesAs1, matchesAs2] = await Promise.all([
+        Match.filter({ user1_id: userData.id }),
+        Match.filter({ user2_id: userData.id }),
+      ]);
+      const allMatches = [...matchesAs1, ...matchesAs2];
+      const matchData = allMatches.find(m => m.id === matchId);
+      if (!matchData) { navigate(createPageUrl("Matches")); return; }
       setMatch(matchData);
+
 
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
       const profiles = await Profile.filter({ user_id: otherUserId });
