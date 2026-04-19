@@ -34,12 +34,14 @@ export default function SettingsPage() {
   const [notifyLikes, setNotifyLikes] = useState(true);
   const [notifyMatches, setNotifyMatches] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       const userData = await User.me();
       setNotifyLikes(userData.notify_likes !== false);
       setNotifyMatches(userData.notify_matches !== false);
+      setIsAdmin(userData.role === 'admin');
     };
     load();
   }, []);
@@ -114,10 +116,12 @@ export default function SettingsPage() {
             </Button>
             
 
-            <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-gray-400 text-xs">
-                <Shield className="w-3 h-3 ml-2" />
-                Admin: User Management
-            </Button>
+            {isAdmin && (
+              <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-2 border-orange-300 text-orange-600 font-bold">
+                <Shield className="w-4 h-4 ml-2" />
+                ניהול משתמשים (Admin)
+              </Button>
+            )}
         </div>
       </div>
     </div>
