@@ -247,7 +247,11 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         <X className="w-6 h-6 text-white" />
       </button>
 
-      <div className="absolute inset-0 flex items-center justify-center px-4" style={{ top: '72px', bottom: '0px', alignItems: 'center' }}>
+      {/* האזור שבין כפתור ה-X (72px מלמעלה) לפוטר (80px מלמטה) */}
+      <div
+        className="absolute flex items-center justify-center px-4"
+        style={{ top: '72px', bottom: '80px', left: 0, right: 0 }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion.id}
