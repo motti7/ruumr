@@ -34,7 +34,7 @@ export default function DiscoverPage() {
     {
       queryKey: ['swipes', userProfile?.user_id],
       updateFn: (old = [], newSwipe) => [...old, newSwipe],
-      onError: () => alert("שגיאה בשמירת הסווייפ. אנא נסה שוב."),
+      onError: () => {},
     }
   );
 
@@ -218,7 +218,6 @@ export default function DiscoverPage() {
         // Rollback optimistic update on server failure
         setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
-        alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
     }
   }, [currentIndex, profiles.length, userProfile]);
   

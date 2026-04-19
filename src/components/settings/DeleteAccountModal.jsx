@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AlertTriangle, Loader2, X } from "lucide-react";
+import { AlertTriangle, Loader2, X, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
@@ -7,17 +7,25 @@ import { createPageUrl } from "@/utils";
 
 export default function DeleteAccountModal({ isOpen, onClose }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+
+  const showToast = (message, type = 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleConfirmDeletion = async () => {
     setIsDeleting(true);
     try {
       await base44.functions.invoke("deleteAccount", {});
-      alert("ruumr: החשבון והמידע שלך נמחקו בהצלחה.");
-      await User.logout();
-      window.location.href = createPageUrl("Home");
+      showToast("החשבון והמידע שלך נמחקו בהצלחה.", "success");
+      setTimeout(async () => {
+        await User.logout();
+        window.location.href = createPageUrl("Home");
+      }, 1500);
     } catch (error) {
       console.error("Delete account error:", error);
-      alert("אירעה שגיאה במחיקת הנתונים. אנא נסה שנית או צור קשר עם התמיכה.");
+      showToast("אירעה שגיאה במחיקת הנתונים. אנא נסה שנית או צור קשר עם התמיכה.");
       setIsDeleting(false);
     }
   };
@@ -27,7 +35,22 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
   };
 
   return (
-    <AnimatePresence>
+    <>
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[300] px-5 py-3 rounded-2xl shadow-xl text-white font-bold text-sm flex items-center gap-2 ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
+            dir="rtl"
+          >
+            {toast.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -125,5 +148,6 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }
