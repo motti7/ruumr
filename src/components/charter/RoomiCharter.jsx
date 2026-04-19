@@ -160,7 +160,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
     if (!currentQuestion || !currentUserId) return;
 
     const qId = currentQuestion.id;
-    setDirection(option === 'a' ? 1 : -1);
+    setDirection(option === 'a' ? -1 : 1);
     
     try {
       await base44.entities.CharterAnswer.create({
