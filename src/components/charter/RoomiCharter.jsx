@@ -18,24 +18,24 @@ const CHARTER_DATA = {
           "id": "q_smoking",
           "title": "עישון בדירה",
           "emoji": "🚬",
-          "option_a": "בכיף, חופשי בסלון",
-          "option_b": "איכס! רק בחוץ/במרפסת",
+          "option_a": "זורם/ת, תרגישו חופשי",
+          "option_b": "מעדיפ/ה אוויר נקי",
           "compromise": "מעשנים רק במרפסת (עם דלת סגורה!)"
         },
         {
           "id": "q_partners",
           "title": "בני/בנות זוג",
           "emoji": "😍",
-          "option_a": "בית פתוח - שיישנו פה חופשי",
-          "option_b": "מוגזם - גג פעמיים בשבוע",
+          "option_a": "הבית פתוח, כולם מוזמנים",
+          "option_b": "מעדיפ/ה את הלבד שלי",
           "compromise": "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות."
         },
         {
           "id": "q_pets",
           "title": "בעלי חיים",
           "emoji": "🐶",
-          "option_a": "מת על חיות, תביאו הכל",
-          "option_b": "אלרגי / לא מתחבר",
+          "option_a": "אין על חיות!",
+          "option_b": "אלרגי / פחות מתאים לי",
           "compromise": "אין פשרה (זה Dealbreaker). חייבים להסכים מראש."
         }
       ]
@@ -49,8 +49,8 @@ const CHARTER_DATA = {
           "id": "q_cleaning_strictness",
           "title": "ניקיון - עד כמה מקפידים?",
           "emoji": "🧹",
-          "option_a": "בית מרקחת: חייב להיות מצוחצח תמיד (יש טבלה ואין ויתורים!)",
-          "option_b": "חיים פה: מנקים כשרואים לכלוך, לא צריך להשתגע",
+          "option_a": "אוהב/ת ניקיון, יש טבלה מסודרת",
+          "option_b": "קליל/ה, מנקים כשצריך",
           "compromise": "מנקים 'יסודי' פעם בשבוע (סופ\"ש), ובשאר הזמן שומרים על סביר."
         },
         {
@@ -71,8 +71,8 @@ const CHARTER_DATA = {
           "id": "q_dishes",
           "title": "כלים בכיור",
           "emoji": "🍽️",
-          "option_a": "שוטפים מיד אחרי האוכל!",
-          "option_b": "זורמים... שוטפים כשמצטבר",
+          "option_a": "שוטפ/ת מיד, לא סובלת ערימות",
+          "option_b": "יחכה למחר, הכל טוב",
           "compromise": "חוק ה-24 שעות: הכיור חייב להיות ריק לפני שהולכים לישון."
         },
         {
@@ -247,7 +247,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         <X className="w-6 h-6 text-white" />
       </button>
 
-      <div className="absolute inset-0 flex items-center justify-center px-4" style={{ top: '72px', bottom: '0px' }}>
+      <div className="absolute inset-0 flex items-center justify-center px-4" style={{ top: '72px', bottom: '0px', alignItems: 'center' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion.id}
@@ -269,7 +269,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
                 <h2 className="text-2xl font-black text-white leading-snug mb-2">
                   {currentQuestion.title}
                 </h2>
-                <p className="text-base text-white/80 font-bold">מה אתה/ת מעדיפ/ה?</p>
+                <p className="text-base text-white/80 font-bold">מה את/ה מעדיפ/ה?</p>
               </div>
               
               <div className="px-6 pb-12 space-y-4">
