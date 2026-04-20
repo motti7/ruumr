@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart, ClipboardList } from "lucide-react";
+import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart, ClipboardList, BarChart2 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -179,6 +179,10 @@ export default function AdminUsersPage() {
                         <Button onClick={() => navigate(createPageUrl('AdminCharter'))} variant="outline" className="border-purple-300 text-purple-600 hover:bg-purple-50">
                             <ClipboardList className="w-4 h-4 ml-2" />
                             שאלון התאמה
+                        </Button>
+                        <Button onClick={() => navigate(createPageUrl('AdminAnalytics'))} variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+                            <BarChart2 className="w-4 h-4 ml-2" />
+                            Analytics
                         </Button>
                         <Button onClick={loadData} variant="outline"><Loader2 className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} /> רענן</Button>
                     </div>

@@ -19,6 +19,7 @@ import PageTransition from './components/shared/PageTransition';
 const GroupTracker = lazy(() => import('./pages/GroupTracker'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'));
 
 const PageLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
         <Route path="/GroupTracker" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
+        <Route path="/AdminAnalytics" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminAnalytics"><AdminAnalytics /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
