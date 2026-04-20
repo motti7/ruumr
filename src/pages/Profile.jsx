@@ -80,9 +80,14 @@ export default function ProfilePage() {
     } catch (error) { console.error("Error saving profile:", error); }
   };
 
-  // Image compression utility
+  // Image compression + HEIF/HEIC conversion utility
   const compressImage = async (file) => {
-    if (file.size < 1024 * 1024) return file; // Skip if smaller than 1MB
+    const isHeif = file.type === 'image/heif' || file.type === 'image/heic' || 
+                   file.name?.toLowerCase().endsWith('.heif') || file.name?.toLowerCase().endsWith('.heic');
+    const needsConversion = isHeif || file.size >= 1024 * 1024;
+    
+    if (!needsConversion) return file;
+
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -91,18 +96,17 @@ export default function ProfilePage() {
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxWidth = 800;
-          if (img.width <= maxWidth && file.size < 300000) { resolve(file); return; }
-          const scaleSize = maxWidth / img.width;
-          canvas.width = maxWidth;
+          const maxWidth = 1200;
+          const scaleSize = img.width > maxWidth ? maxWidth / img.width : 1;
+          canvas.width = img.width * scaleSize;
           canvas.height = img.height * scaleSize;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          ctx.canvas.toBlob((blob) => {
+          canvas.toBlob((blob) => {
             if (!blob) { resolve(file); return; }
-            const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+            const newFile = new File([blob], file.name.replace(/\.(heif|heic)$/i, '.jpg'), { type: 'image/jpeg', lastModified: Date.now() });
             resolve(newFile);
-          }, 'image/jpeg', 0.6);
+          }, 'image/jpeg', 0.8);
         };
         img.onerror = () => resolve(file);
       };
