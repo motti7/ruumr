@@ -7,10 +7,6 @@ import { queryClientInstance } from '@/lib/query-client'
 
 import NavigationTracker from '@/lib/NavigationTracker'
 import OneSignalSetup from '@/components/shared/OneSignalSetup'
-import { initPostHog, identifyUser } from '@/lib/analytics'
-
-// Initialize PostHog once at app startup
-initPostHog();
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
@@ -42,13 +38,6 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
   const location = useLocation();
 
-  // Identify user in PostHog (must be before any early returns)
-  React.useEffect(() => {
-    if (user?.id) {
-      identifyUser(user.id, { email: user.email, name: user.full_name });
-    }
-  }, [user?.id]);
-
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -63,11 +52,13 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
+      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
+  // Render the main app
   return (
     <>
     <OneSignalSetup userId={user?.id} />
