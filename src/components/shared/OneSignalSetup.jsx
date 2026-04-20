@@ -1,26 +1,33 @@
 import { useEffect } from 'react';
 
-export default function OneSignalSetup() {
-    useEffect(() => {
-        // OneSignal App ID (hardcoded — update requires new app version)
-        const appId = '3a9b850f-9934-49fe-8862-4776d1dc36e3';
-        const safariWebId = import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID;
+const ONESIGNAL_APP_ID = '3a9b850f-9934-49fe-8862-4776d1dc36e3';
 
-        if (typeof window !== 'undefined' && window.OneSignal) {
-            window.OneSignal = window.OneSignal || [];
-            
-            window.OneSignal.push(function() {
-                window.OneSignal.init({
-                    appId: appId,
-                    safari_web_id: safariWebId || "web.onesignal.auto",
-                    notifyButton: {
-                        enable: false, // לא מציגים את הכפתור המובנה
-                    },
-                    allowLocalhostAsSecureOrigin: true, // לפיתוח מקומי
-                });
+export default function OneSignalSetup({ userId }) {
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+        window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: ONESIGNAL_APP_ID,
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true,
             });
-        }
+
+            // בקשת הרשאה אוטומטית
+            await OneSignal.Notifications.requestPermission();
+        });
     }, []);
+
+    // כאשר יש userId — מגדירים External User ID כדי שנוכל לשלוח לו התראות
+    useEffect(() => {
+        if (!userId) return;
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.login(userId);
+        });
+    }, [userId]);
 
     return null;
 }

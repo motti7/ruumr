@@ -6,6 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 
 import NavigationTracker from '@/lib/NavigationTracker'
+import OneSignalSetup from '@/components/shared/OneSignalSetup'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
@@ -34,7 +35,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
   const location = useLocation();
 
   // Show loading spinner while checking app public settings or auth
@@ -59,6 +60,8 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <>
+    <OneSignalSetup userId={user?.id} />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location?.pathname}>
         <Route path="/" element={
@@ -87,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
+    </>
   );
 };
 
