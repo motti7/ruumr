@@ -24,9 +24,29 @@ export default function LikesYouPage() {
         setError(null);
         try {
             const user = await User.me();
-            const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-            const swiperIds = likes.map(l => l.swiper_id);
-            
+
+            // Fetch all profiles ever created by this user (covers account migrations/old IDs)
+            const { base44: b44 } = await import('@/api/base44Client');
+            const allMyProfiles = await b44.entities.Profile.filter({ created_by: user.email });
+            const allMyUserIds = new Set([user.id]);
+            allMyProfiles.forEach(p => { if (p.user_id) allMyUserIds.add(p.user_id); });
+
+            // Fetch likes for all known IDs in parallel
+            const likesArrays = await Promise.all(
+                [...allMyUserIds].map(id => Swipe.filter({ swiped_id: id, action: "like" }))
+            );
+            const allLikes = likesArrays.flat();
+
+            // Deduplicate by swiper_id
+            const seen = new Set();
+            const uniqueLikes = allLikes.filter(l => {
+                if (seen.has(l.swiper_id)) return false;
+                seen.add(l.swiper_id);
+                return true;
+            });
+
+            const swiperIds = uniqueLikes.map(l => l.swiper_id);
+
             if (swiperIds.length > 0) {
                 const profilesData = await Promise.all(
                     swiperIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))

@@ -167,7 +167,7 @@ export default function DiscoverPage() {
       const swipeData = {
           swiper_id: userProfile.user_id,
           swiper_name: userProfile.name,
-          swiped_id: swipedProfile.user_id,
+          swiped_id: swipedProfile.user_id,  // user_id from profile
           swiped_name: swipedProfile.name,
           action
       };
