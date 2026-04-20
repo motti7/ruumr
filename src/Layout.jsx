@@ -152,8 +152,9 @@ export default function Layout({ children, currentPageName }) {
               const profiles = await b44.entities.Profile.filter({user_id: user.id});
               if (profiles.length > 0) {
                   const p = profiles[0];
-                  const hasBadPhotos = (p.photos && p.photos.some(ph => ph && ph.startsWith('blob:'))) ||
-                                       (p.apartment_photos && p.apartment_photos.some(ph => ph && ph.startsWith('blob:')));
+                  const isBadPhoto = (ph) => ph && (ph.startsWith('blob:') || ph.toLowerCase().endsWith('.heic') || ph.toLowerCase().endsWith('.heif'));
+                  const hasBadPhotos = (p.photos && p.photos.some(isBadPhoto)) ||
+                                       (p.apartment_photos && p.apartment_photos.some(isBadPhoto));
                   if (hasBadPhotos) {
                       setShowPhotoError(true);
                   }
