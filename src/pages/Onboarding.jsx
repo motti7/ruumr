@@ -15,6 +15,7 @@ import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import { analytics } from '@/lib/analytics';
 
 const TOTAL_STEPS = 11; 
 
@@ -108,6 +109,8 @@ export default function OnboardingPage() {
       try {
         const userData = await User.me();
         setFormData(prev => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
+        analytics.identify(userData.id, { email: userData.email, name: userData.full_name });
+        analytics.userSignedUp('email');
       } catch (e) {
         // If user is not logged in, redirect to login page then back here
         base44.auth.redirectToLogin(window.location.href);
@@ -204,6 +207,12 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
+      analytics.profileCompleted({
+        budget: formData.budget_max,
+        city: formData.search_cities?.[0] || '',
+        vibe_level: formData.vibe_level,
+      });
+
       const finalData = { 
           ...formData, 
           photos: formData.photos.filter(p => p),
