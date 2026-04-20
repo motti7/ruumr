@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Loader2, ImageOff } from "lucide-react";
-import { getCacheStatus, preloadImage } from "@/lib/imageCache";
+import { ImageOff } from "lucide-react";
 
 /**
- * SmartImage — image renderer with Intersection Observer lazy loading.
- * Only loads images when within 200px of viewport (significant low-memory savings).
- * Backed by central imageCache service for instant rendering.
+ * SmartImage — reliable lazy-loading image component.
+ * Uses IntersectionObserver to defer loading until near viewport.
+ * Falls back to immediate loading for priority images.
  */
 export default function SmartImage({
     src,
@@ -16,75 +15,72 @@ export default function SmartImage({
     showSkeleton = false,
     ...props
 }) {
-    const initialStatus = src ? (getCacheStatus(src) ?? 'loading') : 'error';
-    const [status, setStatus] = useState(initialStatus);
-    const [isInViewport, setIsInViewport] = useState(priority); // Priority images always load
+    const [status, setStatus] = useState('idle'); // idle | loading | loaded | error
     const containerRef = useRef(null);
+    const imgRef = useRef(null);
 
-    // Intersection Observer: trigger load only when 200px near viewport
     useEffect(() => {
-        if (priority || !containerRef.current) return;
+        if (!src) {
+            setStatus('error');
+            return;
+        }
 
+        setStatus('idle');
+
+        if (priority) {
+            // Load immediately
+            loadImage(src);
+            return;
+        }
+
+        // Lazy load via IntersectionObserver
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
-                    setIsInViewport(true);
-                    observer.unobserve(entry.target);
+                    observer.disconnect();
+                    loadImage(src);
                 }
             },
-            { rootMargin: '200px' }
+            { rootMargin: '300px' }
         );
 
-        observer.observe(containerRef.current);
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
         return () => observer.disconnect();
-    }, [priority]);
+    }, [src, priority]);
 
-    // Load image only if in viewport or priority
-    useEffect(() => {
-        if (!src || !isInViewport) return;
-
-        const cached = getCacheStatus(src);
-        if (cached === 'loaded') { setStatus('loaded'); return; }
-        if (cached === 'error')  { setStatus('error');  return; }
-
+    const loadImage = (url) => {
         setStatus('loading');
-        preloadImage(src, priority ? 'high' : 'auto').then(() => {
-            const result = getCacheStatus(src);
-            setStatus(result === 'loaded' ? 'loaded' : 'error');
-        });
-    }, [src, isInViewport, priority]);
+        const img = new window.Image();
+        img.onload = () => setStatus('loaded');
+        img.onerror = () => setStatus('error');
+        img.src = url;
+    };
 
     if (!src || status === 'error') {
         return (
-            <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`}>
+            <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`} onClick={onClick}>
                 <ImageOff className="w-8 h-8 text-gray-300" />
             </div>
         );
     }
 
     return (
-        <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 ${className}`} onClick={onClick}>
-            {status === 'loading' && (
-                showSkeleton ? (
-                    <div className="absolute inset-0 z-0">
-                        {/* Skeleton component should be imported by parent if used */}
-                        <div className="w-full h-full animate-pulse bg-gray-200" />
-                    </div>
-                ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse z-0">
-                        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                    </div>
-                )
+        <div ref={containerRef} className={`relative overflow-hidden bg-gray-200 ${className}`} onClick={onClick}>
+            {(status === 'idle' || status === 'loading') && (
+                <div className="absolute inset-0 animate-pulse bg-gray-200" />
             )}
-            <img
-                src={src}
-                alt={alt || "תמונה"}
-                className={`w-full h-full object-cover transition-opacity duration-500 ease-in-out ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
-                loading={priority ? "eager" : "lazy"}
-                decoding={priority ? "sync" : "async"}
-                fetchPriority={priority ? "high" : "auto"}
-                {...props}
-            />
+            {status === 'loaded' && (
+                <img
+                    ref={imgRef}
+                    src={src}
+                    alt={alt || "תמונה"}
+                    className="w-full h-full object-cover"
+                    loading={priority ? "eager" : "lazy"}
+                />
+            )}
         </div>
     );
 }
