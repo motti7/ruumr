@@ -14,6 +14,7 @@ import { Heart, X, Home, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
+import { Analytics } from "@/lib/analytics";
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -174,6 +175,9 @@ export default function DiscoverPage() {
 
       await swipeMutation.mutateAsync(swipeData);
 
+      // Track swipe
+      Analytics.swipeAction(action === 'like' ? 'right' : 'left', swipedProfile.user_id);
+
       // Check for match only on 'like'
       if (action === 'like') {
           const reverseSwipes = await Swipe.filter({ 
@@ -198,6 +202,7 @@ export default function DiscoverPage() {
                       user2_name: swipedProfile.name,
                       status: 'active'
                   });
+                  Analytics.matchCreated(userProfile.user_id, swipedProfile.user_id);
               }
 
               setMatchData({ profile1: userProfile, profile2: swipedProfile });

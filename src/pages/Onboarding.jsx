@@ -15,6 +15,7 @@ import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import { Analytics } from '@/lib/analytics';
 
 const TOTAL_STEPS = 11; 
 
@@ -217,6 +218,15 @@ export default function OnboardingPage() {
           song_image: formData.song_image || null
       };
       await Profile.create(finalData);
+
+      // Track profile completion
+      Analytics.userSignedUp('email');
+      Analytics.profileCompleted({
+          budget: finalData.budget_max,
+          city: finalData.location || (finalData.search_cities?.[0] ?? ''),
+          vibe_level: finalData.vibe_level,
+      });
+
       if (shouldVerify) {
         navigate(createPageUrl('Verification'));
       } else {
