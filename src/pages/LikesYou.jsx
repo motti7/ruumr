@@ -7,7 +7,6 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
-import VirtualizedGrid from '@/components/shared/VirtualizedGrid';
 import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function LikesYouPage() {
@@ -103,38 +102,8 @@ export default function LikesYouPage() {
             )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-                <VirtualizedGrid
-                    items={profiles}
-                    columns={2}
-                    itemHeight={380}
-                    gap={16}
-                    renderItem={(profile) => (
-                        <div
-                            className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative group cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Mark like as seen
-                                const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
-                                setSeenLikeIds(newSeen);
-                                localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
-                                navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
-                            }}
-                        >
-                            <div className="aspect-[3/4] relative">
-                                <SmartImage 
-                                    src={profile.photos?.[0]} 
-                                    className="w-full h-full" 
-                                    alt={profile.name}
-                                    priority={false}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
-                                    <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
-                                    <p className="text-white/80 text-xs">{profile.location}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    emptyState={
+                <div className="px-4 py-4">
+                    {profiles.length === 0 ? (
                         <div className="col-span-2 text-center py-20 px-4">
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <ThumbsUp className="w-10 h-10 text-gray-300" />
@@ -142,8 +111,39 @@ export default function LikesYouPage() {
                             <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">עדיין אין לייקים</h3>
                             <p className="text-gray-500 dark:text-gray-400">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
                         </div>
-                    }
-                />
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4">
+                            {profiles.map((profile, index) => (
+                                <motion.div
+                                    key={profile.id || profile.user_id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                    onClick={() => {
+                                        const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
+                                        setSeenLikeIds(newSeen);
+                                        localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
+                                        navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
+                                    }}
+                                >
+                                    <div className="aspect-[3/4] relative">
+                                        <SmartImage
+                                            src={profile.photos?.[0]}
+                                            className="w-full h-full"
+                                            alt={profile.name}
+                                            priority={false}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                                            <h3 className="text-white font-bold text-lg">{profile.name}, {profile.age}</h3>
+                                            <p className="text-white/80 text-xs">{profile.location}</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </PullToRefresh>
         </div>
     );
