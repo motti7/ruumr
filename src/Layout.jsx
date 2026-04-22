@@ -234,7 +234,7 @@ export default function Layout({ children, currentPageName }) {
             
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
-                <div className="max-w-md mx-auto px-2 flex items-center justify-between" style={{backgroundColor: '#FFE8E2'}}>
+                <div className="max-w-md mx-auto px-2 flex items-center justify-between">
         
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
         <div className="flex items-center gap-2">
