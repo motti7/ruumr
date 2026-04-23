@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -526,38 +526,6 @@ export default function OnboardingPage() {
                 </div>
             </Step>
             
-            <Step step={3} currentStep={step} title="לוקיישן ותקציב">
-                <div className="space-y-8 text-right">
-                    <div className="space-y-2">
-                        <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <MapPin className="text-[--theme-orange]" />
-                            איפה נחפש?
-                        </label>
-                        <p className="text-sm text-gray-500 mb-2">אפשר לבחור מספר ערים</p>
-                        <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <DollarSign className="text-[--theme-orange]" />
-                            מה התקציב שלך?
-                        </label>
-                        <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 text-center">
-                            <span className="text-4xl font-black text-[--theme-orange]">₪{formData.budget_max}</span>
-                            <span className="text-sm text-gray-500 mr-2">לחודש</span>
-                        </div>
-                        <Slider
-                  value={[formData.budget_max]}
-                  min={1000}
-                  max={10000}
-                  step={100}
-                  onValueChange={(v) => setFormField('budget_max', v[0])}
-                  className="py-4" />
-                
-                    </div>
-                </div>
-            </Step>
-
             <Step step={3} currentStep={step} title="העדפות">
                 <div className="space-y-3 text-right">
                     {/* אני מחפש/ת */}
