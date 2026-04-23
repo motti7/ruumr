@@ -564,11 +564,11 @@ export default function ProfilePage() {
                         <motion.div 
                             animate={{ rotate: formData.song_name ? 360 : 0 }}
                             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                            className="w-full h-full rounded-full border-4 border-[#FA3803] bg-[#FA3803] shadow-xl overflow-hidden relative"
+                            className="w-full h-full rounded-full border-4 border-[#FA3803] shadow-xl overflow-hidden relative"
                         >
                             <img 
                                 src={formData.song_image || "https://upload.wikimedia.org/wikipedia/commons/b/b6/12in-Vinyl-LP-Record-Angle.jpg"} 
-                                className={`w-full h-full object-cover ${formData.song_name ? 'opacity-80' : 'opacity-40 grayscale'}`}
+                                className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="w-10 h-10 bg-white rounded-full border-2 border-[#FA3803] shadow-inner flex items-center justify-center">
