@@ -638,9 +638,9 @@ export default function OnboardingPage() {
 
 
             <Step step={5} currentStep={step} title="תחומי עניין">
-                <div className="space-y-4 text-right">
-                    <p className="text-center text-xs mb-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
-                    <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-col h-full text-right">
+                    <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
+                    <div className="flex flex-wrap gap-1.5 justify-center mb-3">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     return (
@@ -654,7 +654,7 @@ export default function OnboardingPage() {
                           [...current, interest.id]
                           );
                         }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                        className={`px-2 py-1 rounded-full text-xs font-semibold border-2 transition-all ${
                         selected ?
                         'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm' :
                         'border-gray-200 bg-white text-gray-600'}`
@@ -664,16 +664,18 @@ export default function OnboardingPage() {
                   })}
                     </div>
 
-                    {/* קצת עליי */}
-                    <div className="space-y-1 pt-2">
-                        <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>קצת עליי</label>
-                        <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
-                    </div>
+                    <div className="flex-1 flex flex-col gap-2 min-h-0">
+                        {/* קצת עליי */}
+                        <div className="flex-1 flex flex-col min-h-0">
+                            <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>קצת עליי</label>
+                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none flex-1" style={{ borderColor: '#B9BFC8' }} />
+                        </div>
 
-                    {/* מה אני מחפש/ת */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
-                        <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
+                        {/* מה אני מחפש/ת */}
+                        <div className="flex-1 flex flex-col min-h-0">
+                            <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
+                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none flex-1" style={{ borderColor: '#B9BFC8' }} />
+                        </div>
                     </div>
                 </div>
             </Step>
