@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, Dog, Cat, X, Plus, Loader2, PawPrint, Home, Search, MapPin, DollarSign, Music, Coffee, Beer, Book, Instagram, Sparkles, Facebook } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Instagram, Facebook, MapPin, DollarSign } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 const INTERESTS_LIST = [
 { id: 'cooking', label: '🍳 בישול משותף' },
@@ -136,13 +136,9 @@ export default function OnboardingPage() {
     switch (step) {
       case 1: // Basic Info
         return formData.name.trim() && formData.age >= 18 && formData.gender;
-      case 2: // Status + Location + Budget (combined)
+      case 2: // Status + Location + Budget + Vibe (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 3: // Location & Budget (legacy - kept for skip logic)
-        return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 4: // Vibe
-        return formData.vibe_level;
-      case 5: // Preferences + Pets (merged)
+      case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
           formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
       case 6: // Apartment Details - Conditional
@@ -155,7 +151,7 @@ export default function OnboardingPage() {
         return formData.about_me.trim() && formData.looking_for_description.trim();
       case 8: // Interests
         return true; // Optional
-      case 9: // Spotify
+      case 9: // Song
         return true; // Optional
       case 10: // Photos
         return formData.photos.filter((p) => p).length >= 2;
@@ -166,7 +162,7 @@ export default function OnboardingPage() {
 
   const nextStep = () => {
     if (step === 2) {
-      setStep(4); // Skip step 3 (location/budget now in step 2)
+      setStep(5); // Skip steps 3 (legacy) and 4 (old vibe, now merged into step 2)
     } else if (step === 5 && formData.current_status === 'seeking_apartment') {
       setStep(7); // Skip apartment details
     } else {
@@ -176,12 +172,13 @@ export default function OnboardingPage() {
 
   const isHasApartment = formData.current_status === 'has_apartment';
   let displayStep = step;
-  if (!isHasApartment && step > 5) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 11 : 10;
+  if (step >= 5) displayStep = step - 2; // steps 3 and 4 are unused
+  if (!isHasApartment && step > 5) displayStep = step - 3;
+  const displayTotal = isHasApartment ? 9 : 8;
 
   const prevStep = () => {
-    if (step === 4) {
-      setStep(2); // Skip step 3 (combined into step 2)
+    if (step === 5) {
+      setStep(2); // Skip steps 3 and 4 (legacy + old vibe)
     } else if (step === 7 && formData.current_status === 'seeking_apartment') {
       setStep(5);
     } else {
@@ -382,14 +379,6 @@ export default function OnboardingPage() {
     }
   };
 
-  const VibeIcon = ({ level }) => {
-    if (level <= 1) return <Book className="w-16 h-16 text-blue-500 mb-4" />;
-    if (level === 2) return <Coffee className="w-16 h-16 text-green-500 mb-4" />;
-    if (level === 3) return <Music className="w-16 h-16 text-yellow-500 mb-4" />;
-    if (level >= 4) return <Beer className="w-16 h-16 text-red-500 mb-4" />;
-    return <Music className="w-16 h-16 text-gray-500 mb-4" />;
-  };
-
   return (
     <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }`}</style>
@@ -487,7 +476,6 @@ export default function OnboardingPage() {
                     {/* Budget */}
                     <div className="pt-1 text-right">
                         <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
-                        {/* Thumb value label */}
                         <div className="relative w-full mb-1">
                             <div
                                 className="absolute text-sm font-bold text-black"
@@ -509,10 +497,27 @@ export default function OnboardingPage() {
                             step={100}
                             onValueChange={(v) => setFormField('budget_max', v[0])}
                             className="py-0" />
-                        {/* Min / Max labels inline with bar */}
                         <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
                             <span>min 10,000</span>
                             <span>max 1,000</span>
+                        </div>
+                    </div>
+
+                    {/* Vibe */}
+                    <div className="pt-1 text-right">
+                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>מה הוויב שלך?</h3>
+                        <Slider
+                            dir="ltr"
+                            value={[formData.vibe_level]}
+                            onValueChange={(v) => setFormField('vibe_level', v[0])}
+                            max={5}
+                            min={1}
+                            step={1}
+                            className="py-0" />
+                        <div className="flex justify-between text-xs mt-1" style={{ color: '#B9BFC8' }}>
+                            <span>תוסס ומסיבתי</span>
+                            <span>מאוזן</span>
+                            <span>שקט וביתי</span>
                         </div>
                     </div>
                 </div>
@@ -548,31 +553,6 @@ export default function OnboardingPage() {
                 
                     </div>
                 </div>
-            </Step>
-
-            <Step step={4} currentStep={step} title="מה הוייב שלך?">
-                 <div className="flex flex-col items-center justify-center h-full space-y-8">
-                      <VibeIcon level={formData.vibe_level} />
-                      
-                      <div className="w-full px-4">
-                          <Slider dir="ltr" value={[formData.vibe_level]} onValueChange={(v) => setFormField('vibe_level', v[0])} max={5} min={1} step={1} className="py-4" />
-                          <div className="flex justify-between text-sm font-bold text-gray-600 mt-4 w-full">
-                              <span className="text-red-500">תוסס ומסיבתי</span>
-                              <span className="text-yellow-500">מאוזן</span>
-                              <span className="text-blue-500">שקט וביתי</span>
-                          </div>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-4 rounded-xl text-center">
-                          <p className="text-lg font-medium text-gray-700">
-                            {formData.vibe_level <= 1 && "אני מעדיף/ה את השקט שלי, בית זה המבצר."}
-                            {formData.vibe_level === 2 && "אוהב/ת שקט אבל גם לארח מדי פעם."}
-                            {formData.vibe_level === 3 && "מאוזן/ת - לפעמים שקט ולפעמים אקשן."}
-                            {formData.vibe_level === 4 && "חברותי/ת מאוד, הבית תמיד פתוח."}
-                            {formData.vibe_level >= 5 && "מסיבות, חברים, רעש ושמחה!"}
-                          </p>
-                      </div>
-                  </div>
             </Step>
 
             <Step step={5} currentStep={step} title="העדפות">
