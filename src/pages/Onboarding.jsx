@@ -48,7 +48,7 @@ const Step = ({ children, step, currentStep, title }) =>
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
     
-        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803' }}>{title}</h2>}
+        {title && <h2 className="mb-2 text-3xl font-black text-center hidden" style={{ color: '#FA3803' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
             {children}
         </div>
@@ -136,9 +136,9 @@ export default function OnboardingPage() {
     switch (step) {
       case 1: // Basic Info
         return formData.name.trim() && formData.age >= 18 && formData.gender;
-      case 2: // Status + Location + Budget
-        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 3: // Location & Budget (was 4) - kept for skip logic
+      case 2: // Status
+        return formData.current_status !== '';
+      case 3: // Location & Budget (was 4)
         return formData.search_cities.length > 0 && formData.budget_max > 0;
       case 4: // Vibe (was 5)
         return formData.vibe_level;
@@ -166,8 +166,8 @@ export default function OnboardingPage() {
   };
 
   const nextStep = () => {
-    if (step === 2) {
-      setStep(4); // Step 2 now includes status+city+budget, skip old step 3
+    if (step === 2 && formData.current_status === 'seeking_apartment') {
+      setStep((s) => s + 1);
     } else if (step === 6 && formData.current_status === 'seeking_apartment') {
       setStep(8); // Skip apartment details
     } else {
@@ -181,9 +181,7 @@ export default function OnboardingPage() {
   const displayTotal = isHasApartment ? 12 : 11;
 
   const prevStep = () => {
-    if (step === 4) {
-      setStep(2); // Skip old step 3 when going back
-    } else if (step === 8 && formData.current_status === 'seeking_apartment') {
+    if (step === 8 && formData.current_status === 'seeking_apartment') {
       setStep(6);
     } else {
       setStep((s) => Math.max(s - 1, 1));
@@ -392,7 +390,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl">
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
@@ -407,25 +405,19 @@ export default function OnboardingPage() {
                  
                  <div className="w-10" />
              </div>
-             <div className="flex gap-2">
-               {[1, 2, 3, 4, 5].map((seg) => {
-                 const activeSegment = Math.ceil(displayStep / displayTotal * 5);
-                 const isActive = seg === activeSegment;
-                 const isFilled = seg < activeSegment;
-                 return (
-                   <div
-                     key={seg}
-                     className="flex-1 h-2 rounded-full transition-colors duration-300"
-                     style={{ backgroundColor: isActive ? '#FA3803' : isFilled ? '#FFE8E2' : '#FFE8E2' }}
-                   />
-                 );
-               })}
+             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                 <motion.div
+              className="h-full gradient-orange"
+              initial={{ width: 0 }}
+              animate={{ width: `${displayStep / displayTotal * 100}%` }}
+              transition={{ duration: 0.5 }} />
+            
              </div>
         </div>
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center mb-8" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
                 <div className="space-y-6">
                     <div className="space-y-2 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
@@ -462,67 +454,22 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={2} currentStep={step} title="מה הסטטוס?">
-                <div className="space-y-3 text-right">
-                    {/* Status Cards */}
-                    <div className="space-y-2">
-                        <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-md' : 'border-gray-100 bg-white shadow-sm'}`}>
-                            <div className="flex justify-between items-center mb-0.5">
-                                <h3 className="text-base font-black text-gray-800">מחפש/ת דירה</h3>
-                                <Search className={`w-4 h-4 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
-                            </div>
-                            <p className="text-gray-500" style={{ fontSize: '11px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
-                        </button>
-
-                        <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-md' : 'border-gray-100 bg-white shadow-sm'}`}>
-                            <div className="flex justify-between items-center mb-0.5">
-                                <h3 className="text-base font-black text-gray-800">יש לי דירה</h3>
-                                <Home className={`w-4 h-4 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
-                            </div>
-                            <p className="text-gray-500" style={{ fontSize: '11px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
-                        </button>
-                    </div>
-
-                    {/* City Selector */}
-                    <div>
-                        <h3 className="text-base font-black text-gray-800 mb-0.5">איפה?</h3>
-                        <p className="text-xs mb-1.5" style={{ color: '#FA3803' }}>ניתן לבחור ממספר ערים</p>
-                        <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
-                    </div>
-
-                    {/* Budget Slider */}
-                    <div>
-                        <h3 className="text-base font-black text-gray-800 mb-1">תקציב לשותף</h3>
-                        <div className="px-1">
-                            {/* Floating tooltip slider */}
-                            <div className="relative pt-5">
-                                {/* Floating value above thumb */}
-                                <div
-                                    className="absolute top-0 pointer-events-none"
-                                    style={{
-                                        left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% + ${8 - ((formData.budget_max - 1000) / (10000 - 1000)) * 16}px)`,
-                                        transform: 'translateX(-50%)',
-                                    }}
-                                >
-                                    <span className="text-xs font-bold text-black whitespace-nowrap">
-                                        ₪{formData.budget_max.toLocaleString()}
-                                    </span>
-                                </div>
-                                <Slider
-                                    dir="ltr"
-                                    value={[formData.budget_max]}
-                                    min={1000}
-                                    max={10000}
-                                    step={100}
-                                    onValueChange={(v) => setFormField('budget_max', v[0])}
-                                    className="py-1" />
-                                {/* Min/Max labels below bar */}
-                                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                    <span>10,000</span>
-                                    <span>1,000</span>
-                                </div>
-                            </div>
+                <div className="space-y-4 mt-4">
+                    <button type="button" onClick={() => {setFormField('current_status', 'seeking_apartment');nextStep();}} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-black text-gray-800">מחפש/ת דירה</h3>
+                            <Search className={`w-6 h-6 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                    </div>
+                        <p className="text-gray-500">אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
+                    </button>
+
+                    <button type="button" onClick={() => {setFormField('current_status', 'has_apartment');nextStep();}} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-black text-gray-800">יש לי דירה</h3>
+                            <Home className={`w-6 h-6 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                        </div>
+                        <p className="text-gray-500">יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
+                    </button>
                 </div>
             </Step>
             
