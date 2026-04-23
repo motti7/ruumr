@@ -13,6 +13,7 @@ import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
+import SongPlayerVariants from '@/components/song/SongPlayerVariants';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -553,6 +554,15 @@ export default function ProfilePage() {
         </div>
         
         <div className="space-y-4">
+            {/* SONG VARIANTS DISPLAY */}
+            <div className="mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 text-right">בחר עיצוב לנגן השיר</h3>
+              <SongPlayerVariants 
+                song={formData} 
+                onSelect={(variant) => setFormData(prev => ({ ...prev, song_player_variant: variant }))}
+              />
+            </div>
+
             {/* SONG SECTION - MOVED HERE */}
             <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
                 <div className={`w-full h-full rounded-[2.5rem] bg-gradient-to-br from-gray-900 to-black p-6 shadow-2xl relative overflow-hidden border border-gray-800 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
