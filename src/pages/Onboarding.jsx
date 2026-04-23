@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
 { id: 'cooking', label: '🍳 בישול משותף' },
@@ -162,9 +162,7 @@ export default function OnboardingPage() {
   if (step === 3 && formData.current_status === 'seeking_apartment') {
     setStep(5); // Skip apartment details
   } else if (step === 5) {
-    setStep(6); // Go directly to merged Interests + About + Looking For
-  } else if (step === 6) {
-    setStep(7); // Go to photos (skipping old song step)
+    setStep(6); // Go to photos
   } else {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
   }
@@ -178,8 +176,6 @@ export default function OnboardingPage() {
   const prevStep = () => {
   if (step === 5 && formData.current_status === 'seeking_apartment') {
     setStep(3);
-  } else if (step === 6) {
-    setStep(5);
   } else {
     setStep((s) => Math.max(s - 1, 1));
   }
@@ -394,7 +390,8 @@ export default function OnboardingPage() {
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
       <div className="w-full max-w-md flex flex-col h-[85vh]">
-        {/* Progress Bar */}
+        {/* Progress Bar - Hidden on Final Step */}
+        {step !== 7 && (
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
@@ -415,6 +412,7 @@ export default function OnboardingPage() {
                  ))}
              </div>
         </div>
+        )}
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
@@ -637,30 +635,9 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={5} currentStep={step} title="קישור חברתי">
-                <div className="space-y-4 text-right">
-                    <label className="text-sm font-bold mb-2 block" style={{ color: '#FA3803' }}>קישור לרשת חברתית</label>
-                    <div className="flex gap-4 justify-center mb-4">
-                        <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
-                            <Instagram className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
-                            <Facebook className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="p-2.5 bg-black rounded-full shadow-sm">
-                            <SiTiktok className="w-5 h-5 text-white" />
-                        </div>
-                    </div>
-                    <Input
-              value={formData.social_link}
-              onChange={(e) => setFormField('social_link', e.target.value)}
-              placeholder="הדבק קישור כאן"
-              className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-base text-right"
-              dir="rtl" />
-                </div>
-            </Step>
 
-            <Step step={6} currentStep={step} title="תחומי עניין">
+
+            <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="space-y-4 text-right">
                     <p className="text-center text-xs mb-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
                     <div className="flex flex-wrap gap-2 justify-center">
@@ -701,7 +678,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="התמונות שלי">
+            <Step step={6} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
@@ -733,8 +710,9 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={8} currentStep={step} title="אימות פרופיל">
+            <Step step={7} currentStep={step} title="">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                    <h2 className="text-3xl font-black" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
                         <Check className="w-16 h-16 text-blue-500" />
@@ -765,7 +743,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 8 &&
+        {step < 7 &&
         <div className="mt-6">
                 <Button
             onClick={nextStep}
