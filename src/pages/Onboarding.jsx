@@ -638,61 +638,42 @@ export default function OnboardingPage() {
 
 
             <Step step={5} currentStep={step} title="תחומי עניין">
-                <div className="space-y-3 text-right h-full flex flex-col">
-                    <div className="flex-1 flex flex-col">
-                        <label className="text-xs font-bold block mb-2" style={{ color: '#FA3803', fontFamily: 'Inter, sans-serif' }}>בחר/י תחומי עניין</label>
-                        <div className="flex flex-wrap gap-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
-                            {[
-                              {id: 'gym', label: 'חדר כושר'},
-                              {id: 'tennis', label: 'טניס'},
-                              {id: 'pilates', label: 'פילאטיס'},
-                              {id: 'yoga', label: 'יוגה'},
-                              {id: 'football', label: 'כדורגל'},
-                              {id: 'basketball', label: 'כדורסל'},
-                              {id: 'f1', label: 'פורמולה 1'},
-                              {id: 'motorcycles', label: 'אופנועים'},
-                              {id: 'gaming', label: 'גיימינג'},
-                              {id: 'lego', label: 'לגו'},
-                              {id: 'photography', label: 'צילום'},
-                              {id: 'painting', label: 'ציור'},
-                              {id: 'reading', label: 'קריאה'},
-                              {id: 'cooking', label: 'בישול ואפייה'},
-                              {id: 'concerts', label: 'הופעות'},
-                              {id: 'business', label: 'עסקים'},
-                              {id: 'entrepreneurship', label: 'יזמות'},
-                              {id: 'veganism', label: 'צמחייה'},
-                              {id: 'hiking', label: 'טיולים בטבע'},
-                            ].map(interest => {
-                              const selected = (formData.interests || []).includes(interest.id);
-                              return (
-                                <button
-                                  key={interest.id}
-                                  type="button"
-                                  onClick={() => {
-                                    const current = formData.interests || [];
-                                    setFormField('interests', selected
-                                      ? current.filter(i => i !== interest.id)
-                                      : [...current, interest.id]
-                                    );
-                                  }}
-                                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all whitespace-nowrap ${
-                                    selected
-                                      ? 'border-[#FA3803] bg-[#FA3803] text-white'
-                                      : 'border-[#B9BFC8] bg-white text-black'
-                                  }`}
-                                  style={{ fontFamily: 'Inter, sans-serif' }}
-                                >
-                                  {interest.label}
-                                </button>
-                              );
-                            })}
-                        </div>
+                <div className="space-y-4 text-right">
+                    <p className="text-center text-xs mb-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                        {INTERESTS_LIST.map((interest) => {
+                    const selected = (formData.interests || []).includes(interest.id);
+                    return (
+                      <button
+                        key={interest.id}
+                        type="button"
+                        onClick={() => {
+                          const current = formData.interests || [];
+                          setFormField('interests', selected ?
+                          current.filter((i) => i !== interest.id) :
+                          [...current, interest.id]
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                        selected ?
+                        'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm' :
+                        'border-gray-200 bg-white text-gray-600'}`
+                        }>
+                        {interest.label}
+                            </button>);
+                  })}
                     </div>
 
                     {/* קצת עליי */}
-                    <div className="space-y-1">
+                    <div className="space-y-1 pt-2">
                         <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>קצת עליי</label>
-                        <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-12" style={{ borderColor: '#B9BFC8' }} />
+                        <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
+                    </div>
+
+                    {/* מה אני מחפש/ת */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
+                        <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
                     </div>
                 </div>
             </Step>
