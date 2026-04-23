@@ -151,8 +151,8 @@ export default function OnboardingPage() {
         return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
       }
       return true;
-    case 5: // Social Link (optional)
-      return true;
+    case 5: // Interests + About + Looking For
+      return formData.about_me.trim() && formData.looking_for_description.trim();
     case 6: // Interests + About + Looking For
       return formData.about_me.trim() && formData.looking_for_description.trim();
     case 7: // Photos
@@ -644,7 +644,7 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-3 -mt-1" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0">
+                    <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0 overflow-hidden">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
