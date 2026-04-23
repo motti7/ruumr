@@ -390,7 +390,8 @@ export default function OnboardingPage() {
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
       <div className="w-full max-w-md flex flex-col h-[85vh]">
-        {/* Progress Bar */}
+        {/* Progress Bar - Hidden on Final Step */}
+        {step !== 7 && (
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
@@ -411,6 +412,7 @@ export default function OnboardingPage() {
                  ))}
              </div>
         </div>
+        )}
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
@@ -708,8 +710,9 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="אימות פרופיל">
+            <Step step={7} currentStep={step} title="">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                    <h2 className="text-3xl font-black" style={{ color: '#FA3803' }}>איזה כיף, סיימנו!</h2>
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
                         <Check className="w-16 h-16 text-blue-500" />
