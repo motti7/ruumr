@@ -511,8 +511,8 @@ export default function OnboardingPage() {
                             className="py-0" />
                         {/* Min / Max labels inline with bar */}
                         <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
-                            <span>min 1,000</span>
-                            <span>max 10,000</span>
+                            <span>min 10,000</span>
+                            <span>max 1,000</span>
                         </div>
                     </div>
                 </div>
