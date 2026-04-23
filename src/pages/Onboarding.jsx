@@ -580,7 +580,7 @@ export default function OnboardingPage() {
                             ].map(({ type, label, icon }) =>
                                 <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
                                     className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all flex items-center gap-1 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
-                                    {icon}{label}
+                                    {label}{icon}
                                 </button>
                             )}
                         </div>
