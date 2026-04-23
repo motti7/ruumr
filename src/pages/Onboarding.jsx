@@ -670,17 +670,17 @@ export default function OnboardingPage() {
                   })}
                     </div>
 
-                    <div className="flex-1 flex flex-col gap-2 min-h-0">
+                    <div className="flex flex-col gap-6 pt-4">
                         {/* קצת עליי */}
-                        <div className="flex-1 flex flex-col min-h-0">
+                        <div className="flex flex-col">
                             <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>קצת עליי</label>
-                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none flex-1" style={{ borderColor: '#B9BFC8' }} />
+                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-8" style={{ borderColor: '#B9BFC8' }} />
                         </div>
 
                         {/* מה אני מחפש/ת */}
-                        <div className="flex-1 flex flex-col min-h-0">
+                        <div className="flex flex-col">
                             <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
-                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none flex-1" style={{ borderColor: '#B9BFC8' }} />
+                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-8" style={{ borderColor: '#B9BFC8' }} />
                         </div>
                     </div>
                 </div>
