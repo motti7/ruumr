@@ -133,39 +133,41 @@ export default function OnboardingPage() {
   }, [step]);
 
   const canProceed = () => {
-    switch (step) {
-      case 1: // Basic Info + Vibe
-        return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
-      case 2: // Status + Location + Budget (combined)
-        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 3: // Preferences + Pets (merged)
-        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
-          formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 4: // Apartment Details - Conditional
-        if (formData.current_status === 'has_apartment') {
-          const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
-          return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
-        }
-        return true;
-      case 5: // About
-        return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 6: // Interests
-        return true; // Optional
-      case 7: // Spotify
-        return true; // Optional
-      case 8: // Photos
-        return formData.photos.filter((p) => p).length >= 2;
-      default:
-        return true;
-    }
+  switch (step) {
+    case 1: // Basic Info + Vibe
+      return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
+    case 2: // Status + Location + Budget (combined)
+      return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
+    case 3: // Preferences + Pets (merged)
+      return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
+        formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
+    case 4: // Apartment Details - Conditional
+      if (formData.current_status === 'has_apartment') {
+        const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
+        return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
+      }
+      return true;
+    case 5: // Social Link (optional)
+      return true;
+    case 6: // Interests + About + Looking For
+      return formData.about_me.trim() && formData.looking_for_description.trim();
+    case 7: // Spotify
+      return true; // Optional
+    case 8: // Photos
+      return formData.photos.filter((p) => p).length >= 2;
+    default:
+      return true;
+  }
   };
 
   const nextStep = () => {
-    if (step === 3 && formData.current_status === 'seeking_apartment') {
-      setStep(5); // Skip apartment details
-    } else {
-      setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
-    }
+  if (step === 3 && formData.current_status === 'seeking_apartment') {
+    setStep(5); // Skip apartment details
+  } else if (step === 5) {
+    setStep(6); // Go directly to merged Interests + About + Looking For
+  } else {
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
+  }
   };
 
   const isHasApartment = formData.current_status === 'has_apartment';
@@ -174,11 +176,13 @@ export default function OnboardingPage() {
   const displayTotal = isHasApartment ? 9 : 8;
 
   const prevStep = () => {
-    if (step === 5 && formData.current_status === 'seeking_apartment') {
-      setStep(3);
-    } else {
-      setStep((s) => Math.max(s - 1, 1));
-    }
+  if (step === 5 && formData.current_status === 'seeking_apartment') {
+    setStep(3);
+  } else if (step === 6) {
+    setStep(5);
+  } else {
+    setStep((s) => Math.max(s - 1, 1));
+  }
   };
 
   const handleFinish = async (shouldVerify = false) => {
@@ -633,66 +637,67 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={5} currentStep={step} title="ספר/י על עצמך">
-                <div className="space-y-6 text-right">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>קצת עליי (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold mb-2 block" style={{ color: '#FA3803' }}>קישור לרשת חברתית</label>
-                        <div className="flex gap-4 justify-center mb-4">
-                            <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
-                                <Instagram className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
-                                <Facebook className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="p-2.5 bg-black rounded-full shadow-sm">
-                                <SiTiktok className="w-5 h-5 text-white" />
-                            </div>
+            <Step step={5} currentStep={step} title="קישור חברתי">
+                <div className="space-y-4 text-right">
+                    <label className="text-sm font-bold mb-2 block" style={{ color: '#FA3803' }}>קישור לרשת חברתית</label>
+                    <div className="flex gap-4 justify-center mb-4">
+                        <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
+                            <Instagram className="w-5 h-5 text-white" />
                         </div>
-                        <Input
-                  value={formData.social_link}
-                  onChange={(e) => setFormField('social_link', e.target.value)}
-                  placeholder="הדבק קישור כאן"
-                  className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-lg text-right"
-                  dir="rtl" />
-                
+                        <div className="p-2.5 bg-[#1877F2] rounded-full shadow-sm">
+                            <Facebook className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="p-2.5 bg-black rounded-full shadow-sm">
+                            <SiTiktok className="w-5 h-5 text-white" />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מה אני מחפש/ת (עד 500 תווים)</label>
-                        <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg" />
-                    </div>
+                    <Input
+              value={formData.social_link}
+              onChange={(e) => setFormField('social_link', e.target.value)}
+              placeholder="הדבק קישור כאן"
+              className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] text-base text-right"
+              dir="rtl" />
                 </div>
             </Step>
 
             <Step step={6} currentStep={step} title="תחומי עניין">
-                <p className="text-center text-gray-500 mb-4">בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                    {INTERESTS_LIST.map((interest) => {
-                const selected = (formData.interests || []).includes(interest.id);
-                return (
-                  <button
-                    key={interest.id}
-                    type="button"
-                    onClick={() => {
-                      const current = formData.interests || [];
-                      setFormField('interests', selected ?
-                      current.filter((i) => i !== interest.id) :
-                      [...current, interest.id]
-                      );
-                    }}
-                    className={`px-4 py-2 rounded-full text-sm font-semibold border-2 transition-all ${
-                    selected ?
-                    'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm' :
-                    'border-gray-200 bg-white text-gray-600'}`
-                    }>
-                    
-                                {interest.label}
+                <div className="space-y-4 text-right">
+                    <p className="text-center text-xs mb-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                        {INTERESTS_LIST.map((interest) => {
+                    const selected = (formData.interests || []).includes(interest.id);
+                    return (
+                      <button
+                        key={interest.id}
+                        type="button"
+                        onClick={() => {
+                          const current = formData.interests || [];
+                          setFormField('interests', selected ?
+                          current.filter((i) => i !== interest.id) :
+                          [...current, interest.id]
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                        selected ?
+                        'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm' :
+                        'border-gray-200 bg-white text-gray-600'}`
+                        }>
+                        {interest.label}
                             </button>);
+                  })}
+                    </div>
 
-              })}
+                    {/* קצת עליי */}
+                    <div className="space-y-1 pt-2">
+                        <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>קצת עליי</label>
+                        <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
+                    </div>
+
+                    {/* מה אני מחפש/ת */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold block" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
+                        <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border-gray-300 focus:ring-[--theme-orange] text-sm resize-none h-14" style={{ borderColor: '#B9BFC8' }} />
+                    </div>
                 </div>
             </Step>
 
