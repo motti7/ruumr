@@ -136,9 +136,9 @@ export default function OnboardingPage() {
     switch (step) {
       case 1: // Basic Info
         return formData.name.trim() && formData.age >= 18 && formData.gender;
-      case 2: // Status
-        return formData.current_status !== '';
-      case 3: // Location & Budget (was 4)
+      case 2: // Status + Location + Budget (combined)
+        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
+      case 3: // Location & Budget (legacy - kept for skip logic)
         return formData.search_cities.length > 0 && formData.budget_max > 0;
       case 4: // Vibe (was 5)
         return formData.vibe_level;
@@ -166,8 +166,8 @@ export default function OnboardingPage() {
   };
 
   const nextStep = () => {
-    if (step === 2 && formData.current_status === 'seeking_apartment') {
-      setStep((s) => s + 1);
+    if (step === 2) {
+      setStep(4); // Skip step 3 (location/budget now in step 2)
     } else if (step === 6 && formData.current_status === 'seeking_apartment') {
       setStep(8); // Skip apartment details
     } else {
@@ -181,7 +181,9 @@ export default function OnboardingPage() {
   const displayTotal = isHasApartment ? 12 : 11;
 
   const prevStep = () => {
-    if (step === 8 && formData.current_status === 'seeking_apartment') {
+    if (step === 4) {
+      setStep(2); // Skip step 3 (combined into step 2)
+    } else if (step === 8 && formData.current_status === 'seeking_apartment') {
       setStep(6);
     } else {
       setStep((s) => Math.max(s - 1, 1));
@@ -457,22 +459,47 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={2} currentStep={step} title="מה הסטטוס?">
-                <div className="space-y-4 mt-4">
-                    <button type="button" onClick={() => {setFormField('current_status', 'seeking_apartment');nextStep();}} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-xl font-black text-gray-800">מחפש/ת דירה</h3>
-                            <Search className={`w-6 h-6 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                <div className="space-y-3 mt-2">
+                    {/* Status Cards */}
+                    <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-base font-black text-gray-800">מחפש/ת דירה</h3>
+                            <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500">אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
                     </button>
 
-                    <button type="button" onClick={() => {setFormField('current_status', 'has_apartment');nextStep();}} className={`w-full p-6 border-2 rounded-2xl text-right transition-all transform hover:scale-[1.02] ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-lg' : 'border-gray-100 bg-white shadow-sm'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-xl font-black text-gray-800">יש לי דירה</h3>
-                            <Home className={`w-6 h-6 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                    <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-base font-black text-gray-800">יש לי דירה</h3>
+                            <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500">יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
                     </button>
+
+                    {/* Location */}
+                    <div className="space-y-1 pt-1 text-right">
+                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>איפה?</h3>
+                        <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
+                        <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
+                    </div>
+
+                    {/* Budget */}
+                    <div className="space-y-2 pt-1 text-right">
+                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                        <div className="flex justify-between text-xs text-gray-400 px-1">
+                            <span>1,000<br/>min</span>
+                            <span className="text-center font-bold text-gray-700 text-sm">₪{formData.budget_max.toLocaleString()}</span>
+                            <span className="text-right">10,000<br/>max</span>
+                        </div>
+                        <Slider
+                            value={[formData.budget_max]}
+                            min={1000}
+                            max={10000}
+                            step={100}
+                            onValueChange={(v) => setFormField('budget_max', v[0])}
+                            className="py-1" />
+                    </div>
                 </div>
             </Step>
             
