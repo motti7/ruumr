@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 10;
 
 const INTERESTS_LIST = [
 { id: 'cooking', label: '🍳 בישול משותף' },
@@ -140,25 +140,24 @@ export default function OnboardingPage() {
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
       case 3: // Location & Budget (legacy - kept for skip logic)
         return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 4: // Vibe (was 5)
+      case 4: // Vibe
         return formData.vibe_level;
-      case 5: // Pets (was 6)
-        return formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 6: // Preferences (was 8)
-        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference;
-      case 7: // Apartment Details (was 9) - Conditional
+      case 5: // Preferences + Pets (merged)
+        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
+          formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
+      case 6: // Apartment Details - Conditional
         if (formData.current_status === 'has_apartment') {
           const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
           return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
-        return true; // Should ideally skip if seeking
-      case 8: // About
+        return true;
+      case 7: // About
         return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 9: // Interests
+      case 8: // Interests
         return true; // Optional
-      case 10: // Spotify
+      case 9: // Spotify
         return true; // Optional
-      case 11: // Photos
+      case 10: // Photos
         return formData.photos.filter((p) => p).length >= 2;
       default:
         return true;
@@ -168,8 +167,8 @@ export default function OnboardingPage() {
   const nextStep = () => {
     if (step === 2) {
       setStep(4); // Skip step 3 (location/budget now in step 2)
-    } else if (step === 6 && formData.current_status === 'seeking_apartment') {
-      setStep(8); // Skip apartment details
+    } else if (step === 5 && formData.current_status === 'seeking_apartment') {
+      setStep(7); // Skip apartment details
     } else {
       setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
     }
@@ -177,14 +176,14 @@ export default function OnboardingPage() {
 
   const isHasApartment = formData.current_status === 'has_apartment';
   let displayStep = step;
-  if (!isHasApartment && step > 6) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 12 : 11;
+  if (!isHasApartment && step > 5) displayStep = step - 1;
+  const displayTotal = isHasApartment ? 11 : 10;
 
   const prevStep = () => {
     if (step === 4) {
       setStep(2); // Skip step 3 (combined into step 2)
-    } else if (step === 8 && formData.current_status === 'seeking_apartment') {
-      setStep(6);
+    } else if (step === 7 && formData.current_status === 'seeking_apartment') {
+      setStep(5);
     } else {
       setStep((s) => Math.max(s - 1, 1));
     }
@@ -575,101 +574,74 @@ export default function OnboardingPage() {
                   </div>
             </Step>
 
-            <Step step={5} currentStep={step} title="חיות מחמד">
-                 <div className="space-y-8 text-right">
-                      <div>
-                          <label className="font-bold text-lg block text-center mb-6 text-gray-600">יש לך חיית מחמד שמצטרפת?</label>
-                          <div className="grid grid-cols-2 gap-4">
-                              {['none', 'dog', 'cat', 'other'].map((type) =>
-                  <button type="button" key={type} onClick={() => setFormField('pet_type', type)} className={`p-6 border-2 rounded-2xl flex flex-col items-center justify-center transition-all ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-md' : 'border-gray-100 bg-gray-50 text-gray-400'}`}>
-                                      {type === 'none' && <X className="w-10 h-10 mb-3" />}
-                                      {type === 'dog' && <Dog className="w-10 h-10 mb-3" />}
-                                      {type === 'cat' && <Cat className="w-10 h-10 mb-3" />}
-                                      {type === 'other' && <PawPrint className="w-10 h-10 mb-3" />}
-                                      <span className="font-bold text-lg">{
-                      { 'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר' }[type]
-                      }</span>
-                                  </button>
-                  )}
-                          </div>
-                           {formData.pet_type === 'other' &&
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-                                  <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="text-center h-12 text-lg bg-gray-50 border-gray-200" />
-                              </motion.div>
-                }
-                      </div>
-                  </div>
-            </Step>
-
-            <Step step={6} currentStep={step} title="העדפות ודת">
-                <div className="space-y-6 text-right">
-                    <div className="space-y-2">
-                        <label className="font-bold block mb-1">אני מחפש/ת</label>
+            <Step step={5} currentStep={step} title="העדפות">
+                <div className="space-y-3 text-right">
+                    {/* אני מחפש/ת */}
+                    <div>
+                        <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>אני מחפש/ת</label>
                         <div className="flex bg-gray-100 p-1 rounded-xl">
-                            {[
-                  { v: 'male', l: 'שותף' },
-                  { v: 'female', l: 'שותפה' },
-                  { v: 'any', l: 'לא משנה' }].
-                  map((opt) =>
-                  <button
-                    key={opt.v}
-                    onClick={() => setFormField('looking_for_gender', opt.v)}
-                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}>
-                    
+                            {[{ v: 'male', l: 'שותף' }, { v: 'female', l: 'שותפה' }, { v: 'any', l: 'לא משנה' }].map((opt) =>
+                                <button key={opt.v} onClick={() => setFormField('looking_for_gender', opt.v)}
+                                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}>
                                     {opt.l}
                                 </button>
-                  )}
+                            )}
                         </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <label className="font-bold block mb-1">זיקה לדת</label>
-                        <BottomSheetSelect
-                  value={formData.religion}
-                  onValueChange={(v) => setFormField('religion', v)}
-                  label="זיקה לדת"
-                  options={[
-                  { value: "secular", label: "חילוני/ת" },
-                  { value: "traditional", label: "מסורתי/ת" },
-                  { value: "national_religious", label: "דתי/ה לאומי/ת" },
-                  { value: "religious", label: "דתי/ה" },
-                  { value: "haredi", label: "חרדי/ת" }]
-                  } />
-                
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="font-bold block mb-1 text-sm">כשרות</label>
-                            <BottomSheetSelect
-                    value={formData.kosher_preference}
-                    onValueChange={(v) => setFormField('kosher_preference', v)}
-                    label="כשרות"
-                    options={[
-                    { value: "for", label: "בעד" },
-                    { value: "against", label: "נגד" },
-                    { value: "flow", label: "זורם" }]
-                    } />
-                  
+                    {/* כשרות + שבת */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>כשרות</label>
+                            <BottomSheetSelect value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)} label="כשרות"
+                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
                         </div>
-                        <div className="space-y-2">
-                            <label className="font-bold block mb-1 text-sm">שבת</label>
-                            <BottomSheetSelect
-                    value={formData.shabbat_preference}
-                    onValueChange={(v) => setFormField('shabbat_preference', v)}
-                    label="שמירת שבת"
-                    options={[
-                    { value: "for", label: "בעד" },
-                    { value: "against", label: "נגד" },
-                    { value: "flow", label: "זורם" }]
-                    } />
-                  
+                        <div>
+                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>שומר שבת</label>
+                            <BottomSheetSelect value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)} label="שמירת שבת"
+                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
                         </div>
+                    </div>
+
+                    {/* זיקה לדת */}
+                    <div>
+                        <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>זיקה לדת</label>
+                        <BottomSheetSelect value={formData.religion} onValueChange={(v) => setFormField('religion', v)} label="זיקה לדת"
+                            options={[
+                                { value: "secular", label: "חילוני/ת" },
+                                { value: "traditional", label: "מסורתי/ת" },
+                                { value: "national_religious", label: "דתי/ה לאומי/ת" },
+                                { value: "religious", label: "דתי/ה" },
+                                { value: "haredi", label: "חרדי/ת" }
+                            ]} />
+                    </div>
+
+                    {/* חיית מחמד */}
+                    <div>
+                        <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>חיית מחמד שמצטרפת?</label>
+                        <div className="flex gap-2 flex-wrap">
+                            {[
+                                { type: 'none', label: 'אין ✕' },
+                                { type: 'dog', label: 'כלב' },
+                                { type: 'cat', label: 'חתול' },
+                                { type: 'other', label: 'אחר' }
+                            ].map(({ type, label }) =>
+                                <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
+                                    className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
+                                    {label}
+                                </button>
+                            )}
+                        </div>
+                        {formData.pet_type === 'other' &&
+                            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-2">
+                                <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
+                            </motion.div>
+                        }
                     </div>
                 </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="פרטי הדירה">
+            <Step step={6} currentStep={step} title="פרטי הדירה">
                 <div className="space-y-6 text-right">
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
@@ -709,7 +681,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={8} currentStep={step} title="ספר/י על עצמך">
+            <Step step={7} currentStep={step} title="ספר/י על עצמך">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>קצת עליי (עד 500 תווים)</label>
@@ -743,7 +715,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="תחומי עניין">
+            <Step step={8} currentStep={step} title="תחומי עניין">
                 <p className="text-center text-gray-500 mb-4">בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                     {INTERESTS_LIST.map((interest) => {
@@ -772,7 +744,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={10} currentStep={step} title="אם היית שיר...">
+            <Step step={9} currentStep={step} title="אם היית שיר...">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <h2 className="text-xl font-medium text-gray-500 -mt-4">איזה שיר הוא אתה?</h2>
                     
@@ -866,7 +838,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={11} currentStep={step} title="התמונות שלי">
+            <Step step={10} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
@@ -898,7 +870,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={12} currentStep={step} title="אימות פרופיל">
+            <Step step={11} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -930,7 +902,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 12 &&
+        {step < 11 &&
         <div className="mt-6">
                 <Button
             onClick={nextStep}
