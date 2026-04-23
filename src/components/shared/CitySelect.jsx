@@ -22,6 +22,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
       onChange(selectedCities.filter(c => c !== city));
     } else {
       onChange([...selectedCities, city]);
+      setOpen(false); // Close after selecting a new city
     }
   };
 
