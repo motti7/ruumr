@@ -555,7 +555,7 @@ export default function ProfilePage() {
         <div className="space-y-4">
             {/* SONG SECTION - MOVED HERE */}
             <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
-                <div className={`w-full h-full rounded-[2.5rem] bg-gradient-to-br from-gray-900 to-black p-6 shadow-2xl relative overflow-hidden border border-gray-800 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
+                <div className={`w-full h-full rounded-[2.5rem] bg-white p-6 shadow-2xl relative overflow-hidden border border-gray-200 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
                      onClick={() => !isEditing && !formData.song_name && setIsEditing(true)}
                 >
                     
@@ -564,15 +564,15 @@ export default function ProfilePage() {
                         <motion.div 
                             animate={{ rotate: formData.song_name ? 360 : 0 }}
                             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                            className="w-full h-full rounded-full border-4 border-gray-800 bg-black shadow-xl overflow-hidden relative"
+                            className="w-full h-full rounded-full border-4 border-gray-300 bg-gray-100 shadow-xl overflow-hidden relative"
                         >
                             <img 
                                 src={formData.song_image || "https://upload.wikimedia.org/wikipedia/commons/b/b6/12in-Vinyl-LP-Record-Angle.jpg"} 
                                 className={`w-full h-full object-cover ${formData.song_name ? 'opacity-80' : 'opacity-40 grayscale'}`}
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-black rounded-full border-2 border-gray-700 shadow-inner flex items-center justify-center">
-                                    <div className="w-3 h-3 bg-black rounded-full"></div>
+                                <div className="w-10 h-10 bg-white rounded-full border-2 border-gray-300 shadow-inner flex items-center justify-center">
+                                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
                                 </div>
                             </div>
                         </motion.div>
@@ -583,26 +583,26 @@ export default function ProfilePage() {
 
                     {(isEditing && !formData.song_name) ? (
                         <div className="w-full space-y-2 relative z-20" onClick={e => e.stopPropagation()}>
-                            <Input 
-                                value={spotifySearch} 
-                                onChange={(e) => setSpotifySearch(e.target.value)} 
-                                placeholder="חפש שיר..." 
-                                className="bg-white/10 border-white/20 text-white text-center placeholder:text-white/40 h-10 text-sm"
-                                dir="rtl"
-                                onKeyDown={(e) => e.key === 'Enter' && searchSong()}
-                            />
-                            <Button 
-                                onClick={searchSong} 
-                                disabled={isSearchingSong || !spotifySearch.trim()} 
-                                className="w-full bg-white/10 hover:bg-white/20 text-white h-8 text-xs"
-                            >
-                                {isSearchingSong ? <Loader2 className="animate-spin w-3 h-3"/> : "חפש"}
-                            </Button>
+                        <Input 
+                            value={spotifySearch} 
+                            onChange={(e) => setSpotifySearch(e.target.value)} 
+                            placeholder="חפש שיר..." 
+                            className="bg-gray-100 border-gray-300 text-black text-center placeholder:text-gray-400 h-10 text-sm"
+                            dir="rtl"
+                            onKeyDown={(e) => e.key === 'Enter' && searchSong()}
+                        />
+                        <Button 
+                            onClick={searchSong} 
+                            disabled={isSearchingSong || !spotifySearch.trim()} 
+                            className="w-full bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] h-8 text-xs font-semibold"
+                        >
+                            {isSearchingSong ? <Loader2 className="animate-spin w-3 h-3"/> : "חפש"}
+                        </Button>
                         </div>
                     ) : (
                         <div className="relative z-20 w-full">
-                            <h3 className="text-white font-black text-xl mb-1 truncate px-2">{formData.song_name || "אם היית שיר..."}</h3>
-                            <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
+                            <h3 className="text-black font-black text-xl mb-1 truncate px-2">{formData.song_name || "אם היית שיר..."}</h3>
+                            <p className="text-gray-700 text-sm truncate px-4">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
                             
                             {formData.song_preview_url && (
                                 <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
@@ -610,7 +610,7 @@ export default function ProfilePage() {
                             
                             {!formData.song_name && !isEditing && (
                                 <div className="mt-3">
-                                    <span className="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-full transition-colors">
+                                    <span className="inline-flex items-center gap-1 bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] text-xs px-3 py-1.5 rounded-full transition-colors font-semibold">
                                         <Plus className="w-3 h-3" /> בחר שיר או אמן
                                     </span>
                                 </div>
@@ -621,7 +621,7 @@ export default function ProfilePage() {
                     {isEditing && formData.song_name && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
-                            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            className="absolute top-4 right-4 text-[#FA3803] hover:text-[#E64A19] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                             aria-label="הסר שיר"
                         >
                             <X className="w-5 h-5" />
