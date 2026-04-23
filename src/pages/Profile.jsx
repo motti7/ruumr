@@ -602,7 +602,7 @@ export default function ProfilePage() {
                     ) : (
                         <div className="relative z-20 w-full">
                             <h3 className="text-white font-black text-xl mb-1 truncate px-2">{formData.song_name || "אם היית שיר..."}</h3>
-                            <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
+                            <p className="text-white/60 text-sm truncate px-4">{formData.song_artist || "בחר שיר שמייצג אותך"}</p>
                             
                             {formData.song_preview_url && (
                                 <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
