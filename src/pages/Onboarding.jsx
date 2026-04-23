@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Target, Activity, Flower, Goal, Bike, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,20 +20,20 @@ const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: Target },
-{ id: 'pilates', label: 'פילאטיס', Icon: Activity },
-{ id: 'yoga', label: 'יוגה', Icon: Flower },
-{ id: 'soccer', label: 'כדורגל', Icon: Goal },
-{ id: 'basketball', label: 'כדורסל', Icon: Music },
-{ id: 'f1', label: 'פורמולה 1', Icon: Zap },
-{ id: 'motorcycles', label: 'אופנועים', Icon: Bike },
+{ id: 'tennis', label: 'טניס', Icon: TennisRacket },
+{ id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
+{ id: 'yoga', label: 'יוגה', Icon: Smile },
+{ id: 'soccer', label: 'כדורגל', Icon: Trophy },
+{ id: 'basketball', label: 'כדורסל', Icon: Target },
+{ id: 'f1', label: 'פורמולה 1', Icon: Car },
+{ id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
 { id: 'lego', label: 'לגו', Icon: Box },
 { id: 'photography', label: 'צילום', Icon: Camera },
 { id: 'painting', label: 'ציור', Icon: Palette },
 { id: 'reading', label: 'קריאה', Icon: BookOpen },
 { id: 'cooking', label: 'בישול ואפייה', Icon: UtensilsCrossed },
-{ id: 'concerts', label: 'הופעות', Icon: Music },
+{ id: 'concerts', label: 'הופעות', Icon: Mic },
 { id: 'business', label: 'עסקים', Icon: Briefcase },
 { id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
 { id: 'plants', label: 'צמחייה', Icon: Leaf },
