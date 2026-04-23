@@ -466,8 +466,8 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={2} currentStep={step} title="מה הסטטוס?">
-                <div className="space-y-2 mt-1">
+            <Step step={2} currentStep={step} title="">
+                <div className="space-y-5 mt-1">
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
@@ -486,14 +486,14 @@ export default function OnboardingPage() {
                     </button>
 
                     {/* Location */}
-                    <div className="space-y-1 pt-1 text-right">
+                    <div className="space-y-1 pt-2 text-right">
                         <h3 className="text-base font-black" style={{ color: '#FA3803' }}>איפה?</h3>
                         <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
-                    <div className="pt-1 text-right">
+                    <div className="pt-2 text-right">
                         <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                         {/* Thumb value label */}
                         <div className="relative w-full mb-1">
