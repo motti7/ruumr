@@ -493,13 +493,9 @@ export default function OnboardingPage() {
                     <div>
                         <h3 className="text-base font-black text-gray-800 mb-1">תקציב לשותף</h3>
                         <div className="px-1">
-                            <div className="flex justify-between text-xs text-gray-400 mb-0.5">
-                                <span>max 10,000</span>
-                                <span>min 1,000</span>
-                            </div>
                             {/* Floating tooltip slider */}
-                            <div className="relative pt-7 pb-1">
-                                {/* Tooltip above thumb */}
+                            <div className="relative pt-5">
+                                {/* Floating value above thumb */}
                                 <div
                                     className="absolute top-0 pointer-events-none"
                                     style={{
@@ -507,7 +503,7 @@ export default function OnboardingPage() {
                                         transform: 'translateX(-50%)',
                                     }}
                                 >
-                                    <span className="bg-[--theme-orange] text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow">
+                                    <span className="text-xs font-bold text-black whitespace-nowrap">
                                         ₪{formData.budget_max.toLocaleString()}
                                     </span>
                                 </div>
@@ -519,6 +515,11 @@ export default function OnboardingPage() {
                                     step={100}
                                     onValueChange={(v) => setFormField('budget_max', v[0])}
                                     className="py-1" />
+                                {/* Min/Max labels below bar */}
+                                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>1,000</span>
+                                    <span>10,000</span>
+                                </div>
                             </div>
                         </div>
                     </div>
