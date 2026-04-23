@@ -707,6 +707,12 @@ export default function OnboardingPage() {
                     
                                         <Camera className="w-4 h-4 text-gray-600" />
                                     </button>
+                                    <button
+                    className="absolute top-1 left-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {e.stopPropagation();setFormData((prev) => {const newPhotos = [...prev.photos];newPhotos[i] = null;return {...prev, photos: newPhotos};});}}>
+                    
+                                        <X className="w-4 h-4 text-gray-600" />
+                                    </button>
                                  </> :
 
                 <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => triggerFileInput(i)}>
