@@ -48,7 +48,7 @@ const Step = ({ children, step, currentStep, title }) =>
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
     
-        {title && <h2 className="text-[hsl(var(--primary))] mb-2 text-3xl font-black text-center">{title}</h2>}
+        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
             {children}
         </div>
@@ -416,7 +416,7 @@ export default function OnboardingPage() {
         </div>
 
         <div className="flex-1 relative">
-            <Step step={1} currentStep={step} title="נעים להכיר!">
+            <Step step={1} currentStep={step} title="בואו נכיר!">
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
                 <div className="space-y-6">
                     <div className="space-y-2 text-right">
