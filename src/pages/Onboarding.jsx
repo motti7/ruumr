@@ -405,13 +405,16 @@ export default function OnboardingPage() {
                  
                  <div className="w-10" />
              </div>
-             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                 <motion.div
-              className="h-full gradient-orange"
-              initial={{ width: 0 }}
-              animate={{ width: `${displayStep / displayTotal * 100}%` }}
-              transition={{ duration: 0.5 }} />
-            
+             <div className="flex gap-1.5">
+                 {Array.from({ length: 5 }).map((_, i) => (
+                   <div
+                     key={i}
+                     className="h-2 flex-1 rounded-full"
+                     style={{
+                       backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FFE8E2'
+                     }}
+                   />
+                 ))}
              </div>
         </div>
 
