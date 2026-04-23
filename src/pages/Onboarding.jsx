@@ -644,7 +644,7 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-0 justify-between mb-1.5 px-0">
+                    <div className="flex flex-wrap gap-0 justify-between mb-1.5 px-0 flex-1 overflow-y-auto">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
@@ -670,17 +670,17 @@ export default function OnboardingPage() {
                   })}
                     </div>
 
-                    <div className="flex flex-col gap-6 pt-4">
+                    <div className="flex flex-col gap-4 pt-2">
                         {/* קצת עליי */}
                         <div className="flex flex-col">
                             <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>קצת עליי</label>
-                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-8" style={{ borderColor: '#B9BFC8' }} />
+                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-6" style={{ borderColor: '#B9BFC8' }} />
                         </div>
 
                         {/* מה אני מחפש/ת */}
                         <div className="flex flex-col">
                             <label className="text-xs font-bold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
-                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-8" style={{ borderColor: '#B9BFC8' }} />
+                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-6" style={{ borderColor: '#B9BFC8' }} />
                         </div>
                     </div>
                 </div>
