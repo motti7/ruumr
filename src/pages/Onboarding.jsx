@@ -425,7 +425,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2 text-right">
-                            <label className="text-sm font-bold text-gray-700">גיל</label>
+                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>גיל</label>
                             <Input
                     type="number"
                     value={formData.age || ''}
@@ -437,7 +437,7 @@ export default function OnboardingPage() {
                   
                         </div>
                         <div className="space-y-2 text-right">
-                            <label className="text-sm font-bold text-gray-700">מגדר</label>
+                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
                             <BottomSheetSelect
                     value={formData.gender}
                     onValueChange={(v) => setFormField('gender', v)}
@@ -642,7 +642,7 @@ export default function OnboardingPage() {
                             </div>
                         </div>
                         
-                        <label className="text-sm font-bold text-gray-700 mb-3 block">תמונות (מינימום 3)</label>
+                        <label className="text-sm font-bold mb-3 block" style={{ color: '#FA3803' }}>תמונות (מינימום 3)</label>
                         <div className="grid grid-cols-3 gap-2">
                             {formData.apartment_photos.map((_, i) =>
                   <div
@@ -667,11 +667,11 @@ export default function OnboardingPage() {
             <Step step={8} currentStep={step} title="ספר/י על עצמך">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">קצת עליי (עד 500 תווים)</label>
+                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>קצת עליי (עד 500 תווים)</label>
                         <Textarea maxLength={500} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק, מה חשוב לך בשותפות..." className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg" />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 mb-2 block">קישור לרשת חברתית</label>
+                        <label className="text-sm font-bold mb-2 block" style={{ color: '#FA3803' }}>קישור לרשת חברתית</label>
                         <div className="flex gap-4 justify-center mb-4">
                             <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full shadow-sm">
                                 <Instagram className="w-5 h-5 text-white" />
@@ -692,7 +692,7 @@ export default function OnboardingPage() {
                 
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700">מה אני מחפש/ת (עד 500 תווים)</label>
+                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מה אני מחפש/ת (עד 500 תווים)</label>
                         <Textarea maxLength={500} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה את/ה מחפש/ת?" className="bg-gray-50 border-gray-200 focus:ring-[--theme-orange] min-h-[120px] text-lg" />
                     </div>
                 </div>
