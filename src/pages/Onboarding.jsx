@@ -20,7 +20,7 @@ const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: TennisRacket },
+{ id: 'tennis', label: 'טניס', Icon: Activity },
 { id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
 { id: 'yoga', label: 'יוגה', Icon: Smile },
 { id: 'soccer', label: 'כדורגל', Icon: Trophy },
