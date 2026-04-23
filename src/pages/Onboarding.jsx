@@ -20,8 +20,8 @@ const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: Activity },
-{ id: 'pilates', label: 'פילאטיס', Icon: Activity },
+{ id: 'tennis', label: 'טניס', Icon: TennisRacket },
+{ id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
 { id: 'yoga', label: 'יוגה', Icon: Smile },
 { id: 'soccer', label: 'כדורגל', Icon: Trophy },
 { id: 'basketball', label: 'כדורסל', Icon: Target },
@@ -398,22 +398,22 @@ export default function OnboardingPage() {
         {step !== 7 && (
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
-                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
-                      <ArrowRight className="h-6 w-6" />
-                  </Button>
-                  
-                  <div className="w-10" />
+                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
+                     <ArrowRight className="h-6 w-6" />
+                 </Button>
+                 
+                 <div className="w-10" />
              </div>
              <div className="flex gap-1.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-2 flex-1 rounded-full"
-                      style={{
-                        backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FFE8E2'
-                      }}
-                    />
-                  ))}
+                 {Array.from({ length: 5 }).map((_, i) => (
+                   <div
+                     key={i}
+                     className="h-2 flex-1 rounded-full"
+                     style={{
+                       backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FFE8E2'
+                     }}
+                   />
+                 ))}
              </div>
         </div>
         )}
@@ -580,8 +580,8 @@ export default function OnboardingPage() {
                         <div className="flex gap-2 flex-wrap">
                             {[
                                 { type: 'none', label: 'אין ✕', icon: null },
-                                { type: 'dog', label: 'כלב', icon: <Dog className="w-[1em] h-[1em]" style={{ fill: 'currentColor', stroke: 'none' }} /> },
-                                { type: 'cat', label: 'חתול', icon: <Cat className="w-[1em] h-[1em]" style={{ fill: 'currentColor', stroke: 'none' }} /> },
+                                { type: 'dog', label: 'כלב', icon: <Dog className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
+                                { type: 'cat', label: 'חתול', icon: <Cat className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
                                 { type: 'other', label: 'אחר', icon: null }
                             ].map(({ type, label, icon }) =>
                                 <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
@@ -643,8 +643,8 @@ export default function OnboardingPage() {
 
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
-                    <p className="text-center text-xs mb-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-1.5 justify-center mb-2 px-0 w-full">
+                    <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
+                    <div className="flex flex-wrap gap-0 justify-between mb-1.5 px-0">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
@@ -659,13 +659,13 @@ export default function OnboardingPage() {
                           [...current, interest.id]
                           );
                         }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 whitespace-nowrap ${
+                        className={`px-1 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 ${
                         selected ?
                         'bg-[#FA3803] text-white border-[#FA3803]' :
                         'bg-white text-black border-[#B9BFC8]'}`
                         }>
                         {interest.label}
-                        <Icon className={`w-4 h-4 flex-shrink-0`} stroke="none" fill="currentColor" />
+                        <Icon className={`w-4 h-4 flex-shrink-0 stroke-current`} strokeWidth={2} fill="none" />
                             </button>);
                   })}
                     </div>
