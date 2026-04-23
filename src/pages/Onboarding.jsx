@@ -459,7 +459,7 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={2} currentStep={step} title="מה הסטטוס?">
-                <div className="space-y-3 mt-2">
+                <div className="space-y-2 mt-1">
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
@@ -485,12 +485,22 @@ export default function OnboardingPage() {
                     </div>
 
                     {/* Budget */}
-                    <div className="space-y-2 pt-1 text-right">
-                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
-                        <div className="flex justify-between text-xs text-gray-400 px-1">
-                            <span>1,000<br/>min</span>
-                            <span className="text-center font-bold text-gray-700 text-sm">₪{formData.budget_max.toLocaleString()}</span>
-                            <span className="text-right">10,000<br/>max</span>
+                    <div className="pt-1 text-right">
+                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                        {/* Thumb value label */}
+                        <div className="relative w-full mb-1">
+                            <div
+                                className="absolute text-sm font-bold text-black"
+                                style={{
+                                    left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% - 20px)`,
+                                    top: 0,
+                                    minWidth: '40px',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {formData.budget_max.toLocaleString()}
+                            </div>
+                            <div className="h-4" />
                         </div>
                         <Slider
                             value={[formData.budget_max]}
@@ -498,7 +508,12 @@ export default function OnboardingPage() {
                             max={10000}
                             step={100}
                             onValueChange={(v) => setFormField('budget_max', v[0])}
-                            className="py-1" />
+                            className="py-0" />
+                        {/* Min / Max labels inline with bar */}
+                        <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
+                            <span>min 1,000</span>
+                            <span>max 10,000</span>
+                        </div>
                     </div>
                 </div>
             </Step>
