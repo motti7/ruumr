@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 const INTERESTS_LIST = [
 { id: 'cooking', label: '🍳 בישול משותף' },
@@ -134,30 +134,26 @@ export default function OnboardingPage() {
 
   const canProceed = () => {
     switch (step) {
-      case 1: // Basic Info
-        return formData.name.trim() && formData.age >= 18 && formData.gender;
+      case 1: // Basic Info + Vibe
+        return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
       case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 3: // Location & Budget (legacy - kept for skip logic)
-        return formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 4: // Vibe
-        return formData.vibe_level;
-      case 5: // Preferences + Pets (merged)
+      case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
           formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 6: // Apartment Details - Conditional
+      case 4: // Apartment Details - Conditional
         if (formData.current_status === 'has_apartment') {
           const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
           return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
         return true;
-      case 7: // About
+      case 5: // About
         return formData.about_me.trim() && formData.looking_for_description.trim();
-      case 8: // Interests
+      case 6: // Interests
         return true; // Optional
-      case 9: // Spotify
+      case 7: // Spotify
         return true; // Optional
-      case 10: // Photos
+      case 8: // Photos
         return formData.photos.filter((p) => p).length >= 2;
       default:
         return true;
@@ -165,10 +161,8 @@ export default function OnboardingPage() {
   };
 
   const nextStep = () => {
-    if (step === 2) {
-      setStep(4); // Skip step 3 (location/budget now in step 2)
-    } else if (step === 5 && formData.current_status === 'seeking_apartment') {
-      setStep(7); // Skip apartment details
+    if (step === 3 && formData.current_status === 'seeking_apartment') {
+      setStep(5); // Skip apartment details
     } else {
       setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
     }
@@ -176,14 +170,12 @@ export default function OnboardingPage() {
 
   const isHasApartment = formData.current_status === 'has_apartment';
   let displayStep = step;
-  if (!isHasApartment && step > 5) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 11 : 10;
+  if (!isHasApartment && step > 3) displayStep = step - 1;
+  const displayTotal = isHasApartment ? 9 : 8;
 
   const prevStep = () => {
-    if (step === 4) {
-      setStep(2); // Skip step 3 (combined into step 2)
-    } else if (step === 7 && formData.current_status === 'seeking_apartment') {
-      setStep(5);
+    if (step === 5 && formData.current_status === 'seeking_apartment') {
+      setStep(3);
     } else {
       setStep((s) => Math.max(s - 1, 1));
     }
@@ -422,37 +414,53 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center mb-8" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
-                <div className="space-y-6">
-                    <div className="space-y-2 text-right">
+                <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <div className="space-y-4">
+                    <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
-                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-12 text-lg bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-right">
+                        <div className="space-y-1 text-right">
                             <label className="text-sm font-bold" style={{ color: '#FA3803' }}>גיל</label>
                             <Input
-                    type="number"
-                    value={formData.age || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setFormField('age', val === '' ? '' : parseInt(val));
-                    }}
-                    className="h-12 text-lg bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
-                  
+                                type="number"
+                                value={formData.age || ''}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setFormField('age', val === '' ? '' : parseInt(val));
+                                }}
+                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
                         </div>
-                        <div className="space-y-2 text-right">
+                        <div className="space-y-1 text-right">
                             <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
                             <BottomSheetSelect
-                    value={formData.gender}
-                    onValueChange={(v) => setFormField('gender', v)}
-                    label="מגדר"
-                    options={[
-                    { value: "male", label: "זכר" },
-                    { value: "female", label: "נקבה" },
-                    { value: "other", label: "אחר" }]
-                    } />
-                  
+                                value={formData.gender}
+                                onValueChange={(v) => setFormField('gender', v)}
+                                label="מגדר"
+                                options={[
+                                    { value: "male", label: "זכר" },
+                                    { value: "female", label: "נקבה" },
+                                    { value: "other", label: "אחר" }
+                                ]} />
+                        </div>
+                    </div>
+
+                    {/* Vibe Section */}
+                    <div className="pt-1 text-right">
+                        <label className="text-sm font-bold block mb-2" style={{ color: '#FA3803' }}>מה הוויב שלך?</label>
+                        <Slider
+                            dir="ltr"
+                            value={[formData.vibe_level]}
+                            onValueChange={(v) => setFormField('vibe_level', v[0])}
+                            max={5}
+                            min={1}
+                            step={1}
+                            className="py-2" />
+                        <div className="flex justify-between text-xs font-medium mt-1" style={{ color: '#B9BFC8' }}>
+                            <span>תוסס ומסיבתי</span>
+                            <span>מאוזן</span>
+                            <span>שקט וביתי</span>
                         </div>
                     </div>
                 </div>
@@ -550,32 +558,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={4} currentStep={step} title="מה הוייב שלך?">
-                 <div className="flex flex-col items-center justify-center h-full space-y-8">
-                      <VibeIcon level={formData.vibe_level} />
-                      
-                      <div className="w-full px-4">
-                          <Slider dir="ltr" value={[formData.vibe_level]} onValueChange={(v) => setFormField('vibe_level', v[0])} max={5} min={1} step={1} className="py-4" />
-                          <div className="flex justify-between text-sm font-bold text-gray-600 mt-4 w-full">
-                              <span className="text-red-500">תוסס ומסיבתי</span>
-                              <span className="text-yellow-500">מאוזן</span>
-                              <span className="text-blue-500">שקט וביתי</span>
-                          </div>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-4 rounded-xl text-center">
-                          <p className="text-lg font-medium text-gray-700">
-                            {formData.vibe_level <= 1 && "אני מעדיף/ה את השקט שלי, בית זה המבצר."}
-                            {formData.vibe_level === 2 && "אוהב/ת שקט אבל גם לארח מדי פעם."}
-                            {formData.vibe_level === 3 && "מאוזן/ת - לפעמים שקט ולפעמים אקשן."}
-                            {formData.vibe_level === 4 && "חברותי/ת מאוד, הבית תמיד פתוח."}
-                            {formData.vibe_level >= 5 && "מסיבות, חברים, רעש ושמחה!"}
-                          </p>
-                      </div>
-                  </div>
-            </Step>
-
-            <Step step={5} currentStep={step} title="העדפות">
+            <Step step={3} currentStep={step} title="העדפות">
                 <div className="space-y-3 text-right">
                     {/* אני מחפש/ת */}
                     <div>
@@ -642,7 +625,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={6} currentStep={step} title="פרטי הדירה">
+            <Step step={4} currentStep={step} title="פרטי הדירה">
                 <div className="space-y-6 text-right">
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
@@ -682,7 +665,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="ספר/י על עצמך">
+            <Step step={5} currentStep={step} title="ספר/י על עצמך">
                 <div className="space-y-6 text-right">
                     <div className="space-y-2">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>קצת עליי (עד 500 תווים)</label>
@@ -716,7 +699,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={8} currentStep={step} title="תחומי עניין">
+            <Step step={6} currentStep={step} title="תחומי עניין">
                 <p className="text-center text-gray-500 mb-4">בחר/י מה שמעניין אותך - זה יעזור למצוא שותף/ה מתאים/ה</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                     {INTERESTS_LIST.map((interest) => {
@@ -745,7 +728,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אם היית שיר...">
+            <Step step={7} currentStep={step} title="אם היית שיר...">
                 <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
                     <h2 className="text-xl font-medium text-gray-500 -mt-4">איזה שיר הוא אתה?</h2>
                     
@@ -839,7 +822,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={10} currentStep={step} title="התמונות שלי">
+            <Step step={8} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
@@ -871,7 +854,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={11} currentStep={step} title="אימות פרופיל">
+            <Step step={9} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -903,7 +886,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 11 &&
+        {step < 9 &&
         <div className="mt-6">
                 <Button
             onClick={nextStep}
