@@ -390,7 +390,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
