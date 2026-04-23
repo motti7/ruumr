@@ -405,13 +405,19 @@ export default function OnboardingPage() {
                  
                  <div className="w-10" />
              </div>
-             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                 <motion.div
-              className="h-full gradient-orange"
-              initial={{ width: 0 }}
-              animate={{ width: `${displayStep / displayTotal * 100}%` }}
-              transition={{ duration: 0.5 }} />
-            
+             <div className="flex gap-2">
+               {[1, 2, 3, 4, 5].map((seg) => {
+                 const activeSegment = Math.ceil(displayStep / displayTotal * 5);
+                 const isActive = seg === activeSegment;
+                 const isFilled = seg < activeSegment;
+                 return (
+                   <div
+                     key={seg}
+                     className="flex-1 h-2 rounded-full transition-colors duration-300"
+                     style={{ backgroundColor: isActive ? '#FA3803' : isFilled ? '#FFE8E2' : '#FFE8E2' }}
+                   />
+                 );
+               })}
              </div>
         </div>
 
