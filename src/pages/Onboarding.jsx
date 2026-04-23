@@ -644,7 +644,7 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-0.5 justify-between mb-2 px-0">
+                    <div className="flex flex-wrap gap-0 justify-between mb-1.5 px-0">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
@@ -659,13 +659,13 @@ export default function OnboardingPage() {
                           [...current, interest.id]
                           );
                         }}
-                        className={`px-1.5 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex-shrink-0 flex items-center gap-1 ${
+                        className={`px-1 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 ${
                         selected ?
                         'bg-[#FA3803] text-white border-[#FA3803]' :
                         'bg-white text-black border-[#B9BFC8]'}`
                         }>
                         {interest.label}
-                        <Icon className={`w-3 h-3 flex-shrink-0 ${selected ? 'text-white' : 'text-black'}`} strokeWidth={2.5} style={{fill: 'none'}} />
+                        <Icon className={`w-4 h-4 flex-shrink-0 stroke-current`} strokeWidth={2} fill="none" />
                             </button>);
                   })}
                     </div>
