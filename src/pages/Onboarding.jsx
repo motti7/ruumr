@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Target, Activity, Flower, Goal, Bike, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,25 +19,25 @@ import ImageLightbox from '@/components/shared/ImageLightbox';
 const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
-{ id: 'gym', label: 'חדר כושר' },
-{ id: 'tennis', label: 'טניס' },
-{ id: 'pilates', label: 'פילאטיס' },
-{ id: 'yoga', label: 'יוגה' },
-{ id: 'soccer', label: 'כדורגל' },
-{ id: 'basketball', label: 'כדורסל' },
-{ id: 'f1', label: 'פורמולה 1' },
-{ id: 'motorcycles', label: 'אופנועים' },
-{ id: 'gaming', label: 'גיימינג' },
-{ id: 'lego', label: 'לגו' },
-{ id: 'photography', label: 'צילום' },
-{ id: 'painting', label: 'ציור' },
-{ id: 'reading', label: 'קריאה' },
-{ id: 'cooking', label: 'בישול ואפייה' },
-{ id: 'concerts', label: 'הופעות' },
-{ id: 'business', label: 'עסקים' },
-{ id: 'entrepreneurship', label: 'יזמות' },
-{ id: 'plants', label: 'צמחייה' },
-{ id: 'nature', label: 'טיולים בטבע' }
+{ id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
+{ id: 'tennis', label: 'טניס', Icon: Target },
+{ id: 'pilates', label: 'פילאטיס', Icon: Activity },
+{ id: 'yoga', label: 'יוגה', Icon: Flower },
+{ id: 'soccer', label: 'כדורגל', Icon: Goal },
+{ id: 'basketball', label: 'כדורסל', Icon: Music },
+{ id: 'f1', label: 'פורמולה 1', Icon: Zap },
+{ id: 'motorcycles', label: 'אופנועים', Icon: Bike },
+{ id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
+{ id: 'lego', label: 'לגו', Icon: Box },
+{ id: 'photography', label: 'צילום', Icon: Camera },
+{ id: 'painting', label: 'ציור', Icon: Palette },
+{ id: 'reading', label: 'קריאה', Icon: BookOpen },
+{ id: 'cooking', label: 'בישול ואפייה', Icon: UtensilsCrossed },
+{ id: 'concerts', label: 'הופעות', Icon: Music },
+{ id: 'business', label: 'עסקים', Icon: Briefcase },
+{ id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
+{ id: 'plants', label: 'צמחייה', Icon: Leaf },
+{ id: 'nature', label: 'טיולים בטבע', Icon: Mountain }
 ];
 
 
@@ -644,9 +644,10 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-1 justify-between mb-3 px-0">
+                    <div className="flex flex-wrap gap-0.5 justify-between mb-2 px-0">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
+                    const Icon = interest.Icon;
                     return (
                       <button
                         key={interest.id}
@@ -658,12 +659,13 @@ export default function OnboardingPage() {
                           [...current, interest.id]
                           );
                         }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium border border-solid transition-all flex-shrink-0 ${
+                        className={`px-1.5 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex-shrink-0 flex items-center gap-1 ${
                         selected ?
                         'bg-[#FA3803] text-white border-[#FA3803]' :
                         'bg-white text-black border-[#B9BFC8]'}`
                         }>
                         {interest.label}
+                        <Icon className={`w-3 h-3 flex-shrink-0 ${selected ? 'text-white' : 'text-black'}`} strokeWidth={2.5} style={{fill: 'none'}} />
                             </button>);
                   })}
                     </div>
