@@ -19,22 +19,26 @@ import ImageLightbox from '@/components/shared/ImageLightbox';
 const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
-{ id: 'cooking', label: '🍳 בישול משותף' },
-{ id: 'netflix', label: '📺 ערבי נטפליקס' },
-{ id: 'gaming', label: '🎮 גיימינג' },
-{ id: 'hosting', label: '🎉 אירוח חברים' },
-{ id: 'nightlife', label: '🌙 חיי לילה' },
-{ id: 'sport', label: '⚽ ספורט' },
-{ id: 'fitness', label: '💪 כושר' },
-{ id: 'nature', label: '🌿 טיולים בטבע' },
-{ id: 'homebody', label: '🏠 נשאר/ת בבית' },
-{ id: 'music', label: '🎵 מוזיקה' },
-{ id: 'morning_person', label: '☀️ אדם של בוקר' },
-{ id: 'night_owl', label: '🦉 ינשוף לילה' },
-{ id: 'food_delivery', label: '🍕 הזמנות אוכל' },
-{ id: 'shopping', label: '🛒 קניות משותפות' },
-{ id: 'pets', label: '🐾 חיות מחמד' },
-{ id: 'wfh', label: '💻 עובד/ת מהבית' }];
+{ id: 'gym', label: 'חדר כושר' },
+{ id: 'tennis', label: 'טניס' },
+{ id: 'pilates', label: 'פילאטיס' },
+{ id: 'yoga', label: 'יוגה' },
+{ id: 'soccer', label: 'כדורגל' },
+{ id: 'basketball', label: 'כדורסל' },
+{ id: 'f1', label: 'פורמולה 1' },
+{ id: 'motorcycles', label: 'אופנועים' },
+{ id: 'gaming', label: 'גיימינג' },
+{ id: 'lego', label: 'לגו' },
+{ id: 'photography', label: 'צילום' },
+{ id: 'painting', label: 'ציור' },
+{ id: 'reading', label: 'קריאה' },
+{ id: 'cooking', label: 'בישול ואפייה' },
+{ id: 'concerts', label: 'הופעות' },
+{ id: 'business', label: 'עסקים' },
+{ id: 'entrepreneurship', label: 'יזמות' },
+{ id: 'plants', label: 'צמחייה' },
+{ id: 'nature', label: 'טיולים בטבע' }
+];
 
 
 const Step = ({ children, step, currentStep, title }) =>
@@ -640,7 +644,7 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-2" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+                    <div className="flex flex-wrap gap-1 justify-between mb-3 px-0">
                         {INTERESTS_LIST.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     return (
@@ -654,10 +658,10 @@ export default function OnboardingPage() {
                           [...current, interest.id]
                           );
                         }}
-                        className={`px-2 py-1 rounded-full text-xs font-semibold border-2 transition-all ${
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border border-solid transition-all flex-shrink-0 ${
                         selected ?
-                        'border-[--theme-orange] bg-orange-50 text-[--theme-orange] scale-105 shadow-sm' :
-                        'border-gray-200 bg-white text-gray-600'}`
+                        'bg-[#FA3803] text-white border-[#FA3803]' :
+                        'bg-white text-black border-[#B9BFC8]'}`
                         }>
                         {interest.label}
                             </button>);
