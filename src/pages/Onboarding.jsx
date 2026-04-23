@@ -402,7 +402,7 @@ export default function OnboardingPage() {
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                  </Button>
-                 <span className="font-bold text-[--theme-orange]">שלב {displayStep} מתוך {displayTotal}</span>
+                 <span className="font-bold text-[--theme-orange] hidden">שלב {displayStep} מתוך {displayTotal}</span>
                  <div className="w-10" />
              </div>
              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
