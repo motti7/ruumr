@@ -495,17 +495,31 @@ export default function OnboardingPage() {
                         <div className="px-1">
                             <div className="flex justify-between text-xs text-gray-400 mb-0.5">
                                 <span>max 10,000</span>
-                                <span className="font-bold text-sm text-gray-700">{formData.budget_max.toLocaleString()}</span>
                                 <span>min 1,000</span>
                             </div>
-                            <Slider
-                                dir="ltr"
-                                value={[formData.budget_max]}
-                                min={1000}
-                                max={10000}
-                                step={100}
-                                onValueChange={(v) => setFormField('budget_max', v[0])}
-                                className="py-1" />
+                            {/* Floating tooltip slider */}
+                            <div className="relative pt-7 pb-1">
+                                {/* Tooltip above thumb */}
+                                <div
+                                    className="absolute top-0 pointer-events-none"
+                                    style={{
+                                        left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% + ${8 - ((formData.budget_max - 1000) / (10000 - 1000)) * 16}px)`,
+                                        transform: 'translateX(-50%)',
+                                    }}
+                                >
+                                    <span className="bg-[--theme-orange] text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow">
+                                        ₪{formData.budget_max.toLocaleString()}
+                                    </span>
+                                </div>
+                                <Slider
+                                    dir="ltr"
+                                    value={[formData.budget_max]}
+                                    min={1000}
+                                    max={10000}
+                                    step={100}
+                                    onValueChange={(v) => setFormField('budget_max', v[0])}
+                                    className="py-1" />
+                            </div>
                         </div>
                     </div>
                 </div>
