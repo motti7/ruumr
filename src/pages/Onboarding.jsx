@@ -420,7 +420,7 @@ export default function OnboardingPage() {
                 <p className="text-center text-gray-500 mb-8">ספר/י לנו קצת על עצמך בשביל ההתחלה</p>
                 <div className="space-y-6">
                     <div className="space-y-2 text-right">
-                        <label className="text-sm font-bold text-gray-700">שם פרטי</label>
+                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
                         <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-12 text-lg bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
