@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -573,14 +573,14 @@ export default function OnboardingPage() {
                         <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>חיית מחמד שמצטרפת?</label>
                         <div className="flex gap-2 flex-wrap">
                             {[
-                                { type: 'none', label: 'אין ✕' },
-                                { type: 'dog', label: 'כלב' },
-                                { type: 'cat', label: 'חתול' },
-                                { type: 'other', label: 'אחר' }
-                            ].map(({ type, label }) =>
+                                { type: 'none', label: 'אין ✕', icon: null },
+                                { type: 'dog', label: 'כלב', icon: <Dog className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
+                                { type: 'cat', label: 'חתול', icon: <Cat className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
+                                { type: 'other', label: 'אחר', icon: null }
+                            ].map(({ type, label, icon }) =>
                                 <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
-                                    className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
-                                    {label}
+                                    className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all flex items-center gap-1 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
+                                    {icon}{label}
                                 </button>
                             )}
                         </div>
