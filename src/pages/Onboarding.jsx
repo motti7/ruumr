@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 8;
 
 const INTERESTS_LIST = [
 { id: 'cooking', label: '🍳 בישול משותף' },
@@ -151,9 +151,7 @@ export default function OnboardingPage() {
       return true;
     case 6: // Interests + About + Looking For
       return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 7: // Spotify
-      return true; // Optional
-    case 8: // Photos
+    case 7: // Photos
       return formData.photos.filter((p) => p).length >= 2;
     default:
       return true;
@@ -165,6 +163,8 @@ export default function OnboardingPage() {
     setStep(5); // Skip apartment details
   } else if (step === 5) {
     setStep(6); // Go directly to merged Interests + About + Looking For
+  } else if (step === 6) {
+    setStep(7); // Go to photos (skipping old song step)
   } else {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
   }
@@ -173,7 +173,7 @@ export default function OnboardingPage() {
   const isHasApartment = formData.current_status === 'has_apartment';
   let displayStep = step;
   if (!isHasApartment && step > 3) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 9 : 8;
+  const displayTotal = isHasApartment ? 8 : 7;
 
   const prevStep = () => {
   if (step === 5 && formData.current_status === 'seeking_apartment') {
@@ -701,101 +701,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={7} currentStep={step} title="אם היית שיר...">
-                <div className="flex flex-col items-center justify-center h-full space-y-6 text-center w-full">
-                    <h2 className="text-xl font-medium text-gray-500 -mt-4">איזה שיר הוא אתה?</h2>
-                    
-                    <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-2 shadow-lg animate-pulse">
-                        <Music className="w-12 h-12 text-white" />
-                    </div>
-
-                    <div className="w-full max-w-sm space-y-4">
-                        <div className="relative group">
-                            <Input
-                    value={spotifySearch}
-                    onChange={(e) => setSpotifySearch(e.target.value)}
-                    placeholder="חפש שיר או אמן..."
-                    className="h-14 text-lg pr-12 rounded-2xl border-2 border-gray-100 focus:border-[--theme-orange] focus:ring-[--theme-orange] transition-all bg-gray-50 focus:bg-white shadow-sm"
-                    onKeyDown={(e) => e.key === 'Enter' && searchSong()} />
-                  
-                            <Button
-                    onClick={searchSong}
-                    disabled={isSearchingSong || !spotifySearch.trim()}
-                    size="icon"
-                    className="absolute top-2 right-2 h-10 w-10 rounded-xl gradient-orange hover:brightness-110 shadow-md transition-transform active:scale-95">
-                    
-                                {isSearchingSong ? <Loader2 className="animate-spin w-5 h-5 text-white" /> : <Search className="w-5 h-5 text-white" />}
-                            </Button>
-                        </div>
-
-                        {/* Search Results List */}
-                        {searchResults.length > 0 && !formData.song_name &&
-                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto px-1">
-                                {searchResults.map((track) =>
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    key={track.spotify_id}
-                    onClick={() => selectSong(track)}
-                    className="p-3 bg-white rounded-xl border border-gray-100 flex items-center gap-3 hover:border-[--theme-orange] hover:shadow-md cursor-pointer text-right transition-all">
-                    
-                                        <img src={track.image_url} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-gray-900 truncate">{track.name}</div>
-                                            <div className="text-xs text-gray-500 truncate">{track.artist}</div>
-                                        </div>
-                                        <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
-                                            <Plus className="w-4 h-4 text-[--theme-orange]" />
-                                        </div>
-                                    </motion.div>
-                  )}
-                            </div>
-                }
-
-                        {formData.song_name &&
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-black p-4 rounded-3xl shadow-2xl border border-gray-800 relative text-white text-right flex items-center gap-4 overflow-hidden">
-                  
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-900/50"></div>
-                                
-                                <div className="relative z-10 w-16 h-16 rounded-full border-2 border-gray-700 overflow-hidden animate-[spin_8s_linear_infinite]">
-                                    <img src={formData.song_image} className="w-full h-full object-cover opacity-80" />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-4 h-4 bg-black rounded-full border border-gray-700"></div>
-                                    </div>
-                                </div>
-                                
-                                <div className="flex-1 relative z-10">
-                                    <div className="font-bold text-lg leading-tight">{formData.song_name}</div>
-                                    <div className="text-sm text-gray-400">{formData.song_artist}</div>
-                                    <div className="flex gap-0.5 h-3 items-end mt-2">
-                                        {[1, 2, 3, 4, 5].map((i) =>
-                      <div key={i} className="w-1 bg-[--theme-orange] rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}></div>
-                      )}
-                                    </div>
-                                </div>
-                                
-                                <button
-                    onClick={() => setFormData((prev) => ({ ...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' }))}
-                    className="absolute top-2 left-2 bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-colors z-20">
-                    
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </motion.div>
-                }
-                        
-                        {!formData.itunes_track_id && !formData.song_name && searchResults.length === 0 &&
-                <div className="text-center mt-8 opacity-50">
-                                <Music className="w-16 h-16 mx-auto mb-2 text-gray-300" />
-                            </div>
-                }
-                    </div>
-                </div>
-            </Step>
-
-            <Step step={8} currentStep={step} title="התמונות שלי">
+            <Step step={7} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
@@ -827,7 +733,7 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={9} currentStep={step} title="אימות פרופיל">
+            <Step step={8} currentStep={step} title="אימות פרופיל">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -859,7 +765,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Action Button */}
-        {step < 9 &&
+        {step < 8 &&
         <div className="mt-6">
                 <Button
             onClick={nextStep}
