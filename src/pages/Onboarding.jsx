@@ -712,7 +712,7 @@ export default function OnboardingPage() {
 
             <Step step={7} currentStep={step} title="">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
-                    <h2 className="text-3xl font-black" style={{ color: '#FA3803' }}>איזה כיף, סיימנו!</h2>
+                    <h2 className="text-3xl font-black" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
                         <Check className="w-16 h-16 text-blue-500" />
