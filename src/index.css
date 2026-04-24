@@ -165,17 +165,14 @@ button:focus-visible {
   * {
     @apply border-border outline-ring/50;
   }
-  html {
-    font-family: 'Inter', system-ui, Arial, sans-serif !important;
-  }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, Arial, sans-serif !important;
+    font-family: 'Inter', system-ui, Arial, sans-serif;
+  }
+  html, body, * {
+    font-family: 'Inter', system-ui, Arial, sans-serif;
   }
 }
-
-/* ABSOLUTE NUCLEAR OVERRIDE - beats everything including @layer */
-* { font-family: 'Inter', sans-serif !important; }
 
 /* Prevent accidental text selection on interactive elements */
 button,

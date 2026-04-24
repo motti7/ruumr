@@ -3,13 +3,10 @@ module.exports = {
     darkMode: ["class"],
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
-  	extend: {},
-  	fontFamily: {
-  		sans: ['Inter', 'system-ui', 'Arial', 'sans-serif'],
-  		serif: ['Inter', 'system-ui', 'Arial', 'sans-serif'],
-  		mono: ['Inter', 'system-ui', 'Arial', 'sans-serif'],
-  	},
   	extend: {
+  		fontFamily: {
+  			sans: ['Inter', 'system-ui', 'Arial', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
