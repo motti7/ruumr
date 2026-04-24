@@ -52,7 +52,7 @@ const Step = ({ children, step, currentStep, title }) =>
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
     
-        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803', fontFamily: "'Rubik', sans-serif" }}>{title}</h2>}
+        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
             {children}
         </div>
@@ -388,7 +388,7 @@ export default function OnboardingPage() {
 
   return (
     <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }`}</style>
+
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />

@@ -213,11 +213,11 @@ export default function Layout({ children, currentPageName }) {
         <div className="sm:hidden">
             <style>
             {`
-            @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
             .logo-font {
-                    font-family: 'Pacifico', cursive;
+                    font-family: 'Inter', sans-serif;
                     color: var(--theme-orange);
-                    font-weight: 400;
+                    font-weight: 900;
+                    letter-spacing: -1px;
                 }
                 .gradient-orange {
                     background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
