@@ -52,7 +52,7 @@ const Step = ({ children, step, currentStep, title }) =>
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
     
-        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803', fontFamily: "'Inter', sans-serif" }}>{title}</h2>}
+        {title && <h2 className="mb-2 text-3xl font-black text-center" style={{ color: '#FA3803' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
             {children}
         </div>
@@ -387,24 +387,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", font: "inherit" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        #onboarding-root,
-        #onboarding-root *,
-        #onboarding-root h1,
-        #onboarding-root h2,
-        #onboarding-root h3,
-        #onboarding-root h4,
-        #onboarding-root p,
-        #onboarding-root label,
-        #onboarding-root button,
-        #onboarding-root input,
-        #onboarding-root textarea,
-        #onboarding-root span {
-          font-family: 'Inter', system-ui, sans-serif !important;
-        }
-      `}</style>
+    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl">
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
@@ -493,7 +476,7 @@ export default function OnboardingPage() {
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-black text-gray-800" style={{ fontFamily: "'Inter', sans-serif" }}>מחפש/ת דירה</h3>
+                            <h3 className="text-base font-black text-gray-800">מחפש/ת דירה</h3>
                             <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
                         <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
@@ -501,7 +484,7 @@ export default function OnboardingPage() {
 
                     <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-black text-gray-800" style={{ fontFamily: "'Inter', sans-serif" }}>יש לי דירה</h3>
+                            <h3 className="text-base font-black text-gray-800">יש לי דירה</h3>
                             <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
                         <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
@@ -509,14 +492,14 @@ export default function OnboardingPage() {
 
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
-                        <h3 className="text-base font-black" style={{ color: '#FA3803', fontFamily: "'Inter', sans-serif" }}>איפה?</h3>
+                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>איפה?</h3>
                         <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
                     <div className="pt-2 text-right">
-                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803', fontFamily: "'Inter', sans-serif" }}>תקציב לשותף</h3>
+                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                         {/* Thumb value label */}
                         <div className="relative w-full mb-1">
                             <div

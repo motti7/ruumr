@@ -174,15 +174,8 @@ button:focus-visible {
   }
 }
 
-/* Nuclear font override - Inter everywhere, no exceptions */
-*, *::before, *::after,
-html, body,
-h1, h2, h3, h4, h5, h6,
-p, span, div, a, button,
-input, textarea, select, label,
-li, ul, ol, td, th {
-  font-family: 'Inter', system-ui, Arial, sans-serif !important;
-}
+/* ABSOLUTE NUCLEAR OVERRIDE - beats everything including @layer */
+* { font-family: 'Inter', sans-serif !important; }
 
 /* Prevent accidental text selection on interactive elements */
 button,
