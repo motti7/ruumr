@@ -169,7 +169,7 @@ button:focus-visible {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, Arial, sans-serif;
   }
-  html, body, * {
+  html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label, li, ul, ol {
     font-family: 'Inter', system-ui, Arial, sans-serif;
   }
 }
