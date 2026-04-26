@@ -23,7 +23,7 @@ const INTERESTS_LIST = [
 { id: 'tennis', label: 'טניס', Icon: Activity },
 { id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
 { id: 'yoga', label: 'יוגה', Icon: Smile },
-{ id: 'soccer_basketball', label: 'כדורגל / כדורסל 🏆', Icon: Trophy },
+{ id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
 { id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
 { id: 'lego', label: 'לגו', Icon: Box },
