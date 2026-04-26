@@ -478,27 +478,27 @@ export default function OnboardingPage() {
                             <h3 className="text-base font-bold text-gray-800">מחפש/ת דירה</h3>
                             <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
                     </button>
 
                     <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-black text-gray-800">יש לי דירה</h3>
+                            <h3 className="text-base font-bold text-gray-800">יש לי דירה</h3>
                             <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
                     </button>
 
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
-                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>איפה?</h3>
+                        <h3 className="text-base font-bold" style={{ color: '#FA3803' }}>איפה?</h3>
                         <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
                     <div className="pt-2 text-right">
-                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                        <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                         {/* Thumb value label */}
                         <div className="relative w-full mb-1">
                             <div
