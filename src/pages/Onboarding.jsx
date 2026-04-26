@@ -416,7 +416,7 @@ export default function OnboardingPage() {
         </div>
         )}
 
-        <div className="flex-1 relative overflow-hidden">
+        <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
                 <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
