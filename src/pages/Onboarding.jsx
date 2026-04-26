@@ -492,7 +492,7 @@ export default function OnboardingPage() {
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
                         <h3 className="text-base font-bold" style={{ color: '#FA3803' }}>איפה?</h3>
-                        <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
+                        <p className="text-xs mb-1" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
