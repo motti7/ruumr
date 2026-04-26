@@ -39,7 +39,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
               {selectedCities.map((city) => (
                 <span
                   key={city}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold whitespace-nowrap border border-orange-200 flex-shrink-0"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-xs font-semibold whitespace-nowrap border border-orange-200 flex-shrink-0" style={{ color: '#FA3803' }}
                 >
                   {city}
                   <span
