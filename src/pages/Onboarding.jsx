@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
 { id: 'tennis', label: 'טניס', Icon: Activity },
 { id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
-{ id: 'yoga', label: 'יוגה', Icon: eye-closed },
+{ id: 'yoga', label: 'יוגה', Icon: EyeOff },
 { id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
 { id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
@@ -30,12 +30,12 @@ const INTERESTS_LIST = [
 { id: 'photography', label: 'צילום', Icon: Camera },
 { id: 'painting', label: 'ציור', Icon: Palette },
 { id: 'reading', label: 'קריאה', Icon: BookOpen },
-{ id: 'cooking', label: 'בישול ואפייה', Icon: chef-hat },
+{ id: 'cooking', label: 'בישול ואפייה', Icon: ChefHat },
 { id: 'concerts', label: 'הופעות', Icon: Mic },
 { id: 'business', label: 'עסקים', Icon: Briefcase },
 { id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
-{ id: 'plants', label: 'צמחייה', Icon: sprout },
-{ id: 'nature', label: 'טיולים בטבע', Icon: leaf }
+{ id: 'plants', label: 'צמחייה', Icon: Sprout },
+{ id: 'nature', label: 'טיולים בטבע', Icon: Leaf }
 ];
 
 
