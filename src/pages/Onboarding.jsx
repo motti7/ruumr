@@ -496,7 +496,37 @@ export default function OnboardingPage() {
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
-
+                    {/* Budget */}
+                    <div className="pt-2 text-right">
+                        <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                        {/* Thumb value label */}
+                        <div className="relative w-full mb-1">
+                            <div
+                                className="absolute text-sm font-bold text-black"
+                                style={{
+                                    left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% - 20px)`,
+                                    top: 0,
+                                    minWidth: '40px',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {formData.budget_max.toLocaleString()}
+                            </div>
+                            <div className="h-4" />
+                        </div>
+                        <Slider
+                            value={[formData.budget_max]}
+                            min={1000}
+                            max={10000}
+                            step={100}
+                            onValueChange={(v) => setFormField('budget_max', v[0])}
+                            className="py-0" />
+                        {/* Min / Max labels inline with bar */}
+                        <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
+                            <span>min 10,000</span>
+                            <span>max 1,000</span>
+                        </div>
+                    </div>
                 </div>
             </Step>
             
