@@ -22,7 +22,7 @@ const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
 { id: 'tennis', label: 'טניס', Icon: Activity },
 { id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
-{ id: 'yoga', label: 'יוגה', Icon: Smile },
+{ id: 'yoga', label: 'יוגה', Icon: eye-closed },
 { id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
 { id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
@@ -30,12 +30,12 @@ const INTERESTS_LIST = [
 { id: 'photography', label: 'צילום', Icon: Camera },
 { id: 'painting', label: 'ציור', Icon: Palette },
 { id: 'reading', label: 'קריאה', Icon: BookOpen },
-{ id: 'cooking', label: 'בישול ואפייה', Icon: UtensilsCrossed },
+{ id: 'cooking', label: 'בישול ואפייה', Icon: chef-hat },
 { id: 'concerts', label: 'הופעות', Icon: Mic },
 { id: 'business', label: 'עסקים', Icon: Briefcase },
 { id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
-{ id: 'plants', label: 'צמחייה', Icon: Leaf },
-{ id: 'nature', label: 'טיולים בטבע', Icon: Mountain }
+{ id: 'plants', label: 'צמחייה', Icon: sprout },
+{ id: 'nature', label: 'טיולים בטבע', Icon: leaf }
 ];
 
 
