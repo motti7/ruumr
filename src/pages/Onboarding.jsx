@@ -20,11 +20,11 @@ const TOTAL_STEPS = 7;
 
 const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: Model },
-{ id: 'pilates', label: 'פילאטיס', Icon: Flower },
-{ id: 'yoga', label: 'יוגה', Icon: EyeClosed },
+{ id: 'tennis', label: 'טניס', Icon: Activity },
+{ id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
+{ id: 'yoga', label: 'יוגה', Icon: EyeOff },
 { id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
-{ id: 'motorcycles', label: 'אופנועים', Icon: MotorBike },
+{ id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
 { id: 'lego', label: 'לגו', Icon: Box },
 { id: 'photography', label: 'צילום', Icon: Camera },
