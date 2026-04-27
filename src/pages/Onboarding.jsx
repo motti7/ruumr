@@ -151,10 +151,10 @@ export default function OnboardingPage() {
       return true;
     case 5: // Interests + About + Looking For
       return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 6: // Interests + About + Looking For
-      return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 7: // Photos
+    case 6: // Photos
       return formData.photos.filter((p) => p).length >= 2;
+    case 7: // Final step
+      return true;
     default:
       return true;
   }
