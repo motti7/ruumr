@@ -564,7 +564,17 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
 
     const handleMuteToggle = useCallback((e) => {
         e.stopPropagation();
-        setIsMuted(m => !m);
+        setIsMuted(m => {
+            const next = !m;
+            if (audioRef.current) {
+                if (next) {
+                    audioRef.current.pause();
+                } else {
+                    audioRef.current.play().catch(() => {});
+                }
+            }
+            return next;
+        });
     }, []);
 
     return (
