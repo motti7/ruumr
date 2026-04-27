@@ -386,7 +386,19 @@ export default function OnboardingPage() {
 
   return (
     <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
+        #onboarding-root input[type=number]::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]::-webkit-outer-spin-button {
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        #onboarding-root input[type=number]:hover::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]:hover::-webkit-outer-spin-button,
+        #onboarding-root input[type=number]:focus::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]:focus::-webkit-outer-spin-button {
+          opacity: 1;
+        }
+      `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
