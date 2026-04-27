@@ -637,7 +637,12 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                          </div>
                     )}
 
-                    {/* Music Player */}
+                    {/* Audio element always mounted (but hidden) so ref is stable */}
+                    {profile.song_preview_url && (
+                        <audio ref={audioRef} src={profile.song_preview_url} loop preload="none" className="hidden" />
+                    )}
+
+                    {/* Music Player UI */}
                     {profile.song_preview_url && profile.song_name && isActive && (
                         <div className="absolute top-5 left-2 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
@@ -653,25 +658,11 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                              </div>
                              <button 
                                 onClick={handleMuteToggle}
-                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors relative"
+                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
                                 aria-label={isMuted ? "ביטול השתקה" : "השתקה"}
-                                style={{
-                                  position: 'relative',
-                                  '::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    inset: '50% 50%',
-                                    minWidth: '44px',
-                                    minHeight: '44px',
-                                    transform: 'translate(-50%, -50%)',
-                                    pointerEvents: 'auto',
-                                    borderRadius: '50%'
-                                  }
-                                }}
                              >
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white"/> : <Volume2 className="w-4 h-4 text-[--theme-orange]"/>}
                              </button>
-                             <audio ref={audioRef} src={profile.song_preview_url} loop className="hidden" />
                         </div>
                     )}
 
