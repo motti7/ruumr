@@ -2,6 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
+import mixpanel from 'mixpanel-browser'
+
+mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
+  debug: true,
+  autocapture: true,
+  record_sessions_percent: 100,
+  api_host: 'https://api-eu.mixpanel.com',
+})
 
 // Configure native status bar color via Capacitor (if available)
 if (window.Capacitor?.isNativePlatform?.()) {
