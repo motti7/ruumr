@@ -208,7 +208,19 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [avgRating, setAvgRating] = useState(null);
+
+    // Use a module-level singleton audio element to guarantee only one plays at a time
     const audioRef = useRef(null);
+    useEffect(() => {
+        if (!audioRef.current) {
+            // Reuse a single global audio element across all card instances
+            if (!window.__ruumrAudio) {
+                window.__ruumrAudio = new Audio();
+                window.__ruumrAudio.loop = true;
+            }
+            audioRef.current = window.__ruumrAudio;
+        }
+    }, []);
 
     useEffect(() => {
         if (!isActive) return; // Only load when card is visible
@@ -228,70 +240,57 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     }, [profile.user_id, isActive]);
     
     useEffect(() => {
-        if (!audioRef.current || !profile.song_preview_url) return;
-
         const audio = audioRef.current;
+        if (!audio) return;
 
-        // Handle visibility change
+        if (!isActive || !profile.song_preview_url) {
+            // Not our turn — pause and reset if we were playing this song
+            if (!audio.paused && audio.src === profile.song_preview_url) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            return;
+        }
+
+        // Update src only if it changed (prevents duplicate play calls)
+        if (audio.src !== profile.song_preview_url) {
+            audio.pause();
+            audio.src = profile.song_preview_url;
+            audio.currentTime = 0;
+        }
+
         const handleVisibilityChange = () => {
             if (document.hidden) {
                 audio.pause();
-            } else if (isActive && !audio.paused) {
+            } else {
                 audio.play().catch(() => {});
             }
         };
-
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // Play when active (don't stop on photo change or expanded state)
-        if (isActive && !document.hidden) {
-            if (audio.paused) {
-                audio.volume = 0;
-                
-                // Handle autoplay restrictions in browsers
-                const playPromise = audio.play();
-
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // Fade in
-                        let vol = 0;
-                        const interval = setInterval(() => {
-                            if (vol < 0.8) {
-                                vol += 0.05;
-                                audio.volume = Math.min(vol, 0.8);
-                            } else {
-                                clearInterval(interval);
-                            }
-                        }, 200);
-                    }).catch(error => {
-                        console.log("Audio autoplay blocked by browser - user interaction required:", error);
-                        // Mute by default if autoplay fails
-                        setIsMuted(true);
-                    });
-                }
-            }
-        } else {
-            // Only pause if not active or tab hidden
-            audio.pause();
-            audio.currentTime = 0;
+        if (!document.hidden && audio.paused) {
+            audio.volume = 0;
+            audio.play().then(() => {
+                let vol = 0;
+                const interval = setInterval(() => {
+                    vol += 0.05;
+                    audio.volume = Math.min(vol, 0.8);
+                    if (vol >= 0.8) clearInterval(interval);
+                }, 200);
+            }).catch(() => setIsMuted(true));
         }
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
-            if (!isActive) {
-                audio.pause();
-            }
+            audio.pause();
+            audio.currentTime = 0;
         };
     }, [isActive, profile.song_preview_url]);
 
     useEffect(() => {
-        if (!audioRef.current) return;
-        if (isMuted) {
-            audioRef.current.volume = 0;
-        } else {
-            audioRef.current.volume = 0.8;
-        }
-    }, [isMuted]);
+        if (!audioRef.current || !isActive) return;
+        audioRef.current.volume = isMuted ? 0 : 0.8;
+    }, [isMuted, isActive]);
 
     // Motion values for drag animation
     const x = useMotionValue(0);
@@ -564,7 +563,17 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
 
     const handleMuteToggle = useCallback((e) => {
         e.stopPropagation();
-        setIsMuted(m => !m);
+        setIsMuted(m => {
+            const next = !m;
+            if (audioRef.current) {
+                if (next) {
+                    audioRef.current.pause();
+                } else {
+                    audioRef.current.play().catch(() => {});
+                }
+            }
+            return next;
+        });
     }, []);
 
     return (
@@ -637,7 +646,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                          </div>
                     )}
 
-                    {/* Music Player */}
+                    {/* Music Player UI */}
                     {profile.song_preview_url && profile.song_name && isActive && (
                         <div className="absolute top-5 left-2 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
@@ -653,25 +662,11 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                              </div>
                              <button 
                                 onClick={handleMuteToggle}
-                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors relative"
+                                className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
                                 aria-label={isMuted ? "ביטול השתקה" : "השתקה"}
-                                style={{
-                                  position: 'relative',
-                                  '::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    inset: '50% 50%',
-                                    minWidth: '44px',
-                                    minHeight: '44px',
-                                    transform: 'translate(-50%, -50%)',
-                                    pointerEvents: 'auto',
-                                    borderRadius: '50%'
-                                  }
-                                }}
                              >
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white"/> : <Volume2 className="w-4 h-4 text-[--theme-orange]"/>}
                              </button>
-                             <audio ref={audioRef} src={profile.song_preview_url} loop className="hidden" />
                         </div>
                     )}
 

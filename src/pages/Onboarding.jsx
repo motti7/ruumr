@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,22 +22,20 @@ const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
 { id: 'tennis', label: 'טניס', Icon: Activity },
 { id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
-{ id: 'yoga', label: 'יוגה', Icon: Smile },
-{ id: 'soccer', label: 'כדורגל', Icon: Trophy },
-{ id: 'basketball', label: 'כדורסל', Icon: Target },
-{ id: 'f1', label: 'פורמולה 1', Icon: Car },
+{ id: 'yoga', label: 'יוגה', Icon: EyeOff },
+{ id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
 { id: 'motorcycles', label: 'אופנועים', Icon: Zap },
 { id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
 { id: 'lego', label: 'לגו', Icon: Box },
 { id: 'photography', label: 'צילום', Icon: Camera },
 { id: 'painting', label: 'ציור', Icon: Palette },
 { id: 'reading', label: 'קריאה', Icon: BookOpen },
-{ id: 'cooking', label: 'בישול ואפייה', Icon: UtensilsCrossed },
+{ id: 'cooking', label: 'בישול ואפייה', Icon: ChefHat },
 { id: 'concerts', label: 'הופעות', Icon: Mic },
 { id: 'business', label: 'עסקים', Icon: Briefcase },
 { id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
-{ id: 'plants', label: 'צמחייה', Icon: Leaf },
-{ id: 'nature', label: 'טיולים בטבע', Icon: Mountain }
+{ id: 'plants', label: 'צמחייה', Icon: Sprout },
+{ id: 'nature', label: 'טיולים בטבע', Icon: Leaf }
 ];
 
 
@@ -153,10 +151,10 @@ export default function OnboardingPage() {
       return true;
     case 5: // Interests + About + Looking For
       return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 6: // Interests + About + Looking For
-      return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 7: // Photos
+    case 6: // Photos
       return formData.photos.filter((p) => p).length >= 2;
+    case 7: // Final step
+      return true;
     default:
       return true;
   }
@@ -388,7 +386,19 @@ export default function OnboardingPage() {
 
   return (
     <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
+        #onboarding-root input[type=number]::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]::-webkit-outer-spin-button {
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        #onboarding-root input[type=number]:hover::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]:hover::-webkit-outer-spin-button,
+        #onboarding-root input[type=number]:focus::-webkit-inner-spin-button,
+        #onboarding-root input[type=number]:focus::-webkit-outer-spin-button {
+          opacity: 1;
+        }
+      `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
@@ -477,30 +487,30 @@ export default function OnboardingPage() {
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-black text-gray-800">מחפש/ת דירה</h3>
+                            <h3 className="text-base font-bold text-gray-800">מחפש/ת דירה</h3>
                             <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
                     </button>
 
                     <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-black text-gray-800">יש לי דירה</h3>
+                            <h3 className="text-base font-bold text-gray-800">יש לי דירה</h3>
                             <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו.</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
                     </button>
 
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
-                        <h3 className="text-base font-black" style={{ color: '#FA3803' }}>איפה?</h3>
-                        <p className="text-xs mb-1" style={{ color: '#FA3803' }}>ניתן לבחור מספר ערים</p>
+                        <h3 className="text-base font-bold" style={{ color: '#FA3803' }}>איפה?</h3>
+                        <p className="text-xs mb-1" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
                     <div className="pt-2 text-right">
-                        <h3 className="text-base font-black mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                        <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                         {/* Thumb value label */}
                         <div className="relative w-full mb-1">
                             <div
@@ -726,7 +736,7 @@ export default function OnboardingPage() {
 
             <Step step={7} currentStep={step} title="">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
-                    <h2 className="text-3xl font-black" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
+                    <h2 className="text-3xl font-bold" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
                         <Check className="w-16 h-16 text-blue-500" />
