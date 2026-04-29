@@ -750,9 +750,9 @@ export default function OnboardingPage() {
 
                     {/* Social Media Link Section */}
                     <div className="w-full text-right">
-                        <div className="flex items-center gap-2 mb-2 justify-end">
-                            <span className="text-sm text-gray-400">(אופציונלי)</span>
+                        <div className="flex items-center gap-2 mb-2 justify-start flex-row-reverse">
                             <span className="text-sm font-bold text-gray-700">קישור לרשת חברתית</span>
+                            <span className="text-sm text-gray-400">(אופציונלי)</span>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
                                     <Instagram className="w-4 h-4 text-white" />
