@@ -2,8 +2,17 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import mixpanel from 'mixpanel-browser';
 
 const AuthContext = createContext();
+const isMixpanelEnabledForHostname = (hostname) => {
+  const normalizedHostname = (hostname || '').toLowerCase();
+  return (
+    !normalizedHostname.includes('localhost') &&
+    !normalizedHostname.includes('preview-sandbox') &&
+    !normalizedHostname.includes('base44')
+  );
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -94,6 +103,16 @@ export const AuthProvider = ({ children }) => {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
+
+      if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
+        mixpanel.identify(String(currentUser.id));
+        mixpanel.people.set({
+          $name: currentUser.full_name || currentUser.name || '',
+          $email: currentUser.email || '',
+          user_id: currentUser.id,
+        });
+      }
+
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);

@@ -14,6 +14,7 @@ import { Heart, X, Home, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
+import mixpanel from 'mixpanel-browser';
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -27,6 +28,10 @@ export default function DiscoverPage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 });
   const [allProfiles, setAllProfiles] = useState([]);
+  const shouldTrackMixpanel = useMemo(() => {
+    const hostname = window.location.hostname.toLowerCase();
+    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
+  }, []);
 
   // Optimistic swipe mutation
   const swipeMutation = useMutationWithOptimistic(
@@ -173,6 +178,12 @@ export default function DiscoverPage() {
       };
 
       await swipeMutation.mutateAsync(swipeData);
+      if (shouldTrackMixpanel) {
+        mixpanel.track('Swipe', {
+          direction: action === 'like' ? 'right' : 'left',
+          target_profile_id: swipedProfile.user_id,
+        });
+      }
 
       // Check for match only on 'like'
       if (action === 'like') {
@@ -198,6 +209,11 @@ export default function DiscoverPage() {
                       user2_name: swipedProfile.name,
                       status: 'active'
                   });
+                  if (shouldTrackMixpanel) {
+                    mixpanel.track('Match Created', {
+                      matched_with_id: swipedProfile.user_id,
+                    });
+                  }
               }
 
               setMatchData({ profile1: userProfile, profile2: swipedProfile });
@@ -219,7 +235,7 @@ export default function DiscoverPage() {
         setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
     }
-  }, [currentIndex, profiles.length, userProfile]);
+  }, [currentIndex, profiles, shouldTrackMixpanel, userProfile, swipeMutation]);
   
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {

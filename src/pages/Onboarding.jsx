@@ -15,8 +15,18 @@ import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import mixpanel from 'mixpanel-browser';
 
 const TOTAL_STEPS = 7;
+const STEP_NAMES = {
+  1: 'Basic Info',
+  2: 'Status Location Budget',
+  3: 'Preferences',
+  4: 'Apartment Details',
+  5: 'Interests And About',
+  6: 'Photos',
+  7: 'Final Review',
+};
 
 const INTERESTS_LIST = [
 { id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
@@ -104,6 +114,10 @@ export default function OnboardingPage() {
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const isMixpanelTrackingEnabled = (() => {
+    const hostname = window.location.hostname.toLowerCase();
+    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
+  })();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -161,6 +175,15 @@ export default function OnboardingPage() {
   };
 
   const nextStep = () => {
+  const currentStep = step;
+  const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;
+  if (isMixpanelTrackingEnabled) {
+    mixpanel.track('Registration Step Completed', {
+      step_number: currentStep,
+      step_name: stepName,
+    });
+  }
+
   if (step === 3 && formData.current_status === 'seeking_apartment') {
     setStep(5); // Skip apartment details
   } else if (step === 5) {
@@ -212,6 +235,9 @@ export default function OnboardingPage() {
         song_image: formData.song_image || null
       };
       await Profile.create(finalData);
+      if (isMixpanelTrackingEnabled) {
+        mixpanel.track('Registration Completed');
+      }
       if (shouldVerify) {
         navigate(createPageUrl('Verification'));
       } else {
