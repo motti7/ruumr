@@ -735,7 +735,7 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={7} currentStep={step} title="">
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
                     <h2 className="text-3xl font-bold" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
                     <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
                         <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
@@ -746,6 +746,32 @@ export default function OnboardingPage() {
                         <p className="text-gray-500 max-w-xs mx-auto">
                             פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
                         </p>
+                    </div>
+
+                    {/* Social Media Link Section */}
+                    <div className="w-full text-right">
+                        <div className="flex items-center gap-2 mb-2 justify-end">
+                            <span className="text-sm text-gray-400">(אופציונלי)</span>
+                            <span className="text-sm font-bold text-gray-700">קישור לרשת חברתית</span>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
+                                    <Instagram className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center">
+                                    <Facebook className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center">
+                                    <SiTiktok className="w-3.5 h-3.5 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                        <Input
+                            value={formData.social_link}
+                            onChange={(e) => setFormField('social_link', e.target.value)}
+                            placeholder="הדבק קישור כאן"
+                            className="h-9 text-sm bg-gray-50 border-gray-200 text-right w-full"
+                            dir="ltr"
+                        />
                     </div>
                     
                     <div className="w-full space-y-4">
