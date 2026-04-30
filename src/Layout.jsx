@@ -143,7 +143,8 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
-    { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    // RUUMR PLUS NAV ITEM — disabled, re-enable by uncommenting:
+    // { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ];
@@ -222,6 +223,7 @@ export default function Layout({ children, currentPageName }) {
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
         <div className="flex items-center gap-2">
             <WriteReviewButton /> {/* הכוכב עכשיו ראשון, ולכן הכי ימני */}
+            {/* RUUMR PLUS HEADER BUTTON — disabled, re-enable by uncommenting
             <Link
               to={createPageUrl("RuumrPlus")}
               aria-label="Ruumr Plus"
@@ -235,6 +237,7 @@ export default function Layout({ children, currentPageName }) {
               <Sparkles className="w-4 h-4" />
               <span>Ruumr Plus</span>
             </Link>
+            */}
             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
