@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
             // Fetch users (only admins can list users)
             const allUsers = await User.list();
             // Fetch all profiles to map to users
-            const allProfiles = await Profile.list(1000);
+            const allProfiles = await Profile.list('-created_date', 1000);
             const entitlementResponse = await fetchRuumrPlusEntitlements().catch((error) => {
                 console.error("Failed to load Ruumr Plus entitlements", error);
                 return null;

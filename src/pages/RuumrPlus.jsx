@@ -124,7 +124,7 @@ function RuumrPlusRecommendationCard({ profile }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
 
-        <div className="absolute top-3 left-3 flex flex-col items-end gap-2">
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
           <span className="rounded-full bg-black/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
             {score}% התאמה
           </span>
@@ -574,7 +574,14 @@ export default function RuumrPlusPage() {
                 disabled={isActivating || !currentUser || !currentProfile}
                 className="flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[--theme-orange] font-bold shadow-lg hover:bg-white/90"
               >
-                <Sparkles className="w-4 h-4" />
+                {(isActivating || (!currentUser && !currentProfile)) ? (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
                 <span>{primaryActionLabel}</span>
               </Button>
               <Button
@@ -624,7 +631,7 @@ export default function RuumrPlusPage() {
 
           {plusState.status === "loading" ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {[0, 1].map((index) => (
+              {[0, 1, 2, 3, 4].map((index) => (
                 <div key={index} className="overflow-hidden rounded-[1.75rem] border border-gray-100 bg-gray-50">
                   <div className="aspect-[4/3] animate-pulse bg-gray-200" />
                   <div className="space-y-3 p-4">

@@ -100,45 +100,43 @@ export default function ProfileViewPage() {
   const loadProfile = async () => {
     setIsLoading(true);
     try {
-      // Use location.search from the hook for reliability in SPA
       const urlParams = new URLSearchParams(location.search);
       const userId = urlParams.get("userId");
       const fromLikes = urlParams.get("fromLikes");
 
       if (!userId) {
-        console.error("No userId in URL");
         navigate(createPageUrl("Matches"));
         return;
       }
 
-      const profiles = await Profile.filter({ user_id: userId });
-      if (!profiles || profiles.length === 0) {
-        console.error("Profile not found");
-        // Don't auto-navigate away immediately to avoid loops, just show error
+      // Always load current user so swipe actions always work
+      const user = await User.me();
+      setCurrentUser(user);
+
+      const [profilesResult, myProfilesResult] = await Promise.all([
+        Profile.filter({ user_id: userId }),
+        Profile.filter({ user_id: user.id }),
+      ]);
+
+      if (!profilesResult || profilesResult.length === 0) {
         setIsLoading(false);
         return;
       }
 
-      setProfile(profiles[0]);
+      setProfile(profilesResult[0]);
+      setUserProfile(myProfilesResult[0] || null);
 
-      // Check if there's a match between current user and this profile (to allow writing a review)
+      // Check for existing match (to allow writing a review)
       try {
-        const currentUser = await User.me();
-        const m1 = await Match.filter({ user1_id: currentUser.id, user2_id: userId });
-        const m2 = await Match.filter({ user2_id: currentUser.id, user1_id: userId });
-        if ((m1.length > 0 || m2.length > 0)) {
-          setIsExMatch(true);
-        }
+        const [m1, m2] = await Promise.all([
+          Match.filter({ user1_id: user.id, user2_id: userId }),
+          Match.filter({ user2_id: user.id, user1_id: userId }),
+        ]);
+        if (m1.length > 0 || m2.length > 0) setIsExMatch(true);
       } catch(e) {}
-      
-      // Load current user data if coming from likes page
-      if (fromLikes === 'true') {
-        const user = await User.me();
-        const myProfiles = await Profile.filter({ user_id: user.id });
-        setCurrentUser(user);
-        setUserProfile(myProfiles[0]);
 
-        // Check if I already swiped on this user — if so, hide actions
+      // Show swipe actions only when coming from likes and not yet swiped
+      if (fromLikes === 'true') {
         const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
         setShowActions(existingSwipe.length === 0);
       }
@@ -174,20 +172,17 @@ export default function ProfileViewPage() {
       }
 
       // Check for match if liked
+      let didMatch = false;
       if (action === 'like') {
         try {
-          console.log(`🔍 Checking if ${profile.name} liked me back...`);
-
           const reverseSwipes = await Swipe.filter({ 
             swiper_id: profile.user_id, 
             swiped_id: userProfile.user_id, 
             action: 'like' 
           });
 
-          console.log(`📊 Found ${reverseSwipes?.length || 0} reverse swipes`);
-
           if (reverseSwipes && reverseSwipes.length > 0) {
-            console.log(`💕 IT'S A MATCH!`);
+            didMatch = true;
 
             const existingMatches = await Match.filter({
               $or: [
@@ -204,7 +199,6 @@ export default function ProfileViewPage() {
                 user2_name: profile.name,
                 status: 'active'
               });
-              console.log(`✅ Match created successfully!`);
               if (isMixpanelTrackingEnabled) {
                 mixpanel.track('Match Created', {
                   matched_with_id: profile.user_id,
@@ -214,7 +208,6 @@ export default function ProfileViewPage() {
 
             setMatchData({ profile1: userProfile, profile2: profile });
 
-            // Try to call backend function for emails
             try {
               const { base44: b44 } = await import('@/api/base44Client');
               if (b44.functions?.handleSwipe) {
@@ -225,19 +218,16 @@ export default function ProfileViewPage() {
                   origin: window.location.origin
                 });
               }
-            } catch (e) {
-              console.log("📧 Email notification skipped");
-            }
+            } catch (e) {}
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);
         }
       }
       
-      // Navigate back after action
       setTimeout(() => {
         navigate(createPageUrl('LikesYou'));
-      }, action === 'like' && matchData ? 4000 : 1000);
+      }, didMatch ? 4000 : 1000);
       
     } catch (error) { 
       console.error("❌ Swipe save failed:", error); 
@@ -532,22 +522,23 @@ export default function ProfileViewPage() {
             <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
             <div className="flex flex-wrap gap-2">
               {[
-                {id: 'sport', label: '⚽ ספורט', color: 'bg-green-50 text-green-700 border-green-200'},
-                {id: 'music', label: '🎵 מוזיקה', color: 'bg-purple-50 text-purple-700 border-purple-200'},
-                {id: 'cooking', label: '🍳 בישול', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
-                {id: 'travel', label: '✈️ טיולים', color: 'bg-sky-50 text-sky-700 border-sky-200'},
-                {id: 'art', label: '🎨 אמנות', color: 'bg-pink-50 text-pink-700 border-pink-200'},
-                {id: 'gaming', label: '🎮 גיימינג', color: 'bg-indigo-50 text-indigo-700 border-indigo-200'},
-                {id: 'fitness', label: '💪 כושר', color: 'bg-orange-50 text-orange-700 border-orange-200'},
+                {id: 'gym', label: '🏋️ חדר כושר', color: 'bg-orange-50 text-orange-700 border-orange-200'},
+                {id: 'tennis', label: '🎾 טניס', color: 'bg-green-50 text-green-700 border-green-200'},
+                {id: 'pilates', label: '🤸 פילאטיס', color: 'bg-teal-50 text-teal-700 border-teal-200'},
                 {id: 'yoga', label: '🧘 יוגה', color: 'bg-teal-50 text-teal-700 border-teal-200'},
+                {id: 'soccer_basketball', label: '⚽ כדורגל / כדורסל', color: 'bg-green-50 text-green-700 border-green-200'},
+                {id: 'motorcycles', label: '🏍️ אופנועים', color: 'bg-gray-100 text-gray-700 border-gray-300'},
+                {id: 'gaming', label: '🎮 גיימינג', color: 'bg-indigo-50 text-indigo-700 border-indigo-200'},
+                {id: 'lego', label: '🧱 לגו', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
                 {id: 'photography', label: '📸 צילום', color: 'bg-gray-100 text-gray-700 border-gray-300'},
+                {id: 'painting', label: '🎨 ציור', color: 'bg-pink-50 text-pink-700 border-pink-200'},
                 {id: 'reading', label: '📚 קריאה', color: 'bg-amber-50 text-amber-700 border-amber-200'},
-                {id: 'movies', label: '🎬 סרטים', color: 'bg-red-50 text-red-700 border-red-200'},
-                {id: 'nature', label: '🌿 טבע', color: 'bg-lime-50 text-lime-700 border-lime-200'},
-                {id: 'nightlife', label: '🌙 חיי לילה', color: 'bg-violet-50 text-violet-700 border-violet-200'},
-                {id: 'tech', label: '💻 טכנולוגיה', color: 'bg-cyan-50 text-cyan-700 border-cyan-200'},
-                {id: 'fashion', label: '👗 אופנה', color: 'bg-rose-50 text-rose-700 border-rose-200'},
-                {id: 'pets', label: '🐾 חיות', color: 'bg-orange-50 text-orange-700 border-orange-200'},
+                {id: 'cooking', label: '🍳 בישול ואפייה', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
+                {id: 'concerts', label: '🎤 הופעות', color: 'bg-purple-50 text-purple-700 border-purple-200'},
+                {id: 'business', label: '💼 עסקים', color: 'bg-blue-50 text-blue-700 border-blue-200'},
+                {id: 'entrepreneurship', label: '💡 יזמות', color: 'bg-cyan-50 text-cyan-700 border-cyan-200'},
+                {id: 'plants', label: '🌱 צמחייה', color: 'bg-lime-50 text-lime-700 border-lime-200'},
+                {id: 'nature', label: '🌿 טיולים בטבע', color: 'bg-lime-50 text-lime-700 border-lime-200'},
               ].filter(i => profile.interests.includes(i.id)).map(interest => (
                 <span key={interest.id} className={`px-3 py-1.5 rounded-full text-sm font-medium border ${interest.color}`}>
                   {interest.label}
