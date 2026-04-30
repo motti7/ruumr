@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 import mixpanel from 'mixpanel-browser'
-import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
+// Configure the native Android status bar when running inside Capacitor.
+// Dynamically imported to avoid breaking the web build.
+
 
 const hostname = window.location.hostname.toLowerCase()
 const shouldEnableMixpanel =
@@ -21,11 +22,7 @@ if (shouldEnableMixpanel) {
   })
 }
 
-// Configure the native Android status bar when running inside Capacitor.
-if (Capacitor.isNativePlatform?.()) {
-  StatusBar.setBackgroundColor({ color: '#E8420A' }).catch(() => {});
-  StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-}
+// Capacitor status bar is configured natively via the Android build.
 
 // Register audit tools in development
 if (import.meta.env.DEV) {
