@@ -3,8 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import mixpanel from 'mixpanel-browser';
+import { clearClientUserData, APPLE_IDENTITY_CACHE_KEY, LAST_AUTH_PROVIDER_KEY } from '@/lib/clientSessionCleanup';
 
 const AuthContext = createContext();
+
 const isMixpanelEnabledForHostname = (hostname) => {
   const normalizedHostname = (hostname || '').toLowerCase();
   return (
@@ -12,6 +14,38 @@ const isMixpanelEnabledForHostname = (hostname) => {
     !normalizedHostname.includes('preview-sandbox') &&
     !normalizedHostname.includes('base44')
   );
+};
+
+const safeJsonParse = (value, fallbackValue) => {
+  try {
+    return JSON.parse(value);
+  } catch (_) {
+    return fallbackValue;
+  }
+};
+
+const isAppleAuthUser = (user) => {
+  if (!user) return false;
+  const provider = String(
+    user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
+  ).toLowerCase();
+  const email = String(user.email || '').toLowerCase();
+  return provider.includes('apple') || email.includes('privaterelay.appleid.com');
+};
+
+const persistAppleIdentity = (user) => {
+  if (!user?.id || typeof window === 'undefined') return;
+
+  const existingCache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
+  const currentEntry = existingCache[String(user.id)] || {};
+  const nextEntry = {
+    fullName: user.full_name || user.name || currentEntry.fullName || '',
+    email: user.email || currentEntry.email || '',
+  };
+
+  existingCache[String(user.id)] = nextEntry;
+  localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(existingCache));
+  localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
 };
 
 export const AuthProvider = ({ children }) => {
@@ -104,6 +138,12 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
 
+      // Apple returns name/email only on first authorization.
+      // Persist immediately so future logins can rely on user ID lookup + cached profile data.
+      if (isAppleAuthUser(currentUser)) {
+        persistAppleIdentity(currentUser);
+      }
+
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
         mixpanel.identify(String(currentUser.id));
         mixpanel.people.set({
@@ -129,9 +169,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
+    setAuthError(null);
+    setAppPublicSettings(null);
+    await clearClientUserData();
     
     if (shouldRedirect) {
       // Use the SDK's logout method which handles token cleanup and redirect

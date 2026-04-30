@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { AlertTriangle, Loader2, X, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
+import { useAuth } from "@/lib/AuthContext";
+import { clearClientUserData } from "@/lib/clientSessionCleanup";
 
 export default function DeleteAccountModal({ isOpen, onClose }) {
+  const { logout } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
 
@@ -20,7 +22,8 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
       await base44.functions.invoke("deleteAccount", {});
       showToast("החשבון והמידע שלך נמחקו בהצלחה.", "success");
       setTimeout(async () => {
-        await User.logout();
+        await clearClientUserData();
+        await logout(false);
         window.location.href = createPageUrl("Home");
       }, 1500);
     } catch (error) {

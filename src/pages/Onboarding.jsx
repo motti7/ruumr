@@ -18,6 +18,7 @@ import ImageLightbox from '@/components/shared/ImageLightbox';
 import mixpanel from 'mixpanel-browser';
 
 const TOTAL_STEPS = 7;
+const APPLE_IDENTITY_CACHE_KEY = 'ruumr_apple_identity_by_user_id';
 const STEP_NAMES = {
   1: 'Basic Info',
   2: 'Status Location Budget',
@@ -26,6 +27,43 @@ const STEP_NAMES = {
   5: 'Interests And About',
   6: 'Photos',
   7: 'Final Review',
+};
+
+const safeJsonParse = (value, fallbackValue) => {
+  try {
+    return JSON.parse(value);
+  } catch (_) {
+    return fallbackValue;
+  }
+};
+
+const isAppleAuthUser = (user) => {
+  if (!user) return false;
+  const provider = String(
+    user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
+  ).toLowerCase();
+  const email = String(user.email || '').toLowerCase();
+  const lastAuthProvider =
+    typeof window !== 'undefined' ? localStorage.getItem('ruumr_last_auth_provider') : null;
+  return provider.includes('apple') || email.includes('privaterelay.appleid.com') || lastAuthProvider === 'apple';
+};
+
+const getCachedAppleIdentity = (userId) => {
+  if (!userId || typeof window === 'undefined') return null;
+  const cache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
+  return cache[String(userId)] || null;
+};
+
+const persistAppleIdentity = (userId, identity) => {
+  if (!userId || typeof window === 'undefined') return;
+  const cache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
+  const previous = cache[String(userId)] || {};
+  cache[String(userId)] = {
+    fullName: identity?.fullName || previous.fullName || '',
+    email: identity?.email || previous.email || '',
+  };
+  localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(cache));
+  localStorage.setItem('ruumr_last_auth_provider', 'apple');
 };
 
 const INTERESTS_LIST = [
@@ -123,7 +161,28 @@ export default function OnboardingPage() {
     const fetchUser = async () => {
       try {
         const userData = await User.me();
-        setFormData((prev) => ({ ...prev, name: userData.full_name.split(' ')[0], user_id: userData.id }));
+        const isAppleUser = isAppleAuthUser(userData);
+        const cachedIdentity = getCachedAppleIdentity(userData.id);
+
+        const fullName =
+          userData.full_name ||
+          userData.name ||
+          cachedIdentity?.fullName ||
+          '';
+        const email = userData.email || cachedIdentity?.email || '';
+        const firstName = fullName ? fullName.split(' ')[0] : '';
+
+        if (isAppleUser) {
+          // Critical: persist first-login Apple identity immediately for future logins.
+          persistAppleIdentity(userData.id, { fullName, email });
+        }
+
+        setFormData((prev) => ({ ...prev, name: firstName, user_id: userData.id }));
+
+        // Bypass manual name/email step for Apple sign-ins when identity is already known.
+        if (isAppleUser && firstName) {
+          setStep((currentStep) => (currentStep === 1 ? 2 : currentStep));
+        }
       } catch (e) {
         // If user is not logged in, redirect to login page then back here
         base44.auth.redirectToLogin(window.location.href);

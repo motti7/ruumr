@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Trash2, CheckCircle2 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
-import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
+import { clearClientUserData } from "@/lib/clientSessionCleanup";
 
 export default function DataDeletionPage() {
   const [reason, setReason] = useState("");
@@ -26,20 +26,7 @@ export default function DataDeletionPage() {
     setIsSubmitting(true);
     try {
       const user = await User.me();
-      
-      // Delete all user data
-      const mySwipes = await Swipe.filter({ swiper_id: user.id });
-      await Promise.all(mySwipes.map(s => Swipe.delete(s.id)));
-      
-      const swipesOnMe = await Swipe.filter({ swiped_id: user.id });
-      await Promise.all(swipesOnMe.map(s => Swipe.delete(s.id)));
-      
-      const myMatches1 = await Match.filter({ user1_id: user.id });
-      const myMatches2 = await Match.filter({ user2_id: user.id });
-      await Promise.all([...myMatches1, ...myMatches2].map(m => Match.delete(m.id)));
-      
-      const myProfiles = await Profile.filter({ user_id: user.id });
-      await Promise.all(myProfiles.map(p => Profile.delete(p.id)));
+      await base44.functions.invoke("deleteAccount", {});
       
       // Send email to admin to delete Google login credentials
       await base44.integrations.Core.SendEmail({
@@ -64,6 +51,7 @@ export default function DataDeletionPage() {
       
       // Logout after 3 seconds
       setTimeout(() => {
+        clearClientUserData();
         User.logout();
         window.location.href = createPageUrl('Home');
       }, 3000);

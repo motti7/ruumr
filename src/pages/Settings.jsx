@@ -8,6 +8,7 @@ import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Heart, Mes
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import DeleteAccountModal from "../components/settings/DeleteAccountModal";
+import { useAuth } from "@/lib/AuthContext";
 
 const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onClick }) => {
   const content = (
@@ -31,6 +32,7 @@ const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onCl
 
 
 export default function SettingsPage() {
+  const { logout } = useAuth();
   const [notifyLikes, setNotifyLikes] = useState(true);
   const [notifyMatches, setNotifyMatches] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -55,8 +57,7 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await User.logout();
-    window.location.href = createPageUrl('Home');
+    await logout(true);
   };
 
 
@@ -104,6 +105,16 @@ export default function SettingsPage() {
         
         <div className="pt-6 space-y-4">
              <Button 
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full text-center text-gray-600 font-bold text-lg min-h-[44px]"
+              aria-label="התנתקות"
+            >
+              <LogOut className="w-5 h-5 ml-2" />
+              התנתקות
+            </Button>
+
+            <Button 
                onClick={() => setShowDeleteModal(true)} 
                variant="ghost" 
                className="w-full text-center text-red-500 font-bold text-lg min-h-[44px]"
