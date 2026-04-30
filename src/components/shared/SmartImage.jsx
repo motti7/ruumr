@@ -11,7 +11,7 @@ export default function SmartImage({
     alt,
     className = "",
     priority = false,
-    onClick,
+    onClick = undefined,
     showSkeleton = false,
     ...props
 }) {
@@ -61,16 +61,22 @@ export default function SmartImage({
 
     if (!src || status === 'error') {
         return (
-            <div ref={containerRef} className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`} onClick={onClick}>
+            <div ref={containerRef} {...props} className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${className}`} onClick={onClick}>
                 <ImageOff className="w-8 h-8 text-gray-300" />
             </div>
         );
     }
 
     return (
-        <div ref={containerRef} className={`relative overflow-hidden bg-gray-200 ${className}`} onClick={onClick}>
+        <div ref={containerRef} {...props} className={`relative overflow-hidden bg-gray-200 ${className}`} onClick={onClick}>
             {(status === 'idle' || status === 'loading') && (
-                <div className="absolute inset-0 animate-pulse bg-gray-200" />
+                showSkeleton ? (
+                    <div className="absolute inset-0 animate-pulse bg-gray-200" />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-[--theme-orange] animate-spin" />
+                    </div>
+                )
             )}
             {status === 'loaded' && (
                 <img

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 // Root screens that should exit the app (or go to home) on back press
-const ROOT_PATHS = ['/', '/Discover', '/Matches', '/LikesYou', '/GroupTracker'];
+const ROOT_PATHS = ['/', '/Discover', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker'];
 
 /**
  * Native Android back handler bridge
@@ -11,12 +13,17 @@ const ROOT_PATHS = ['/', '/Discover', '/Matches', '/LikesYou', '/GroupTracker'];
 class AndroidBackBridge {
   static isNativeAndroid() {
     return typeof window !== 'undefined' && (
+      (Capacitor.isNativePlatform?.() && Capacitor.getPlatform?.() === 'android') ||
       window.AndroidBridge !== undefined ||
       window.webkit?.messageHandlers?.androidBack !== undefined
     );
   }
 
   static onBackPress() {
+    if (Capacitor.isNativePlatform?.()) {
+      App.exitApp?.();
+      return;
+    }
     if (window.AndroidBridge?.onBackPress) {
       window.AndroidBridge.onBackPress();
     } else if (window.webkit?.messageHandlers?.androidBack) {
@@ -90,8 +97,19 @@ export default function useAndroidBackButton(onBack = null) {
     };
 
     window.addEventListener('popstate', handlePopState);
+
+    let nativeBackListener = null;
+    if (Capacitor.isNativePlatform?.() && Capacitor.getPlatform?.() === 'android') {
+      App.addListener('backButton', handlePopState)
+        .then((listener) => {
+          nativeBackListener = listener;
+        })
+        .catch(() => {});
+    }
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      nativeBackListener?.remove?.();
     };
   }, [location.pathname, navigate, onBack]);
 }

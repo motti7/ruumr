@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Trash2, CheckCircle2 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
-import { Profile, Swipe, Match, Message } from "@/entities/all";
+import { Profile, Swipe, Match } from "@/entities/all";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";

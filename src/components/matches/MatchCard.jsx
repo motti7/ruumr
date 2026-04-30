@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
+import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
 const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {

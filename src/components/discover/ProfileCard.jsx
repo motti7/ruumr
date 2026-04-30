@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
+import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 
 const ProfileDetail = ({ profile, onClose }) => {
     const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
     const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
     const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
+    const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
 
     const ensureProtocol = (url) => {
         if (!url) return '';
@@ -50,6 +52,17 @@ const ProfileDetail = ({ profile, onClose }) => {
             <div className="p-6 pt-24 text-white space-y-6" onClick={(e) => e.stopPropagation()}>
                 <div className="text-center">
                     <h3 className="text-3xl font-bold" id="profile-header">{profile.name}, {profile.age}</h3>
+                    {plusMeta && (
+                        <div className="mt-3 inline-flex items-center gap-2 bg-white/15 border border-white/10 px-4 py-2 rounded-full text-sm font-bold">
+                            <span className="text-[--theme-orange]">
+                                {Math.round((Number(plusMeta.score) || 0) * 100)}% התאמה
+                            </span>
+                            <span className="text-white/70">·</span>
+                            <span className="text-white">
+                                {plusMeta.messageable ? 'הודעות פתוחות' : 'שיחה נעולה'}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex items-center justify-center text-white/90 mt-3 text-base">
                         <MapPin className="w-5 h-5 ml-1" aria-hidden="true" />
                         <div className="flex flex-col items-center">
@@ -89,6 +102,30 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
+                {plusMeta && plusMeta.insight && (
+                    <div className="bg-gradient-to-br from-[--theme-orange]/25 to-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                        <h4 className="font-bold mb-2 text-white text-lg flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-[--theme-orange]" />
+                            למה Ruumr Plus אוהב את זה
+                        </h4>
+                        <p className="text-base text-white/95 leading-relaxed">{plusMeta.insight}</p>
+                        {plusMeta.reasons && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                {(plusMeta.reasons.shared_cities || []).map((city, i) => (
+                                    <span key={`city-${i}`} className="bg-white/15 px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/10">
+                                        {city}
+                                    </span>
+                                ))}
+                                {(plusMeta.reasons.shared_interests || []).map((interest, i) => (
+                                    <span key={`interest-${i}`} className="bg-white/15 px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/10">
+                                        {interest}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Remaining interests (those not shown on the card) */}
                 {profile.interests && profile.interests.length > 3 && (
                     <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
@@ -102,6 +139,14 @@ const ProfileDetail = ({ profile, onClose }) => {
                         </div>
                     </div>
                 )}
+
+                <HouseholdPreferencesGrid
+                    profile={profile}
+                    variant="dark"
+                    title="הרגלים בבית"
+                    description="אלו השדות ש-Ruumr Plus משתמש בהם כדי לשפר התאמות."
+                    className="mt-2"
+                />
 
                 <div className="grid grid-cols-2 gap-3" role="list">
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
@@ -208,6 +253,7 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [avgRating, setAvgRating] = useState(null);
+    const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
 
     // Use a module-level singleton audio element to guarantee only one plays at a time
     const audioRef = useRef(null);
@@ -405,6 +451,12 @@ const ProfileCard = memo(function ProfileCard({ profile, onSwipe, isActive }) {
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
                                     {avgRating.toFixed(1)}
+                                </div>
+                            )}
+                            {plusMeta && (
+                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-[--theme-orange]" />
+                                    {Math.round((Number(plusMeta.score) || 0) * 100)}%
                                 </div>
                             )}
                             {/* Info button below tags */}

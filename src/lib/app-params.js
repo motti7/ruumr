@@ -1,6 +1,11 @@
+import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+
 const isNode = typeof window === 'undefined';
 const windowObj = isNode ? { localStorage: new Map() } : window;
 const storage = windowObj.localStorage;
+
+const DEFAULT_BASE44_APP_ID = import.meta.env.VITE_BASE44_APP_ID || '68c919adff6ac6fafb51bed6';
+const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'https://base44.app';
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -40,10 +45,10 @@ const getAppParams = () => {
 		storage.removeItem('token');
 	}
 	return {
-		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
-		serverUrl: getAppParamValue("server_url", { defaultValue: import.meta.env.VITE_BASE44_BACKEND_URL }),
+		appId: getAppParamValue("app_id", { defaultValue: DEFAULT_BASE44_APP_ID }),
+		serverUrl: getAppParamValue("server_url", { defaultValue: DEFAULT_BASE44_SERVER_URL }),
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
-		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
+		fromUrl: getAppParamValue("from_url", { defaultValue: getSafeAuthReturnUrl() }),
 		functionsVersion: getAppParamValue("functions_version"),
 	}
 }

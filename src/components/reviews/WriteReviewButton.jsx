@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Star, X, ChevronLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
@@ -13,22 +13,28 @@ export default function WriteReviewButton() {
 
   const loadMatches = async () => {
     setIsLoading(true);
-    const user = await User.me();
-    const m1 = await base44.entities.Match.filter({ user1_id: user.id });
-    const m2 = await base44.entities.Match.filter({ user2_id: user.id });
-    const allMatches = [...m1, ...m2].filter(m => m.status === 'active');
+    try {
+      const user = await User.me();
+      const m1 = await base44.entities.Match.filter({ user1_id: user.id });
+      const m2 = await base44.entities.Match.filter({ user2_id: user.id });
+      const allMatches = [...m1, ...m2].filter(m => m.status === 'active');
 
-    // Get profile for each partner
-    const results = await Promise.all(allMatches.map(async (match) => {
-      const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
-      const partnerName = match.user1_id === user.id ? match.user2_name : match.user1_name;
-      const profiles = await base44.entities.Profile.filter({ user_id: partnerId });
-      const photo = profiles[0]?.photos?.[0] || null;
-      return { userId: partnerId, name: partnerName, photo };
-    }));
+      // Get profile for each partner
+      const results = await Promise.all(allMatches.map(async (match) => {
+        const partnerId = match.user1_id === user.id ? match.user2_id : match.user1_id;
+        const partnerName = match.user1_id === user.id ? match.user2_name : match.user1_name;
+        const profiles = await base44.entities.Profile.filter({ user_id: partnerId });
+        const photo = profiles[0]?.photos?.[0] || null;
+        return { userId: partnerId, name: partnerName, photo };
+      }));
 
-    setMatches(results);
-    setIsLoading(false);
+      setMatches(results);
+    } catch (error) {
+      console.error("Failed to load review matches:", error);
+      setMatches([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOpen = () => {

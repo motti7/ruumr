@@ -235,6 +235,42 @@ Ensure `.env` files are ignored:
 
 ---
 
+## Ruumr Plus Bridge Configuration
+
+The Ruumr app now talks to the standalone Ruumr Plus service through a Base44 function bridge. These settings live on the function/runtime side, not in the Vite client bundle:
+
+```bash
+# Base44 function / server-side environment
+RUUMR_PLUS_SERVICE_URL=http://127.0.0.1:8787
+RUUMR_PLUS_API_KEY=replace-me
+RUUMR_PLUS_WEBHOOK_SECRET=replace-me
+```
+
+### Notes
+
+- `RUUMR_PLUS_SERVICE_URL` should point at the deployed Ruumr Plus service.
+- `RUUMR_PLUS_API_KEY` protects recommendation and admin endpoints.
+- `RUUMR_PLUS_WEBHOOK_SECRET` signs profile sync requests for replay protection.
+- If either secret is left as `replace-me`, the service treats that check as disabled for local development.
+- The bridge defaults to `http://127.0.0.1:8787` so local service testing works without extra wiring.
+
+### Base44 deployment
+
+When you push `ruumr` to Base44, these values must be configured as Base44 function secrets for the `ruumrPlusBridge` function. They are not Vite client env vars.
+
+```bash
+base44 secrets set \
+  RUUMR_PLUS_SERVICE_URL=https://your-ruumr-plus-service.example.com \
+  RUUMR_PLUS_API_KEY=your-service-api-key \
+  RUUMR_PLUS_WEBHOOK_SECRET=your-webhook-secret
+```
+
+- `base44 deploy` will publish the bridge function along with the rest of the `ruumr` app.
+- `ruumr-plus-service` is still deployed separately and is not uploaded into Base44.
+- If `RUUMR_PLUS_SERVICE_URL` is still set to localhost after deploying, the bridge will fail fast with a clear error.
+
+---
+
 ## Additional Resources
 
 - [Vite Environment Variables Docs](https://vitejs.dev/guide/env-and-mode.html)

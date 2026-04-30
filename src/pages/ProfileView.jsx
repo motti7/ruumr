@@ -3,13 +3,14 @@ import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Heart, X, Star } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
 import MatchAnimation from '../components/discover/MatchAnimation';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
+import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -85,6 +86,7 @@ export default function ProfileViewPage() {
   const [showActions, setShowActions] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
+  const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
 
   useEffect(() => {
     loadProfile();
@@ -473,6 +475,21 @@ export default function ProfileViewPage() {
           <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
         </div>
 
+        {plusMeta && plusMeta.insight && (
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
+            <h4 className="font-bold text-lg mb-2 flex items-center gap-2 text-[--theme-orange]">
+              <Sparkles className="w-5 h-5" />
+              Ruumr Plus
+            </h4>
+            <p className="text-gray-700 leading-relaxed">{plusMeta.insight}</p>
+            {plusMeta.messageable !== undefined && (
+              <div className="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-[--theme-orange]">
+                {plusMeta.messageable ? "הודעות פתוחות" : "שיחה נעולה"}
+              </div>
+            )}
+          </div>
+        )}
+
         <ReviewsSection userId={profile.user_id} />
 
         {isExMatch && (
@@ -562,6 +579,13 @@ export default function ProfileViewPage() {
             )}
           </div>
         </div>
+
+        <HouseholdPreferencesGrid
+          profile={profile}
+          variant="light"
+          title="הרגלים בבית"
+          description="המידע הזה משמש את Ruumr Plus כדי להבין את שגרת החיים בדירה."
+        />
       </div>
       
       {showActions && (

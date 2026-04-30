@@ -1,4 +1,3 @@
-import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
 
@@ -34,15 +33,22 @@ const buttonVariants = cva(
   }
 )
 
-const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
+/**
+ * @param {{
+ *   className?: string;
+ *   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+ *   size?: "default" | "sm" | "lg" | "icon";
+ *   asChild?: boolean;
+ *   [key: string]: any;
+ * }} props
+ */
+function Button({ className, variant, size, asChild = false, ...props }) {
   const Comp = asChild ? Slot : "button"
   return (
     (<Comp
       className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
       {...props} />)
   );
-})
-Button.displayName = "Button"
+}
 
 export { Button, buttonVariants }

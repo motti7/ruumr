@@ -168,6 +168,28 @@ button:focus-visible {
   }
 }
 
+@layer utilities {
+  .logo-font {
+    font-family: "Pacifico", cursive;
+    color: var(--theme-orange);
+    font-weight: 400;
+  }
+
+  .gradient-orange {
+    background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
+  }
+
+  .components-slider-thumb {
+    background-color: var(--theme-orange) !important;
+    border-color: var(--theme-orange) !important;
+  }
+
+  .components-slider-range,
+  .components-progress-indicator {
+    background-color: var(--theme-orange) !important;
+  }
+}
+
 /* Prevent accidental text selection on interactive elements */
 button,
 a,

@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 import mixpanel from 'mixpanel-browser'
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
   debug: true,
@@ -11,15 +13,10 @@ mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
   api_host: 'https://api-eu.mixpanel.com',
 })
 
-// Configure native status bar color via Capacitor (if available)
-if (window.Capacitor?.isNativePlatform?.()) {
-  try {
-    const { StatusBar, Style } = window.Capacitor.Plugins;
-    if (StatusBar) {
-      StatusBar.setBackgroundColor({ color: '#E8420A' });
-      StatusBar.setStyle({ style: 'DARK' });
-    }
-  } catch (_) {}
+// Configure the native Android status bar when running inside Capacitor.
+if (Capacitor.isNativePlatform?.()) {
+  StatusBar.setBackgroundColor({ color: '#E8420A' }).catch(() => {});
+  StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
 }
 
 // Register audit tools in development

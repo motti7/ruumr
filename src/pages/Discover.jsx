@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -10,7 +10,7 @@ import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Heart, X, Home, Puzzle } from "lucide-react";
+import { Heart, X, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
@@ -100,7 +100,7 @@ export default function DiscoverPage() {
         
         return overlap;
       });
-      
+
       setAllProfiles(availableProfiles);
       setProfiles(availableProfiles);
     } catch (error) {
@@ -313,7 +313,7 @@ export default function DiscoverPage() {
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
                 const isTopCard = index === arr.length - 1;
                 return (
-                  <ErrorBoundary key={`${profile.id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
+                  <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
                     <div
                       className={`absolute inset-0 transition-all duration-300 ${
                         isTopCard

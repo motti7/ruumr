@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 const ONESIGNAL_APP_ID = '3a9b850f-9934-49fe-8862-4776d1dc36e3';
 
 export default function OneSignalSetup({ userId }) {
     useEffect(() => {
         if (typeof window === 'undefined') return;
+        if (Capacitor.isNativePlatform?.()) return;
 
         window.OneSignalDeferred = window.OneSignalDeferred || [];
 

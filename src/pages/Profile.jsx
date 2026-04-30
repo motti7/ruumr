@@ -2,17 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
-import { base44 } from "@/api/base44Client";
+import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Music, Search, Video, Play, Facebook } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
+import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
+import { createProfileDefaults } from '@/lib/profileDefaults';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -36,8 +38,9 @@ export default function ProfilePage() {
       const userData = await User.me();
       const userProfiles = await ProfileEntity.filter({ user_id: userData.id });
       if (userProfiles.length > 0) {
-        setProfile(userProfiles[0]);
-        setFormData(userProfiles[0]);
+        const mergedProfile = createProfileDefaults(userProfiles[0]);
+        setProfile(mergedProfile);
+        setFormData(mergedProfile);
       } else {
         window.location.href = createPageUrl('Onboarding');
       }
@@ -74,6 +77,11 @@ export default function ProfilePage() {
         const dataToSave = {...formData, social_link: cleanSocial};
         if(!dataToSave.budget_min) dataToSave.budget_min = 0;
         await ProfileEntity.update(profile.id, dataToSave);
+      }
+      try {
+        await syncCurrentProfileToRuumrPlus();
+      } catch (syncError) {
+        console.error("Failed to sync profile changes to Ruumr Plus:", syncError);
       }
       await loadProfile();
       setIsEditing(false);
@@ -513,6 +521,17 @@ export default function ProfilePage() {
                       </div>
                   </div>
               </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+              <HouseholdPreferencesSection
+                values={formData}
+                onChange={setFormField}
+                disabled={!isEditing}
+                title="הרגלים בבית"
+                description="אלו השדות ש-Ruumr Plus משתמש בהם כדי למצוא התאמה יציבה ונוחה."
+                className=""
+              />
             </div>
 
             <div>

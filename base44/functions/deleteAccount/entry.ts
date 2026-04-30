@@ -17,6 +17,14 @@ Deno.serve(async (req) => {
         const userEmail = user.email;
         const sr = base44.asServiceRole.entities;
 
+        try {
+            await base44.functions.invoke('ruumrPlusBridge', {
+                action: 'profile.delete_current',
+            });
+        } catch (syncError) {
+            console.error('⚠️ Failed to sync profile deletion to Ruumr Plus:', syncError);
+        }
+
         // Delete Profile
         const profiles = await sr.Profile.filter({ user_id: userId });
         for (const p of profiles) await safeDelete(sr.Profile, p.id);
