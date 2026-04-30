@@ -6,12 +6,20 @@ import mixpanel from 'mixpanel-browser'
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
-mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
-  debug: true,
-  autocapture: true,
-  record_sessions_percent: 100,
-  api_host: 'https://api-eu.mixpanel.com',
-})
+const hostname = window.location.hostname.toLowerCase()
+const shouldEnableMixpanel =
+  !hostname.includes('localhost') &&
+  !hostname.includes('preview-sandbox') &&
+  !hostname.includes('base44')
+
+if (shouldEnableMixpanel) {
+  mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
+    debug: true,
+    autocapture: true,
+    record_sessions_percent: 100,
+    api_host: 'https://api-eu.mixpanel.com',
+  })
+}
 
 // Configure the native Android status bar when running inside Capacitor.
 if (Capacitor.isNativePlatform?.()) {

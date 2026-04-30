@@ -11,6 +11,7 @@ import MatchAnimation from '../components/discover/MatchAnimation';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
+import mixpanel from 'mixpanel-browser';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -87,6 +88,10 @@ export default function ProfileViewPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
   const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
+  const isMixpanelTrackingEnabled = (() => {
+    const hostname = window.location.hostname.toLowerCase();
+    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
+  })();
 
   useEffect(() => {
     loadProfile();
@@ -161,6 +166,12 @@ export default function ProfileViewPage() {
       
       await Swipe.create(swipeData);
       console.log("✅ Swipe saved successfully:", swipeData);
+      if (isMixpanelTrackingEnabled) {
+        mixpanel.track('Swipe', {
+          direction: action === 'like' ? 'right' : 'left',
+          target_profile_id: profile.user_id,
+        });
+      }
 
       // Check for match if liked
       if (action === 'like') {
@@ -194,6 +205,11 @@ export default function ProfileViewPage() {
                 status: 'active'
               });
               console.log(`✅ Match created successfully!`);
+              if (isMixpanelTrackingEnabled) {
+                mixpanel.track('Match Created', {
+                  matched_with_id: profile.user_id,
+                });
+              }
             }
 
             setMatchData({ profile1: userProfile, profile2: profile });
