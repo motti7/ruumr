@@ -163,17 +163,15 @@ button:focus-visible {
   * {
     @apply border-border outline-ring/50;
   }
-  html, body, #root {
+  body {
+    @apply bg-background text-foreground;
+    /* Prevent see-through background on PWA/WebView */
     background-color: #ffffff !important;
     min-height: 100vh;
     min-height: 100dvh;
-    width: 100%;
-    overflow-x: hidden;
   }
-  body {
-    @apply bg-background text-foreground;
-    background-color: #ffffff !important;
-    -webkit-background-color: #ffffff;
+  html {
+    background-color: #ffffff;
   }
 }
 
