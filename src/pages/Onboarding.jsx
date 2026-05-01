@@ -252,9 +252,6 @@ export default function OnboardingPage() {
   };
 
   const handleFinish = async (shouldVerify = false) => {
-    // Guard against double-submit
-    if (isSubmitting) return;
-
     if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {
       alert("אנא המתן לסיום העלאת התמונות");
       return;
@@ -289,13 +286,6 @@ export default function OnboardingPage() {
         song_artist: formData.song_artist || null,
         song_image: formData.song_image || null
       };
-      // Guard: check if profile already exists before creating
-      const existingProfiles = await Profile.filter({ user_id: formData.user_id });
-      if (existingProfiles.length > 0) {
-        // Profile already exists, skip creation
-        navigate(shouldVerify ? createPageUrl('Verification') : createPageUrl('Discover'));
-        return;
-      }
       await Profile.create(finalData);
       try {
         await syncCurrentProfileToRuumrPlus();
