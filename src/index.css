@@ -165,6 +165,13 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent see-through background on PWA/WebView */
+    background-color: #ffffff !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  html {
+    background-color: #ffffff;
   }
 }
 
