@@ -267,18 +267,6 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
-      // Guard against duplicate profile creation
-      const existingProfiles = await Profile.filter({ user_id: formData.user_id });
-      if (existingProfiles.length > 0) {
-        console.warn("Profile already exists, skipping creation");
-        if (shouldVerify) {
-          navigate(createPageUrl('Verification'));
-        } else {
-          navigate(createPageUrl('Discover'));
-        }
-        return;
-      }
-
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
       const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(formData.name, cleanedPhotos, 2) : cleanedPhotos;
