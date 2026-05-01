@@ -4,9 +4,8 @@ import { User } from "@/entities/User";
 import { Star, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 
-export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose, onSubmitted }) {
+export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose, onSubmitted = undefined }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [text, setText] = useState("");

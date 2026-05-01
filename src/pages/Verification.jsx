@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
 import { useNavigate } from "react-router-dom";
@@ -6,8 +6,9 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowRight, Check, RefreshCw, ShieldCheck, Sparkles, Award, Zap } from "lucide-react";
+import { Mail, ArrowRight, RefreshCw, Sparkles, Award } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
 export default function VerificationPage() {
   const navigate = useNavigate();
@@ -71,6 +72,11 @@ export default function VerificationPage() {
         const profiles = await Profile.filter({ user_id: user.id });
         if (profiles.length > 0) {
             await Profile.update(profiles[0].id, { is_verified: true });
+        }
+        try {
+          await syncCurrentProfileToRuumrPlus();
+        } catch (syncError) {
+          console.error("Failed to sync verification update to Ruumr Plus:", syncError);
         }
         setStep(3);
         setTimeout(() => {

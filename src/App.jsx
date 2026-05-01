@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense, useCallback } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
@@ -21,14 +21,17 @@ const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
 
 const PageLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white">
-    <div className="w-8 h-8 border-4 border-gray-200 border-t-[#FF5722] rounded-full animate-spin" />
+  <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-b from-white via-orange-50 to-orange-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-[--theme-orange] animate-spin" />
+      <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">טוען...</span>
+    </div>
   </div>
 );
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+const MainPage = mainPageKey ? Pages[mainPageKey] : null;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
@@ -37,6 +40,12 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    if (authError?.type === 'auth_required') {
+      navigateToLogin();
+    }
+  }, [authError, navigateToLogin]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -51,9 +60,9 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
+    }
+
+    if (authError.type === 'auth_required') {
       return null;
     }
   }
@@ -67,7 +76,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={
           <PageTransition>
             <LayoutWrapper currentPageName={mainPageKey}>
-              <MainPage />
+              {MainPage ? <MainPage /> : null}
             </LayoutWrapper>
           </PageTransition>
         } />

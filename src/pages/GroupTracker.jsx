@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
+import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -58,6 +59,11 @@ export default function GroupTrackerPage() {
       .filter(m => newTeamIds.includes(m.id))
       .map(m => ({ match_id: m.id, name: m.name, photo: m.photo }));
     await Profile.update(myProfile.id, { team_members: teamMembers, team_target: newTarget });
+    try {
+      await syncCurrentProfileToRuumrPlus();
+    } catch (syncError) {
+      console.error("Failed to sync team updates to Ruumr Plus:", syncError);
+    }
     setIsSaving(false);
   };
 

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
-import { Profile, Swipe, Match, Message } from "@/entities/all";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, LogOut, Lock, Trash2, Heart, MessageCircle } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, Lock, Trash2, Heart } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import DeleteAccountModal from "../components/settings/DeleteAccountModal";
@@ -125,10 +124,7 @@ export default function SettingsPage() {
             </Button>
             
 
-            <Button onClick={() => window.location.href = createPageUrl('AdminUsers')} variant="outline" className="w-full mt-2 border-dashed border-gray-300 text-gray-400 text-xs">
-                <Shield className="w-3 h-3 ml-2" />
-                Admin: User Management
-            </Button>
+
         </div>
       </div>
     </div>

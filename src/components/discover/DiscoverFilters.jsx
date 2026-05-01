@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SlidersHorizontal, X, Check, MapPin } from "lucide-react";
+import { X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const ISRAEL_CITIES = [

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageCircle, Puzzle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, Puzzle } from 'lucide-react';
 import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
 import RoomiCharter from './RoomiCharter';

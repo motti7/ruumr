@@ -6,7 +6,8 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, UtensilsCrossed, Briefcase, Lightbulb, Leaf, Mountain, Zap, Target, Trophy, User as UserIcon, Smile, Car, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
+import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, Briefcase, Lightbulb, Leaf, Zap, Trophy, User as UserIcon, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,14 @@ import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
+import { createProfileDefaults } from '@/lib/profileDefaults';
+import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+import {
+    buildSimulatorApartmentPhotos,
+    buildSimulatorProfilePhotos,
+    isRuumrSimulatorMode,
+} from '@/lib/simulatorMode';
 import mixpanel from 'mixpanel-browser';
 
 const TOTAL_STEPS = 7;
@@ -109,38 +118,9 @@ const Step = ({ children, step, currentStep, title }) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    age: 25,
-    gender: 'male',
-    about_me: '',
-    social_link: '',
-    looking_for_description: '',
-    photos: Array(6).fill(null),
-    location: '',
-    search_cities: [],
-    search_area: 'מרכז',
-    budget_max: 3500,
-    vibe_level: 3,
-    pet_type: 'none',
-    pet_other_description: '',
-    looking_for_gender: 'any',
-    religion: 'secular',
-    kosher_preference: 'flow',
-    shabbat_preference: 'flow',
-    current_status: '',
-    apartment_photos: Array(6).fill(null),
-    existing_roommates: 0,
-    apartment_total_budget: 5000,
-    interests: [],
-    // Song Info
-    itunes_track_id: '',
-    song_preview_url: null,
-    song_name: '',
-    song_artist: '',
-    song_image: ''
-  });
+  const [formData, setFormData] = useState(() => createProfileDefaults());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
@@ -185,7 +165,7 @@ export default function OnboardingPage() {
         }
       } catch (e) {
         // If user is not logged in, redirect to login page then back here
-        base44.auth.redirectToLogin(window.location.href);
+        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
       }
     };
     fetchUser();
@@ -217,6 +197,9 @@ export default function OnboardingPage() {
       return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
         formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
     case 4: // Apartment Details - Conditional
+      if (simulatorMode) {
+        return true;
+      }
       if (formData.current_status === 'has_apartment') {
         const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
         return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
@@ -225,6 +208,9 @@ export default function OnboardingPage() {
     case 5: // Interests + About + Looking For
       return formData.about_me.trim() && formData.looking_for_description.trim();
     case 6: // Photos
+      if (simulatorMode) {
+        return true;
+      }
       return formData.photos.filter((p) => p).length >= 2;
     case 7: // Final step
       return true;
@@ -281,10 +267,17 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
+      const cleanedPhotos = formData.photos.filter((p) => p);
+      const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
+      const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(formData.name, cleanedPhotos, 2) : cleanedPhotos;
+      const finalApartmentPhotos = simulatorMode && formData.current_status === 'has_apartment'
+        ? buildSimulatorApartmentPhotos(formData.name, cleanedApartmentPhotos, 3)
+        : cleanedApartmentPhotos;
+
       const finalData = {
         ...formData,
-        photos: formData.photos.filter((p) => p),
-        apartment_photos: formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [],
+        photos: finalPhotos,
+        apartment_photos: finalApartmentPhotos,
         location: formData.search_cities[0] || '',
         is_visible: true,
         // Ensure nulls are handled
@@ -294,6 +287,11 @@ export default function OnboardingPage() {
         song_image: formData.song_image || null
       };
       await Profile.create(finalData);
+      try {
+        await syncCurrentProfileToRuumrPlus();
+      } catch (syncError) {
+        console.error("Failed to sync onboarding profile to Ruumr Plus:", syncError);
+      }
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Registration Completed');
       }
@@ -690,12 +688,27 @@ export default function OnboardingPage() {
                                 <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
                             </motion.div>
                         }
+
+                        <div className="pt-3">
+                            <HouseholdPreferencesSection
+                                values={formData}
+                                onChange={setFormField}
+                                title="הרגלים בבית"
+                                description="זה עוזר ל-Ruumr Plus להתאים לכם שותפים עם קצב חיים דומה."
+                                className="bg-orange-50/60 p-4 rounded-2xl border border-orange-100"
+                            />
+                        </div>
                     </div>
                 </div>
             </Step>
 
             <Step step={4} currentStep={step} title="פרטי הדירה">
                 <div className="space-y-6 text-right">
+                    {simulatorMode && (
+                        <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+                            Simulator mode is on, so apartment photos are optional here. We’ll fill them with demo images if you continue.
+                        </div>
+                    )}
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
                             <Home className="w-5 h-5" />
@@ -783,6 +796,11 @@ export default function OnboardingPage() {
 
             <Step step={6} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
+                {simulatorMode && (
+                    <div className="mb-4 rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 text-center">
+                        Simulator mode is on, so you can continue without uploading photos. Demo photos will be generated automatically.
+                    </div>
+                )}
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
               <div key={i} className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm hover:shadow-md transition-all bg-gray-50 group">

@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
-import { BannedUser } from "@/entities/BannedUser";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Trash2, ShieldAlert, MessageSquare, Heart, ClipboardList } from "lucide-react";
+import { Loader2, Search, ShieldAlert, MessageSquare, ClipboardList, Sparkles, RefreshCw } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+    fetchRuumrPlusEntitlements,
+    grantRuumrPlusEntitlement,
+    revokeRuumrPlusEntitlement,
+    snapshotProfilesToRuumrPlus,
+} from "@/api/ruumrPlus";
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
@@ -24,12 +29,17 @@ export default function AdminUsersPage() {
     const [showEmailDialog, setShowEmailDialog] = useState(false);
     const [emailSubject, setEmailSubject] = useState("");
     const [emailBody, setEmailBody] = useState("");
+    const [entitlements, setEntitlements] = useState({});
+    const [currentAdmin, setCurrentAdmin] = useState(null);
+    const [plusActionUserId, setPlusActionUserId] = useState(null);
+    const [isSyncingSnapshot, setIsSyncingSnapshot] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         const checkAdminAndLoad = async () => {
             try {
                 const me = await User.me();
+                setCurrentAdmin(me);
                 console.log('🔍 Current user:', me);
                 console.log('🔍 Is admin?', me.role === 'admin');
                 
@@ -56,15 +66,25 @@ export default function AdminUsersPage() {
             // Fetch users (only admins can list users)
             const allUsers = await User.list();
             // Fetch all profiles to map to users
-            const allProfiles = await Profile.list(1000);
+            const allProfiles = await Profile.list('-created_date', 1000);
+            const entitlementResponse = await fetchRuumrPlusEntitlements().catch((error) => {
+                console.error("Failed to load Ruumr Plus entitlements", error);
+                return null;
+            });
             
             const profileMap = {};
             allProfiles.forEach(p => {
                 profileMap[p.user_id] = p;
             });
 
+            const entitlementMap = {};
+            (entitlementResponse?.items || entitlementResponse?.result?.items || []).forEach((entitlement) => {
+                entitlementMap[entitlement.user_id] = entitlement;
+            });
+
             setUsers(allUsers);
             setProfiles(profileMap);
+            setEntitlements(entitlementMap);
         } catch (e) {
             console.error("Failed to load users", e);
             alert("שגיאה בטעינת משתמשים (האם אתה אדמין?)");
@@ -136,6 +156,52 @@ export default function AdminUsersPage() {
         setEmailBody("");
     };
 
+    const handlePlusSnapshotSync = async () => {
+        if (!confirm("לסנכרן את כל הפרופילים הקיימים ל-Ruumr Plus?")) return;
+        setIsSyncingSnapshot(true);
+        try {
+            const result = await snapshotProfilesToRuumrPlus({ replace_existing: true });
+            const upsertedCount = result?.result?.upserted_count ?? result?.result?.profile_upserts ?? 0;
+            alert(`הסנכרון הושלם. עודכנו ${upsertedCount} פרופילים.`);
+        } catch (error) {
+            console.error("Failed to sync snapshot to Ruumr Plus:", error);
+            alert("שגיאה בסנכרון Ruumr Plus");
+        } finally {
+            setIsSyncingSnapshot(false);
+            await loadData();
+        }
+    };
+
+    const handleTogglePlus = async (userToUpdate) => {
+        const existingEntitlement = entitlements[userToUpdate.id];
+        const isActive = existingEntitlement?.status === 'active' && String(existingEntitlement?.tier || '').toLowerCase() === 'plus';
+        const action = isActive ? 'revoke' : 'grant';
+
+        if (!confirm(`${isActive ? 'לבטל' : 'להעניק'} Plus עבור ${userToUpdate.email}?`)) return;
+
+        setPlusActionUserId(userToUpdate.id);
+        try {
+            if (isActive) {
+                await revokeRuumrPlusEntitlement({
+                    userId: userToUpdate.id,
+                    grantedBy: currentAdmin?.email || currentAdmin?.full_name || 'admin',
+                });
+            } else {
+                await grantRuumrPlusEntitlement({
+                    userId: userToUpdate.id,
+                    grantedBy: currentAdmin?.email || currentAdmin?.full_name || 'admin',
+                });
+            }
+            await loadData();
+            alert(`${action === 'grant' ? 'Plus הוענק' : 'Plus בוטל'} בהצלחה`);
+        } catch (error) {
+            console.error("Failed to toggle Ruumr Plus entitlement:", error);
+            alert("שגיאה בעדכון Plus");
+        } finally {
+            setPlusActionUserId(null);
+        }
+    };
+
     const toggleSelectUser = (userId) => {
         if (selectedUsers.includes(userId)) {
             setSelectedUsers(selectedUsers.filter(id => id !== userId));
@@ -157,9 +223,9 @@ export default function AdminUsersPage() {
 
 
     const filteredUsers = users.filter(u => 
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profiles[u.id]?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (profiles[u.id]?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (!isAdmin) return null;
@@ -195,6 +261,15 @@ export default function AdminUsersPage() {
                                 className="pr-10"
                             />
                         </div>
+                        <Button
+                            onClick={handlePlusSnapshotSync}
+                            variant="outline"
+                            className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                            disabled={isSyncingSnapshot}
+                        >
+                            <RefreshCw className={`w-4 h-4 ml-2 ${isSyncingSnapshot ? 'animate-spin' : ''}`} />
+                            סנכרון Plus
+                        </Button>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -212,6 +287,7 @@ export default function AdminUsersPage() {
                                     <TableHead className="text-right">שם</TableHead>
                                     <TableHead className="text-right">אימייל</TableHead>
                                     <TableHead className="text-right">סטטוס פרופיל</TableHead>
+                                    <TableHead className="text-right">Ruumr Plus</TableHead>
                                     <TableHead className="text-right">תאריך הרשמה</TableHead>
                                     <TableHead className="text-right">פעולות</TableHead>
                                 </TableRow>
@@ -219,7 +295,7 @@ export default function AdminUsersPage() {
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8">
+                                        <TableCell colSpan={7} className="text-center py-8">
                                             <Loader2 className="w-8 h-8 animate-spin mx-auto text-gray-400" />
                                         </TableCell>
                                     </TableRow>
@@ -253,11 +329,36 @@ export default function AdminUsersPage() {
                                                     <Badge variant="destructive">אין פרופיל</Badge>
                                                 )}
                                             </TableCell>
+                                            <TableCell>
+                                                {entitlements[user.id]?.status === 'active' && String(entitlements[user.id]?.tier || '').toLowerCase() === 'plus' ? (
+                                                    <Badge className="bg-amber-100 text-amber-700 border border-amber-200">
+                                                        <Sparkles className="w-3 h-3 ml-1" />
+                                                        Plus פעיל
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                                                        ללא Plus
+                                                    </Badge>
+                                                )}
+                                            </TableCell>
                                             <TableCell>{new Date(user.created_date).toLocaleDateString('he-IL')}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
                                                     <Button variant="ghost" size="icon" onClick={() => handleMessage(user)} title="שלח הודעה">
                                                         <MessageSquare className="w-4 h-4 text-blue-500" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleTogglePlus(user)}
+                                                        title={entitlements[user.id]?.status === 'active' && String(entitlements[user.id]?.tier || '').toLowerCase() === 'plus' ? 'בטל Plus' : 'הענק Plus'}
+                                                        disabled={plusActionUserId === user.id}
+                                                    >
+                                                        {plusActionUserId === user.id ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                                                        ) : (
+                                                            <Sparkles className={`w-4 h-4 ${entitlements[user.id]?.status === 'active' && String(entitlements[user.id]?.tier || '').toLowerCase() === 'plus' ? 'text-amber-500' : 'text-gray-400'}`} />
+                                                        )}
                                                     </Button>
                                                     <Button variant="ghost" size="icon" onClick={() => handleBan(user)} title="חסום משתמש">
                                                         <ShieldAlert className="w-4 h-4 text-red-500" />

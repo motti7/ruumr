@@ -1,16 +1,16 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Compass, User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, SlidersHorizontal } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
-import { Message } from "@/entities/Message";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
+import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 
 function FilterHintButton() {
   return (
@@ -37,6 +37,7 @@ function FilterHintButton() {
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
+  const matchesCountRef = useRef(0);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
     try {
       const saved = localStorage.getItem('roomi_seen_match_ids');
@@ -48,51 +49,62 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-       const checkBanned = async () => {
-           try {
-               const user = await UserEntity.me();
-               // Check if banned
-               const { base44: b44 } = await import('@/api/base44Client');
-               const banned = await b44.entities.BannedUser.filter({ email: user.email });
-               if (banned.length > 0) {
-                   window.location.href = createPageUrl('Banned');
-               }
-           } catch(e) {}
-       };
+    matchesCountRef.current = matchesCount;
+  }, [matchesCount]);
 
-       const checkNotifications = async () => {
-           try {
-               await checkBanned();
-               const user = await UserEntity.me();
-               const matches = await Match.filter({ user1_id: user.id }); 
-               const matches2 = await Match.filter({ user2_id: user.id });
-               const allMatches = [...matches, ...matches2];
-               const total = allMatches.length;
+  useEffect(() => {
+    if (currentPageName === 'Onboarding') {
+      return;
+    }
 
-               if (total > matchesCount && matchesCount !== 0) {
-                   // New match detected!
-                   if (Notification.permission === 'granted') {
-                       new Notification('ruumr', {
-                           body: 'יש לך התאמה חדשה! - ruumr',
-                           icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
-                       });
-                   }
-               }
-               setMatchesCount(total);
+    const checkBanned = async () => {
+      try {
+        const user = await UserEntity.me();
+        // Check if banned
+        const { base44: b44 } = await import('@/api/base44Client');
+        const banned = await b44.entities.BannedUser.filter({ email: user.email });
+        if (banned.length > 0) {
+          window.location.href = createPageUrl('Banned');
+        }
+      } catch (e) {}
+    };
 
-               // Request permissions if not denied/granted yet
-               if (user.enable_notifications !== false && Notification.permission === 'default') {
-                   Notification.requestPermission();
-               }
+    const checkNotifications = async () => {
+      try {
+        const notificationsSupported = typeof Notification !== 'undefined';
+        await checkBanned();
+        const user = await UserEntity.me();
+        const matches = await Match.filter({ user1_id: user.id }); 
+        const matches2 = await Match.filter({ user2_id: user.id });
+        const allMatches = [...matches, ...matches2];
+        const total = allMatches.length;
+        const previousTotal = matchesCountRef.current;
 
-           } catch(e) {}
-           };
-           if (currentPageName !== 'Onboarding') {
-           checkNotifications();
-           const interval = setInterval(checkNotifications, 10000); // Poll every 10s
-           return () => clearInterval(interval);
-       }
-       }, [currentPageName, matchesCount]);
+        if (notificationsSupported && total > previousTotal && previousTotal !== 0) {
+          // New match detected!
+          if (Notification.permission === 'granted') {
+            new Notification('ruumr', {
+              body: 'יש לך התאמה חדשה! - ruumr',
+              icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
+            });
+          }
+        }
+
+        matchesCountRef.current = total;
+        setMatchesCount(total);
+
+        // Request permissions if not denied/granted yet
+        if (notificationsSupported && user.enable_notifications !== false && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+
+      } catch (e) {}
+    };
+
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 10000); // Poll every 10s
+    return () => clearInterval(interval);
+  }, [currentPageName]);
 
   // Mark match as seen when viewing Chat page
   useEffect(() => {
@@ -131,11 +143,13 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
+    // RUUMR PLUS NAV ITEM — disabled, re-enable by uncommenting:
+    // { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Chat'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -165,7 +179,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-behavior-none" dir="rtl">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -195,15 +209,6 @@ export default function Layout({ children, currentPageName }) {
                 </div>
             </div>
         )}
-        <meta name="theme-color" content="#FF5722" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-        <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png" />
-        <title>Ruumr</title>
-        <style>{`body { background-color: #f3f4f6; }`}</style>
-
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
             <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                 {children}
@@ -211,27 +216,6 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         <div className="sm:hidden">
-            <style>
-            {`
-            @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-            .logo-font {
-                    font-family: 'Pacifico', cursive;
-                    color: var(--theme-orange);
-                    font-weight: 400;
-                }
-                .gradient-orange {
-                    background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
-                }
-                .components-slider-thumb {
-                    background-color: var(--theme-orange) !important;
-                    border-color: var(--theme-orange) !important;
-                }
-                .components-slider-range, .components-progress-indicator {
-                    background-color: var(--theme-orange) !important;
-                }
-                `}
-            </style>
-            
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between">
@@ -239,6 +223,21 @@ export default function Layout({ children, currentPageName }) {
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
         <div className="flex items-center gap-2">
             <WriteReviewButton /> {/* הכוכב עכשיו ראשון, ולכן הכי ימני */}
+            {/* RUUMR PLUS HEADER BUTTON — disabled, re-enable by uncommenting
+            <Link
+              to={createPageUrl("RuumrPlus")}
+              aria-label="Ruumr Plus"
+              onClick={(e) => {
+                e.preventDefault();
+                markRuumrPlusActivationIntent({ source: "header" });
+                navigate(createPageUrl("RuumrPlus"));
+              }}
+              className="select-none flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-[10px] font-bold text-[--theme-orange] shadow-sm transition-transform active:scale-95 touch-manipulation"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Ruumr Plus</span>
+            </Link>
+            */}
             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
@@ -277,7 +276,15 @@ export default function Layout({ children, currentPageName }) {
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         const Icon = item.icon;
+                        const isPlusItem = item.name === "Plus";
                         const handleClick = (e) => {
+                            if (isPlusItem) {
+                                e.preventDefault();
+                                markRuumrPlusActivationIntent({ source: "nav" });
+                                navigate(item.path);
+                                return;
+                            }
+
                             if (isActive) {
                                 e.preventDefault();
                                 navigate(item.path);
@@ -287,16 +294,27 @@ export default function Layout({ children, currentPageName }) {
                         <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center py-2 px-3 min-h-[44px] justify-center transition-colors duration-200 select-none ${
-                                isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
-                            } relative`}
+                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${
+                                isPlusItem
+                                    ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
+                                        isActive
+                                            ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
+                                            : 'bg-orange-50 text-[--theme-orange] border border-orange-200'
+                                      }`
+                                    : `py-2 px-3 min-h-[44px] ${
+                                        isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
+                                      }`
+                            }`}
                             >
                             {item.customIcon ? (
                                 <div className={`rounded-full p-1 border-2 ${isActive ? 'border-[--theme-orange]' : 'border-gray-300'}`}>
                                     <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
                                 </div>
                             ) : (
-                                <Icon className="w-7 h-7" fill={isActive ? 'currentColor' : 'none'} />
+                                <div className={isPlusItem ? 'flex items-center gap-1.5' : ''}>
+                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill={isActive ? 'currentColor' : 'none'} />
+                                    {isPlusItem && <span className="text-[10px] font-bold leading-none">Plus</span>}
+                                </div>
                             )}
                             {item.badgeCount > 0 && (
                                 <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">

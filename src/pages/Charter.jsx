@@ -5,7 +5,6 @@ import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
 import { Skeleton } from '@/components/ui/skeleton';
 import RoomiCharter from '../components/charter/RoomiCharter';
-import { base44 } from '@/api/base44Client';
 
 export default function CharterPage() {
   const navigate = useNavigate();
