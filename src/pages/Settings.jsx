@@ -3,7 +3,7 @@ import { User } from "@/entities/User";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, Lock, Trash2, Heart, LogOut } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, Lock, Trash2, Heart } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import DeleteAccountModal from "../components/settings/DeleteAccountModal";
