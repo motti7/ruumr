@@ -1,0 +1,202 @@
+{
+  "name": "Profile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "other"
+      ]
+    },
+    "phone_number": {
+      "type": "string"
+    },
+    "about_me": {
+      "type": "string"
+    },
+    "social_link": {
+      "type": "string"
+    },
+    "itunes_track_id": {
+      "type": "string"
+    },
+    "song_preview_url": {
+      "type": "string"
+    },
+    "song_name": {
+      "type": "string"
+    },
+    "song_artist": {
+      "type": "string"
+    },
+    "song_image": {
+      "type": "string"
+    },
+    "looking_for_description": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "search_area": {
+      "type": "string"
+    },
+    "search_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget_max": {
+      "type": "number"
+    },
+    "budget_min": {
+      "type": "number",
+      "default": 0
+    },
+    "vibe_level": {
+      "type": "number"
+    },
+    "pet_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "dog",
+        "cat",
+        "other"
+      ],
+      "default": "none"
+    },
+    "pet_other_description": {
+      "type": "string"
+    },
+    "looking_for_gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "any"
+      ]
+    },
+    "religion": {
+      "type": "string",
+      "enum": [
+        "secular",
+        "traditional",
+        "national_religious",
+        "religious",
+        "haredi"
+      ]
+    },
+    "kosher_preference": {
+      "type": "string",
+      "enum": [
+        "for",
+        "against",
+        "flow"
+      ]
+    },
+    "shabbat_preference": {
+      "type": "string",
+      "enum": [
+        "for",
+        "against",
+        "flow"
+      ]
+    },
+    "current_status": {
+      "type": "string",
+      "enum": [
+        "seeking_apartment",
+        "has_apartment"
+      ],
+      "default": "seeking_apartment"
+    },
+    "apartment_photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "is_visible": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u05ea\u05d7\u05d5\u05de\u05d9 \u05e2\u05e0\u05d9\u05d9\u05df \u05e9\u05dc \u05d4\u05de\u05e9\u05ea\u05de\u05e9"
+    },
+    "team_target": {
+      "type": "number",
+      "description": "\u05db\u05de\u05d4 \u05e9\u05d5\u05ea\u05e4\u05d9\u05dd \u05de\u05d7\u05e4\u05e9\u05d9\u05dd \u05d1\u05d3\u05d9\u05e8\u05d4"
+    },
+    "team_members": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "\u05d7\u05d1\u05e8\u05d9 \u05d4\u05e6\u05d5\u05d5\u05ea \u05d4\u05e0\u05d5\u05db\u05d7\u05d9\u05d9\u05dd"
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "age",
+    "gender"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "role": "admin"
+        }
+      ]
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "role": "admin"
+        }
+      ]
+    }
+  }
+}
