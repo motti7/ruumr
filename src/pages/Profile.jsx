@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
 import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
 import { createProfileDefaults } from '@/lib/profileDefaults';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -370,43 +371,111 @@ export default function ProfilePage() {
         )}
         
         <div className="px-2 pt-2 pb-2">
-          <div className="grid grid-cols-3 gap-1">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className={`aspect-square rounded-lg overflow-hidden relative ${isEditing ? 'cursor-pointer border-2 border-gray-200 hover:border-[--theme-orange]' : ''} transition-all`} onClick={() => triggerFileInput(i)}>
-                {(formData.photos?.length > i && formData.photos[i]) ? (
-                  formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
-                      <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
-                  ) : (
-                      <SmartImage 
-                        src={formData.photos[i]} 
-                        alt={`מדיה ${i+1}`} 
-                        className="w-full h-full" 
-                        priority={true}
-                      />
-                  )
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 gap-1">
-                    {isEditing && (
-                        <>
-                            <Plus className="w-6 h-6 text-gray-400"/>
-                            {i === 0 && <span className="text-[10px] text-gray-400">תמונות/וידאו</span>}
-                        </>
-                    )}
+          {isEditing ? (
+            <DragDropContext onDragEnd={(result) => {
+              if (!result.destination) return;
+              const photos = [...(formData.photos || Array(6).fill(null))];
+              const [moved] = photos.splice(result.source.index, 1);
+              photos.splice(result.destination.index, 0, moved);
+              setFormData(prev => ({ ...prev, photos }));
+            }}>
+              <Droppable droppableId="photos" direction="horizontal">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="grid grid-cols-3 gap-1"
+                  >
+                    {[...Array(6)].map((_, i) => {
+                      const hasPhoto = formData.photos?.length > i && formData.photos[i];
+                      return (
+                        <Draggable key={`photo-${i}`} draggableId={`photo-${i}`} index={i} isDragDisabled={!hasPhoto}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`aspect-square rounded-lg overflow-hidden relative border-2 transition-all ${snapshot.isDragging ? 'border-[--theme-orange] shadow-lg scale-105 z-50' : 'border-gray-200 hover:border-[--theme-orange]'}`}
+                            >
+                              {hasPhoto ? (
+                                <>
+                                  {formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
+                                    <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                                  ) : (
+                                    <SmartImage src={formData.photos[i]} alt={`מדיה ${i+1}`} className="w-full h-full" priority={true} />
+                                  )}
+                                  {/* Drag handle */}
+                                  <div {...provided.dragHandleProps} className="absolute top-1 right-1 bg-black/40 rounded-full p-0.5 cursor-grab active:cursor-grabbing z-10">
+                                    <GripVertical className="w-3 h-3 text-white" />
+                                  </div>
+                                  {/* Delete button */}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const newPhotos = [...(formData.photos || [])];
+                                      newPhotos[i] = null;
+                                      setFormData(prev => ({ ...prev, photos: newPhotos }));
+                                    }}
+                                    className="absolute top-1 left-1 bg-black/40 rounded-full p-0.5 z-10"
+                                    aria-label="מחק תמונה"
+                                  >
+                                    <X className="w-3 h-3 text-white" />
+                                  </button>
+                                </>
+                              ) : (
+                                <div
+                                  className="w-full h-full flex flex-col items-center justify-center bg-gray-100 gap-1 cursor-pointer"
+                                  onClick={() => triggerFileInput(i)}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <Plus className="w-6 h-6 text-gray-400" />
+                                  {i === 0 && <span className="text-[10px] text-gray-400">תמונות/וידאו</span>}
+                                </div>
+                              )}
+                              {uploadingIndex === i && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
+                                  <Loader2 className="animate-spin text-white" />
+                                </div>
+                              )}
+                              {/* Click to replace photo */}
+                              {hasPhoto && (
+                                <div
+                                  className="absolute inset-0 z-[5]"
+                                  onClick={() => triggerFileInput(i)}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
                   </div>
                 )}
-                {!isEditing && formData.photos?.[i] && (
-                  <div 
-                    className="absolute inset-0 z-10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedApartmentPhoto(formData.photos[i]);
-                    }}
-                  />
-                )}
-                {uploadingIndex === i && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white"/></div>}
-              </div>
-            ))}
-          </div>
+              </Droppable>
+            </DragDropContext>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-square rounded-lg overflow-hidden relative transition-all">
+                  {(formData.photos?.length > i && formData.photos[i]) ? (
+                    formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
+                      <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                    ) : (
+                      <SmartImage src={formData.photos[i]} alt={`מדיה ${i+1}`} className="w-full h-full" priority={true} />
+                    )
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 gap-1" />
+                  )}
+                  {formData.photos?.[i] && (
+                    <div
+                      className="absolute inset-0 z-10"
+                      onClick={() => setSelectedApartmentPhoto(formData.photos[i])}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
