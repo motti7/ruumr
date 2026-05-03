@@ -252,7 +252,7 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]">
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between h-12">
         
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
@@ -301,7 +301,7 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: '48px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
                 {children}
             </main>
 
