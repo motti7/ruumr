@@ -1,10 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.ruumr.app.android',
+  appId: 'com.ruumr.app',
   appName: 'Ruumr',
   webDir: 'dist',
-  bundledWebRuntime: false,
+  ios: {
+    contentInset: 'automatic',
+    handleApplicationNotifications: false,
+  },
   plugins: {
     StatusBar: {
       style: 'dark',

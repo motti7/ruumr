@@ -24,7 +24,7 @@ function initDB() {
     };
     
     request.onupgradeneeded = (e) => {
-      const db = e.target.result;
+      const db = /** @type {IDBOpenDBRequest} */ (e.target).result;
       if (!db.objectStoreNames.contains(CACHE_STORE_NAME)) {
         db.createObjectStore(CACHE_STORE_NAME, { keyPath: 'url' });
       }
@@ -122,6 +122,7 @@ export function preloadImage(url, priority = 'auto') {
 
   return new Promise((resolve) => {
     const img = new window.Image();
+    img.crossOrigin = 'anonymous';
     img.fetchPriority = priority;
     img.onload = async () => {
       cache.set(url, 'loaded');
@@ -190,6 +191,7 @@ export async function restoreFromIndexedDB(url) {
     return new Promise((resolve) => {
       img.onload = () => {
         cache.set(url, 'loaded');
+        URL.revokeObjectURL(blobUrl);
         resolve(true);
       };
       img.onerror = () => {

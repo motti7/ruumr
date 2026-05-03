@@ -1,8 +1,7 @@
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 
 const isNode = typeof window === 'undefined';
-const windowObj = isNode ? { localStorage: new Map() } : window;
-const storage = windowObj.localStorage;
+const storage = isNode ? null : window.localStorage;
 
 const DEFAULT_BASE44_APP_ID = import.meta.env.VITE_BASE44_APP_ID || '68c919adff6ac6fafb51bed6';
 const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'https://base44.app';
@@ -25,14 +24,14 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 		window.history.replaceState({}, document.title, newUrl);
 	}
 	if (searchParam) {
-		storage.setItem(storageKey, searchParam);
+		storage?.setItem(storageKey, searchParam);
 		return searchParam;
 	}
 	if (defaultValue) {
-		storage.setItem(storageKey, defaultValue);
+		storage?.setItem(storageKey, defaultValue);
 		return defaultValue;
 	}
-	const storedValue = storage.getItem(storageKey);
+	const storedValue = storage?.getItem(storageKey);
 	if (storedValue) {
 		return storedValue;
 	}
@@ -41,8 +40,8 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 
 const getAppParams = () => {
 	if (getAppParamValue("clear_access_token") === 'true') {
-		storage.removeItem('base44_access_token');
-		storage.removeItem('token');
+		storage?.removeItem('base44_access_token');
+		storage?.removeItem('token');
 	}
 	return {
 		appId: getAppParamValue("app_id", { defaultValue: DEFAULT_BASE44_APP_ID }),

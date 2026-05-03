@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
@@ -11,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 
 function FilterHintButton() {
   return (
@@ -34,6 +36,24 @@ function FilterHintButton() {
   );
 }
 
+function isDesktopBrowserContext() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
+function isIosLikeBrowserContext() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const ua = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  return /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
@@ -47,6 +67,7 @@ export default function Layout({ children, currentPageName }) {
     }
   });
   const navigate = useNavigate();
+  const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -57,9 +78,9 @@ export default function Layout({ children, currentPageName }) {
       return;
     }
 
-    const checkBanned = async () => {
+    const checkBanned = async (currentUser = null) => {
       try {
-        const user = await UserEntity.me();
+        const user = currentUser ?? await UserEntity.me();
         // Check if banned
         const { base44: b44 } = await import('@/api/base44Client');
         const banned = await b44.entities.BannedUser.filter({ email: user.email });
@@ -69,18 +90,37 @@ export default function Layout({ children, currentPageName }) {
       } catch (e) {}
     };
 
-    const checkNotifications = async () => {
+  const checkNotifications = async () => {
       try {
         const notificationsSupported = typeof Notification !== 'undefined';
-        await checkBanned();
+        const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
         const user = await UserEntity.me();
+        const browserNotificationsEnabled =
+          notificationsSupported &&
+          isBrowserWeb &&
+          isDesktopBrowserContext() &&
+          !isIosLikeBrowserContext() &&
+          isBrowserRuntime &&
+          !isRuumrSimulatorMode() &&
+          user.enable_notifications !== false;
+
+        console.info('[ruumr] Layout notifications', {
+          protocol: typeof window !== 'undefined' ? window.location.protocol : 'n/a',
+          isBrowserWeb,
+          isDesktopBrowser: isDesktopBrowserContext(),
+          isIosLikeBrowser: isIosLikeBrowserContext(),
+          isBrowserRuntime,
+          simulatorMode: isRuumrSimulatorMode(),
+          permission: notificationsSupported ? Notification.permission : 'unsupported',
+        });
+        await checkBanned(user);
         const matches = await Match.filter({ user1_id: user.id }); 
         const matches2 = await Match.filter({ user2_id: user.id });
         const allMatches = [...matches, ...matches2];
         const total = allMatches.length;
         const previousTotal = matchesCountRef.current;
 
-        if (notificationsSupported && total > previousTotal && previousTotal !== 0) {
+        if (browserNotificationsEnabled && total > previousTotal && previousTotal !== 0) {
           // New match detected!
           if (Notification.permission === 'granted') {
             new Notification('ruumr', {
@@ -92,11 +132,6 @@ export default function Layout({ children, currentPageName }) {
 
         matchesCountRef.current = total;
         setMatchesCount(total);
-
-        // Request permissions if not denied/granted yet
-        if (notificationsSupported && user.enable_notifications !== false && Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
 
       } catch (e) {}
     };
@@ -217,7 +252,7 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
+               <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between">
         
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}

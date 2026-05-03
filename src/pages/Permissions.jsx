@@ -8,6 +8,9 @@ import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
+/**
+ * @param {any} props
+ */
 const PermissionItem = ({ title, subtitle, checked, onChange }) => (
     <Card className="shadow-sm border-0">
         <CardContent className="p-4">
@@ -32,23 +35,30 @@ export default function PermissionsPage() {
 
     useEffect(() => {
         const loadUser = async () => {
-            const userData = await User.me();
-            setUser(userData);
-            setShowInDiscovery(userData.show_in_discovery !== false);
-            setShowActiveStatus(userData.show_active_status !== false);
-            setEnableNotifications(userData.enable_notifications !== false);
+            try {
+                const userData = await User.me();
+                setUser(userData);
+                setShowInDiscovery(userData.show_in_discovery !== false);
+                setShowActiveStatus(userData.show_active_status !== false);
+                setEnableNotifications(userData.enable_notifications !== false);
+            } catch (e) {
+                console.error("Failed to load user permissions:", e);
+            }
         };
         loadUser();
     }, []);
 
     const handleDiscoveryChange = async (checked) => {
         setShowInDiscovery(checked);
-        await User.updateMyUserData({ show_in_discovery: checked });
-        
-        // Update profile visibility as well for easier filtering
         try {
-            const user = await User.me();
-            const profiles = await Profile.filter({ user_id: user.id });
+            await User.updateMyUserData({ show_in_discovery: checked });
+        } catch (e) {
+            setShowInDiscovery(!checked);
+            return;
+        }
+
+        try {
+            const profiles = user ? await Profile.filter({ user_id: user.id }) : [];
             if (profiles.length > 0) {
                 await Profile.update(profiles[0].id, { is_visible: checked });
                 try {
@@ -64,13 +74,17 @@ export default function PermissionsPage() {
 
     const handleActiveStatusChange = async (checked) => {
         setShowActiveStatus(checked);
-        await User.updateMyUserData({ show_active_status: checked });
+        try {
+            await User.updateMyUserData({ show_active_status: checked });
+        } catch (e) {
+            setShowActiveStatus(!checked);
+        }
     };
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen pb-24" dir="rtl">
             <div className="flex items-center mb-8">
-                <Link to={createPageUrl("Settings")} className="ml-4">
+                <Link to={createPageUrl("Settings")} className="ml-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label="חזור">
                     <ArrowLeft className="w-6 h-6 text-gray-600" />
                 </Link>
                 <h1 className="text-3xl font-black text-gray-800">ניהול הרשאות</h1>

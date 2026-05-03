@@ -49,6 +49,10 @@ function addWindow(activatedAt) {
   return new Date(parsed.getTime() + RUUMR_PLUS_ACTIVATION_WINDOW_MS).toISOString();
 }
 
+/**
+ * @param {Record<string, any> | null} record
+ * @returns {Record<string, any> | null}
+ */
 export function normalizeRuumrPlusActivation(record = null) {
   if (!record || typeof record !== "object") {
     return null;
@@ -212,6 +216,16 @@ export function consumeRuumrPlusActivationIntent() {
   }
 }
 
+/**
+ * @param {{
+ *   response?: Record<string, any>;
+ *   recommendations?: any[];
+ *   matchedCount?: number | null;
+ *   candidateCount?: number | null;
+ *   source?: string;
+ * }} options
+ * @returns {Record<string, any> | null}
+ */
 export function buildRuumrPlusActivationRecord({
   response = {},
   recommendations = [],

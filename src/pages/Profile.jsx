@@ -15,11 +15,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
 import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
 import { createProfileDefaults } from '@/lib/profileDefaults';
+import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(/** @type {any} */ ({}));
   const [isLoading, setIsLoading] = useState(true);
   const [selectedApartmentPhoto, setSelectedApartmentPhoto] = useState(null);
   const fileInputRef = useRef(null);
@@ -38,7 +39,10 @@ export default function ProfilePage() {
       const userData = await User.me();
       const userProfiles = await ProfileEntity.filter({ user_id: userData.id });
       if (userProfiles.length > 0) {
-        const mergedProfile = createProfileDefaults(userProfiles[0]);
+        const mergedProfile = createProfileDefaults({
+          ...userProfiles[0],
+          interests: normalizeInterestValues(userProfiles[0].interests),
+        });
         setProfile(mergedProfile);
         setFormData(mergedProfile);
       } else {
@@ -74,7 +78,11 @@ export default function ProfilePage() {
 
     try {
       if (profile) {
-        const dataToSave = {...formData, social_link: cleanSocial};
+        const dataToSave = {
+          ...formData,
+          interests: normalizeInterestValues(formData.interests),
+          social_link: cleanSocial,
+        };
         if(!dataToSave.budget_min) dataToSave.budget_min = 0;
         await ProfileEntity.update(profile.id, dataToSave);
       }
@@ -101,7 +109,7 @@ export default function ProfilePage() {
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
-        img.src = event.target.result;
+        img.src = /** @type {string} */ (event.target?.result || "");
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const maxWidth = 1200;
@@ -327,7 +335,6 @@ export default function ProfilePage() {
               onClick={() => {
                   if (!isEditing) {
                       setIsEditing(true);
-                      alert("לא לשכוח לשמור שינויים");
                   } else {
                       handleSave();
                   }
@@ -432,7 +439,7 @@ export default function ProfilePage() {
                       ]}
                     />
                   ) : (
-                     <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? 'זכר' : 'נקבה'}</p>
+                     <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? 'זכר' : formData.gender === 'female' ? 'נקבה' : 'אחר'}</p>
                   )}
                 </div>
             </div>
@@ -746,24 +753,7 @@ export default function ProfilePage() {
         <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
           <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
           <div className="flex flex-wrap gap-2">
-            {[
-              {id: 'cooking', label: '🍳 בישול משותף'},
-              {id: 'netflix', label: '📺 ערבי נטפליקס'},
-              {id: 'gaming', label: '🎮 גיימינג'},
-              {id: 'hosting', label: '🎉 אירוח חברים'},
-              {id: 'nightlife', label: '🌙 חיי לילה'},
-              {id: 'sport', label: '⚽ ספורט'},
-              {id: 'fitness', label: '💪 כושר'},
-              {id: 'nature', label: '🌿 טיולים בטבע'},
-              {id: 'homebody', label: '🏠 נשאר/ת בבית'},
-              {id: 'music', label: '🎵 מוזיקה'},
-              {id: 'morning_person', label: '☀️ אדם של בוקר'},
-              {id: 'night_owl', label: '🦉 ינשוף לילה'},
-              {id: 'food_delivery', label: '🍕 הזמנות אוכל'},
-              {id: 'shopping', label: '🛒 קניות משותפות'},
-              {id: 'pets', label: '🐾 חיות מחמד'},
-              {id: 'wfh', label: '💻 עובד/ת מהבית'},
-            ].map(interest => {
+            {INTEREST_OPTIONS.map(interest => {
               const selected = (formData.interests || []).includes(interest.id);
               return (
                 <button

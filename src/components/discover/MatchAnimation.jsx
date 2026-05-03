@@ -33,7 +33,7 @@ export default function MatchAnimation({ profile1, profile2, onDismiss }) {
           transition={{ type: 'spring', stiffness: 100, delay: 0.3 }}
           className="absolute w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl"
         >
-          <img src={profile1.photos[0]} alt={profile1.name} className="w-full h-full object-cover" />
+          <img src={profile1.photos?.[0] || ''} alt={profile1.name} className="w-full h-full object-cover" />
         </motion.div>
 
         <motion.div
@@ -51,7 +51,7 @@ export default function MatchAnimation({ profile1, profile2, onDismiss }) {
           transition={{ type: 'spring', stiffness: 100, delay: 0.3 }}
           className="absolute w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl"
         >
-          <img src={profile2.photos[0]} alt={profile2.name} className="w-full h-full object-cover" />
+          <img src={profile2.photos?.[0] || ''} alt={profile2.name} className="w-full h-full object-cover" />
         </motion.div>
       </div>
 

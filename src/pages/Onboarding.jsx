@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, Briefcase, Lightbulb, Leaf, Zap, Trophy, User as UserIcon, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
+import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,9 +16,9 @@ import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
-import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
     buildSimulatorApartmentPhotos,
     buildSimulatorProfilePhotos,
@@ -75,27 +75,6 @@ const persistAppleIdentity = (userId, identity) => {
   localStorage.setItem('ruumr_last_auth_provider', 'apple');
 };
 
-const INTERESTS_LIST = [
-{ id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: Activity },
-{ id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
-{ id: 'yoga', label: 'יוגה', Icon: EyeOff },
-{ id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
-{ id: 'motorcycles', label: 'אופנועים', Icon: Zap },
-{ id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
-{ id: 'lego', label: 'לגו', Icon: Box },
-{ id: 'photography', label: 'צילום', Icon: Camera },
-{ id: 'painting', label: 'ציור', Icon: Palette },
-{ id: 'reading', label: 'קריאה', Icon: BookOpen },
-{ id: 'cooking', label: 'בישול ואפייה', Icon: ChefHat },
-{ id: 'concerts', label: 'הופעות', Icon: Mic },
-{ id: 'business', label: 'עסקים', Icon: Briefcase },
-{ id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
-{ id: 'plants', label: 'צמחייה', Icon: Sprout },
-{ id: 'nature', label: 'טיולים בטבע', Icon: Leaf }
-];
-
-
 const Step = ({ children, step, currentStep, title }) =>
 <AnimatePresence mode="wait">
     {currentStep === step &&
@@ -120,7 +99,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(() => createProfileDefaults());
+  const [formData, setFormData] = useState(/** @type {any} */ (createProfileDefaults()));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
@@ -276,6 +255,7 @@ export default function OnboardingPage() {
 
       const finalData = {
         ...formData,
+        interests: normalizeInterestValues(formData.interests),
         photos: finalPhotos,
         apartment_photos: finalApartmentPhotos,
         location: formData.search_cities[0] || '',
@@ -318,7 +298,7 @@ export default function OnboardingPage() {
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
-        img.src = event.target.result;
+        img.src = /** @type {string} */ (event.target?.result || "");
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const maxWidth = 800;
@@ -468,7 +448,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
         #onboarding-root input[type=number]::-webkit-inner-spin-button,
         #onboarding-root input[type=number]::-webkit-outer-spin-button {
@@ -618,8 +598,8 @@ export default function OnboardingPage() {
                             className="py-0" />
                         {/* Min / Max labels inline with bar */}
                         <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
-                            <span>min 10,000</span>
-                            <span>max 1,000</span>
+                            <span>1,000</span>
+                            <span>10,000</span>
                         </div>
                     </div>
                 </div>
@@ -688,16 +668,6 @@ export default function OnboardingPage() {
                                 <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
                             </motion.div>
                         }
-
-                        <div className="pt-3">
-                            <HouseholdPreferencesSection
-                                values={formData}
-                                onChange={setFormField}
-                                title="הרגלים בבית"
-                                description="זה עוזר ל-Ruumr Plus להתאים לכם שותפים עם קצב חיים דומה."
-                                className="bg-orange-50/60 p-4 rounded-2xl border border-orange-100"
-                            />
-                        </div>
                     </div>
                 </div>
             </Step>
@@ -753,7 +723,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center text-xs mb-3 -mt-1" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0 overflow-hidden">
-                        {INTERESTS_LIST.map((interest) => {
+                        {INTEREST_OPTIONS.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
                     return (

@@ -33,7 +33,7 @@ export default function AdminCharterPage() {
       const [allAnswers, allUsers, allProfiles] = await Promise.all([
         base44.entities.CharterAnswer.list(),
         User.list(),
-        base44.entities.Profile.list(1000),
+        base44.entities.Profile.list("-created_date", 1000),
       ]);
 
       // מפה: user_id → שם
