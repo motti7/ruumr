@@ -108,9 +108,9 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir="rtl" style={{ height: 'calc(100vh - 64px - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir="rtl" style={{ height: 'calc(100dvh - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
       <PullToRefresh onRefresh={loadMatches}>
-      <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
+      <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-black text-gray-900 dark:text-white">התאמות</h1>
           <motion.button

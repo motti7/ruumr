@@ -71,7 +71,7 @@ export default function LikesYouPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 flex flex-col" dir="rtl">
-            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white">לייקים</h1>
                     <button 
