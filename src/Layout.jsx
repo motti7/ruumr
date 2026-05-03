@@ -255,27 +255,12 @@ export default function Layout({ children, currentPageName }) {
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]">
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between h-12">
         
-        {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
+        {/* קבוצה ימין: הגדרות הכי ימני, ואז כוכב */}
         <div className="flex items-center gap-2">
-            <WriteReviewButton /> {/* הכוכב עכשיו ראשון, ולכן הכי ימני */}
-            {/* RUUMR PLUS HEADER BUTTON — disabled, re-enable by uncommenting
-            <Link
-              to={createPageUrl("RuumrPlus")}
-              aria-label="Ruumr Plus"
-              onClick={(e) => {
-                e.preventDefault();
-                markRuumrPlusActivationIntent({ source: "header" });
-                navigate(createPageUrl("RuumrPlus"));
-              }}
-              className="select-none flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-[10px] font-bold text-[--theme-orange] shadow-sm transition-transform active:scale-95 touch-manipulation"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Ruumr Plus</span>
-            </Link>
-            */}
             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
+            <WriteReviewButton />
         </div>
 
         {/* אמצע: כותרת רומר */}
