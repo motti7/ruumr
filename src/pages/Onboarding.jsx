@@ -117,7 +117,7 @@ export default function OnboardingPage() {
   })();
 
   useEffect(() => {
-    const fetchUser = async (retryCount = 0) => {
+    const fetchUser = async () => {
       try {
         const userData = await User.me();
         const isAppleUser = isAppleAuthUser(userData);
@@ -143,14 +143,8 @@ export default function OnboardingPage() {
           setStep((currentStep) => (currentStep === 1 ? 2 : currentStep));
         }
       } catch (e) {
-        // Auth token may not be ready yet right after OAuth redirect — retry a few times
-        if (retryCount < 4) {
-          const delay = (retryCount + 1) * 800; // 800ms, 1600ms, 2400ms, 3200ms
-          setTimeout(() => fetchUser(retryCount + 1), delay);
-        } else {
-          // Only redirect to login after all retries are exhausted
-          base44.auth.redirectToLogin(getSafeAuthReturnUrl());
-        }
+        // If user is not logged in, redirect to login page then back here
+        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
       }
     };
     fetchUser();
