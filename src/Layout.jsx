@@ -214,7 +214,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -252,7 +252,7 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', height: 'calc(60px + env(safe-area-inset-top, 0px))' }}>
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between">
         
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
@@ -301,12 +301,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 ${shouldShowNav ? 'pb-20 pt-2' : ''}`}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(60px + env(safe-area-inset-top, 0px) + 8px)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed bottom-2 right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ bottom: 'max(8px, env(safe-area-inset-bottom))' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path;

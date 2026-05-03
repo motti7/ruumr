@@ -358,7 +358,7 @@ export default function DiscoverPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-gradient-to-br from-gray-50 to-orange-50">
         <div className="relative w-20 h-20 mb-6">
           {/* Outer rotating ring */}
           <motion.div
@@ -379,7 +379,7 @@ export default function DiscoverPage() {
 
   if (loadError) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-gradient-to-b from-white via-orange-50 to-orange-100 px-6 text-center">
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gradient-to-b from-white via-orange-50 to-orange-100 px-6 text-center">
         <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl">
           <Puzzle className="h-10 w-10 text-[--theme-orange]" />
         </div>
@@ -441,8 +441,8 @@ export default function DiscoverPage() {
 
       <DiscoverFilters filters={filters} onChange={applyFilters} />
 
-      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 36px)' }}>
-        <div style={{ height: 'calc(100vh - 180px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 68px)' }}>
+        <div style={{ height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 68px - 120px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
@@ -482,7 +482,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-30" style={{ bottom: '50px' }}>
+        <div className="fixed w-full flex justify-center z-30" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 70px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}
