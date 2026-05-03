@@ -285,15 +285,14 @@ export default function Layout({ children, currentPageName }) {
             </Link>
         </div>
 
-        {/* קבוצה שמאל: פרופיל, ואז מסננים הכי שמאלי */}
+        {/* קבוצה שמאל: מסננים ופרופיל */}
         <div className="flex items-center gap-2">
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
-                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-            </Link>
-            {/* המסנן אחרון, ולכן הכי שמאלי */}
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
+                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+            </Link>
         </div>
 
     </div>
