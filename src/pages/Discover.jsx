@@ -441,8 +441,8 @@ export default function DiscoverPage() {
 
       <DiscoverFilters filters={filters} onChange={applyFilters} />
 
-      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 68px)' }}>
-        <div style={{ height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 68px - 120px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}>
+        <div style={{ height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 56px - 120px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
@@ -482,7 +482,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-30" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 70px)' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 40px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}
