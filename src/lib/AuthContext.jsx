@@ -129,43 +129,29 @@ export const AuthProvider = ({ children }) => {
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
           if (reason === 'auth_required') {
-            // If we have a token, try to authenticate directly — the user may have just
-            // returned from OAuth (Google/Apple) and the public-settings endpoint
-            // rejected them before checkUserAuth ran.
-            if (appParams.token) {
-              setIsLoadingPublicSettings(false);
-              await checkUserAuth();
-            } else {
-              setAuthError({
-                type: 'auth_required',
-                message: 'Authentication required'
-              });
-              setIsLoadingPublicSettings(false);
-              setIsLoadingAuth(false);
-            }
+            setAuthError({
+              type: 'auth_required',
+              message: 'Authentication required'
+            });
           } else if (reason === 'user_not_registered') {
             setAuthError({
               type: 'user_not_registered',
               message: 'User not registered for this app'
             });
-            setIsLoadingPublicSettings(false);
-            setIsLoadingAuth(false);
           } else {
             setAuthError({
               type: reason,
               message: appError.message
             });
-            setIsLoadingPublicSettings(false);
-            setIsLoadingAuth(false);
           }
         } else {
           setAuthError({
             type: 'unknown',
             message: appError.message || 'Failed to load app'
           });
-          setIsLoadingPublicSettings(false);
-          setIsLoadingAuth(false);
         }
+        setIsLoadingPublicSettings(false);
+        setIsLoadingAuth(false);
       }
     } catch (error) {
       console.error('Unexpected error:', error);

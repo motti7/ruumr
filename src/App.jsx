@@ -60,10 +60,10 @@ const AuthenticatedApp = () => {
   }, []);
 
   useEffect(() => {
-    if (authError?.type === 'auth_required' && !isAuthenticated) {
+    if (authError?.type === 'auth_required') {
       navigateToLogin();
     }
-  }, [authError, isAuthenticated, navigateToLogin]);
+  }, [authError, navigateToLogin]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -76,7 +76,7 @@ const AuthenticatedApp = () => {
   }
 
   // Handle authentication errors
-  if (authError && !isAuthenticated) {
+  if (authError) {
     if (authError.type === 'user_not_registered') {
       writeBootMarker('authenticated-app-user-not-registered');
       return <UserNotRegisteredError />;
