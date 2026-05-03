@@ -29,15 +29,6 @@ const oneSignalGeneratedPluginDir = path.join(
   'sources',
   'OnesignalCordovaPlugin',
 );
-const oneSignalArtifactsSourceDir = path.join(
-  repoRoot,
-  'ios',
-  'App',
-  'CapApp-SPM',
-  '.build',
-  'artifacts',
-  'onesignal-xcframework',
-);
 const iosProjectFilePath = path.join(
   repoRoot,
   'ios',
@@ -164,24 +155,11 @@ function restoreOneSignalCordovaPluginPackage() {
     fs.copyFileSync(sourcePath, path.join(oneSignalGeneratedPluginDir, fileName));
   }
 
-  if (fs.existsSync(oneSignalArtifactsSourceDir)) {
-    const relativeTarget = path.relative(
-      oneSignalGeneratedPluginDir,
-      oneSignalArtifactsSourceDir,
-    );
-
-    const sourceRelativeTarget = path.relative(
-      path.dirname(oneSignalPackageArtifactsLinkPath),
-      oneSignalArtifactsSourceDir,
-    );
-    const generatedLinkPath = path.join(oneSignalGeneratedPluginDir, 'Artifacts');
-
-    fs.rmSync(oneSignalPackageArtifactsLinkPath, { recursive: true, force: true });
-    fs.symlinkSync(sourceRelativeTarget, oneSignalPackageArtifactsLinkPath, 'dir');
-
-    fs.rmSync(generatedLinkPath, { recursive: true, force: true });
-    fs.symlinkSync(relativeTarget, generatedLinkPath, 'dir');
-  }
+  fs.rmSync(oneSignalPackageArtifactsLinkPath, { recursive: true, force: true });
+  fs.rmSync(path.join(oneSignalGeneratedPluginDir, 'Artifacts'), {
+    recursive: true,
+    force: true,
+  });
 }
 
 function patchIosBundleId() {
