@@ -252,7 +252,7 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] border-b border-gray-200 dark:border-gray-700 shadow-sm h-12" style={{ paddingTop: 'max(4px, env(safe-area-inset-top, 0px))' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] h-12" style={{ paddingTop: 'max(4px, env(safe-area-inset-top, 0px))' }}>
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between h-full">
         
         {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}

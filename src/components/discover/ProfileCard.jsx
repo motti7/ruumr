@@ -647,7 +647,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                     className={`relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
-                    <div className="absolute inset-0 bg-gray-100">
+                    <div className="absolute inset-0 bg-black">
                         {media.length > 0 ? (
                             media[currentPhotoIndex].type === 'video' ? (
                                 <video
@@ -703,7 +703,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
 
                     {/* Music Player UI */}
                     {profile.song_preview_url && profile.song_name && isActive && (
-                        <div className="absolute top-5 left-2 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="absolute top-5 left-2 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
                                       <img src={profile.song_image} className="w-full h-full object-cover" />
