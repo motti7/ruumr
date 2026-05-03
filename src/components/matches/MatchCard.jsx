@@ -1,9 +1,10 @@
+// @ts-nocheck
 import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
+const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
@@ -140,6 +141,6 @@ const MatchCard = memo(function MatchCard({ match, isOnline, onClickProfile, onC
       </div>
     </motion.div>
   );
-});
+}));
 
 export default MatchCard;

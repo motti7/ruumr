@@ -11,6 +11,7 @@ import MatchAnimation from '../components/discover/MatchAnimation';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
+import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
 import mixpanel from 'mixpanel-browser';
 
 // Custom Audio Player Component with Fade In
@@ -22,31 +23,31 @@ const AudioPlayer = ({ src }) => {
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
+        let fadeInterval = null;
 
-        audio.volume = 0; // Start at 0
-        
+        audio.volume = 0;
+
         const playPromise = audio.play();
-        
+
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 setIsPlaying(true);
-                // Fade In
                 let vol = 0;
-                const interval = setInterval(() => {
-                    if (vol < 0.8) { // Max volume 0.8
+                fadeInterval = setInterval(() => {
+                    if (vol < 0.8) {
                         vol += 0.05;
-                        audio.volume = vol;
+                        audio.volume = Math.min(vol, 0.8);
                     } else {
-                        clearInterval(interval);
+                        clearInterval(fadeInterval);
                     }
-                }, 200); // Gradual fade in over ~3 seconds
-            }).catch(error => {
-                console.log("Auto-play prevented");
+                }, 200);
+            }).catch(() => {
                 setIsPlaying(false);
             });
         }
 
         return () => {
+            clearInterval(fadeInterval);
             if (audio) {
                 audio.pause();
                 audio.src = "";
@@ -66,7 +67,7 @@ const AudioPlayer = ({ src }) => {
             <audio ref={audioRef} src={src} loop />
             <button 
                 onClick={toggleMute}
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
             >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
@@ -77,17 +78,18 @@ const AudioPlayer = ({ src }) => {
 export default function ProfileViewPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isLoading, setIsLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-  const [matchData, setMatchData] = useState(null);
+  const [currentUser, setCurrentUser] = useState(/** @type {any} */ (null));
+  const [userProfile, setUserProfile] = useState(/** @type {any} */ (null));
+  const [matchData, setMatchData] = useState(/** @type {any} */ (null));
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
   const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
+  const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
   const isMixpanelTrackingEnabled = (() => {
     const hostname = window.location.hostname.toLowerCase();
     return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
@@ -210,8 +212,9 @@ export default function ProfileViewPage() {
 
             try {
               const { base44: b44 } = await import('@/api/base44Client');
-              if (b44.functions?.handleSwipe) {
-                await b44.functions.handleSwipe({
+              const functions = /** @type {any} */ (b44.functions);
+              if (functions?.handleSwipe) {
+                await functions.handleSwipe({
                   swiper_id: userProfile.user_id,
                   swiped_id: profile.user_id,
                   action,
@@ -348,7 +351,7 @@ export default function ProfileViewPage() {
         )}
       </AnimatePresence>
 
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
         <button 
           onClick={() => navigate(-1)} 
           className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -470,7 +473,7 @@ export default function ProfileViewPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-4 py-2 rounded-full hover:brightness-110 transition-colors shadow-sm"
             >
-              {React.cloneElement(getSocialIcon(profile.social_link), { className: "w-5 h-5" })}
+              {(() => { const icon = getSocialIcon(profile.social_link); return icon ? React.cloneElement(icon, { className: "w-5 h-5" }) : <LinkIcon className="w-5 h-5" />; })()}
               בואו להכיר אותי
             </a>
           )}
@@ -517,29 +520,11 @@ export default function ProfileViewPage() {
           />
         )}
 
-        {profile.interests && profile.interests.length > 0 && (
+        {interestOptions.length > 0 && (
           <div className="bg-white p-4 rounded-xl shadow-sm">
             <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
             <div className="flex flex-wrap gap-2">
-              {[
-                {id: 'gym', label: '🏋️ חדר כושר', color: 'bg-orange-50 text-orange-700 border-orange-200'},
-                {id: 'tennis', label: '🎾 טניס', color: 'bg-green-50 text-green-700 border-green-200'},
-                {id: 'pilates', label: '🤸 פילאטיס', color: 'bg-teal-50 text-teal-700 border-teal-200'},
-                {id: 'yoga', label: '🧘 יוגה', color: 'bg-teal-50 text-teal-700 border-teal-200'},
-                {id: 'soccer_basketball', label: '⚽ כדורגל / כדורסל', color: 'bg-green-50 text-green-700 border-green-200'},
-                {id: 'motorcycles', label: '🏍️ אופנועים', color: 'bg-gray-100 text-gray-700 border-gray-300'},
-                {id: 'gaming', label: '🎮 גיימינג', color: 'bg-indigo-50 text-indigo-700 border-indigo-200'},
-                {id: 'lego', label: '🧱 לגו', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
-                {id: 'photography', label: '📸 צילום', color: 'bg-gray-100 text-gray-700 border-gray-300'},
-                {id: 'painting', label: '🎨 ציור', color: 'bg-pink-50 text-pink-700 border-pink-200'},
-                {id: 'reading', label: '📚 קריאה', color: 'bg-amber-50 text-amber-700 border-amber-200'},
-                {id: 'cooking', label: '🍳 בישול ואפייה', color: 'bg-yellow-50 text-yellow-700 border-yellow-200'},
-                {id: 'concerts', label: '🎤 הופעות', color: 'bg-purple-50 text-purple-700 border-purple-200'},
-                {id: 'business', label: '💼 עסקים', color: 'bg-blue-50 text-blue-700 border-blue-200'},
-                {id: 'entrepreneurship', label: '💡 יזמות', color: 'bg-cyan-50 text-cyan-700 border-cyan-200'},
-                {id: 'plants', label: '🌱 צמחייה', color: 'bg-lime-50 text-lime-700 border-lime-200'},
-                {id: 'nature', label: '🌿 טיולים בטבע', color: 'bg-lime-50 text-lime-700 border-lime-200'},
-              ].filter(i => profile.interests.includes(i.id)).map(interest => (
+              {interestOptions.map((interest) => (
                 <span key={interest.id} className={`px-3 py-1.5 rounded-full text-sm font-medium border ${interest.color}`}>
                   {interest.label}
                 </span>
@@ -569,7 +554,7 @@ export default function ProfileViewPage() {
             </div>
             <div>
               <span className="text-gray-500 text-sm block mb-1">תקציב</span>
-              <span className="font-semibold text-[--theme-orange]">₪{profile.budget_max?.toLocaleString()}</span>
+              <span className="font-semibold text-[--theme-orange]">{profile.budget_max != null ? `₪${profile.budget_max.toLocaleString()}` : '-'}</span>
             </div>
             {profile.pet_type !== 'none' && (
               <div>
@@ -596,7 +581,7 @@ export default function ProfileViewPage() {
       </div>
       
       {showActions && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
           <div className="max-w-md mx-auto flex items-center justify-center gap-6">
             <motion.button
               whileTap={{ scale: 0.9 }}

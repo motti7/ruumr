@@ -54,19 +54,6 @@ export default function CharterPage() {
     setLoading(false);
   };
 
-  const handleComplete = async (summary, score) => {
-    try {
-      // Save charter to database (you can create a Charter entity if needed)
-      console.log('Charter completed:', { summary, score, matchId: match.id });
-      
-      // For now, just navigate back
-      navigate(createPageUrl('Matches'));
-    } catch (e) {
-      console.error(e);
-      alert('שגיאה בשמירת החוזה');
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -91,7 +78,7 @@ export default function CharterPage() {
       matchId={match.id}
       user1Name={user1Profile.name}
       user2Name={user2Profile.name}
-      onComplete={handleComplete}
+      onClose={() => navigate(createPageUrl("Matches"))}
     />
   );
 }

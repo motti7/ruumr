@@ -16,13 +16,13 @@ export default function PageTransition({ children }) {
 
   const variants = {
     initial: root
-      ? { opacity: 0 }
+      ? { opacity: 1 }
       : { x: "-100%", opacity: 0 },
     animate: root
       ? { opacity: 1 }
       : { x: 0, opacity: 1 },
     exit: root
-      ? { opacity: 0 }
+      ? { opacity: 1 }
       : { x: "100%", opacity: 0 },
   };
 
@@ -30,7 +30,7 @@ export default function PageTransition({ children }) {
     <motion.div
       key={location.pathname}
       variants={variants}
-      initial="initial"
+      initial={root ? false : "initial"}
       animate="animate"
       exit="exit"
       transition={{ type: "tween", duration: 0.22, ease: "easeInOut" }}

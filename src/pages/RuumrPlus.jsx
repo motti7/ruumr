@@ -23,6 +23,7 @@ import {
   normalizeRuumrPlusActivation,
 } from "@/lib/ruumrPlusActivation";
 import SmartImage from "@/components/shared/SmartImage";
+import { getInterestLabel } from "@/lib/interests";
 import {
   Crown,
   MessageCircle,
@@ -106,7 +107,7 @@ function RuumrPlusRecommendationCard({ profile }) {
   const tags = [
     ...(profile.current_status === "has_apartment" ? ["יש לי דירה"] : []),
     ...sharedCities.slice(0, 2),
-    ...sharedInterests.slice(0, 2),
+    ...sharedInterests.slice(0, 2).map((interest) => getInterestLabel(interest)),
   ];
 
   return (

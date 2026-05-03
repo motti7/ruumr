@@ -9,6 +9,9 @@ import TinderSwitch from "../components/shared/TinderSwitch";
 import DeleteAccountModal from "../components/settings/DeleteAccountModal";
 import { useAuth } from "@/lib/AuthContext";
 
+/**
+ * @param {any} props
+ */
 const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onClick }) => {
   const content = (
     <div className="flex items-center justify-between w-full py-4">
@@ -38,21 +41,33 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const load = async () => {
-      const userData = await User.me();
-      setNotifyLikes(userData.notify_likes !== false);
-      setNotifyMatches(userData.notify_matches !== false);
+      try {
+        const userData = await User.me();
+        setNotifyLikes(userData.notify_likes !== false);
+        setNotifyMatches(userData.notify_matches !== false);
+      } catch (e) {
+        console.error("Failed to load user settings:", e);
+      }
     };
     load();
   }, []);
 
   const handleNotifyLikesChange = async (val) => {
     setNotifyLikes(val);
-    await base44.auth.updateMe({ notify_likes: val });
+    try {
+      await base44.auth.updateMe({ notify_likes: val });
+    } catch (e) {
+      setNotifyLikes(!val);
+    }
   };
 
   const handleNotifyMatchesChange = async (val) => {
     setNotifyMatches(val);
-    await base44.auth.updateMe({ notify_matches: val });
+    try {
+      await base44.auth.updateMe({ notify_matches: val });
+    } catch (e) {
+      setNotifyMatches(!val);
+    }
   };
 
   const handleLogout = async () => {

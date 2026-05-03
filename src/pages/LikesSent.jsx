@@ -46,7 +46,7 @@ export default function LikesSentPage() {
     return (
         <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
             <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center gap-3">
-                 <button onClick={() => navigate(-1)}>
+                 <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label="חזור">
                     <ArrowRight className="w-6 h-6 text-gray-600" />
                 </button>
                 <h1 className="text-2xl font-black text-gray-900">לייקים ששלחתי</h1>

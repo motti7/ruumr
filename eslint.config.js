@@ -6,7 +6,7 @@ import pluginUnusedImports from "eslint-plugin-unused-imports";
 
 export default [
   {
-    ignores: ["android/**", "dist/**", "node_modules/**"],
+    ignores: ["android/**", "dist/**", "ios/**/.build/**", "ios/build/**", "node_modules/**"],
   },
   {
     files: [

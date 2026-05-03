@@ -3,20 +3,20 @@ import { base44 } from './base44Client';
 
 
 
+/** @type {any} */
 export const Core = base44.integrations.Core;
 
-export const InvokeLLM = base44.integrations.Core.InvokeLLM;
+export const InvokeLLM = Core.InvokeLLM;
 
-export const SendEmail = base44.integrations.Core.SendEmail;
+export const SendEmail = Core.SendEmail;
 
-export const SendSMS = base44.integrations.Core.SendSMS;
+export const SendSMS = Core.SendSMS;
 
-export const UploadFile = base44.integrations.Core.UploadFile;
+export const UploadFile = Core.UploadFile;
 
-export const GenerateImage = base44.integrations.Core.GenerateImage;
+export const GenerateImage = Core.GenerateImage;
 
-export const ExtractDataFromUploadedFile = base44.integrations.Core.ExtractDataFromUploadedFile;
-
+export const ExtractDataFromUploadedFile = Core.ExtractDataFromUploadedFile;
 
 
 

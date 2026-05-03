@@ -1,12 +1,15 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
+import { Capacitor } from '@capacitor/core';
 
 import NavigationTracker from '@/lib/NavigationTracker'
 import OneSignalSetup from '@/components/shared/OneSignalSetup'
+import { detectNativeIOSSimulator } from '@/lib/nativeEnvironment';
+import { base44 } from '@/api/base44Client';
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
@@ -14,6 +17,8 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
+import { enableSimulatorBackend } from '@/lib/simulatorBackend';
+import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
 
 // Lazy-load heavy pages for route-based code splitting
 const GroupTracker = lazy(() => import('./pages/GroupTracker'));
@@ -32,14 +37,27 @@ const PageLoader = () => (
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : null;
+const isNativePlatform = typeof window !== 'undefined' && Capacitor.getPlatform() !== 'web';
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+const writeBootMarker = (value) => {
+  try {
+    window.localStorage.setItem('ruumr_boot_marker', value);
+  } catch {
+    // Best-effort debug trace only.
+  }
+};
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    writeBootMarker('authenticated-app-mounted');
+  }, []);
 
   useEffect(() => {
     if (authError?.type === 'auth_required') {
@@ -49,6 +67,7 @@ const AuthenticatedApp = () => {
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
+    writeBootMarker('authenticated-app-loading');
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -59,15 +78,18 @@ const AuthenticatedApp = () => {
   // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
+      writeBootMarker('authenticated-app-user-not-registered');
       return <UserNotRegisteredError />;
     }
 
     if (authError.type === 'auth_required') {
+      writeBootMarker('authenticated-app-auth-required');
       return null;
     }
   }
 
   // Render the main app
+  writeBootMarker('authenticated-app-ready');
   return (
     <>
     <OneSignalSetup userId={user?.id} />
@@ -105,22 +127,98 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-  const [splashDone, setSplashDone] = useState(false);
+  const isNativeWebView = typeof window !== 'undefined' && window.location.protocol.startsWith('capacitor');
+  const [splashDone, setSplashDone] = useState(() => isNativeWebView);
+  const [nativeBootstrapDone, setNativeBootstrapDone] = useState(() => !isNativeWebView);
+  const handleSplashDone = useCallback(() => {
+    setSplashDone(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isNativeWebView) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const primeNativeBootstrap = async () => {
+      const isSimulator = await detectNativeIOSSimulator();
+      const shouldUseDemoBackend = isRuumrNativeDemoSession();
+
+      try {
+        if (typeof window !== 'undefined') {
+          if (shouldUseDemoBackend) {
+            writeBootMarker(isSimulator ? 'native-bootstrap-simulator-detected' : 'native-bootstrap-demo-session');
+            window.localStorage.setItem('ruumr_simulator_mode', 'true');
+            enableSimulatorBackend(base44);
+            writeBootMarker('native-bootstrap-backend-enabled');
+          } else {
+            window.localStorage.removeItem('ruumr_simulator_mode');
+            writeBootMarker('native-bootstrap-real-device');
+          }
+        }
+      } catch {
+        // Best-effort only. The UI should still proceed even if storage is unavailable.
+      } finally {
+        if (!cancelled) {
+          writeBootMarker('native-bootstrap-complete');
+          setNativeBootstrapDone(true);
+        }
+      }
+    };
+
+    void primeNativeBootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isNativeWebView]);
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <SplashScreen onDone={() => setSplashDone(true)} />
-        {splashDone && (
-          <Router>
-            <NavigationTracker />
-            <AuthenticatedApp />
-          </Router>
-        )}
-        <Toaster />
-
-      </QueryClientProvider>
-    </AuthProvider>
+    <>
+      {writeBootMarker('app-render')}
+      {!isNativePlatform && !splashDone && <SplashScreen onDone={handleSplashDone} />}
+      {splashDone && !nativeBootstrapDone && isNativeWebView && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ backgroundColor: "#E8420A" }}>
+          <div className="flex flex-col items-center gap-2">
+            <span
+              style={{
+                fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
+                fontWeight: 800,
+                fontSize: "72px",
+                color: "white",
+                letterSpacing: "-1px",
+                lineHeight: 1,
+              }}
+            >
+              ruumr
+            </span>
+            <span
+              style={{
+                fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
+                fontWeight: 400,
+                fontSize: "16px",
+                color: "rgba(255,255,255,0.85)",
+                letterSpacing: "0.5px",
+              }}
+            >
+              find your perfect roommates
+            </span>
+          </div>
+        </div>
+      )}
+      {splashDone && nativeBootstrapDone && (
+        <AuthProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <NavigationTracker />
+              <AuthenticatedApp />
+            </Router>
+          </QueryClientProvider>
+        </AuthProvider>
+      )}
+      <Toaster />
+    </>
   )
 }
 

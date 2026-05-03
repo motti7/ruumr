@@ -1,4 +1,5 @@
 import { Profile } from "@/entities/Profile";
+import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
 
 /**
  * @typedef {Object} SimulatorRecommendationOptions
@@ -10,36 +11,6 @@ import { Profile } from "@/entities/Profile";
  * @property {any[] | null} [localProfiles]
  * @property {any | null} [currentProfile]
  */
-
-const INTEREST_LABELS = {
-  gym: "חדר כושר",
-  tennis: "טניס",
-  pilates: "פילאטיס",
-  yoga: "יוגה",
-  soccer_basketball: "כדורגל / כדורסל",
-  motorcycles: "אופנועים",
-  gaming: "גיימינג",
-  lego: "לגו",
-  photography: "צילום",
-  painting: "ציור",
-  reading: "קריאה",
-  cooking: "בישול ואפייה",
-  concerts: "הופעות",
-  business: "עסקים",
-  entrepreneurship: "יזמות",
-  plants: "צמחייה",
-  nature: "טיולים בטבע",
-  sport: "ספורט",
-  music: "מוזיקה",
-  travel: "טיולים",
-  art: "אמנות",
-  fitness: "כושר",
-  movies: "סרטים",
-  nightlife: "חיי לילה",
-  tech: "טכנולוגיה",
-  fashion: "אופנה",
-  pets: "חיות",
-};
 
 const NEUTRAL_VALUES = new Set([
   "any",
@@ -116,8 +87,7 @@ function normalizeKey(value) {
 }
 
 function humanizeInterest(value) {
-  const key = normalizeKey(value).replace(/[\s_-]+/g, "_");
-  return INTEREST_LABELS[key] ?? (String(value ?? "").replace(/_/g, " ").trim() || "עניין משותף");
+  return getInterestLabel(value);
 }
 
 function toList(value) {
@@ -168,7 +138,7 @@ function getProfileCities(profile = {}) {
 }
 
 function getProfileInterests(profile = {}) {
-  return toList(profile.interests).map((interest) => String(interest).trim()).filter(Boolean);
+  return normalizeInterestValues(toList(profile.interests));
 }
 
 function getProfileText(profile = {}) {
