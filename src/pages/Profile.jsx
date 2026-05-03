@@ -599,17 +599,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-              <HouseholdPreferencesSection
-                values={formData}
-                onChange={setFormField}
-                disabled={!isEditing}
-                title="הרגלים בבית"
-                description="אלו השדות ש-Ruumr Plus משתמש בהם כדי למצוא התאמה יציבה ונוחה."
-                className=""
-              />
-            </div>
-
             <div>
               <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
               <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
