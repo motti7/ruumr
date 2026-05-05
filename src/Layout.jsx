@@ -256,8 +256,8 @@ export default function Layout({ children, currentPageName }) {
                 <div className="max-w-md mx-auto px-2 flex items-center justify-between h-12">
         
         {/* קבוצה ימין: הגדרות הכי ימני, ואז כוכב */}
-        <div className="flex items-center gap-1">
-            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none w-11 h-11 flex items-center justify-center touch-manipulation rounded-full">
+        <div className="flex items-center gap-2">
+            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
             <WriteReviewButton />
@@ -265,17 +265,17 @@ export default function Layout({ children, currentPageName }) {
 
         {/* אמצע: כותרת רומר */}
         <div className="flex items-center justify-center">
-            <Link to={createPageUrl("Discover")} className="select-none px-3 h-11 flex items-center justify-center">
+            <Link to={createPageUrl("Discover")} className="select-none">
                  <h1 className="text-4xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
             </Link>
         </div>
 
         {/* קבוצה שמאל: מסננים ופרופיל */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none w-11 h-11 flex items-center justify-center touch-manipulation rounded-full">
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
         </div>
