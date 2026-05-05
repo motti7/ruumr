@@ -57,10 +57,28 @@ export default function CitySelect({ selectedCities = [], onChange }) {
           <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0 ml-1" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="start">
+      <PopoverContent
+        className="p-0 border-0 overflow-hidden"
+        style={{
+          width: 'var(--radix-popover-trigger-width)',
+          borderRadius: '12px',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+          marginTop: '4px',
+        }}
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        avoidCollisions={false}
+      >
         <Command>
-          <CommandInput placeholder="חפש עיר..." className="text-right" />
-          <CommandList className="max-h-60 overflow-auto">
+          <div className="sticky top-0 z-10 bg-gray-50 border-b border-gray-100">
+            <CommandInput
+              placeholder="חפש עיר..."
+              className="text-right border-0 focus:ring-0 focus:outline-none shadow-none bg-transparent"
+              style={{ boxShadow: 'none', outline: 'none' }}
+            />
+          </div>
+          <CommandList style={{ maxHeight: '120px', overflowY: 'auto' }}>
             <CommandEmpty>לא נמצאה עיר.</CommandEmpty>
             <CommandGroup>
               {CITIES.map((city) => (
@@ -68,7 +86,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
                   key={city}
                   value={city}
                   onSelect={() => toggleCity(city)}
-                  className="flex items-center justify-between cursor-pointer"
+                  className="flex items-center justify-between cursor-pointer text-sm font-light"
                 >
                   <span>{city}</span>
                   {selectedCities.includes(city) && <Check className="h-4 w-4 text-[--theme-orange]" />}
