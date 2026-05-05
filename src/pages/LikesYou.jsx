@@ -24,14 +24,25 @@ export default function LikesYouPage() {
         setError(null);
         try {
             const user = await User.me();
+
+            // Get all users who liked me
             const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-            const swiperIds = likes.map(l => l.swiper_id);
             
-            if (swiperIds.length > 0) {
+            // Get all swipes I already sent (so we can exclude them)
+            const mySwipes = await Swipe.filter({ swiper_id: user.id });
+            const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
+
+            // Only show people I haven't swiped on yet
+            const pendingLikerIds = likes
+                .map(l => l.swiper_id)
+                .filter(id => !alreadySwiped.has(id));
+            
+            if (pendingLikerIds.length > 0) {
                 const profilesData = await Promise.all(
-                    swiperIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
+                    pendingLikerIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
                 );
-                setProfiles(profilesData.filter(p => p));
+                // Filter out nulls and hidden profiles
+                setProfiles(profilesData.filter(p => p && p.is_visible !== false));
             } else {
                 setProfiles([]);
             }
