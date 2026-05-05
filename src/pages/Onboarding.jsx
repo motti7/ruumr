@@ -479,6 +479,41 @@ export default function OnboardingPage() {
         #onboarding-root input[type=number]:focus::-webkit-outer-spin-button {
           opacity: 1;
         }
+        /* Remove all focus rings / black outlines on inputs & selects */
+        #onboarding-root input:focus,
+        #onboarding-root input:focus-visible,
+        #onboarding-root textarea:focus,
+        #onboarding-root textarea:focus-visible,
+        #onboarding-root select:focus,
+        #onboarding-root select:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border-color: #FA3803 !important;
+          border-width: 1px !important;
+        }
+        /* Styled native select dropdown */
+        #onboarding-root select {
+          border-radius: 10px;
+          border: 1px solid #e5e7eb;
+          background-color: #f9fafb;
+          color: #1f2937;
+          font-size: 14px;
+          font-weight: 400;
+          padding: 0 12px;
+          height: 44px;
+          appearance: none;
+          -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FA3803' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: left 10px center;
+          cursor: pointer;
+          transition: border-color 0.15s;
+        }
+        #onboarding-root select:focus {
+          border-color: #FA3803 !important;
+          box-shadow: 0 0 0 0 transparent !important;
+          outline: none !important;
+        }
       `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
@@ -515,7 +550,7 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
-                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1 text-right">
@@ -527,14 +562,14 @@ export default function OnboardingPage() {
                                     const val = e.target.value;
                                     setFormField('age', val === '' ? '' : parseInt(val));
                                 }}
-                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="space-y-1 text-right">
                             <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
                             <select
                                 value={formData.gender}
                                 onChange={(e) => setFormField('gender', e.target.value)}
-                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-base text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                className="w-full">
                                 <option value="" disabled>בחר/י</option>
                                 <option value="male">זכר</option>
                                 <option value="female">נקבה</option>
@@ -643,7 +678,7 @@ export default function OnboardingPage() {
                         <div>
                             <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>כשרות</label>
                             <select value={formData.kosher_preference} onChange={(e) => setFormField('kosher_preference', e.target.value)}
-                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                className="w-full">
                                 <option value="" disabled>בחר/י</option>
                                 <option value="for">בעד</option>
                                 <option value="against">נגד</option>
@@ -653,7 +688,7 @@ export default function OnboardingPage() {
                         <div>
                             <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>שומר שבת</label>
                             <select value={formData.shabbat_preference} onChange={(e) => setFormField('shabbat_preference', e.target.value)}
-                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                className="w-full">
                                 <option value="" disabled>בחר/י</option>
                                 <option value="for">בעד</option>
                                 <option value="against">נגד</option>
@@ -666,7 +701,7 @@ export default function OnboardingPage() {
                     <div>
                         <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>זיקה לדת</label>
                         <select value={formData.religion} onChange={(e) => setFormField('religion', e.target.value)}
-                            className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                            className="w-full">
                             <option value="" disabled>בחר/י</option>
                             <option value="secular">חילוני/ת</option>
                             <option value="traditional">מסורתי/ת</option>
