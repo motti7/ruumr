@@ -6,6 +6,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
+import heic2any from 'heic2any';
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
@@ -342,6 +343,18 @@ export default function OnboardingPage() {
   const handleImageUpload = async (e, index, isApartment = false) => {
     let file = e.target.files[0];
     if (!file) return;
+
+    // Convert HEIC to JPEG
+    if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+      try {
+        const convertedBlob = await heic2any({ blob: file });
+        file = new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg', lastModified: Date.now() });
+      } catch (conversionError) {
+        console.error("HEIC conversion failed:", conversionError);
+        alert("שגיאה בהמרת התמונה. אנא נסה תמונה אחרת.");
+        return;
+      }
+    }
 
     // Track upload
     if (isApartment) {
