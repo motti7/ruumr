@@ -887,35 +887,14 @@ export default function OnboardingPage() {
 
             <Step step={7} currentStep={step} title="">
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                    <h2 className="text-3xl font-bold" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
-                    <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
-                        <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
-                        <Check className="w-16 h-16 text-blue-500" />
-                    </div>
-                    <div>
-                        <h3 className="text-2xl font-bold mb-2">אמת/י את הפרופיל שלך</h3>
-                        <p className="text-gray-500 max-w-xs mx-auto">
-                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
-                        </p>
+                    {/* Title with inline orange checkmark */}
+                    <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
+                        <Check className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
                     </div>
 
-                    <div className="w-full space-y-3">
-                        <Button
-                            onClick={() => handleFinish(true)}
-                            disabled={isSubmitting}
-                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
-                        </Button>
-                        <button
-                            onClick={() => !isSubmitting && handleFinish(false)}
-                            disabled={isSubmitting}
-                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
-                            אולי אחר כך
-                        </button>
-                    </div>
-
-                    {/* Social Media Link Section */}
-                    <div className="w-full pt-2 border-t border-gray-100">
+                    {/* Social Media Link Section — moved above verification */}
+                    <div className="w-full">
                         <div className="flex items-center gap-2 mb-2" dir="rtl">
                             <span className="text-sm font-bold text-gray-700">קישור לרשת חברתית</span>
                             <span className="text-sm text-gray-400">(אופציונלי)</span>
@@ -938,6 +917,29 @@ export default function OnboardingPage() {
                             className="h-8 text-sm bg-gray-50 border-gray-200 w-full"
                             dir="rtl"
                         />
+                    </div>
+
+                    {/* Verification section */}
+                    <div>
+                        <h3 className="text-2xl font-bold mb-2">אמת/י את הפרופיל שלך</h3>
+                        <p className="text-gray-500 max-w-xs mx-auto">
+                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
+                        </p>
+                    </div>
+
+                    <div className="w-full space-y-3">
+                        <Button
+                            onClick={() => handleFinish(true)}
+                            disabled={isSubmitting}
+                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
+                        </Button>
+                        <button
+                            onClick={() => !isSubmitting && handleFinish(false)}
+                            disabled={isSubmitting}
+                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
+                            אולי אחר כך
+                        </button>
                     </div>
                 </div>
             </Step>
