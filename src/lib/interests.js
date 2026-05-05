@@ -66,7 +66,6 @@ const INTEREST_OPTIONS = [
   { id: "morning_person", label: "אדם של בוקר", Icon: SunMedium, color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   { id: "night_owl", label: "ינשוף לילה", Icon: Moon, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   { id: "food_delivery", label: "הזמנות אוכל", Icon: UtensilsCrossed, color: "bg-orange-50 text-orange-700 border-orange-200" },
-  { id: "shopping", label: "קניות משותפות", Icon: ShoppingCart, color: "bg-blue-50 text-blue-700 border-blue-200" },
   { id: "wfh", label: "עובד/ת מהבית", Icon: Laptop, color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
 ];
 
