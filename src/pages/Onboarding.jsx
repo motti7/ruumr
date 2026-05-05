@@ -158,14 +158,14 @@ export default function OnboardingPage() {
   useEffect(() => {
     const trackStep = async () => {
       try {
-        const user = await User.me();
+        if (!formData.user_id) return;
         const { PageView } = await import('@/entities/PageView');
         await PageView.create({
           page_name: `Onboarding - Step ${step}`,
-          user_id: user.id
+          user_id: formData.user_id
         });
       } catch (e) {
-        console.error("Failed to track onboarding step:", e);
+        // silent fail - tracking is non-critical
       }
     };
     trackStep();
@@ -838,12 +838,14 @@ export default function OnboardingPage() {
                     <div className="w-full space-y-3">
                         <Button
                             onClick={() => handleFinish(true)}
-                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110">
-                            אמת עכשיו (מומלץ)
+                            disabled={isSubmitting}
+                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
                         </Button>
                         <button
-                            onClick={() => handleFinish(false)}
-                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1">
+                            onClick={() => !isSubmitting && handleFinish(false)}
+                            disabled={isSubmitting}
+                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
                             אולי אחר כך
                         </button>
                     </div>
