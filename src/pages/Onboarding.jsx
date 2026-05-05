@@ -452,7 +452,24 @@ export default function OnboardingPage() {
       apartmentFileInputRef.current.click();
     } else {
       fileInputRef.current.onclick = () => {
-        fileInputRef.current.onchange = (e) => handleImageUpload(e, index, false);
+        fileInputRef.current.onchange = async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 1) {
+            // Single file — use existing slot-based handler
+            await handleImageUpload(e, index, false);
+          } else {
+            // Multiple files — fill slots starting from the first empty one
+            const currentPhotos = formData.photos;
+            let slotIndex = currentPhotos.findIndex((p) => !p);
+            if (slotIndex === -1) slotIndex = 0;
+            const filesToUpload = files.slice(0, 6 - slotIndex);
+            for (let i = 0; i < filesToUpload.length; i++) {
+              const fakeEvent = { target: { files: [filesToUpload[i]] } };
+              await handleImageUpload(fakeEvent, slotIndex + i, false);
+            }
+          }
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        };
       };
       fileInputRef.current.click();
     }
@@ -517,7 +534,7 @@ export default function OnboardingPage() {
         }
       `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
       <div className="w-full max-w-md flex flex-col h-[85vh]">
