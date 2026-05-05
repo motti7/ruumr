@@ -60,10 +60,20 @@ const AuthenticatedApp = () => {
   }, []);
 
   useEffect(() => {
-    if (authError?.type === 'auth_required') {
+    console.log('[ruumr] AuthenticatedApp state', {
+      isLoadingAuth,
+      isLoadingPublicSettings,
+      isAuthenticated,
+      authErrorType: authError?.type ?? null,
+    });
+    // Only redirect once both loading phases are done. The 3-second native fallback timer
+    // can clear loading flags before auth resolves; without this guard, a subsequent auth
+    // failure would fire navigateToLogin while the actual auth request is still in-flight.
+    if (authError?.type === 'auth_required' && !isLoadingAuth && !isLoadingPublicSettings) {
+      console.log('[ruumr] navigateToLogin: auth_required and loading complete');
       navigateToLogin();
     }
-  }, [authError, navigateToLogin]);
+  }, [authError, isLoadingAuth, isLoadingPublicSettings, navigateToLogin]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {

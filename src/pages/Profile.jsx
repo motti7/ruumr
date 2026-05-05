@@ -13,7 +13,6 @@ import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
-import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';

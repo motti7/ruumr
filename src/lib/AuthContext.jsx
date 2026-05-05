@@ -67,6 +67,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    console.log('[ruumr] checkAppState: start, hasToken =', Boolean(appParams.token));
     try {
       if (isRuumrSimulatorMode()) {
         enableSimulatorBackend(base44);
@@ -168,7 +169,9 @@ export const AuthProvider = ({ children }) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
+      console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
       const currentUser = await base44.auth.me();
+      console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
       setUser(currentUser);
       setIsAuthenticated(true);
 
@@ -189,10 +192,10 @@ export const AuthProvider = ({ children }) => {
 
       setIsLoadingAuth(false);
     } catch (error) {
-      console.error('User auth check failed:', error);
+      console.error('[ruumr] checkUserAuth failed:', error?.status, error?.message);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
+
       // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
         setAuthError({

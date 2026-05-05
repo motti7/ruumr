@@ -143,8 +143,13 @@ export default function OnboardingPage() {
           setStep((currentStep) => (currentStep === 1 ? 2 : currentStep));
         }
       } catch (e) {
-        // If user is not logged in, redirect to login page then back here
-        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+        console.error('[ruumr] Onboarding fetchUser error:', e?.status, e?.message, e);
+        // Only redirect to login on actual auth failures, not transient network errors.
+        // Treating every error as "not logged in" causes an infinite redirect loop on Android
+        // WebView when the first post-OAuth API call fails due to a race condition or network blip.
+        if (e?.status === 401 || e?.status === 403) {
+          base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+        }
       }
     };
     fetchUser();
