@@ -251,6 +251,10 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
+      // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
+      const currentUser = await User.me();
+      const userId = currentUser.id;
+
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
       const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(formData.name, cleanedPhotos, 2) : cleanedPhotos;
@@ -260,6 +264,7 @@ export default function OnboardingPage() {
 
       const finalData = {
         ...formData,
+        user_id: userId,
         interests: normalizeInterestValues(formData.interests),
         photos: finalPhotos,
         apartment_photos: finalApartmentPhotos,
@@ -272,7 +277,7 @@ export default function OnboardingPage() {
       };
 
       // If user already has a profile (e.g. navigated back), update instead of create
-      const existingProfiles = await Profile.filter({ user_id: formData.user_id });
+      const existingProfiles = await Profile.filter({ user_id: userId });
       if (existingProfiles.length > 0) {
         await Profile.update(existingProfiles[0].id, finalData);
       } else {
