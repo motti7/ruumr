@@ -626,7 +626,7 @@ export default function OnboardingPage() {
 
                     {/* Budget */}
                     <div className="pt-0 text-right">
-                       <h3 className="text-base font-bold mb-1" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                       <h3 className="text-base font-bold mt-2 mb-1" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                        {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
                        <div className="relative w-full mb-2" dir="ltr">
                            <div
