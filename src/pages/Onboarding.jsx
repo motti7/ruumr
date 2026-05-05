@@ -886,7 +886,7 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={7} currentStep={step} title="">
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+                <div className="flex flex-col items-center justify-between h-full text-center py-6">
                     {/* Title with inline orange checkmark */}
                     <div className="flex items-center justify-center gap-2">
                         <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
