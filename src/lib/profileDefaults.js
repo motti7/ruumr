@@ -5,8 +5,8 @@ const DEFAULT_PHOTOS = Array(6).fill(null);
 export function createProfileDefaults(overrides = {}) {
   return {
     name: "",
-    age: 25,
-    gender: "male",
+    age: "",
+    gender: "",
     about_me: "",
     social_link: "",
     looking_for_description: "",
@@ -20,9 +20,9 @@ export function createProfileDefaults(overrides = {}) {
     pet_type: "none",
     pet_other_description: "",
     looking_for_gender: "any",
-    religion: "secular",
-    kosher_preference: "flow",
-    shabbat_preference: "flow",
+    religion: "",
+    kosher_preference: "",
+    shabbat_preference: "",
     current_status: "",
     apartment_photos: [...DEFAULT_PHOTOS],
     existing_roommates: 0,
