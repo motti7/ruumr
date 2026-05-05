@@ -17,16 +17,15 @@ export default function LikesSentPage() {
             setIsLoading(true);
             try {
                 const user = await User.me();
-                // Find swipes where swiper_id is me and action is like
-                const myLikes = await Swipe.filter({ swiper_id: user.id, action: "like" });
-                const swipedIds = myLikes.map(l => l.swiped_id);
-                
-                if (swipedIds.length > 0) {
-                    const profilesData = await Promise.all(
-                        swipedIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
-                    );
-                    setProfiles(profilesData.filter(p => p));
-                }
+
+                const [myLikes, allProfiles] = await Promise.all([
+                    Swipe.filter({ swiper_id: user.id, action: "like" }),
+                    Profile.list("-created_date", 500),
+                ]);
+
+                const swipedIds = new Set(myLikes.map(l => l.swiped_id));
+                const matched = allProfiles.filter(p => swipedIds.has(p.user_id));
+                setProfiles(matched);
             } catch (e) {
                 console.error(e);
             }

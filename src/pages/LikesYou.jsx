@@ -25,27 +25,23 @@ export default function LikesYouPage() {
         try {
             const user = await User.me();
 
-            // Get all users who liked me
-            const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-            
-            // Get all swipes I already sent (so we can exclude them)
-            const mySwipes = await Swipe.filter({ swiper_id: user.id });
-            const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
+            // Fetch in parallel: who liked me + who I already swiped + all profiles
+            const [likes, mySwipes, allProfiles] = await Promise.all([
+                Swipe.filter({ swiped_id: user.id, action: "like" }),
+                Swipe.filter({ swiper_id: user.id }),
+                Profile.list("-created_date", 500),
+            ]);
 
-            // Only show people I haven't swiped on yet
-            const pendingLikerIds = likes
-                .map(l => l.swiper_id)
-                .filter(id => !alreadySwiped.has(id));
-            
-            if (pendingLikerIds.length > 0) {
-                const profilesData = await Promise.all(
-                    pendingLikerIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
-                );
-                // Filter out nulls and hidden profiles
-                setProfiles(profilesData.filter(p => p && p.is_visible !== false));
-            } else {
-                setProfiles([]);
-            }
+            const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
+            const pendingLikerIds = new Set(
+                likes.map(l => l.swiper_id).filter(id => !alreadySwiped.has(id))
+            );
+
+            const matched = allProfiles.filter(
+                p => pendingLikerIds.has(p.user_id) && p.is_visible !== false
+            );
+
+            setProfiles(matched);
         } catch (e) {
             console.error(e);
             setError("שגיאה בטעינת הלייקים. אנא נסה שוב.");
