@@ -786,7 +786,7 @@ export default function OnboardingPage() {
 
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
-                    <p className="text-center text-xs mb-3 -mt-1" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
+                    <p className="text-center text-xs mb-3 -mt-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0 overflow-hidden">
                         {INTEREST_OPTIONS.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
