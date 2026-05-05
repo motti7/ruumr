@@ -265,21 +265,30 @@ export default function OnboardingPage() {
         apartment_photos: finalApartmentPhotos,
         location: formData.search_cities[0] || '',
         is_visible: true,
-        // Ensure nulls are handled
         song_preview_url: formData.song_preview_url || null,
         song_name: formData.song_name || null,
         song_artist: formData.song_artist || null,
         song_image: formData.song_image || null
       };
-      await Profile.create(finalData);
+
+      // If user already has a profile (e.g. navigated back), update instead of create
+      const existingProfiles = await Profile.filter({ user_id: formData.user_id });
+      if (existingProfiles.length > 0) {
+        await Profile.update(existingProfiles[0].id, finalData);
+      } else {
+        await Profile.create(finalData);
+      }
+
       try {
         await syncCurrentProfileToRuumrPlus();
       } catch (syncError) {
         console.error("Failed to sync onboarding profile to Ruumr Plus:", syncError);
       }
+
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Registration Completed');
       }
+
       if (shouldVerify) {
         navigate(createPageUrl('Verification'));
       } else {
