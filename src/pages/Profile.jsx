@@ -407,7 +407,7 @@ export default function ProfilePage() {
                                   {formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
                                     <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                                   ) : (
-                                    <SmartImage src={formData.photos[i]} alt={`מדיה ${i+1}`} className="w-full h-full" priority={true} />
+                                    <img src={formData.photos[i]} alt={`תמונה ${i+1}`} className="w-full h-full object-cover" />
                                   )}
                                   {/* Drag handle */}
                                   <div {...provided.dragHandleProps} className="absolute top-1 right-1 bg-black/40 rounded-full p-0.5 cursor-grab active:cursor-grabbing z-10">
@@ -461,25 +461,27 @@ export default function ProfilePage() {
             </DragDropContext>
           ) : (
             <div className="grid grid-cols-3 gap-1">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-square rounded-lg overflow-hidden relative transition-all">
-                  {(formData.photos?.length > i && formData.photos[i]) ? (
-                    formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
-                      <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+              {[...Array(6)].map((_, i) => {
+                const photoUrl = formData.photos?.[i];
+                return (
+                  <div key={i} className="aspect-square rounded-lg overflow-hidden relative transition-all bg-gray-100">
+                    {photoUrl ? (
+                      photoUrl.match(/\.(mp4|mov|webm)$/i) ? (
+                        <video src={photoUrl} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                      ) : (
+                        <img
+                          src={photoUrl}
+                          alt={`תמונה ${i+1}`}
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => setSelectedApartmentPhoto(photoUrl)}
+                        />
+                      )
                     ) : (
-                      <SmartImage src={formData.photos[i]} alt={`מדיה ${i+1}`} className="w-full h-full" priority={true} />
-                    )
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 gap-1" />
-                  )}
-                  {formData.photos?.[i] && (
-                    <div
-                      className="absolute inset-0 z-10"
-                      onClick={() => setSelectedApartmentPhoto(formData.photos[i])}
-                    />
-                  )}
-                </div>
-              ))}
+                      <div className="w-full h-full" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
