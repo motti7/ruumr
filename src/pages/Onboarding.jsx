@@ -599,7 +599,7 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={2} currentStep={step} title="">
-                <div className="space-y-5 mt-1">
+                <div className="space-y-3 mt-1">
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
@@ -625,10 +625,10 @@ export default function OnboardingPage() {
                     </div>
 
                     {/* Budget */}
-                    <div className="pt-2 text-right">
-                       <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                    <div className="pt-0 text-right">
+                       <h3 className="text-base font-bold mb-1" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                        {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
-                       <div className="relative w-full mb-3" dir="ltr">
+                       <div className="relative w-full mb-2" dir="ltr">
                            <div
                                className="absolute text-sm text-black"
                                style={{
