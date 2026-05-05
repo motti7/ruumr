@@ -12,7 +12,6 @@ import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
@@ -532,15 +531,15 @@ export default function OnboardingPage() {
                         </div>
                         <div className="space-y-1 text-right">
                             <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
-                            <BottomSheetSelect
+                            <select
                                 value={formData.gender}
-                                onValueChange={(v) => setFormField('gender', v)}
-                                label="מגדר"
-                                options={[
-                                    { value: "male", label: "זכר" },
-                                    { value: "female", label: "נקבה" },
-                                    { value: "other", label: "אחר" }
-                                ]} />
+                                onChange={(e) => setFormField('gender', e.target.value)}
+                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-base text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                <option value="" disabled>בחר/י</option>
+                                <option value="male">זכר</option>
+                                <option value="female">נקבה</option>
+                                <option value="other">אחר</option>
+                            </select>
                         </div>
                     </div>
 
@@ -643,27 +642,38 @@ export default function OnboardingPage() {
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>כשרות</label>
-                            <BottomSheetSelect value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)} label="כשרות"
-                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
+                            <select value={formData.kosher_preference} onChange={(e) => setFormField('kosher_preference', e.target.value)}
+                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                <option value="" disabled>בחר/י</option>
+                                <option value="for">בעד</option>
+                                <option value="against">נגד</option>
+                                <option value="flow">זורם/ת</option>
+                            </select>
                         </div>
                         <div>
                             <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>שומר שבת</label>
-                            <BottomSheetSelect value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)} label="שמירת שבת"
-                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
+                            <select value={formData.shabbat_preference} onChange={(e) => setFormField('shabbat_preference', e.target.value)}
+                                className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                                <option value="" disabled>בחר/י</option>
+                                <option value="for">בעד</option>
+                                <option value="against">נגד</option>
+                                <option value="flow">זורם/ת</option>
+                            </select>
                         </div>
                     </div>
 
                     {/* זיקה לדת */}
                     <div>
                         <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>זיקה לדת</label>
-                        <BottomSheetSelect value={formData.religion} onValueChange={(v) => setFormField('religion', v)} label="זיקה לדת"
-                            options={[
-                                { value: "secular", label: "חילוני/ת" },
-                                { value: "traditional", label: "מסורתי/ת" },
-                                { value: "national_religious", label: "דתי/ה לאומי/ת" },
-                                { value: "religious", label: "דתי/ה" },
-                                { value: "haredi", label: "חרדי/ת" }
-                            ]} />
+                        <select value={formData.religion} onChange={(e) => setFormField('religion', e.target.value)}
+                            className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[--theme-orange] appearance-none">
+                            <option value="" disabled>בחר/י</option>
+                            <option value="secular">חילוני/ת</option>
+                            <option value="traditional">מסורתי/ת</option>
+                            <option value="national_religious">דתי/ה לאומי/ת</option>
+                            <option value="religious">דתי/ה</option>
+                            <option value="haredi">חרדי/ת</option>
+                        </select>
                     </div>
 
                     {/* חיית מחמד */}
