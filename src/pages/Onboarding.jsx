@@ -566,16 +566,12 @@ export default function OnboardingPage() {
                                 className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="space-y-1 text-right">
-                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
-                            <select
+                            <CustomSelect
+                                label="מגדר"
                                 value={formData.gender}
-                                onChange={(e) => setFormField('gender', e.target.value)}
-                                className="w-full">
-                                <option value="" disabled>בחר/י</option>
-                                <option value="male">זכר</option>
-                                <option value="female">נקבה</option>
-                                <option value="other">אחר</option>
-                            </select>
+                                onChange={(v) => setFormField('gender', v)}
+                                options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]}
+                            />
                         </div>
                     </div>
 
