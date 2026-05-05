@@ -919,7 +919,7 @@ export default function OnboardingPage() {
                             onChange={(e) => setFormField('social_link', e.target.value)}
                             placeholder="הדבק קישור כאן"
                             className="h-8 text-sm bg-gray-50 border-gray-200 w-full"
-                            dir="ltr"
+                            dir="rtl"
                         />
                     </div>
                 </div>
