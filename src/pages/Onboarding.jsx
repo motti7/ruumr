@@ -74,7 +74,7 @@ const persistAppleIdentity = (userId, identity) => {
   localStorage.setItem('ruumr_last_auth_provider', 'apple');
 };
 
-const Step = ({ children, step, currentStep, title, noScroll }) =>
+const Step = ({ children, step, currentStep, title }) =>
 <AnimatePresence mode="wait">
     {currentStep === step &&
   <motion.div
@@ -86,7 +86,7 @@ const Step = ({ children, step, currentStep, title, noScroll }) =>
     className="w-full flex flex-col h-full">
     
         {title && <h2 className="mb-2 text-3xl text-center" style={{ color: '#FA3803', fontFamily: "'Google Sans', 'Inter', sans-serif", fontWeight: 'bold' }}>{title}</h2>}
-        <div className={`flex-1 px-1 ${noScroll ? 'overflow-hidden py-2' : 'overflow-y-auto py-4 custom-scrollbar'}`}>
+        <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
             {children}
         </div>
       </motion.div>
@@ -522,7 +522,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md flex flex-col h-[85vh]">
         {/* Progress Bar - Hidden on Final Step */}
         {step !== 7 && (
-        <div className={step === 2 ? "mb-2" : "mb-6"}>
+        <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin()} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
@@ -598,37 +598,37 @@ export default function OnboardingPage() {
                 </div>
             </Step>
 
-            <Step step={2} currentStep={step} title="" noScroll>
-                <div className="flex flex-col gap-2">
+            <Step step={2} currentStep={step} title="">
+                <div className="space-y-5 mt-1">
                     {/* Status Cards */}
-                    <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-2 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-sm font-bold text-gray-800">מחפש/ת דירה</h3>
-                            <Search className={`w-4 h-4 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                    <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-base font-bold text-gray-800">מחפש/ת דירה</h3>
+                            <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500 text-xs">אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
                     </button>
 
-                    <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-2 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-sm font-bold text-gray-800">יש לי דירה</h3>
-                            <Home className={`w-4 h-4 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
+                    <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-base font-bold text-gray-800">יש לי דירה</h3>
+                            <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500 text-xs">יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
                     </button>
 
                     {/* Location */}
-                    <div className="text-right">
-                        <h3 className="text-sm font-bold mb-0.5" style={{ color: '#FA3803' }}>איפה?</h3>
+                    <div className="space-y-1 pt-2 text-right">
+                        <h3 className="text-base font-bold" style={{ color: '#FA3803' }}>איפה?</h3>
                         <p className="text-xs mb-1" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
-                    <div className="text-right">
-                       <h3 className="text-sm font-bold mb-1" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                    <div className="pt-2 text-right">
+                       <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
                        {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
-                       <div className="relative w-full mb-2" dir="ltr">
+                       <div className="relative w-full mb-3" dir="ltr">
                            <div
                                className="absolute text-sm text-black"
                                style={{
@@ -641,7 +641,7 @@ export default function OnboardingPage() {
                            >
                                {formData.budget_max.toLocaleString()}
                            </div>
-                           <div className="h-5" />
+                           <div className="h-6" />
                        </div>
                        <Slider
                            dir="ltr"
@@ -651,6 +651,7 @@ export default function OnboardingPage() {
                            step={100}
                            onValueChange={(v) => setFormField('budget_max', v[0])}
                            className="py-0" />
+                       {/* Min / Max labels — explicitly LTR: 1,000 left, 10,000 right */}
                        <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
                            <div className="flex flex-col items-start">
                                <span>1,000</span>
@@ -938,7 +939,7 @@ export default function OnboardingPage() {
 
         {/* Action Button */}
         {step < 7 &&
-        <div className={step === 2 ? "mt-2" : "mt-6"}>
+        <div className="mt-6">
                 <Button
             onClick={nextStep}
             className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`}
