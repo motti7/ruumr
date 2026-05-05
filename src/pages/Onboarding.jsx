@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
+import CustomSelect from '@/components/shared/CustomSelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
@@ -683,41 +684,33 @@ export default function OnboardingPage() {
 
                     {/* כשרות + שבת */}
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>כשרות</label>
-                            <select value={formData.kosher_preference} onChange={(e) => setFormField('kosher_preference', e.target.value)}
-                                className="w-full">
-                                <option value="" disabled>בחר/י</option>
-                                <option value="for">בעד</option>
-                                <option value="against">נגד</option>
-                                <option value="flow">זורם/ת</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>שומר שבת</label>
-                            <select value={formData.shabbat_preference} onChange={(e) => setFormField('shabbat_preference', e.target.value)}
-                                className="w-full">
-                                <option value="" disabled>בחר/י</option>
-                                <option value="for">בעד</option>
-                                <option value="against">נגד</option>
-                                <option value="flow">זורם/ת</option>
-                            </select>
-                        </div>
+                        <CustomSelect
+                            label="כשרות"
+                            value={formData.kosher_preference}
+                            onChange={(v) => setFormField('kosher_preference', v)}
+                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
+                        />
+                        <CustomSelect
+                            label="שומר/ת שבת"
+                            value={formData.shabbat_preference}
+                            onChange={(v) => setFormField('shabbat_preference', v)}
+                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
+                        />
                     </div>
 
                     {/* זיקה לדת */}
-                    <div>
-                        <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>זיקה לדת</label>
-                        <select value={formData.religion} onChange={(e) => setFormField('religion', e.target.value)}
-                            className="w-full">
-                            <option value="" disabled>בחר/י</option>
-                            <option value="secular">חילוני/ת</option>
-                            <option value="traditional">מסורתי/ת</option>
-                            <option value="national_religious">דתי/ה לאומי/ת</option>
-                            <option value="religious">דתי/ה</option>
-                            <option value="haredi">חרדי/ת</option>
-                        </select>
-                    </div>
+                    <CustomSelect
+                        label="זיקה לדת"
+                        value={formData.religion}
+                        onChange={(v) => setFormField('religion', v)}
+                        options={[
+                            { v: 'secular', l: 'חילוני/ת' },
+                            { v: 'traditional', l: 'מסורתי/ת' },
+                            { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
+                            { v: 'religious', l: 'דתי/ה' },
+                            { v: 'haredi', l: 'חרדי/ת' },
+                        ]}
+                    />
 
                     {/* חיית מחמד */}
                     <div>
