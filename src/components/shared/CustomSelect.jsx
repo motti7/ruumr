@@ -35,10 +35,11 @@ export default function CustomSelect({ label, value, onChange, options }) {
 
       {open && (
         <div
-          className="absolute z-50 w-full bg-white rounded-2xl overflow-hidden"
+          className="absolute z-50 w-full bg-white rounded-2xl overflow-y-auto"
           style={{
             top: 'calc(100% + 4px)',
             boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+            maxHeight: '132px',
           }}
         >
           {options.map((opt) => (
