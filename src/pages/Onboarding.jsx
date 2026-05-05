@@ -627,8 +627,8 @@ export default function OnboardingPage() {
                     {/* Budget */}
                     <div className="pt-2 text-right">
                        <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
-                       {/* Thumb value label */}
-                       <div className="relative w-full mb-3">
+                       {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
+                       <div className="relative w-full mb-3" dir="ltr">
                            <div
                                className="absolute text-sm text-black"
                                style={{
@@ -644,14 +644,15 @@ export default function OnboardingPage() {
                            <div className="h-6" />
                        </div>
                        <Slider
+                           dir="ltr"
                            value={[formData.budget_max]}
                            min={1000}
                            max={10000}
                            step={100}
                            onValueChange={(v) => setFormField('budget_max', v[0])}
                            className="py-0" />
-                       {/* Min / Max labels inline with bar */}
-                       <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
+                       {/* Min / Max labels — explicitly LTR: 1,000 left, 10,000 right */}
+                       <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
                            <div className="flex flex-col items-start">
                                <span>1,000</span>
                                <span>min</span>
