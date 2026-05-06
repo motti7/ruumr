@@ -180,13 +180,13 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1: // Basic Info + Vibe
         return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
-        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {
-          const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
+        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
           return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
         return true;
@@ -909,7 +909,7 @@ export default function OnboardingPage() {
                     {/* Social Media Link Section — moved above verification */}
                     <div className="w-full">
                         <div className="flex items-center gap-2 mb-2" dir="rtl">
-                            <span className="text-lg font-bold text-[hsl(var(--accent-foreground))]">קישור לרשת חברתית</span>
+                            <span className="text-lg text-[hsl(var(--accent-foreground))] font-bold uppercase">קישור לרשת חברתית</span>
                             <span className="text-sm text-gray-400">(אופציונלי)</span>
                             <div className="flex items-center gap-1.5 mr-auto">
                                 <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
