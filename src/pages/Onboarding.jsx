@@ -170,9 +170,9 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
-      }};trackStep();}, [step]);
-  const canProceed = () => {
+      }};trackStep();}, [step]);const canProceed = () => {
     switch (step) {
       case 1: // Basic Info + Vibe
         return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
@@ -903,7 +903,7 @@ export default function OnboardingPage() {
                     {/* Title with inline orange checkmark */}
                     <div className="flex items-center justify-center gap-2">
                         <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
-                        <Check className="w-7 h-7 flex-shrink-0 text-[#15f812] opacity-100 mx-2" style={{ color: '#FA3803' }} />
+                        <Check className="w-7 h-7 flex-shrink-0 opacity-100 mx-2 text-[#f8be12]" style={{ color: '#FA3803' }} />
                     </div>
 
                     {/* Social Media Link Section — moved above verification */}
