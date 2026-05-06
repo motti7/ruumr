@@ -176,12 +176,12 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1: // Basic Info + Vibe
         return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
-        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-      case 4: // Apartment Details - Conditional
+        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
         if (simulatorMode) {
           return true;
         }
