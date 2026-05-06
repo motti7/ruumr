@@ -168,9 +168,9 @@ export default function OnboardingPage() {
       } catch (e) {
 
 
+
         // silent fail - tracking is non-critical
-      }};trackStep();
-  }, [step]);
+      }};trackStep();}, [step]);
 
   const canProceed = () => {
     switch (step) {
