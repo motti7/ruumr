@@ -174,11 +174,11 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1: // Basic Info + Vibe
         return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;case 2: // Status + Location + Budget (combined)
-        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
-      case 3: // Preferences + Pets (merged)
+        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
         formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
       case 4: // Apartment Details - Conditional
@@ -903,7 +903,7 @@ export default function OnboardingPage() {
                     {/* Title with inline orange checkmark */}
                     <div className="flex items-center justify-center gap-2">
                         <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
-                        <Check className="w-7 h-7 flex-shrink-0 opacity-100 text-[#fe3801] mx-1" style={{ color: '#FA3803' }} />
+                        <Check className="w-7 h-7 flex-shrink-0 opacity-100 mx-1 text-[#fe3801]" style={{ color: '#FA3803' }} />
                     </div>
 
                     {/* Social Media Link Section — moved above verification */}
