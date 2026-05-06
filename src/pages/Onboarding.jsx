@@ -169,9 +169,9 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);
-
   const canProceed = () => {
     switch (step) {
       case 1: // Basic Info + Vibe
