@@ -171,9 +171,9 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
-      }};trackStep();}, [step]);const canProceed = () => {
-    switch (step) {
+      }};trackStep();}, [step]);const canProceed = () => {switch (step) {
       case 1: // Basic Info + Vibe
         return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
       case 2: // Status + Location + Budget (combined)
