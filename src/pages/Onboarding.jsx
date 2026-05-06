@@ -167,9 +167,9 @@ export default function OnboardingPage() {
         });
       } catch (e) {
 
+
         // silent fail - tracking is non-critical
-      }};
-    trackStep();
+      }};trackStep();
   }, [step]);
 
   const canProceed = () => {
@@ -903,7 +903,7 @@ export default function OnboardingPage() {
                     {/* Title with inline orange checkmark */}
                     <div className="flex items-center justify-center gap-2">
                         <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
-                        <Check className="w-7 h-7 flex-shrink-0 text-[#15f812] opacity-95" style={{ color: '#FA3803' }} />
+                        <Check className="w-7 h-7 flex-shrink-0 text-[#15f812] opacity-100 mx-2" style={{ color: '#FA3803' }} />
                     </div>
 
                     {/* Social Media Link Section — moved above verification */}
