@@ -109,7 +109,7 @@ let package = Package(
         .binaryTarget(
             name: "OneSignalLiveActivities",
             url: "https://github.com/OneSignal/OneSignal-iOS-SDK/releases/download/5.5.1/OneSignalLiveActivities.xcframework.zip",
-            checksum: "b8118f029efac9bec0f7f0047d690bfb2609f70aa1b799444918ab3353cc193f"
+            checksum: "b8118f029efac9bec0f7f0047d690bfb2609f70aa1b799444918ab3353cc193d"
         )
     ]
 )

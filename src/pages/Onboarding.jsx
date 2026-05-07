@@ -542,7 +542,7 @@ export default function OnboardingPage() {
         {step !== 7 && (
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
-                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin()} className="hover:bg-orange-50 text-gray-500">
+                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                  </Button>
                  

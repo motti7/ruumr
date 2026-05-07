@@ -223,5 +223,9 @@ execSync('npm run build', { stdio: 'inherit', env, cwd: repoRoot });
 execSync('npx cap sync ios', { stdio: 'inherit', env, cwd: repoRoot });
 restoreOneSignalCordovaPluginPackage();
 patchIosBundleId();
-removeOnesignalFromIosAppPackage();
-removeOnesignalFromIosPublicAssets();
+
+const isSimulatorTarget = env.VITE_RUUMR_SIMULATOR_MODE === 'true';
+if (isSimulatorTarget) {
+  removeOnesignalFromIosAppPackage();
+  removeOnesignalFromIosPublicAssets();
+}

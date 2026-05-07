@@ -1,0 +1,15 @@
+{
+  "_comment": "Replace this file with the real google-services.json for FCM/OneSignal Android push.",
+  "_setup": [
+    "1. In OneSignal dashboard -> Settings -> Platforms -> Google Android (FCM), download the linked Firebase project's google-services.json.",
+    "2. Save it as android/app/google-services.json (this filename is gitignored).",
+    "3. Re-run `npx cap sync android` and rebuild. The 'google-services.json not found' warning in app/build.gradle should disappear."
+  ],
+  "project_info": {
+    "project_number": "REPLACE_ME",
+    "project_id": "REPLACE_ME",
+    "storage_bucket": "REPLACE_ME"
+  },
+  "client": [],
+  "configuration_version": "1"
+}

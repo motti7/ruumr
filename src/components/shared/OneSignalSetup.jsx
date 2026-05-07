@@ -6,7 +6,8 @@ const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || '3a9b850f-9934
 const ONESIGNAL_REST_API_KEY = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
 const ONESIGNAL_SCRIPT_ID = 'ruumr-onesignal-web-sdk';
 const ONESIGNAL_SCRIPT_SRC = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-const NATIVE_ONE_SIGNAL_PLATFORMS = new Set(['android']);
+const NATIVE_ONE_SIGNAL_PLATFORMS = new Set(['android', 'ios']);
+const PUSH_PERMISSION_REQUESTED_KEY = 'ruumr_push_permission_requested';
 
 let nativeOneSignalSdkPromise = null;
 let nativeOneSignalInitPromise = null;
@@ -121,6 +122,16 @@ async function initializeNativeOneSignal() {
 
         OneSignal.initialize(ONESIGNAL_APP_ID);
         window.__ruumrOneSignalInitialized = true;
+
+        try {
+            const alreadyAsked = window.localStorage.getItem(PUSH_PERMISSION_REQUESTED_KEY) === '1';
+            if (!alreadyAsked && OneSignal.Notifications?.requestPermission) {
+                await OneSignal.Notifications.requestPermission(true);
+                window.localStorage.setItem(PUSH_PERMISSION_REQUESTED_KEY, '1');
+            }
+        } catch (error) {
+            console.warn('OneSignal permission prompt skipped:', error);
+        }
 
         return OneSignal;
     })().catch((error) => {
@@ -251,7 +262,12 @@ export const OneSignalHelpers = {
                 return null;
             }
 
-            await OneSignal.Notifications.requestPermission(false);
+            await OneSignal.Notifications.requestPermission(true);
+            try {
+                window.localStorage.setItem(PUSH_PERMISSION_REQUESTED_KEY, '1');
+            } catch {
+                // ignore storage failure
+            }
             return true;
         }
 
