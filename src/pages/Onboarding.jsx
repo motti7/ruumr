@@ -122,6 +122,8 @@ export default function OnboardingPage() {
     const fetchUser = async () => {
       try {
         const userData = await User.me();
+        console.log('[ruumr] Onboarding userData:', JSON.stringify({ full_name: userData.full_name, name: userData.name, email: userData.email, id: userData.id }));
+        console.log('[ruumr] Onboarding authUser:', JSON.stringify({ full_name: authUser?.full_name, name: authUser?.name }));
         const isAppleUser = isAppleAuthUser(userData);
         const cachedIdentity = getCachedAppleIdentity(userData.id);
 
@@ -134,6 +136,7 @@ export default function OnboardingPage() {
           '';
         const email = userData.email || cachedIdentity?.email || '';
         const firstName = fullName ? fullName.split(' ')[0] : '';
+        console.log('[ruumr] Onboarding resolved name:', JSON.stringify({ fullName, firstName }));
 
         if (isAppleUser) {
           // Critical: persist first-login Apple identity immediately for future logins.
