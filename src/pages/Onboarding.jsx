@@ -66,14 +66,20 @@ const Step = ({ children, step, currentStep, title }) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { user: authUser } = useAuth();
+  const { user: authUser, isLoadingAuth } = useAuth();
+  const initialAppleIdentity = resolveAppleDisplayName({ authUser });
+  const initialIsAppleUser = isAppleAuthUser(authUser);
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(/** @type {any} */ (createProfileDefaults()));
+  const [formData, setFormData] = useState(() => /** @type {any} */ (
+    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.displayName } : {})
+  ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
-  const [isAppleUser, setIsAppleUser] = useState(false);
-  const [appleDisplayName, setAppleDisplayName] = useState('');
+  const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
+  const [appleDisplayName, setAppleDisplayName] = useState(
+    initialIsAppleUser ? initialAppleIdentity.displayName : ''
+  );
 
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
@@ -463,6 +469,17 @@ export default function OnboardingPage() {
     return <Music className="w-16 h-16 text-gray-500 mb-4" />;
   };
 
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white" dir="rtl">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-[--theme-orange] animate-spin" />
+          <span className="text-sm font-semibold text-gray-500">טוען...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
@@ -547,23 +564,26 @@ export default function OnboardingPage() {
                 <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
                         {isAppleUser && (
-                            <>
-                                <div className="h-11 flex items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-base text-gray-800">
-                                    {formData.name || appleDisplayName || 'Ruumr user'}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    שם הפרטי כבר יובא מחשבון Apple, ולא צריך להקליד אותו מחדש.
+                            <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
+                                <p className="text-xs font-bold" style={{ color: '#FA3803' }}>שם מחשבון Apple</p>
+                                <p className="mt-1 text-base font-semibold text-gray-800">
+                                    {appleDisplayName || formData.name || 'Ruumr user'}
                                 </p>
-                            </>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    השם נשמר אוטומטית מחשבון Apple, בלי לבקש אותו שוב.
+                                </p>
+                            </div>
                         )}
                         {!isAppleUser && (
-                            <Input
-                                value={formData.name}
-                                onChange={(e) => setFormField('name', e.target.value)}
-                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
-                            />
+                            <>
+                                <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
+                                <Input
+                                    value={formData.name}
+                                    onChange={(e) => setFormField('name', e.target.value)}
+                                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
+                                />
+                            </>
                         )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">

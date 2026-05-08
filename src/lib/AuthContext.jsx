@@ -147,7 +147,10 @@ export const AuthProvider = ({ children }) => {
       // Apple returns name/email only on first authorization.
       // Persist immediately so future logins can rely on user ID lookup + cached profile data.
       if (isAppleAuthUser(currentUser)) {
-        persistAppleIdentity(currentUser);
+        persistAppleIdentity(currentUser.id, {
+          fullName: currentUser.full_name || currentUser.name || '',
+          email: currentUser.email || '',
+        });
       }
 
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {

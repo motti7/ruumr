@@ -307,4 +307,32 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     await waitFor(() => expect(mockUserMe).toHaveBeenCalled());
     expect(screen.queryByText('Admin')).toBeNull();
   });
+
+  it('does not render a name input for Apple-authenticated users', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'apple-user-1',
+        email: 'user@privaterelay.appleid.com',
+        full_name: 'John Appleseed',
+        auth_provider: 'apple',
+      },
+      isLoadingAuth: false,
+    });
+    mockUserMe.mockResolvedValue({
+      id: 'apple-user-1',
+      email: 'user@privaterelay.appleid.com',
+      full_name: 'John Appleseed',
+      auth_provider: 'apple',
+    });
+
+    render(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.getByText(/נשמר אוטומטית מחשבון Apple/)).toBeTruthy();
+    await waitFor(() => expect(mockUserMe).toHaveBeenCalled());
+  });
 });
