@@ -137,11 +137,6 @@ export default function OnboardingPage() {
         }
 
         setFormData((prev) => ({ ...prev, name: firstName, user_id: userData.id }));
-
-        // Bypass manual name/email step for Apple sign-ins when identity is already known.
-        if (isAppleUser && firstName) {
-          setStep((currentStep) => (currentStep === 1 ? 2 : currentStep));
-        }
       } catch (e) {
         console.error('[ruumr] Onboarding fetchUser error:', e?.status, e?.message, e);
         // Only redirect to login on actual auth failures, not transient network errors.
