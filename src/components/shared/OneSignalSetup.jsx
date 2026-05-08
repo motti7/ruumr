@@ -42,7 +42,12 @@ function canUseWebOneSignal() {
 }
 
 function canUseNativeOneSignal() {
-    return typeof window !== 'undefined' && !isRuumrSimulatorMode() && !window.location.protocol.startsWith('http') && NATIVE_ONE_SIGNAL_PLATFORMS.has(Capacitor.getPlatform());
+    return (
+        typeof window !== 'undefined' &&
+        !isRuumrSimulatorMode() &&
+        Capacitor.isNativePlatform() &&
+        NATIVE_ONE_SIGNAL_PLATFORMS.has(Capacitor.getPlatform())
+    );
 }
 
 function loadOneSignalWebSdk() {

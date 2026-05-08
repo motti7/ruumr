@@ -226,6 +226,8 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
 
   beforeEach(async () => {
     vi.resetModules();
+    mockUseAuth.mockReturnValue({ user: null });
+    mockUserMe.mockReset();
     mockRedirectToLogin.mockClear();
     const mod = await import('@/pages/Onboarding');
     OnboardingPage = mod.default;
@@ -286,5 +288,23 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
 
     await waitFor(() => expect(mockUserMe).toHaveBeenCalled());
     expect(mockRedirectToLogin).not.toHaveBeenCalled();
+  });
+
+  it('does not expose the admin shortcut to regular users', async () => {
+    mockUseAuth.mockReturnValue({ user: { role: 'member' } });
+    mockUserMe.mockResolvedValue({
+      id: 'user-1',
+      email: 'member@example.com',
+      full_name: 'Member User',
+    });
+
+    render(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(mockUserMe).toHaveBeenCalled());
+    expect(screen.queryByText('Admin')).toBeNull();
   });
 });

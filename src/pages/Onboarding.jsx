@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
-import { ArrowRight, Check, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
+import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,12 @@ import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
+    getCachedAppleIdentity,
+    isAppleAuthUser,
+    persistAppleIdentity,
+    resolveAppleDisplayName,
+} from '@/lib/appleIdentity';
+import {
     buildSimulatorApartmentPhotos,
     buildSimulatorProfilePhotos,
     isRuumrSimulatorMode,
@@ -28,7 +34,6 @@ import {
 import mixpanel from 'mixpanel-browser';
 
 const TOTAL_STEPS = 7;
-const APPLE_IDENTITY_CACHE_KEY = 'ruumr_apple_identity_by_user_id';
 const STEP_NAMES = {
   1: 'Basic Info',
   2: 'Status Location Budget',
@@ -37,43 +42,6 @@ const STEP_NAMES = {
   5: 'Interests And About',
   6: 'Photos',
   7: 'Final Review',
-};
-
-const safeJsonParse = (value, fallbackValue) => {
-  try {
-    return JSON.parse(value);
-  } catch (_) {
-    return fallbackValue;
-  }
-};
-
-const isAppleAuthUser = (user) => {
-  if (!user) return false;
-  const provider = String(
-    user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
-  ).toLowerCase();
-  const email = String(user.email || '').toLowerCase();
-  const lastAuthProvider =
-    typeof window !== 'undefined' ? localStorage.getItem('ruumr_last_auth_provider') : null;
-  return provider.includes('apple') || email.includes('privaterelay.appleid.com') || lastAuthProvider === 'apple';
-};
-
-const getCachedAppleIdentity = (userId) => {
-  if (!userId || typeof window === 'undefined') return null;
-  const cache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
-  return cache[String(userId)] || null;
-};
-
-const persistAppleIdentity = (userId, identity) => {
-  if (!userId || typeof window === 'undefined') return;
-  const cache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
-  const previous = cache[String(userId)] || {};
-  cache[String(userId)] = {
-    fullName: identity?.fullName || previous.fullName || '',
-    email: identity?.email || previous.email || '',
-  };
-  localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(cache));
-  localStorage.setItem('ruumr_last_auth_provider', 'apple');
 };
 
 const Step = ({ children, step, currentStep, title }) =>
@@ -104,6 +72,8 @@ export default function OnboardingPage() {
   const [formData, setFormData] = useState(/** @type {any} */ (createProfileDefaults()));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
+  const [isAppleUser, setIsAppleUser] = useState(false);
+  const [appleDisplayName, setAppleDisplayName] = useState('');
 
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
@@ -122,8 +92,13 @@ export default function OnboardingPage() {
     const fetchUser = async () => {
       try {
         const userData = await User.me();
-        const isAppleUser = isAppleAuthUser(userData);
+        const appleAuthUser = isAppleAuthUser(userData);
         const cachedIdentity = getCachedAppleIdentity(userData.id);
+        const appleIdentity = resolveAppleDisplayName({
+          authUser,
+          userData,
+          cachedIdentity,
+        });
 
         // authUser (from AuthContext) is the most reliable source — it's populated directly
         // from the OAuth token (Google/Apple) immediately after login.
@@ -136,13 +111,19 @@ export default function OnboardingPage() {
           cachedIdentity?.fullName ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
-        const firstName = fullName ? fullName.split(' ')[0] : '';
+        const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
-        if (isAppleUser) {
+        if (appleAuthUser) {
           persistAppleIdentity(userData.id, { fullName, email });
         }
 
-        setFormData((prev) => ({ ...prev, name: firstName, user_id: userData.id }));
+        setIsAppleUser(appleAuthUser);
+        setAppleDisplayName(appleAuthUser ? appleIdentity.displayName : '');
+        setFormData((prev) => ({
+          ...prev,
+          name: appleAuthUser ? appleIdentity.displayName : firstName,
+          user_id: userData.id
+        }));
       } catch (e) {
         if (e?.status === 401 || e?.status === 403) {
           base44.auth.redirectToLogin(getSafeAuthReturnUrl());
@@ -171,7 +152,7 @@ export default function OnboardingPage() {
   const canProceed = () => {
   switch (step) {
     case 1: // Basic Info + Vibe
-      return formData.name.trim() && formData.age >= 18 && formData.gender && formData.vibe_level;
+      return (isAppleUser || formData.name.trim()) && formData.age >= 18 && formData.gender && formData.vibe_level;
     case 2: // Status + Location + Budget (combined)
       return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
     case 3: // Preferences + Pets (merged)
@@ -251,16 +232,18 @@ export default function OnboardingPage() {
       // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
       const currentUser = await User.me();
       const userId = currentUser.id;
+      const resolvedProfileName = formData.name.trim() || appleDisplayName || 'Ruumr user';
 
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
-      const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(formData.name, cleanedPhotos, 2) : cleanedPhotos;
+      const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(resolvedProfileName, cleanedPhotos, 2) : cleanedPhotos;
       const finalApartmentPhotos = simulatorMode && formData.current_status === 'has_apartment'
-        ? buildSimulatorApartmentPhotos(formData.name, cleanedApartmentPhotos, 3)
+        ? buildSimulatorApartmentPhotos(resolvedProfileName, cleanedApartmentPhotos, 3)
         : cleanedApartmentPhotos;
 
       const finalData = {
         ...formData,
+        name: resolvedProfileName,
         user_id: userId,
         interests: normalizeInterestValues(formData.interests),
         photos: finalPhotos,
@@ -565,7 +548,23 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
-                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
+                        {isAppleUser && (
+                            <>
+                                <div className="h-11 flex items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-base text-gray-800">
+                                    {formData.name || appleDisplayName || 'Ruumr user'}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    שם הפרטי כבר יובא מחשבון Apple, ולא צריך להקליד אותו מחדש.
+                                </p>
+                            </>
+                        )}
+                        {!isAppleUser && (
+                            <Input
+                                value={formData.name}
+                                onChange={(e) => setFormField('name', e.target.value)}
+                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
+                            />
+                        )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1 text-right">
@@ -956,12 +955,13 @@ export default function OnboardingPage() {
         }
       </div>
       
-      <button
-        onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
-        className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors">
-        
-        Admin
-      </button>
+      {authUser?.role === 'admin' && (
+        <button
+          onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
+          className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors">
+          Admin
+        </button>
+      )}
     </div>);
 
 }

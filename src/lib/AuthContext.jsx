@@ -4,10 +4,11 @@ import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import mixpanel from 'mixpanel-browser';
-import { clearClientUserData, APPLE_IDENTITY_CACHE_KEY, LAST_AUTH_PROVIDER_KEY } from '@/lib/clientSessionCleanup';
+import { clearClientUserData } from '@/lib/clientSessionCleanup';
 import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
+import { isAppleAuthUser, persistAppleIdentity } from '@/lib/appleIdentity';
 
 const AuthContext = createContext(null);
 
@@ -20,39 +21,7 @@ const isMixpanelEnabledForHostname = (hostname) => {
   );
 };
 
-const safeJsonParse = (value, fallbackValue) => {
-  try {
-    return JSON.parse(value);
-  } catch (_) {
-    return fallbackValue;
-  }
-};
-
-const isAppleAuthUser = (user) => {
-  if (!user) return false;
-  const provider = String(
-    user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
-  ).toLowerCase();
-  const email = String(user.email || '').toLowerCase();
-  return provider.includes('apple') || email.includes('privaterelay.appleid.com');
-};
-
-const isNativePlatform = typeof window !== 'undefined' && Capacitor.getPlatform() !== 'web';
-
-const persistAppleIdentity = (user) => {
-  if (!user?.id || typeof window === 'undefined') return;
-
-  const existingCache = safeJsonParse(localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
-  const currentEntry = existingCache[String(user.id)] || {};
-  const nextEntry = {
-    fullName: user.full_name || user.name || currentEntry.fullName || '',
-    email: user.email || currentEntry.email || '',
-  };
-
-  existingCache[String(user.id)] = nextEntry;
-  localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(existingCache));
-  localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
-};
+const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

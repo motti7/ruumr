@@ -116,7 +116,7 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-red-600 font-bold">•</span>
-                    <span>פרטי הכניסה עם גוגל</span>
+                    <span>פרטי הכניסה המשויכים לחשבון</span>
                   </li>
                 </ul>
               </div>

@@ -114,9 +114,7 @@ export function isRuumrNativeDemoSession() {
     return false;
   }
 
-  // Capacitor/native shells use a non-http(s) scheme.
-  // This stays true even when the platform bridge is still warming up.
-  if (window.location.protocol.startsWith('http')) {
+  if (!Capacitor.isNativePlatform()) {
     return false;
   }
 

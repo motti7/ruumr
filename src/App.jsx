@@ -37,7 +37,7 @@ const PageLoader = () => (
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : null;
-const isNativePlatform = typeof window !== 'undefined' && Capacitor.getPlatform() !== 'web';
+const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
@@ -137,7 +137,8 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-  const isNativeWebView = typeof window !== 'undefined' && window.location.protocol.startsWith('capacitor');
+  const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+  const isNativeWebView = isNativePlatform;
   const [splashDone, setSplashDone] = useState(() => isNativeWebView);
   const [nativeBootstrapDone, setNativeBootstrapDone] = useState(() => !isNativeWebView);
   const handleSplashDone = useCallback(() => {

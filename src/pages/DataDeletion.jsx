@@ -28,12 +28,12 @@ export default function DataDeletionPage() {
       const user = await User.me();
       await base44.functions.invoke("deleteAccount", {});
       
-      // Send email to admin to delete Google login credentials
+      // Send email to admin to delete the user's login credentials
       await base44.integrations.Core.SendEmail({
         to: "moti.yeheskel@gmail.com",
-        subject: `מחיקת פרטי כניסה גוגל - ${user.email}`,
+        subject: `מחיקת פרטי כניסה - ${user.email}`,
         body: `
-          משתמש מחק את חשבונו ומבקש למחוק גם את פרטי הכניסה עם גוגל.
+          משתמש מחק את חשבונו ומבקש למחוק גם את פרטי הכניסה המשויכים לחשבון.
           
           פרטי המשתמש:
           - אימייל: ${user.email}
@@ -43,7 +43,7 @@ export default function DataDeletionPage() {
           סיבת המחיקה:
           ${reason}
           
-          יש למחוק את פרטי הכניסה עם גוגל של משתמש זה.
+          יש למחוק את פרטי הכניסה של משתמש זה.
         `
       });
 
@@ -72,7 +72,7 @@ export default function DataDeletionPage() {
           </div>
           <h2 className="text-2xl font-black text-gray-900 mb-4">החשבון נמחק בהצלחה</h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            כל הנתונים שלך נמחקו מהמערכת. בקשה למחיקת פרטי הכניסה עם גוגל נשלחה למנהל המערכת.
+            כל הנתונים שלך נמחקו מהמערכת. בקשה למחיקת פרטי הכניסה נשלחה למנהל המערכת.
           </p>
           <Link to={createPageUrl("Settings")}>
             <Button className="w-full gradient-orange text-white font-bold">
@@ -107,7 +107,7 @@ export default function DataDeletionPage() {
                   <li>פרופיל ותמונות</li>
                   <li>התאמות והודעות</li>
                   <li>העדפות וחיפושים</li>
-                  <li>פרטי כניסה עם גוגל</li>
+                  <li>פרטי כניסה משויכים לחשבון</li>
                 </ul>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function DataDeletionPage() {
             <p className="font-bold text-gray-800">מה קורה אחרי המחיקה?</p>
             <ul className="list-disc mr-5 space-y-1">
               <li>כל הנתונים שלך יימחקו מיידית</li>
-              <li>פרטי הכניסה עם גוגל יימחקו תוך 30 יום</li>
+              <li>פרטי הכניסה המשויכים לחשבון יימחקו תוך 30 יום</li>
               <li>לא תוכל/י להתחבר לאפליקציה יותר</li>
               <li>המחיקה היא סופית ולא ניתנת לשחזור</li>
             </ul>
