@@ -48,7 +48,6 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminCharter from './pages/AdminCharter';
-import AdminUsers from './pages/AdminUsers';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
 import Chat from './pages/Chat';
@@ -73,7 +72,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "AdminCharter": AdminCharter,
-    "AdminUsers": AdminUsers,
     "Banned": Banned,
     "Charter": Charter,
     "Chat": Chat,

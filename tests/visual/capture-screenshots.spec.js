@@ -1,0 +1,44 @@
+import { test } from '@playwright/test';
+
+const VIEWPORTS = [
+  { name: 'iPhone-SE', width: 375, height: 667 },
+  { name: 'iPhone-14', width: 390, height: 844 },
+  { name: 'iPhone-14-Pro-Max', width: 430, height: 932 },
+  { name: 'Pixel-7', width: 412, height: 915 },
+  { name: 'Galaxy-S21', width: 360, height: 800 },
+];
+
+const PAGES = [
+  { name: 'Discover', path: '/' },
+  { name: 'RuumrPlus', path: '/RuumrPlus' },
+  { name: 'Matches', path: '/Matches' },
+  { name: 'Profile', path: '/Profile' },
+  { name: 'Settings', path: '/Settings' },
+];
+
+for (const viewport of VIEWPORTS) {
+  for (const page of PAGES) {
+    test(`screenshot: ${page.name} @ ${viewport.name} (${viewport.width}x${viewport.height})`, async ({ page: pw }) => {
+      await pw.setViewportSize({ width: viewport.width, height: viewport.height });
+      await pw.goto(page.path, { waitUntil: 'domcontentloaded', timeout: 10_000 }).catch(() => {});
+      await pw.waitForTimeout(1500);
+
+      await pw.screenshot({
+        path: `tests/visual/screenshots/${viewport.name}--${page.name}.png`,
+        fullPage: false,
+      });
+    });
+  }
+
+  test(`screenshot: ${viewport.name} dark-mode Discover`, async ({ page: pw }) => {
+    await pw.setViewportSize({ width: viewport.width, height: viewport.height });
+    await pw.emulateMedia({ colorScheme: 'dark' });
+    await pw.goto('/', { waitUntil: 'domcontentloaded', timeout: 10_000 }).catch(() => {});
+    await pw.waitForTimeout(1500);
+
+    await pw.screenshot({
+      path: `tests/visual/screenshots/${viewport.name}--Discover--dark.png`,
+      fullPage: false,
+    });
+  });
+}

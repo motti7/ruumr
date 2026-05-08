@@ -1,46 +1,76 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 
-const THRESHOLD = 72; // px to pull before triggering
+const THRESHOLD = 72;
 
 export default function PullToRefresh({ onRefresh, children }) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const startYRef = useRef(null);
   const containerRef = useRef(null);
+  const pullDistanceRef = useRef(0);
+  const isRefreshingRef = useRef(false);
+  const onRefreshRef = useRef(onRefresh);
 
-  const handleTouchStart = useCallback((e) => {
-    const el = containerRef.current;
-    if (!el) return;
-    // Only activate when scrolled to top
-    if (el.scrollTop <= 0) {
-      startYRef.current = e.touches[0].clientY;
-    }
-  }, []);
+  onRefreshRef.current = onRefresh;
 
-  const handleTouchMove = useCallback((e) => {
-    if (startYRef.current === null || isRefreshing) return;
-    const delta = e.touches[0].clientY - startYRef.current;
-    if (delta > 0) {
-      e.preventDefault();
-      setPullDistance(Math.min(delta * 0.5, THRESHOLD * 1.5));
-    }
+  useEffect(() => {
+    pullDistanceRef.current = pullDistance;
+  }, [pullDistance]);
+
+  useEffect(() => {
+    isRefreshingRef.current = isRefreshing;
   }, [isRefreshing]);
 
-  const handleTouchEnd = useCallback(async () => {
-    if (pullDistance >= THRESHOLD && !isRefreshing) {
-      setIsRefreshing(true);
-      setPullDistance(THRESHOLD);
-      try {
-        await onRefresh();
-      } finally {
-        setIsRefreshing(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e) => {
+      if (el.scrollTop <= 0) {
+        startYRef.current = e.touches[0].clientY;
       }
-    }
-    startYRef.current = null;
-    setPullDistance(0);
-  }, [pullDistance, isRefreshing, onRefresh]);
+    };
+
+    const handleTouchMove = (e) => {
+      if (startYRef.current === null || isRefreshingRef.current) return;
+      const delta = e.touches[0].clientY - startYRef.current;
+      if (delta > 0) {
+        e.preventDefault();
+        const dist = Math.min(delta * 0.5, THRESHOLD * 1.5);
+        pullDistanceRef.current = dist;
+        setPullDistance(dist);
+      }
+    };
+
+    const handleTouchEnd = async () => {
+      if (pullDistanceRef.current >= THRESHOLD && !isRefreshingRef.current) {
+        isRefreshingRef.current = true;
+        setIsRefreshing(true);
+        setPullDistance(THRESHOLD);
+        try {
+          await onRefreshRef.current();
+        } finally {
+          isRefreshingRef.current = false;
+          setIsRefreshing(false);
+        }
+      }
+      startYRef.current = null;
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   const progress = Math.min(pullDistance / THRESHOLD, 1);
 
@@ -48,12 +78,8 @@ export default function PullToRefresh({ onRefresh, children }) {
     <div
       ref={containerRef}
       className="relative overflow-y-auto h-full"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       style={{ overscrollBehavior: "none" }}
     >
-      {/* Pull indicator */}
       <AnimatePresence>
         {(pullDistance > 0 || isRefreshing) && (
           <motion.div

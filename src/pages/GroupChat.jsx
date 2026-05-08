@@ -46,7 +46,7 @@ export default function GroupChatPage() {
         setGroupId(gid);
 
         const msgs = await base44.entities.GroupMessage.filter({ group_id: gid });
-        msgs.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+        msgs.sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
         setMessages(msgs);
       } catch (e) {
         console.error(e);
@@ -64,7 +64,7 @@ export default function GroupChatPage() {
       if (event.type === "create") {
         setMessages(prev => {
           if (prev.find(m => m.id === event.id)) return prev;
-          return [...prev, event.data].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+          return [...prev, event.data].sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
         });
       }
     });
@@ -76,16 +76,17 @@ export default function GroupChatPage() {
   }, [messages]);
 
   // Optimistic mutation for group messages
-  const messageMutation = useMutationWithOptimistic(
+  const messageMutation = /** @type {any} */ (useMutationWithOptimistic(
     (messageData) => base44.entities.GroupMessage.create(messageData),
     {
       queryKey: ['groupchat', groupId],
       updateFn: (oldMessages = [], newMessage) => [...oldMessages, newMessage],
     }
-  );
+  ));
 
   const sendMessage = async () => {
     if (!input.trim() || isSending || !groupId || !user) return;
+    setIsSending(true);
     const text = input.trim();
     setInput("");
     try {
@@ -99,6 +100,8 @@ export default function GroupChatPage() {
     } catch (error) {
       console.error("Error sending group message:", error);
       setInput(text);
+    } finally {
+      setIsSending(false);
     }
   };
 

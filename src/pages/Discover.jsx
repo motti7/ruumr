@@ -14,7 +14,25 @@ import { Heart, X, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
+import { base44 } from "@/api/base44Client";
+import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import mixpanel from 'mixpanel-browser';
+
+const sortProfilesByCreatedDateDesc = (records = []) => {
+  return [...records].sort((left, right) => {
+    const leftTime = Date.parse(left?.created_date);
+    const rightTime = Date.parse(right?.created_date);
+
+    if (Number.isFinite(leftTime) && Number.isFinite(rightTime)) {
+      return rightTime - leftTime;
+    }
+
+    const leftValue = String(left?.created_date ?? '').trim();
+    const rightValue = String(right?.created_date ?? '').trim();
+    return rightValue.localeCompare(leftValue);
+  });
+};
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -22,6 +40,7 @@ export default function DiscoverPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [lastSwipes, setLastSwipes] = useState([]);
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
@@ -33,21 +52,56 @@ export default function DiscoverPage() {
     return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
   }, []);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('ruumr_discover_marker', 'discover-mounted');
+    } catch {
+      // Debug only.
+    }
+  }, []);
+
   // Optimistic swipe mutation
-  const swipeMutation = useMutationWithOptimistic(
+  const swipeMutation = /** @type {any} */ (useMutationWithOptimistic(
     (swipeData) => Swipe.create(swipeData),
     {
       queryKey: ['swipes', userProfile?.user_id],
       updateFn: (old = [], newSwipe) => [...old, newSwipe],
       onError: () => {},
     }
-  );
+  ));
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
-      const user = await User.me();
-      const userProfiles = await Profile.filter({ user_id: user.id });
+      if (isRuumrSimulatorMode()) {
+        enableSimulatorBackend(base44);
+      }
+
+      window.localStorage.setItem('ruumr_discover_marker', 'discover-loading');
+    } catch {
+      // Debug only.
+    }
+    try {
+      let user = null;
+      try {
+        user = await User.me();
+      } catch (authError) {
+        const simulatorState = getSimulatorBackendState();
+        if (simulatorState?.currentUser) {
+          user = simulatorState.currentUser;
+        } else {
+          throw authError;
+        }
+      }
+
+      let userProfiles = [];
+      try {
+        userProfiles = await Profile.filter({ user_id: user.id });
+      } catch {
+        const simulatorState = getSimulatorBackendState();
+        userProfiles = simulatorState?.collections?.Profile?.filter((profile) => String(profile.user_id) === String(user.id)) || [];
+      }
 
       if (userProfiles.length === 0) {
         navigate(createPageUrl('Onboarding'));
@@ -56,11 +110,31 @@ export default function DiscoverPage() {
       const currentUserProfile = userProfiles[0];
       setUserProfile(currentUserProfile);
       
-      const allProfiles = await Profile.list("-created_date", 500);
-      const userSwipes = await Swipe.filter({ swiper_id: user.id });
+      let allProfiles = [];
+      try {
+        allProfiles = await Profile.list("-created_date", 500);
+      } catch {
+        const simulatorState = getSimulatorBackendState();
+        allProfiles = simulatorState?.collections?.Profile ? [...simulatorState.collections.Profile] : [];
+      }
+      allProfiles = sortProfilesByCreatedDateDesc(allProfiles);
+
+      let userSwipes = [];
+      try {
+        userSwipes = await Swipe.filter({ swiper_id: user.id });
+      } catch {
+        const simulatorState = getSimulatorBackendState();
+        userSwipes = simulatorState?.collections?.Swipe?.filter((swipe) => String(swipe.swiper_id) === String(user.id)) || [];
+      }
       const swipedIds = userSwipes.map(s => String(s.swiped_id));
       
-      const likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
+      let likedMeSwipes = [];
+      try {
+        likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
+      } catch {
+        const simulatorState = getSimulatorBackendState();
+        likedMeSwipes = simulatorState?.collections?.Swipe?.filter((swipe) => String(swipe.swiped_id) === String(user.id) && String(swipe.action) === 'like') || [];
+      }
       const likedMeIds = likedMeSwipes.map(s => String(s.swiper_id));
 
       const isAdminViewer = user.email === 'mottishif7@gmail.com';
@@ -108,9 +182,26 @@ export default function DiscoverPage() {
 
       setAllProfiles(availableProfiles);
       setProfiles(availableProfiles);
+      try {
+        window.localStorage.setItem('ruumr_discover_marker', `discover-ready:${availableProfiles.length}`);
+      } catch {
+        // Debug only.
+      }
     } catch (error) {
       console.error("Error loading data:", error);
-      navigate(createPageUrl('Home'));
+      setLoadError(error instanceof Error ? error.message : 'Failed to load Discover');
+      try {
+        window.localStorage.setItem('ruumr_discover_marker', 'discover-error');
+        window.localStorage.setItem(
+          'ruumr_discover_error',
+          JSON.stringify({
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : null,
+          })
+        );
+      } catch {
+        // Debug only.
+      }
     }
     setIsLoading(false);
   }, [navigate]);
@@ -220,12 +311,15 @@ export default function DiscoverPage() {
 
               // Async email notification (fire-and-forget)
               import('@/api/base44Client').then(({ base44: b44 }) => {
-                  b44.functions?.handleSwipe?.({
+                  const functions = /** @type {any} */ (b44.functions);
+                  if (functions?.handleSwipe) {
+                    functions.handleSwipe({
                       swiper_id: userProfile.user_id,
                       swiped_id: swipedProfile.user_id,
                       action,
                       origin: window.location.origin
-                  });
+                    });
+                  }
               }).catch(() => {});
           }
       }
@@ -264,7 +358,7 @@ export default function DiscoverPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-gradient-to-br from-gray-50 to-orange-50">
         <div className="relative w-20 h-20 mb-6">
           {/* Outer rotating ring */}
           <motion.div
@@ -279,6 +373,31 @@ export default function DiscoverPage() {
         </div>
         <p className="text-gray-600 font-bold text-lg">מחפש שותפים...</p>
         <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gradient-to-b from-white via-orange-50 to-orange-100 px-6 text-center">
+        <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl">
+          <Puzzle className="h-10 w-10 text-[--theme-orange]" />
+        </div>
+        <h2 className="mb-3 text-2xl font-black text-gray-900">הייתה בעיה בטעינת המסך</h2>
+        <p className="mb-6 max-w-sm text-sm leading-relaxed text-gray-600">
+          אפשר לנסות שוב. אם זה ממשיך לקרות, צריך לבדוק את חיבור הנתונים של הסימולטור.
+        </p>
+        <div className="flex flex-col gap-3">
+          <Button onClick={loadData} className="gradient-orange text-white font-bold px-8 rounded-full shadow-lg">
+            נסה שוב
+          </Button>
+          <button
+            onClick={() => navigate(createPageUrl('Onboarding'))}
+            className="text-sm font-semibold text-gray-500"
+          >
+            מעבר להרשמה
+          </button>
+        </div>
       </div>
     );
   }
@@ -322,8 +441,8 @@ export default function DiscoverPage() {
 
       <DiscoverFilters filters={filters} onChange={applyFilters} />
 
-      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 36px)' }}>
-        <div style={{ height: 'calc(100vh - 180px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
+      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: '56px' }}>
+        <div style={{ height: 'calc(100dvh - 56px - 120px)', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
               profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
@@ -349,8 +468,8 @@ export default function DiscoverPage() {
             ) : (
               <motion.div
                 key="no-profiles"
-                initial={{ opacity: 0, scale: 0.9 }} 
-                animate={{ opacity: 1, scale: 1 }} 
+                initial={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center h-full text-center px-8"
               >
                 <h2 className="text-2xl font-black text-gray-800 mb-3">זה הכל לעכשיו!</h2>
@@ -363,7 +482,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-30" style={{ bottom: '50px' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 40px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}

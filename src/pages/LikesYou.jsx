@@ -24,17 +24,24 @@ export default function LikesYouPage() {
         setError(null);
         try {
             const user = await User.me();
-            const likes = await Swipe.filter({ swiped_id: user.id, action: "like" });
-            const swiperIds = likes.map(l => l.swiper_id);
-            
-            if (swiperIds.length > 0) {
-                const profilesData = await Promise.all(
-                    swiperIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
-                );
-                setProfiles(profilesData.filter(p => p));
-            } else {
-                setProfiles([]);
-            }
+
+            // Fetch in parallel: who liked me + who I already swiped + all profiles
+            const [likes, mySwipes, allProfiles] = await Promise.all([
+                Swipe.filter({ swiped_id: user.id, action: "like" }),
+                Swipe.filter({ swiper_id: user.id }),
+                Profile.list("-created_date", 500),
+            ]);
+
+            const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
+            const pendingLikerIds = new Set(
+                likes.map(l => l.swiper_id).filter(id => !alreadySwiped.has(id))
+            );
+
+            const matched = allProfiles.filter(
+                p => pendingLikerIds.has(p.user_id) && p.is_visible !== false
+            );
+
+            setProfiles(matched);
         } catch (e) {
             console.error(e);
             setError("שגיאה בטעינת הלייקים. אנא נסה שוב.");
@@ -71,7 +78,7 @@ export default function LikesYouPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 flex flex-col" dir="rtl">
-            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10 p-4 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white">לייקים</h1>
                     <button 

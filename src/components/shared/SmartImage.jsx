@@ -26,14 +26,21 @@ export default function SmartImage({
         }
 
         setStatus('idle');
+        let cancelled = false;
+
+        const loadImage = (url) => {
+            setStatus('loading');
+            const img = new window.Image();
+            img.onload = () => { if (!cancelled) setStatus('loaded'); };
+            img.onerror = () => { if (!cancelled) setStatus('error'); };
+            img.src = url;
+        };
 
         if (priority) {
-            // Load immediately
             loadImage(src);
-            return;
+            return () => { cancelled = true; };
         }
 
-        // Lazy load via IntersectionObserver
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -48,16 +55,11 @@ export default function SmartImage({
             observer.observe(containerRef.current);
         }
 
-        return () => observer.disconnect();
+        return () => {
+            cancelled = true;
+            observer.disconnect();
+        };
     }, [src, priority]);
-
-    const loadImage = (url) => {
-        setStatus('loading');
-        const img = new window.Image();
-        img.onload = () => setStatus('loaded');
-        img.onerror = () => setStatus('error');
-        img.src = url;
-    };
 
     if (!src || status === 'error') {
         return (

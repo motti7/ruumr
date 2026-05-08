@@ -17,16 +17,15 @@ export default function LikesSentPage() {
             setIsLoading(true);
             try {
                 const user = await User.me();
-                // Find swipes where swiper_id is me and action is like
-                const myLikes = await Swipe.filter({ swiper_id: user.id, action: "like" });
-                const swipedIds = myLikes.map(l => l.swiped_id);
-                
-                if (swipedIds.length > 0) {
-                    const profilesData = await Promise.all(
-                        swipedIds.map(id => Profile.filter({ user_id: id }).then(res => res[0]))
-                    );
-                    setProfiles(profilesData.filter(p => p));
-                }
+
+                const [myLikes, allProfiles] = await Promise.all([
+                    Swipe.filter({ swiper_id: user.id, action: "like" }),
+                    Profile.list("-created_date", 500),
+                ]);
+
+                const swipedIds = new Set(myLikes.map(l => l.swiped_id));
+                const matched = allProfiles.filter(p => swipedIds.has(p.user_id));
+                setProfiles(matched);
             } catch (e) {
                 console.error(e);
             }
@@ -46,7 +45,7 @@ export default function LikesSentPage() {
     return (
         <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
             <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center gap-3">
-                 <button onClick={() => navigate(-1)}>
+                 <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label="חזור">
                     <ArrowRight className="w-6 h-6 text-gray-600" />
                 </button>
                 <h1 className="text-2xl font-black text-gray-900">לייקים ששלחתי</h1>

@@ -23,6 +23,7 @@ import {
   normalizeRuumrPlusActivation,
 } from "@/lib/ruumrPlusActivation";
 import SmartImage from "@/components/shared/SmartImage";
+import { getInterestLabel } from "@/lib/interests";
 import {
   Crown,
   MessageCircle,
@@ -106,7 +107,7 @@ function RuumrPlusRecommendationCard({ profile }) {
   const tags = [
     ...(profile.current_status === "has_apartment" ? ["יש לי דירה"] : []),
     ...sharedCities.slice(0, 2),
-    ...sharedInterests.slice(0, 2),
+    ...sharedInterests.slice(0, 2).map((interest) => getInterestLabel(interest)),
   ];
 
   return (
@@ -591,15 +592,7 @@ export default function RuumrPlusPage() {
               >
                 <Link to={createPageUrl("Profile")}>ערוך/י פרופיל</Link>
               </Button>
-              {isAdmin && (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="h-12 rounded-full border-white/25 bg-white/10 text-white font-bold hover:bg-white/15 sm:col-span-2"
-                >
-                  <Link to={createPageUrl("AdminUsers")}>ניהול Plus למנהלים</Link>
-                </Button>
-              )}
+
             </div>
           </div>
         </div>
@@ -746,27 +739,7 @@ export default function RuumrPlusPage() {
           </div>
         </div>
 
-        {isAdmin && (
-          <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50 p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[--theme-orange] shadow-sm">
-                <Crown className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-black text-gray-900">Admin shortcut</h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  אם אתה/את מנהל/ת, אפשר לקפוץ ישר לניהול המשתמשים, הענקת Plus וסנכרון הפרופילים.
-                </p>
-                <Button
-                  asChild
-                  className="mt-4 h-11 rounded-full bg-[--theme-orange] text-white font-bold hover:brightness-110"
-                >
-                  <Link to={createPageUrl("AdminUsers")}>פתח/י Admin Users</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );

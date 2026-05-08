@@ -5,8 +5,8 @@ const DEFAULT_PHOTOS = Array(6).fill(null);
 export function createProfileDefaults(overrides = {}) {
   return {
     name: "",
-    age: 25,
-    gender: "male",
+    age: "",
+    gender: "",
     about_me: "",
     social_link: "",
     looking_for_description: "",

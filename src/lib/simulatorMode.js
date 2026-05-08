@@ -1,3 +1,5 @@
+import { Capacitor } from "@capacitor/core";
+
 const SIMULATOR_STORAGE_KEY = 'ruumr_simulator_mode';
 const SIMULATOR_QUERY_PARAM = 'simulator_mode';
 
@@ -100,7 +102,25 @@ export function isRuumrSimulatorMode() {
     // Ignore malformed URL state; fall back to stored/env values.
   }
 
-  return import.meta.env.VITE_RUUMR_SIMULATOR_MODE === 'true' || window.localStorage.getItem(SIMULATOR_STORAGE_KEY) === 'true';
+  return (
+    import.meta.env.VITE_RUUMR_SIMULATOR_MODE === 'true' ||
+    window.localStorage.getItem(SIMULATOR_STORAGE_KEY) === 'true' ||
+    isRuumrNativeDemoSession()
+  );
+}
+
+export function isRuumrNativeDemoSession() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  // Capacitor/native shells use a non-http(s) scheme.
+  // This stays true even when the platform bridge is still warming up.
+  if (window.location.protocol.startsWith('http')) {
+    return false;
+  }
+
+  return !window.localStorage.getItem('base44_access_token') && !window.localStorage.getItem('token');
 }
 
 export function buildSimulatorProfilePhotos(name, existingPhotos = [], minCount = 2) {

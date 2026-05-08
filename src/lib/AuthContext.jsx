@@ -5,8 +5,11 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import mixpanel from 'mixpanel-browser';
 import { clearClientUserData, APPLE_IDENTITY_CACHE_KEY, LAST_AUTH_PROVIDER_KEY } from '@/lib/clientSessionCleanup';
+import { Capacitor } from '@capacitor/core';
+import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
+import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 const isMixpanelEnabledForHostname = (hostname) => {
   const normalizedHostname = (hostname || '').toLowerCase();
@@ -33,6 +36,8 @@ const isAppleAuthUser = (user) => {
   const email = String(user.email || '').toLowerCase();
   return provider.includes('apple') || email.includes('privaterelay.appleid.com');
 };
+
+const isNativePlatform = typeof window !== 'undefined' && Capacitor.getPlatform() !== 'web';
 
 const persistAppleIdentity = (user) => {
   if (!user?.id || typeof window === 'undefined') return;
@@ -62,7 +67,36 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    console.log('[ruumr] checkAppState: start, hasToken =', Boolean(appParams.token));
     try {
+      if (isRuumrSimulatorMode()) {
+        enableSimulatorBackend(base44);
+        let currentUser = null;
+
+        try {
+          currentUser = await base44.auth.me();
+        } catch (authError) {
+          const simulatorState = getSimulatorBackendState();
+          if (simulatorState?.currentUser) {
+            currentUser = simulatorState.currentUser;
+          } else if (isRuumrNativeDemoSession()) {
+            throw authError;
+          } else {
+            throw authError;
+          }
+        }
+
+        setAppPublicSettings({
+          id: appParams.appId,
+          public_settings: {},
+        });
+        setUser(currentUser);
+        setIsAuthenticated(true);
+        setIsLoadingPublicSettings(false);
+        setIsLoadingAuth(false);
+        return;
+      }
+
       setIsLoadingPublicSettings(true);
       setAuthError(null);
       
@@ -135,7 +169,9 @@ export const AuthProvider = ({ children }) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
+      console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
       const currentUser = await base44.auth.me();
+      console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
       setUser(currentUser);
       setIsAuthenticated(true);
 
@@ -156,10 +192,10 @@ export const AuthProvider = ({ children }) => {
 
       setIsLoadingAuth(false);
     } catch (error) {
-      console.error('User auth check failed:', error);
+      console.error('[ruumr] checkUserAuth failed:', error?.status, error?.message);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
+
       // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
         setAuthError({
@@ -175,21 +211,35 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setAuthError(null);
     setAppPublicSettings(null);
-    await clearClientUserData();
-    
+
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
       base44.auth.logout(getSafeAuthReturnUrl());
     } else {
-      // Just remove the token without redirect
       base44.auth.logout();
     }
+
+    await clearClientUserData();
   };
 
   const navigateToLogin = () => {
     // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(getSafeAuthReturnUrl());
   };
+
+  useEffect(() => {
+    if (!isNativePlatform) {
+      return;
+    }
+
+    // Native WebViews can occasionally stall during the initial Base44 handshake.
+    // If that happens, fail open so the simulator/device can still show the app shell.
+    const fallbackTimer = window.setTimeout(() => {
+      setIsLoadingPublicSettings((current) => (current ? false : current));
+      setIsLoadingAuth((current) => (current ? false : current));
+    }, 3000);
+
+    return () => window.clearTimeout(fallbackTimer);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 

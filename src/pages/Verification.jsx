@@ -37,8 +37,8 @@ export default function VerificationPage() {
     try {
       await base44.integrations.Core.SendEmail({
         to: email,
-        subject: "קוד האימות שלך ל-Roomi",
-        body: `היי, קוד האימות שלך הוא: ${newCode}`
+        subject: "קוד האימות שלך ל-ruumr",
+        body: `היי, קוד האימות שלך ל-ruumr הוא: ${newCode}`
       });
       setStep(2);
     } catch (error) {

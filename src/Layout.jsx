@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
@@ -11,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 
 function FilterHintButton() {
   return (
@@ -34,6 +36,24 @@ function FilterHintButton() {
   );
 }
 
+function isDesktopBrowserContext() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
+function isIosLikeBrowserContext() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const ua = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  return /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
@@ -47,6 +67,7 @@ export default function Layout({ children, currentPageName }) {
     }
   });
   const navigate = useNavigate();
+  const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -57,9 +78,9 @@ export default function Layout({ children, currentPageName }) {
       return;
     }
 
-    const checkBanned = async () => {
+    const checkBanned = async (currentUser = null) => {
       try {
-        const user = await UserEntity.me();
+        const user = currentUser ?? await UserEntity.me();
         // Check if banned
         const { base44: b44 } = await import('@/api/base44Client');
         const banned = await b44.entities.BannedUser.filter({ email: user.email });
@@ -69,18 +90,37 @@ export default function Layout({ children, currentPageName }) {
       } catch (e) {}
     };
 
-    const checkNotifications = async () => {
+  const checkNotifications = async () => {
       try {
         const notificationsSupported = typeof Notification !== 'undefined';
-        await checkBanned();
+        const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
         const user = await UserEntity.me();
+        const browserNotificationsEnabled =
+          notificationsSupported &&
+          isBrowserWeb &&
+          isDesktopBrowserContext() &&
+          !isIosLikeBrowserContext() &&
+          isBrowserRuntime &&
+          !isRuumrSimulatorMode() &&
+          user.enable_notifications !== false;
+
+        console.info('[ruumr] Layout notifications', {
+          protocol: typeof window !== 'undefined' ? window.location.protocol : 'n/a',
+          isBrowserWeb,
+          isDesktopBrowser: isDesktopBrowserContext(),
+          isIosLikeBrowser: isIosLikeBrowserContext(),
+          isBrowserRuntime,
+          simulatorMode: isRuumrSimulatorMode(),
+          permission: notificationsSupported ? Notification.permission : 'unsupported',
+        });
+        await checkBanned(user);
         const matches = await Match.filter({ user1_id: user.id }); 
         const matches2 = await Match.filter({ user2_id: user.id });
         const allMatches = [...matches, ...matches2];
         const total = allMatches.length;
         const previousTotal = matchesCountRef.current;
 
-        if (notificationsSupported && total > previousTotal && previousTotal !== 0) {
+        if (browserNotificationsEnabled && total > previousTotal && previousTotal !== 0) {
           // New match detected!
           if (Notification.permission === 'granted') {
             new Notification('ruumr', {
@@ -92,11 +132,6 @@ export default function Layout({ children, currentPageName }) {
 
         matchesCountRef.current = total;
         setMatchesCount(total);
-
-        // Request permissions if not denied/granted yet
-        if (notificationsSupported && user.enable_notifications !== false && Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
 
       } catch (e) {}
     };
@@ -179,7 +214,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -217,30 +252,15 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 py-1 shadow-sm">
-                <div className="max-w-md mx-auto px-2 flex items-center justify-between">
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]">
+                <div className="max-w-md mx-auto px-2 flex items-center justify-between h-12">
         
-        {/* קבוצה ימין: כוכב הכי ימני, ואז הגדרות */}
+        {/* קבוצה ימין: הגדרות הכי ימני, ואז כוכב */}
         <div className="flex items-center gap-2">
-            <WriteReviewButton /> {/* הכוכב עכשיו ראשון, ולכן הכי ימני */}
-            {/* RUUMR PLUS HEADER BUTTON — disabled, re-enable by uncommenting
-            <Link
-              to={createPageUrl("RuumrPlus")}
-              aria-label="Ruumr Plus"
-              onClick={(e) => {
-                e.preventDefault();
-                markRuumrPlusActivationIntent({ source: "header" });
-                navigate(createPageUrl("RuumrPlus"));
-              }}
-              className="select-none flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-[10px] font-bold text-[--theme-orange] shadow-sm transition-transform active:scale-95 touch-manipulation"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Ruumr Plus</span>
-            </Link>
-            */}
             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
+            <WriteReviewButton />
         </div>
 
         {/* אמצע: כותרת רומר */}
@@ -250,15 +270,14 @@ export default function Layout({ children, currentPageName }) {
             </Link>
         </div>
 
-        {/* קבוצה שמאל: פרופיל, ואז מסננים הכי שמאלי */}
+        {/* קבוצה שמאל: מסננים ופרופיל */}
         <div className="flex items-center gap-2">
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
-                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-            </Link>
-            {/* המסנן אחרון, ולכן הכי שמאלי */}
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
+                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+            </Link>
         </div>
 
     </div>
@@ -266,12 +285,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 ${shouldShowNav ? 'pb-20 pt-2' : ''}`}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: '48px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed bottom-2 right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ bottom: 'max(8px, env(safe-area-inset-bottom, 0px))' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path;

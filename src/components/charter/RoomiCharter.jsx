@@ -99,6 +99,7 @@ const CHARTER_DATA = {
 
 export default function RoomiCharter({ matchId, user1Name, user2Name, onClose }) {
   const navigate = useNavigate();
+  const navTimerRef = React.useRef(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [myAnswers, setMyAnswers] = useState({});
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
@@ -113,6 +114,10 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
   const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
   const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
   const currentQuestion = currentLevel?.questions[currentQuestionIndex];
+
+  useEffect(() => {
+    return () => { clearTimeout(navTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -194,7 +199,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
           origin: { y: 0.4 },
           colors: ['#FF5722', '#FF1744', '#F50057', '#E91E63', '#FFD700']
         });
-        setTimeout(() => {
+        navTimerRef.current = setTimeout(() => {
           navigate(createPageUrl('Chat') + `?matchId=${matchId}`);
         }, 2000);
 

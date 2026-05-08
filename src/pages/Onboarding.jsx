@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { User } from '@/entities/User';
 import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
@@ -7,18 +8,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
-import { ArrowRight, Check, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat, Dumbbell, Activity, Gamepad2, Box, Palette, BookOpen, Briefcase, Lightbulb, Leaf, Zap, Trophy, User as UserIcon, Mic, EyeOff, ChefHat, Sprout } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import BottomSheetSelect from '@/components/shared/BottomSheetSelect';
 import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
+import CustomSelect from '@/components/shared/CustomSelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
-import HouseholdPreferencesSection from '@/components/profile/HouseholdPreferencesSection';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
     buildSimulatorApartmentPhotos,
     buildSimulatorProfilePhotos,
@@ -75,27 +76,6 @@ const persistAppleIdentity = (userId, identity) => {
   localStorage.setItem('ruumr_last_auth_provider', 'apple');
 };
 
-const INTERESTS_LIST = [
-{ id: 'gym', label: 'חדר כושר', Icon: Dumbbell },
-{ id: 'tennis', label: 'טניס', Icon: Activity },
-{ id: 'pilates', label: 'פילאטיס', Icon: UserIcon },
-{ id: 'yoga', label: 'יוגה', Icon: EyeOff },
-{ id: 'soccer_basketball', label: 'כדורגל / כדורסל', Icon: Trophy },
-{ id: 'motorcycles', label: 'אופנועים', Icon: Zap },
-{ id: 'gaming', label: 'גיימינג', Icon: Gamepad2 },
-{ id: 'lego', label: 'לגו', Icon: Box },
-{ id: 'photography', label: 'צילום', Icon: Camera },
-{ id: 'painting', label: 'ציור', Icon: Palette },
-{ id: 'reading', label: 'קריאה', Icon: BookOpen },
-{ id: 'cooking', label: 'בישול ואפייה', Icon: ChefHat },
-{ id: 'concerts', label: 'הופעות', Icon: Mic },
-{ id: 'business', label: 'עסקים', Icon: Briefcase },
-{ id: 'entrepreneurship', label: 'יזמות', Icon: Lightbulb },
-{ id: 'plants', label: 'צמחייה', Icon: Sprout },
-{ id: 'nature', label: 'טיולים בטבע', Icon: Leaf }
-];
-
-
 const Step = ({ children, step, currentStep, title }) =>
 <AnimatePresence mode="wait">
     {currentStep === step &&
@@ -118,9 +98,10 @@ const Step = ({ children, step, currentStep, title }) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(() => createProfileDefaults());
+  const [formData, setFormData] = useState(/** @type {any} */ (createProfileDefaults()));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
@@ -144,7 +125,12 @@ export default function OnboardingPage() {
         const isAppleUser = isAppleAuthUser(userData);
         const cachedIdentity = getCachedAppleIdentity(userData.id);
 
+        // authUser (from AuthContext) is the most reliable source — it's populated directly
+        // from the OAuth token (Google/Apple) immediately after login.
+        // userData.full_name may be empty on first login before the platform syncs it.
         const fullName =
+          authUser?.full_name ||
+          authUser?.name ||
           userData.full_name ||
           userData.name ||
           cachedIdentity?.fullName ||
@@ -153,35 +139,30 @@ export default function OnboardingPage() {
         const firstName = fullName ? fullName.split(' ')[0] : '';
 
         if (isAppleUser) {
-          // Critical: persist first-login Apple identity immediately for future logins.
           persistAppleIdentity(userData.id, { fullName, email });
         }
 
         setFormData((prev) => ({ ...prev, name: firstName, user_id: userData.id }));
-
-        // Bypass manual name/email step for Apple sign-ins when identity is already known.
-        if (isAppleUser && firstName) {
-          setStep((currentStep) => (currentStep === 1 ? 2 : currentStep));
-        }
       } catch (e) {
-        // If user is not logged in, redirect to login page then back here
-        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+        if (e?.status === 401 || e?.status === 403) {
+          base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+        }
       }
     };
     fetchUser();
-  }, [navigate]);
+  }, [authUser]);
 
   useEffect(() => {
     const trackStep = async () => {
       try {
-        const user = await User.me();
+        if (!formData.user_id) return;
         const { PageView } = await import('@/entities/PageView');
         await PageView.create({
           page_name: `Onboarding - Step ${step}`,
-          user_id: user.id
+          user_id: formData.user_id
         });
       } catch (e) {
-        console.error("Failed to track onboarding step:", e);
+        // silent fail - tracking is non-critical
       }
     };
     trackStep();
@@ -267,6 +248,10 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
+      // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
+      const currentUser = await User.me();
+      const userId = currentUser.id;
+
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
       const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(formData.name, cleanedPhotos, 2) : cleanedPhotos;
@@ -276,25 +261,36 @@ export default function OnboardingPage() {
 
       const finalData = {
         ...formData,
+        user_id: userId,
+        interests: normalizeInterestValues(formData.interests),
         photos: finalPhotos,
         apartment_photos: finalApartmentPhotos,
         location: formData.search_cities[0] || '',
         is_visible: true,
-        // Ensure nulls are handled
         song_preview_url: formData.song_preview_url || null,
         song_name: formData.song_name || null,
         song_artist: formData.song_artist || null,
         song_image: formData.song_image || null
       };
-      await Profile.create(finalData);
+
+      // If user already has a profile (e.g. navigated back), update instead of create
+      const existingProfiles = await Profile.filter({ user_id: userId });
+      if (existingProfiles.length > 0) {
+        await Profile.update(existingProfiles[0].id, finalData);
+      } else {
+        await Profile.create(finalData);
+      }
+
       try {
         await syncCurrentProfileToRuumrPlus();
       } catch (syncError) {
         console.error("Failed to sync onboarding profile to Ruumr Plus:", syncError);
       }
+
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Registration Completed');
       }
+
       if (shouldVerify) {
         navigate(createPageUrl('Verification'));
       } else {
@@ -318,7 +314,7 @@ export default function OnboardingPage() {
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
-        img.src = event.target.result;
+        img.src = /** @type {string} */ (event.target?.result || "");
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const maxWidth = 800;
@@ -453,7 +449,24 @@ export default function OnboardingPage() {
       apartmentFileInputRef.current.click();
     } else {
       fileInputRef.current.onclick = () => {
-        fileInputRef.current.onchange = (e) => handleImageUpload(e, index, false);
+        fileInputRef.current.onchange = async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 1) {
+            // Single file — use existing slot-based handler
+            await handleImageUpload(e, index, false);
+          } else {
+            // Multiple files — fill slots starting from the first empty one
+            const currentPhotos = formData.photos;
+            let slotIndex = currentPhotos.findIndex((p) => !p);
+            if (slotIndex === -1) slotIndex = 0;
+            const filesToUpload = files.slice(0, 6 - slotIndex);
+            for (let i = 0; i < filesToUpload.length; i++) {
+              const fakeEvent = { target: { files: [filesToUpload[i]] } };
+              await handleImageUpload(fakeEvent, slotIndex + i, false);
+            }
+          }
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        };
       };
       fileInputRef.current.click();
     }
@@ -468,7 +481,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
         #onboarding-root input[type=number]::-webkit-inner-spin-button,
         #onboarding-root input[type=number]::-webkit-outer-spin-button {
@@ -481,9 +494,44 @@ export default function OnboardingPage() {
         #onboarding-root input[type=number]:focus::-webkit-outer-spin-button {
           opacity: 1;
         }
+        /* Remove all focus rings / black outlines on inputs & selects */
+        #onboarding-root input:focus,
+        #onboarding-root input:focus-visible,
+        #onboarding-root textarea:focus,
+        #onboarding-root textarea:focus-visible,
+        #onboarding-root select:focus,
+        #onboarding-root select:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border-color: #FA3803 !important;
+          border-width: 1px !important;
+        }
+        /* Styled native select dropdown */
+        #onboarding-root select {
+          border-radius: 10px;
+          border: 1px solid #e5e7eb;
+          background-color: #f9fafb;
+          color: #1f2937;
+          font-size: 14px;
+          font-weight: 400;
+          padding: 0 12px;
+          height: 44px;
+          appearance: none;
+          -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FA3803' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: left 10px center;
+          cursor: pointer;
+          transition: border-color 0.15s;
+        }
+        #onboarding-root select:focus {
+          border-color: #FA3803 !important;
+          box-shadow: 0 0 0 0 transparent !important;
+          outline: none !important;
+        }
       `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
       <div className="w-full max-w-md flex flex-col h-[85vh]">
@@ -491,7 +539,7 @@ export default function OnboardingPage() {
         {step !== 7 && (
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
-                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : window.location.href = createPageUrl('')} className="hover:bg-orange-50 text-gray-500">
+                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                  </Button>
                  
@@ -517,7 +565,7 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
-                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                        <Input value={formData.name} onChange={(e) => setFormField('name', e.target.value)} className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1 text-right">
@@ -529,19 +577,15 @@ export default function OnboardingPage() {
                                     const val = e.target.value;
                                     setFormField('age', val === '' ? '' : parseInt(val));
                                 }}
-                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-[--theme-orange]" />
+                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="space-y-1 text-right">
-                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
-                            <BottomSheetSelect
-                                value={formData.gender}
-                                onValueChange={(v) => setFormField('gender', v)}
+                            <CustomSelect
                                 label="מגדר"
-                                options={[
-                                    { value: "male", label: "זכר" },
-                                    { value: "female", label: "נקבה" },
-                                    { value: "other", label: "אחר" }
-                                ]} />
+                                value={formData.gender}
+                                onChange={(v) => setFormField('gender', v)}
+                                options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]}
+                            />
                         </div>
                     </div>
 
@@ -566,7 +610,7 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={2} currentStep={step} title="">
-                <div className="space-y-5 mt-1">
+                <div className="space-y-3 mt-1">
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
@@ -592,35 +636,43 @@ export default function OnboardingPage() {
                     </div>
 
                     {/* Budget */}
-                    <div className="pt-2 text-right">
-                        <h3 className="text-base font-bold mb-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
-                        {/* Thumb value label */}
-                        <div className="relative w-full mb-1">
-                            <div
-                                className="absolute text-sm font-bold text-black"
-                                style={{
-                                    left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% - 20px)`,
-                                    top: 0,
-                                    minWidth: '40px',
-                                    textAlign: 'center'
-                                }}
-                            >
-                                {formData.budget_max.toLocaleString()}
-                            </div>
-                            <div className="h-4" />
-                        </div>
-                        <Slider
-                            value={[formData.budget_max]}
-                            min={1000}
-                            max={10000}
-                            step={100}
-                            onValueChange={(v) => setFormField('budget_max', v[0])}
-                            className="py-0" />
-                        {/* Min / Max labels inline with bar */}
-                        <div className="flex justify-between text-xs text-gray-400 mt-1 px-0">
-                            <span>min 10,000</span>
-                            <span>max 1,000</span>
-                        </div>
+                    <div className="pt-0 text-right">
+                       <h3 className="text-base font-bold mb-1" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                       {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
+                       <div className="relative w-full mb-2" dir="ltr">
+                           <div
+                               className="absolute text-sm text-black"
+                               style={{
+                                   left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% - 20px)`,
+                                   bottom: 0,
+                                   minWidth: '40px',
+                                   textAlign: 'center',
+                                   fontWeight: 'normal'
+                               }}
+                           >
+                               {formData.budget_max.toLocaleString()}
+                           </div>
+                           <div className="h-6" />
+                       </div>
+                       <Slider
+                           dir="ltr"
+                           value={[formData.budget_max]}
+                           min={1000}
+                           max={10000}
+                           step={100}
+                           onValueChange={(v) => setFormField('budget_max', v[0])}
+                           className="py-0" />
+                       {/* Min / Max labels — explicitly LTR: 1,000 left, 10,000 right */}
+                       <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
+                           <div className="flex flex-col items-start">
+                               <span>1,000</span>
+                               <span>min</span>
+                           </div>
+                           <div className="flex flex-col items-end">
+                               <span>10,000</span>
+                               <span>max</span>
+                           </div>
+                       </div>
                     </div>
                 </div>
             </Step>
@@ -642,30 +694,33 @@ export default function OnboardingPage() {
 
                     {/* כשרות + שבת */}
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>כשרות</label>
-                            <BottomSheetSelect value={formData.kosher_preference} onValueChange={(v) => setFormField('kosher_preference', v)} label="כשרות"
-                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
-                        </div>
-                        <div>
-                            <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>שומר שבת</label>
-                            <BottomSheetSelect value={formData.shabbat_preference} onValueChange={(v) => setFormField('shabbat_preference', v)} label="שמירת שבת"
-                                options={[{ value: "for", label: "בעד" }, { value: "against", label: "נגד" }, { value: "flow", label: "זורם/ת" }]} />
-                        </div>
+                        <CustomSelect
+                            label="כשרות"
+                            value={formData.kosher_preference}
+                            onChange={(v) => setFormField('kosher_preference', v)}
+                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
+                        />
+                        <CustomSelect
+                            label="שומר/ת שבת"
+                            value={formData.shabbat_preference}
+                            onChange={(v) => setFormField('shabbat_preference', v)}
+                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
+                        />
                     </div>
 
                     {/* זיקה לדת */}
-                    <div>
-                        <label className="text-sm font-bold block mb-1" style={{ color: '#FA3803' }}>זיקה לדת</label>
-                        <BottomSheetSelect value={formData.religion} onValueChange={(v) => setFormField('religion', v)} label="זיקה לדת"
-                            options={[
-                                { value: "secular", label: "חילוני/ת" },
-                                { value: "traditional", label: "מסורתי/ת" },
-                                { value: "national_religious", label: "דתי/ה לאומי/ת" },
-                                { value: "religious", label: "דתי/ה" },
-                                { value: "haredi", label: "חרדי/ת" }
-                            ]} />
-                    </div>
+                    <CustomSelect
+                        label="זיקה לדת"
+                        value={formData.religion}
+                        onChange={(v) => setFormField('religion', v)}
+                        options={[
+                            { v: 'secular', l: 'חילוני/ת' },
+                            { v: 'traditional', l: 'מסורתי/ת' },
+                            { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
+                            { v: 'religious', l: 'דתי/ה' },
+                            { v: 'haredi', l: 'חרדי/ת' },
+                        ]}
+                    />
 
                     {/* חיית מחמד */}
                     <div>
@@ -688,16 +743,6 @@ export default function OnboardingPage() {
                                 <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
                             </motion.div>
                         }
-
-                        <div className="pt-3">
-                            <HouseholdPreferencesSection
-                                values={formData}
-                                onChange={setFormField}
-                                title="הרגלים בבית"
-                                description="זה עוזר ל-Ruumr Plus להתאים לכם שותפים עם קצב חיים דומה."
-                                className="bg-orange-50/60 p-4 rounded-2xl border border-orange-100"
-                            />
-                        </div>
                     </div>
                 </div>
             </Step>
@@ -751,9 +796,9 @@ export default function OnboardingPage() {
 
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
-                    <p className="text-center text-xs mb-3 -mt-1" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
+                    <p className="text-center text-xs mb-4 -mt-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0 overflow-hidden">
-                        {INTERESTS_LIST.map((interest) => {
+                        {INTEREST_OPTIONS.map((interest) => {
                     const selected = (formData.interests || []).includes(interest.id);
                     const Icon = interest.Icon;
                     return (
@@ -838,34 +883,15 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={7} currentStep={step} title="">
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                    <h2 className="text-3xl font-bold" style={{ color: '#FA3803' }}>הפרופיל שלך מוכן!</h2>
-                    <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
-                        <div className="absolute inset-0 border-4 border-blue-100 rounded-full animate-pulse"></div>
-                        <Check className="w-16 h-16 text-blue-500" />
-                    </div>
-                    <div>
-                        <h3 className="text-2xl font-bold mb-2">אמת/י את הפרופיל שלך</h3>
-                        <p className="text-gray-500 max-w-xs mx-auto">
-                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
-                        </p>
+                <div className="flex flex-col items-center justify-between h-full text-center py-6">
+                    {/* Title with inline orange checkmark */}
+                    <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
+                        <CheckCircle className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
                     </div>
 
-                    <div className="w-full space-y-3">
-                        <Button
-                            onClick={() => handleFinish(true)}
-                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110">
-                            אמת עכשיו (מומלץ)
-                        </Button>
-                        <button
-                            onClick={() => handleFinish(false)}
-                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1">
-                            אולי אחר כך
-                        </button>
-                    </div>
-
-                    {/* Social Media Link Section */}
-                    <div className="w-full pt-2 border-t border-gray-100">
+                    {/* Social Media Link Section — moved above verification */}
+                    <div className="w-full">
                         <div className="flex items-center gap-2 mb-2" dir="rtl">
                             <span className="text-sm font-bold text-gray-700">קישור לרשת חברתית</span>
                             <span className="text-sm text-gray-400">(אופציונלי)</span>
@@ -886,8 +912,31 @@ export default function OnboardingPage() {
                             onChange={(e) => setFormField('social_link', e.target.value)}
                             placeholder="הדבק קישור כאן"
                             className="h-8 text-sm bg-gray-50 border-gray-200 w-full"
-                            dir="ltr"
+                            dir="rtl"
                         />
+                    </div>
+
+                    {/* Verification section */}
+                    <div>
+                        <h3 className="text-2xl font-bold mb-2">אמת/י את הפרופיל שלך</h3>
+                        <p className="text-gray-500 max-w-xs mx-auto">
+                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
+                        </p>
+                    </div>
+
+                    <div className="w-full space-y-3">
+                        <Button
+                            onClick={() => handleFinish(true)}
+                            disabled={isSubmitting}
+                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
+                        </Button>
+                        <button
+                            onClick={() => !isSubmitting && handleFinish(false)}
+                            disabled={isSubmitting}
+                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
+                            אולי אחר כך
+                        </button>
                     </div>
                 </div>
             </Step>

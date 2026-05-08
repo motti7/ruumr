@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 
 // Root screens that should exit the app (or go to home) on back press
 const ROOT_PATHS = ['/', '/Discover', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker'];
@@ -10,17 +11,12 @@ const ROOT_PATHS = ['/', '/Discover', '/Matches', '/RuumrPlus', '/LikesYou', '/G
  */
 class AndroidBackBridge {
   static isNativeAndroid() {
-    return typeof window !== 'undefined' && (
-      window.AndroidBridge !== undefined ||
-      window.webkit?.messageHandlers?.androidBack !== undefined
-    );
+    return typeof window !== 'undefined' && Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
   }
 
   static onBackPress() {
     if (window.AndroidBridge?.onBackPress) {
       window.AndroidBridge.onBackPress();
-    } else if (window.webkit?.messageHandlers?.androidBack) {
-      window.webkit.messageHandlers.androidBack.postMessage({});
     } else if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'androidBackPress' }, '*');
     }
@@ -38,6 +34,10 @@ export default function useAndroidBackButton(onBack = null) {
   const isNativeAndroidRef = useRef(AndroidBackBridge.isNativeAndroid());
 
   useEffect(() => {
+    if (!isNativeAndroidRef.current) {
+      return;
+    }
+
     window.history.pushState({ androidBackSentinel: true, ts: Date.now() }, '');
     lastPathRef.current = location.pathname;
 
@@ -52,18 +52,16 @@ export default function useAndroidBackButton(onBack = null) {
           return;
         }
 
-        const isRoot = ROOT_PATHS.includes(location.pathname);
+        const currentPath = window.location.pathname;
+        const isRoot = ROOT_PATHS.includes(currentPath);
 
         if (isRoot) {
           if (isNativeAndroidRef.current) {
             AndroidBackBridge.onBackPress();
           }
         } else {
-          if (lastPathRef.current === location.pathname) {
-            window.history.pushState({ androidBackSentinel: true, ts: Date.now() }, '');
-            navigate(-1);
-            lastPathRef.current = location.pathname;
-          }
+          window.history.pushState({ androidBackSentinel: true, ts: Date.now() }, '');
+          navigate(-1);
         }
       } finally {
         isHandlingRef.current = false;

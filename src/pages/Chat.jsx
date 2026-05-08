@@ -30,7 +30,13 @@ export default function ChatPage() {
   const userRef = useRef(null);
 
   useEffect(() => {
-    loadData();
+    const cleanupRef = { current: null };
+    loadData().then(cleanup => {
+      cleanupRef.current = cleanup;
+    });
+    return () => {
+      if (typeof cleanupRef.current === 'function') cleanupRef.current();
+    };
   }, []);
 
   useEffect(() => {
@@ -165,13 +171,13 @@ export default function ChatPage() {
   };
 
   // Optimistic mutation for sending messages
-  const messageMutation = useMutationWithOptimistic(
+  const messageMutation = /** @type {any} */ (useMutationWithOptimistic(
     (messageData) => Message.create(messageData),
     {
       queryKey: ['chat', matchIdRef.current],
       updateFn: (oldMessages = [], newMessage) => [...oldMessages, newMessage],
     }
-  );
+  ));
 
   const handleSendMessage = async () => {
     const messageContent = newMessage.trim();
@@ -220,7 +226,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir="rtl">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
         <BackButton className="text-gray-600" />
         <div className="flex items-center gap-3 flex-1">
           <img
@@ -305,12 +311,12 @@ export default function ChatPage() {
       )}
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
+      <div className="bg-white border-t border-gray-200 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
         <div className="flex items-center gap-3">
           <Input
             value={newMessage}
             onChange={(e) => handleTyping(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="הקלד/י הודעה..."
             className="flex-1 bg-gray-100 border-0"
           />

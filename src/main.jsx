@@ -6,6 +6,37 @@ import mixpanel from 'mixpanel-browser'
 // Configure the native Android status bar when running inside Capacitor.
 // Dynamically imported to avoid breaking the web build.
 
+const recordRuntimeIssue = (kind, payload) => {
+  try {
+    window.localStorage.setItem('ruumr_last_runtime_issue', JSON.stringify({
+      kind,
+      payload,
+      timestamp: new Date().toISOString(),
+    }));
+  } catch {
+    // Debug only.
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    recordRuntimeIssue('error', {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      stack: event.error?.stack || null,
+    });
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    recordRuntimeIssue('unhandledrejection', {
+      reason: event.reason?.message || String(event.reason || 'unknown'),
+      stack: event.reason?.stack || null,
+    });
+  });
+}
+
 
 const hostname = window.location.hostname.toLowerCase()
 const shouldEnableMixpanel =
