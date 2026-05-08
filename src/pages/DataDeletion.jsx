@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Trash2, CheckCircle2 } from "lucide-react";
+import { Trash2, CheckCircle2, ShieldAlert } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
 import { clearClientUserData } from "@/lib/clientSessionCleanup";
+import { PremiumCard, PremiumPageFrame, PremiumPill, PremiumStat } from "@/components/shared/PremiumPageFrame";
 
 export default function DataDeletionPage() {
   const [reason, setReason] = useState("");
@@ -65,86 +66,104 @@ export default function DataDeletionPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-sm p-8 text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+      <PremiumPageFrame
+        icon={CheckCircle2}
+        eyebrow="נשלח בהצלחה"
+        title="החשבון נמחק"
+        subtitle="הנתונים הוסרו מהמערכת והבקשה למחיקת פרטי הכניסה נשלחה לטיפול."
+        backTo={createPageUrl("Settings")}
+        backLabel="חזרה להגדרות"
+        badge={<PremiumPill tone="emerald">המחיקה הושלמה</PremiumPill>}
+      >
+        <PremiumCard>
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+            <CheckCircle2 className="h-10 w-10" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 mb-4">החשבון נמחק בהצלחה</h2>
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            כל הנתונים שלך נמחקו מהמערכת. בקשה למחיקת פרטי הכניסה עם גוגל נשלחה למנהל המערכת.
+          <p className="mt-5 text-center text-sm leading-7 text-slate-600">
+            נשמור את הבקשה לסנכרון פרטי הכניסה, ואז ננקה את הסשן המקומי כדי שלא תישאר/י מחובר/ת בטעות.
           </p>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <PremiumStat label="פרופיל" value="נמחק" tone="emerald" />
+            <PremiumStat label="הודעות" value="נוקו" tone="blue" />
+            <PremiumStat label="כניסה" value="בטיפול" tone="orange" />
+          </div>
+        </PremiumCard>
+
+        <PremiumCard>
           <Link to={createPageUrl("Settings")}>
-            <Button className="w-full gradient-orange text-white font-bold">
+            <Button className="w-full rounded-[18px] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]">
               חזרה להגדרות
             </Button>
           </Link>
-        </div>
-      </div>
+        </PremiumCard>
+      </PremiumPageFrame>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pb-24" dir="rtl">
-      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-sm p-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Link to={createPageUrl("Settings")}>
-            <ChevronRight className="w-6 h-6 text-gray-400" />
-          </Link>
-          <h1 className="text-2xl font-black text-gray-900">בקשת מחיקת נתונים מלאה</h1>
+    <PremiumPageFrame
+      icon={Trash2}
+      eyebrow="מחיקה מלאה"
+      title="בקשת מחיקת נתונים"
+      subtitle="זהו מסלול סופי שמסיר את כל המידע האישי, ההתאמות, התמונות ונתוני ההתחברות שלך."
+      backTo={createPageUrl("Settings")}
+      backLabel="חזרה להגדרות"
+      badge={<PremiumPill tone="rose">פעולה בלתי הפיכה</PremiumPill>}
+      actions={<PremiumPill tone="neutral">נדרשת סיבה</PremiumPill>}
+    >
+      <PremiumCard>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <PremiumStat label="קצב" value="מיידי" tone="rose" />
+          <PremiumStat label="בטיחות" value="גבוהה" tone="orange" />
+          <PremiumStat label="שחזור" value="לא קיים" tone="blue" />
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <Trash2 className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-bold text-red-900 mb-2">מחיקה מלאה וסופית</h3>
-                <p className="text-sm text-red-800 leading-relaxed">
-                  בקשה זו תמחק את כל הנתונים הקשורים אליך מהמערכת, כולל:
-                </p>
-                <ul className="text-sm text-red-800 list-disc mr-5 mt-2 space-y-1">
-                  <li>פרופיל ותמונות</li>
-                  <li>התאמות והודעות</li>
-                  <li>העדפות וחיפושים</li>
-                  <li>פרטי כניסה עם גוגל</li>
-                </ul>
-              </div>
+        <div className="mt-5 rounded-[1.5rem] bg-rose-50/80 p-4 text-right ring-1 ring-rose-100">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+            <div>
+              <p className="text-sm font-bold text-rose-700">מחיקה מלאה וסופית</p>
+              <p className="mt-2 text-sm leading-7 text-rose-900/80">
+                הבקשה תמחק את כל הנתונים הקשורים אליך מהמערכת, כולל פרופיל, תמונות, התאמות, הודעות, העדפות ופרטי כניסה.
+              </p>
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              אנא הסבר/י את הסיבה למחיקה (חובה)
-            </label>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="למשל: לא מצאתי שותפים, האפליקציה לא מתאימה לי, בעיות פרטיות..."
-              className="min-h-32"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-2">
-            <p className="font-bold text-gray-800">מה קורה אחרי המחיקה?</p>
-            <ul className="list-disc mr-5 space-y-1">
-              <li>כל הנתונים שלך יימחקו מיידית</li>
-              <li>פרטי הכניסה עם גוגל יימחקו תוך 30 יום</li>
-              <li>לא תוכל/י להתחבר לאפליקציה יותר</li>
-              <li>המחיקה היא סופית ולא ניתנת לשחזור</li>
-            </ul>
-          </div>
-
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !reason.trim()}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-full"
-          >
-            {isSubmitting ? "שולח בקשה..." : "שלח בקשת מחיקה"}
-          </Button>
         </div>
-      </div>
-    </div>
+      </PremiumCard>
+
+      <PremiumCard>
+        <label className="mb-2 block text-right text-sm font-bold text-slate-700">
+          אנא הסבר/י בקצרה למה תרצה/י למחוק את החשבון
+        </label>
+        <Textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="למשל: לא מצאתי שותפים, החוויה לא התאימה לי, או שיש לי שיקולי פרטיות..."
+          className="min-h-32 rounded-[1.35rem] border-slate-200 bg-white/90 text-right shadow-sm focus-visible:ring-[--theme-orange]"
+          disabled={isSubmitting}
+        />
+      </PremiumCard>
+
+      <PremiumCard>
+        <p className="text-right text-sm font-bold text-[--theme-orange]">מה קורה אחרי המחיקה?</p>
+        <ul className="mt-3 space-y-2 text-right text-sm leading-7 text-slate-600">
+          <li>• הפרופיל, התמונות וההתאמות יוסרו מיידית.</li>
+          <li>• פרטי הכניסה והקישור ל-Google יעברו למחיקה משנית.</li>
+          <li>• לא תוכל/י להתחבר לחשבון הזה יותר.</li>
+          <li>• הבקשה היא סופית ולא ניתנת לשחזור.</li>
+        </ul>
+      </PremiumCard>
+
+      <PremiumCard>
+        <Button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !reason.trim()}
+          className="w-full rounded-[18px] bg-[linear-gradient(135deg,#ef4444_0%,#dc2626_100%)] text-white shadow-[0_18px_40px_rgba(239,68,68,0.22)] hover:opacity-95"
+        >
+          {isSubmitting ? "שולח בקשה..." : "שלח בקשת מחיקה"}
+        </Button>
+      </PremiumCard>
+    </PremiumPageFrame>
   );
 }

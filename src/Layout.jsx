@@ -1,9 +1,8 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
-import WriteReviewButton from "./components/reviews/WriteReviewButton";
+import { User, Settings, Home, Smartphone, Heart, Puzzle } from "lucide-react";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
@@ -11,30 +10,7 @@ import { User as UserEntity } from "@/entities/User";
 import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
-import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
-
-function FilterHintButton() {
-  return (
-    <button
-      onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
-      aria-label="פילטרים"
-      className="hover:scale-110 transition-transform select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
-    >
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Line 1 */}
-        <line x1="3" y1="7" x2="23" y2="7" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="9" cy="7" r="3" fill="#FF5722"/>
-        {/* Line 2 */}
-        <line x1="3" y1="13" x2="23" y2="13" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="17" cy="13" r="3" fill="#FF5722"/>
-        {/* Line 3 */}
-        <line x1="3" y1="19" x2="23" y2="19" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="11" cy="19" r="3" fill="#FF5722"/>
-      </svg>
-    </button>
-  );
-}
 
 function isDesktopBrowserContext() {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -66,7 +42,6 @@ export default function Layout({ children, currentPageName }) {
       return [];
     }
   });
-  const navigate = useNavigate();
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -176,12 +151,10 @@ export default function Layout({ children, currentPageName }) {
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
 
   const navigationItems = [
-    { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
-    // RUUMR PLUS NAV ITEM — disabled, re-enable by uncommenting:
-    // { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
-    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
+    { name: "Discover", path: createPageUrl("Discover"), icon: Home },
+    { name: "Matches", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
+    { name: "Likes", path: createPageUrl("LikesYou"), icon: Heart },
+    { name: "Profile", path: createPageUrl("Profile"), icon: User }
   ];
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
@@ -214,7 +187,8 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+    <div className="relative min-h-[100dvh] overflow-hidden bg-transparent text-slate-950 antialiased overscroll-none dark:text-white" dir="rtl">
+        <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.88),_transparent_24%),linear-gradient(180deg,_#fffdf8_0%,_#f8f4ed_44%,_#f3eee6_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(255,112,67,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.08),_transparent_30%),linear-gradient(180deg,_#0f172a_0%,_#111827_42%,_#020617_100%)]" />
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -244,99 +218,89 @@ export default function Layout({ children, currentPageName }) {
                 </div>
             </div>
         )}
-        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
-            <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
+        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-transparent text-center p-4">
+            <div className="w-full max-w-6xl mx-auto min-h-screen shadow-sm bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl">
                 {children}
             </div>
         </div>
 
         <div className="sm:hidden">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]">
-                <div className="max-w-md mx-auto px-2 flex items-center justify-between h-12">
-        
-        {/* קבוצה ימין: הגדרות הכי ימני, ואז כוכב */}
-        <div className="flex items-center gap-2">
-            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
-                <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-            </Link>
-            <WriteReviewButton />
-        </div>
+               <header className="fixed left-0 right-0 top-0 z-[60] border-b border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(15,23,42,0.04)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/55">
+                <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
+                    {currentPageName === "Discover" ? (
+                        <Link
+                            to={createPageUrl("Settings")}
+                            aria-label="הגדרות"
+                            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white/70 hover:text-[--theme-orange] dark:text-slate-400 dark:hover:bg-white/10"
+                        >
+                            <Settings className="h-5 w-5" />
+                        </Link>
+                    ) : (
+                        <Link
+                            to={createPageUrl("Profile")}
+                            aria-label="הפרופיל שלי"
+                            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white/70 hover:text-[--theme-orange] dark:text-slate-400 dark:hover:bg-white/10"
+                        >
+                            <User className="h-5 w-5" />
+                        </Link>
+                    )}
 
-        {/* אמצע: כותרת רומר */}
-        <div className="flex items-center justify-center">
-            <Link to={createPageUrl("Discover")} className="select-none">
-                 <h1 className="text-4xl font-black tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">ruumr</h1>
-            </Link>
-        </div>
+                    <Link to={createPageUrl("Discover")} className="select-none">
+                        <h1
+                            className="bg-gradient-to-r from-[#ff7a45] via-[#ff8f5d] to-[#ff5722] bg-clip-text text-[2rem] font-black tracking-[-0.08em] text-transparent drop-shadow-sm"
+                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                            ruumr
+                        </h1>
+                    </Link>
 
-        {/* קבוצה שמאל: מסננים ופרופיל */}
-        <div className="flex items-center gap-2">
-            {currentPageName === 'Discover' && (
-                <FilterHintButton /> 
+                    {currentPageName === "Discover" ? (
+                        <div className="h-11 w-11" aria-hidden="true" />
+                    ) : (
+                        <Link
+                            to={createPageUrl("Settings")}
+                            aria-label="הגדרות"
+                            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white/70 hover:text-[--theme-orange] dark:text-slate-400 dark:hover:bg-white/10"
+                        >
+                            <Settings className="h-5 w-5" />
+                        </Link>
+                    )}
+                </div>
+            </header>
             )}
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
-                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
-            </Link>
-        </div>
 
-    </div>
-</header>
-            )}
-
-            {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: '48px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
+            <main
+                className="relative mx-auto max-w-md bg-transparent"
+                style={shouldShowNav ? { paddingTop: '4.75rem', paddingBottom: 'calc(6.75rem + env(safe-area-inset-bottom, 0px))' } : undefined}
+            >
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ bottom: 'max(8px, env(safe-area-inset-bottom, 0px))' }}>
-                    <div className="flex items-center justify-around py-2">
+                <nav
+                    className="fixed left-1/2 z-50 w-[calc(100%-20px)] max-w-[380px] -translate-x-1/2 rounded-[30px] border border-white/70 bg-white/85 px-2 py-2 shadow-[0_24px_60px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/70"
+                    style={{ bottom: 'max(8px, env(safe-area-inset-bottom, 0px))' }}
+                >
+                    <div className="flex items-center justify-around gap-1">
                     {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path;
+                        const isActive = location.pathname === item.path || (item.path === createPageUrl("Discover") && (location.pathname === "/" || location.pathname === ""));
+                        const isBadgeActive = item.name === "Matches";
                         const Icon = item.icon;
-                        const isPlusItem = item.name === "Plus";
-                        const handleClick = (e) => {
-                            if (isPlusItem) {
-                                e.preventDefault();
-                                markRuumrPlusActivationIntent({ source: "nav" });
-                                navigate(item.path);
-                                return;
-                            }
-
-                            if (isActive) {
-                                e.preventDefault();
-                                navigate(item.path);
-                            }
-                        };
                         return (
-                        <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
+                        <Link key={item.name} to={item.path} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${
-                                isPlusItem
-                                    ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
-                                        isActive
-                                            ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
-                                            : 'bg-orange-50 text-[--theme-orange] border border-orange-200'
-                                      }`
-                                    : `py-2 px-3 min-h-[44px] ${
-                                        isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
-                                      }`
+                            className={`relative flex min-h-[44px] flex-col items-center justify-center rounded-[22px] px-3 py-2 transition-all duration-200 select-none ${
+                                isBadgeActive
+                                  ? 'text-[--theme-orange]'
+                                  : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
                             }`}
+                            aria-current={isActive ? 'page' : undefined}
                             >
-                            {item.customIcon ? (
-                                <div className={`rounded-full p-1 border-2 ${isActive ? 'border-[--theme-orange]' : 'border-gray-300'}`}>
-                                    <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
-                                </div>
-                            ) : (
-                                <div className={isPlusItem ? 'flex items-center gap-1.5' : ''}>
-                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill={isActive ? 'currentColor' : 'none'} />
-                                    {isPlusItem && <span className="text-[10px] font-bold leading-none">Plus</span>}
-                                </div>
-                            )}
+                            <Icon className="h-5 w-5" fill={isBadgeActive ? 'currentColor' : 'none'} />
                             {item.badgeCount > 0 && (
-                                <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
+                                <span className="absolute -top-1 right-2 min-w-[18px] h-[18px] bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm dark:border-slate-950">
                                     {item.badgeCount}
                                 </span>
                             )}

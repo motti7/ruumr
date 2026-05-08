@@ -28,7 +28,7 @@ export default function DiscoverFilters({ filters, onChange }) {
   const activeCount = [
     local.cities?.length > 0,
     local.maxBudget < 10000,
-    local.minAge > 18 || local.maxAge < 50,
+    local.minAge > 18 || local.maxAge < 60,
   ].filter(Boolean).length;
 
   const apply = () => {
@@ -80,7 +80,7 @@ export default function DiscoverFilters({ filters, onChange }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[300] flex items-end justify-center"
+            className="fixed inset-0 z-[300] flex items-end justify-center bg-slate-950/45 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -88,27 +88,35 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md p-6"
-              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom) + 80px)' }}
+              className="w-full max-w-md rounded-t-[2.25rem] border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf4_100%)] p-5 shadow-[0_-28px_90px_rgba(15,23,42,0.18)]"
+              style={{ paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom) + 80px)' }}
               dir="rtl"
               onClick={e => e.stopPropagation()}
             >
+              <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-slate-200/80" />
+
               {/* Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-gray-900">פילטרים</h3>
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[--theme-orange]">Refine</p>
+                  <h3 className="mt-1 text-2xl font-black tracking-tight text-slate-950">פילטרים</h3>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange] ring-1 ring-orange-100">
+                  {activeCount} active
+                </span>
                 <button
                   aria-label="סגור פילטרים"
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/80 text-slate-400 shadow-sm ring-1 ring-slate-200 transition-colors hover:text-slate-600"
                 >
-                  <X className="w-5 h-5 text-gray-400" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* City free-text */}
-              <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים רצוי
+              <div className="mb-5 rounded-[1.75rem] border border-white/70 bg-white/75 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+                <label className="mb-2 block flex items-center gap-1 text-sm font-bold text-slate-700">
+                  <MapPin className="h-4 w-4 text-[--theme-orange]" /> אזור מגורים רצוי
                 </label>
                 <div className="relative">
                   <div className="flex gap-2">
@@ -118,24 +126,25 @@ export default function DiscoverFilters({ filters, onChange }) {
                       onChange={handleCityInputChange}
                       onKeyDown={handleCityKeyDown}
                       placeholder="הקלד עיר..."
-                      className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[--theme-orange] transition-colors"
+                      className="flex-1 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-[--theme-orange] focus:ring-4 focus:ring-orange-100"
                       dir="rtl"
                     />
                     <button
                       onClick={() => addCity(cityInput)}
                       disabled={!cityInput.trim()}
-                      className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
+                      className="rounded-2xl px-4 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60 transition-transform disabled:cursor-not-allowed disabled:opacity-40"
+                      style={{ background: 'linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%)' }}
                     >
                       הוסף
                     </button>
                   </div>
                   {citySuggestions.length > 0 && (
-                    <div className="absolute top-full right-0 left-0 mt-1 bg-white border border-gray-200 rounded-2xl shadow-lg z-10 overflow-hidden">
+                    <div className="absolute top-full right-0 left-0 z-10 mt-2 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-[0_20px_40px_rgba(15,23,42,0.12)]">
                       {citySuggestions.map(city => (
                         <button
                           key={city}
                           onMouseDown={(e) => { e.preventDefault(); addCity(city); }}
-                          className="w-full text-right px-4 py-2.5 text-sm text-gray-800 hover:bg-orange-50 hover:text-[--theme-orange] transition-colors font-medium"
+                          className="w-full px-4 py-3 text-right text-sm font-medium text-slate-800 transition-colors hover:bg-orange-50 hover:text-[--theme-orange]"
                         >
                           {city}
                         </button>
@@ -148,7 +157,7 @@ export default function DiscoverFilters({ filters, onChange }) {
                     {local.cities.map(city => (
                       <span
                         key={city}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 border-2 border-[--theme-orange] text-[--theme-orange] text-sm font-semibold"
+                        className="flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-semibold text-[--theme-orange]"
                       >
                         {city}
                         <button onClick={() => removeCity(city)} className="ml-1">
@@ -161,8 +170,8 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Budget */}
-              <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-1 block">
+              <div className="mb-5 rounded-[1.75rem] border border-white/70 bg-white/75 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+                <label className="mb-1 block text-sm font-bold text-slate-700">
                   תקציב מקסימלי: <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
                 <div dir="ltr">
@@ -174,7 +183,7 @@ export default function DiscoverFilters({ filters, onChange }) {
                     onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
                     className="py-3"
                   />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>₪1,000</span>
                     <span>₪10,000</span>
                   </div>
@@ -182,8 +191,8 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Age Range */}
-              <div className="mb-8">
-                <label className="text-sm font-bold text-gray-700 mb-1 block">
+              <div className="mb-6 rounded-[1.75rem] border border-white/70 bg-white/75 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+                <label className="mb-1 block text-sm font-bold text-slate-700">
                   טווח גילאים: <span className="text-[--theme-orange]">{local.minAge}-{local.maxAge}</span>
                 </label>
                 <div dir="ltr">
@@ -195,7 +204,7 @@ export default function DiscoverFilters({ filters, onChange }) {
                     onValueChange={([min, max]) => setLocal(prev => ({ ...prev, minAge: min, maxAge: max }))}
                     className="py-3"
                   />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>18</span>
                     <span>60</span>
                   </div>
@@ -206,13 +215,14 @@ export default function DiscoverFilters({ filters, onChange }) {
               <div className="flex gap-3">
                 <button
                   onClick={reset}
-                  className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-bold text-sm"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white/80 py-3 text-sm font-bold text-slate-600 shadow-sm transition-colors hover:bg-white"
                 >
                   איפוס
                 </button>
                 <button
                   onClick={apply}
-                  className="flex-1 py-3 rounded-full gradient-orange text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60"
+                  style={{ background: 'linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%)' }}
                 >
                   <Check className="w-4 h-4" />
                   החל פילטרים

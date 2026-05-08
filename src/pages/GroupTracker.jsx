@@ -7,6 +7,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  PremiumCard,
+  PremiumPageFrame,
+  PremiumPill,
+  PremiumStat,
+} from "@/components/shared/PremiumPageFrame";
 
 export default function GroupTrackerPage() {
   const navigate = useNavigate();
@@ -92,228 +99,250 @@ export default function GroupTrackerPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-orange-50">
-        <div className="relative w-20 h-20 mb-6">
-          {/* Outer rotating ring */}
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
+        <div className="flex flex-col items-center gap-4">
           <motion.div
-            className="absolute inset-0 rounded-full border-3 border-transparent border-t-[--theme-orange] border-r-[--theme-orange]"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          />
-          {/* Inner pulsing circle */}
-          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[--theme-orange] to-red-400 flex items-center justify-center animate-pulse">
-            <UsersRound className="w-8 h-8 text-white" />
-          </div>
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <UsersRound className="h-8 w-8" />
+          </motion.div>
+          <p className="text-sm font-medium text-slate-500">טוען את הצוות שלך...</p>
         </div>
-        <p className="text-gray-600 font-bold text-lg">טוען את הצוות שלך...</p>
-        <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28" dir="rtl">
-      <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate(createPageUrl('GroupChat'))}
-              className="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
-            >
-              <MessageCircle className="w-4 h-4" />
-              צ'אט
-            </button>
-            <button
-              onClick={() => navigate(createPageUrl('GroupCompatibility'))}
-              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
-            >
-              <Puzzle className="w-4 h-4" />
-              Vibe Check
-            </button>
+    <PremiumPageFrame
+      icon={UsersRound}
+      eyebrow="צוות ושיתוף"
+      title="הצוות שלי"
+      subtitle="כאן מחזיקים את תהליך חיפוש השותפים במקום אחד, עם יעד ברור, התקדמות ודרך קלה להוסיף עוד אנשים."
+      badge={<PremiumPill tone="orange">{currentCount}/{targetCount} בצוות</PremiumPill>}
+      actions={<PremiumPill tone={remaining === 0 ? "emerald" : "blue"}>{remaining === 0 ? "צוות מלא" : `נשארו ${remaining}`}</PremiumPill>}
+    >
+      <PremiumCard>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <PremiumStat label="נוכחי" value={currentCount} tone="orange" />
+          <PremiumStat label="חסרים" value={remaining} tone="blue" />
+          <PremiumStat label="יעד" value={targetCount} tone="emerald" />
+        </div>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Progress</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {remaining === 0 ? "הצוות מלא ומוכן להתקדם." : `נשארו עוד ${remaining} ${remaining === 1 ? "אדם" : "אנשים"} כדי לסגור את הקבוצה.`}
+            </p>
+          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]">
+            {remaining === 0 ? (
+              <img
+                src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png"
+                className="h-8 w-8 object-contain brightness-0 invert"
+                alt=""
+              />
+            ) : (
+              <UsersRound className="h-8 w-8" />
+            )}
           </div>
         </div>
-        <p className="text-gray-500 text-sm mt-1">מעקב אחר תהליך מציאת השותפים</p>
-      </div>
+        <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
+          <motion.div
+            className="h-full rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)]"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </div>
+      </PremiumCard>
 
-      <div className="p-4 space-y-4">
+      <PremiumCard>
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Target</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">כמה שותפים יש בדירה?</h2>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          {[2, 3, 4, 5, 6].map((n) => (
+            <button
+              key={n}
+              onClick={() => handleTargetChange(n)}
+              className={`h-12 min-w-12 rounded-full px-4 font-black transition-all ${
+                targetCount === n
+                  ? "bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      </PremiumCard>
 
-        {/* Target Selector */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="font-bold text-gray-700 mb-3 text-right">כמה שותפים יש בדירה?</p>
-          <div className="flex gap-2 justify-center">
-            {[2, 3, 4, 5, 6].map(n => (
-              <button
-                key={n}
-                onClick={() => handleTargetChange(n)}
-                className={`w-12 h-12 rounded-full font-black text-lg transition-all ${
-                  targetCount === n ? 'gradient-orange text-white shadow-md scale-110' : 'bg-gray-100 text-gray-500'
-                }`}
+      <PremiumCard>
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Roster</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">מי כבר בצוות?</h2>
+          </div>
+          <div className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-500">
+            {teamMembers.length} חברים
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-start justify-center gap-3">
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-[--theme-orange] shadow-md ring-2 ring-orange-100">
+              {myProfile?.photos?.[0] ? (
+                <img src={myProfile.photos[0]} className="h-full w-full object-cover" alt="אני" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-lg font-black text-white">
+                  {user?.full_name?.[0] || "?"}
+                </div>
+              )}
+            </div>
+            <span className="text-xs font-bold text-[--theme-orange]">אני</span>
+          </div>
+
+          <AnimatePresence>
+            {teamMembers.map((match) => (
+              <motion.div
+                key={match.id}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="flex flex-col items-center gap-1 relative"
               >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-right">
-              <p className="text-4xl font-black text-[--theme-orange]">
-                {currentCount}<span className="text-2xl text-gray-300">/{targetCount}</span>
-              </p>
-              <p className="text-sm text-gray-500 mt-0.5">
-                {remaining === 0 ? '🎉 הצוות מלא!' : `חסרים עוד ${remaining} ${remaining === 1 ? 'אדם' : 'אנשים'}`}
-              </p>
-            </div>
-            <div className="text-5xl flex items-center justify-center">
-              {remaining === 0 ? (
-                <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-12 h-12 object-contain" style={{ filter: 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' }} />
-              ) : currentCount === 1 ? '🙋' : <UsersRound className="w-12 h-12 text-yellow-400" fill="#facc15" />}
-            </div>
-          </div>
-          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full gradient-orange rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            />
-          </div>
-
-        </div>
-
-        {/* Team Members */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="font-bold text-gray-700 mb-4 text-right">ה Team</p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {/* Me */}
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-14 h-14 rounded-full overflow-hidden border-3 border-[--theme-orange] shadow-md ring-2 ring-orange-200">
-                {myProfile?.photos?.[0] ? (
-                  <img src={myProfile.photos[0]} className="w-full h-full object-cover" alt="אני" />
-                ) : (
-                  <div className="w-full h-full gradient-orange flex items-center justify-center text-white font-black text-xl">
-                    {user?.full_name?.[0] || '?'}
+                <div className="relative">
+                  <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-emerald-400 shadow-md ring-2 ring-emerald-100">
+                    {match.photo ? (
+                      <img src={match.photo} className="h-full w-full object-cover" alt={match.name} />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-emerald-50 text-lg font-black text-emerald-700">
+                        {match.name?.[0] || "?"}
+                      </div>
+                    )}
                   </div>
-                )}
+                  <button
+                    onClick={() => removeFromTeam(match.id)}
+                    className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 shadow-sm"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                </div>
+                <span className="max-w-[64px] truncate text-center text-xs font-medium text-slate-600">
+                  {match.name?.split(" ")[0]}
+                </span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {Array.from({ length: remaining }).map((_, i) => (
+            <div key={`empty-${i}`} className="flex flex-col items-center gap-1">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-dashed border-slate-200 bg-slate-50">
+                <span className="text-xl text-slate-300">?</span>
               </div>
-              <span className="text-xs font-bold text-[--theme-orange]">אני</span>
+              <span className="text-xs text-slate-400">פנוי</span>
             </div>
+          ))}
+        </div>
+
+        {availableToAdd.length > 0 && remaining > 0 && (
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setShowAddPanel(!showAddPanel)}
+              className="mx-auto flex rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              <UserPlus className="ml-2 h-4 w-4" />
+              הוסף/י מההתאמות שלי
+            </Button>
 
             <AnimatePresence>
-              {teamMembers.map((match) => (
+              {showAddPanel && (
                 <motion.div
-                  key={match.id}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  className="flex flex-col items-center gap-1 relative"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
                 >
-                  <div className="relative">
-                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-green-400 shadow-md ring-2 ring-green-100">
-                      {match.photo ? (
-                        <img src={match.photo} className="w-full h-full object-cover" alt={match.name} />
-                      ) : (
-                        <div className="w-full h-full bg-green-100 flex items-center justify-center text-green-600 font-black text-xl">
-                          {match.name?.[0] || '?'}
+                  <div className="mt-3 space-y-2">
+                    {availableToAdd.map((match) => (
+                      <div key={match.id} className="flex items-center gap-3 rounded-[1.35rem] bg-slate-50 px-3 py-2.5">
+                        <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border border-slate-200">
+                          {match.photo ? (
+                            <img src={match.photo} className="h-full w-full object-cover" alt={match.name} />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-slate-200 font-bold text-slate-500">
+                              {match.name?.[0]}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeFromTeam(match.id)}
-                      className="absolute -top-1 -left-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-sm"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
+                        <span className="flex-1 text-right font-medium text-slate-800">{match.name?.split(" ")[0]}</span>
+                        <Button
+                          onClick={() => addToTeam(match.id)}
+                          className="rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.22)]"
+                        >
+                          <Plus className="ml-1 h-3 w-3" />
+                          הוסף
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-xs font-medium text-gray-600 max-w-[56px] truncate text-center">{match.name?.split(' ')[0]}</span>
                 </motion.div>
-              ))}
+              )}
             </AnimatePresence>
-
-            {/* Empty slots */}
-            {Array.from({ length: remaining }).map((_, i) => (
-              <div key={`empty-${i}`} className="flex flex-col items-center gap-1">
-                <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
-                  <span className="text-xl text-gray-300">?</span>
-                </div>
-                <span className="text-xs text-gray-400">פנוי</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Add from matches */}
-          {availableToAdd.length > 0 && remaining > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => setShowAddPanel(!showAddPanel)}
-                className="flex items-center gap-2 text-[--theme-orange] font-bold text-sm mx-auto"
-              >
-                <UserPlus className="w-4 h-4" />
-                הוסף מההתאמות שלי
-              </button>
-
-              <AnimatePresence>
-                {showAddPanel && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="mt-3 space-y-2">
-                      {availableToAdd.map(match => (
-                        <div key={match.id} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                            {match.photo ? (
-                              <img src={match.photo} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
-                                {match.name?.[0]}
-                              </div>
-                            )}
-                          </div>
-                          <span className="flex-1 font-medium text-gray-800">{match.name?.split(' ')[0]}</span>
-                          <button
-                            onClick={() => addToTeam(match.id)}
-                            className="flex items-center gap-1 bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full"
-                          >
-                            <Plus className="w-3 h-3" /> הוסף
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-
-        {/* Full team celebration */}
-        {remaining === 0 && (
-          <div className="gradient-orange rounded-2xl p-5 text-center">
-            <div className="flex justify-center mb-2">
-              <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-14 h-14 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
-            </div>
-            <p className="font-black text-white text-xl">ה Team מוכן 😎</p>
-            <p className="text-white/80 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
           </div>
         )}
+      </PremiumCard>
 
-        {/* CTA - find more partners */}
-        {remaining > 0 && (
-          <button
-            onClick={() => navigate(createPageUrl('Discover'))}
-            className="w-full py-4 rounded-2xl gradient-orange text-white font-black text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+      {remaining === 0 ? (
+        <PremiumCard>
+          <div className="text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+              <img
+                src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png"
+                className="h-8 w-8 object-contain brightness-0 invert"
+                alt=""
+              />
+            </div>
+            <p className="mt-4 text-2xl font-black text-slate-950">הצוות מוכן 😎</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">מצאת את כל השותפים שרצית. זמן להתקדם לשלב הבא.</p>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Button
+              onClick={() => navigate(createPageUrl("GroupChat"))}
+              className="w-full rounded-[18px] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
+            >
+              <MessageCircle className="ml-2 h-4 w-4" />
+              צ'אט צוות
+            </Button>
+            <Button
+              onClick={() => navigate(createPageUrl("GroupCompatibility"))}
+              variant="ghost"
+              className="w-full rounded-[18px] border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              <Puzzle className="ml-2 h-4 w-4" />
+              Vibe Check
+            </Button>
+          </div>
+        </PremiumCard>
+      ) : (
+        <PremiumCard>
+          <Button
+            onClick={() => navigate(createPageUrl("Discover"))}
+            className="w-full rounded-[18px] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
           >
-            <Search className="w-5 h-5" />
-            {`חפש שותפים`}
-          </button>
-        )}
-      </div>
-    </div>
+            <Search className="ml-2 h-4 w-4" />
+            חפש/י שותפים נוספים
+          </Button>
+        </PremiumCard>
+      )}
+    </PremiumPageFrame>
   );
 }

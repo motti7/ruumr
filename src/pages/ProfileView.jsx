@@ -1,325 +1,516 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Cat,
+  CheckCircle2,
+  Dog,
+  Facebook,
+  Heart,
+  Home,
+  Instagram,
+  Link as LinkIcon,
+  Linkedin,
+  MapPin,
+  MessageCircle,
+  PawPrint,
+  Sparkles,
+  Star,
+  Twitter,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import SmartImage from '@/components/shared/SmartImage';
-import MatchAnimation from '../components/discover/MatchAnimation';
-import ReviewsSection from '../components/reviews/ReviewsSection';
-import WriteReviewModal from '../components/reviews/WriteReviewModal';
-import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
-import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
-import mixpanel from 'mixpanel-browser';
+import SmartImage from "@/components/shared/SmartImage";
+import MatchAnimation from "../components/discover/MatchAnimation";
+import ReviewsSection from "../components/reviews/ReviewsSection";
+import WriteReviewModal from "../components/reviews/WriteReviewModal";
+import HouseholdPreferencesGrid from "@/components/profile/HouseholdPreferencesGrid";
+import { getInterestDisplayOption, normalizeInterestValues } from "@/lib/interests";
+import { base44 } from "@/api/base44Client";
+import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 
-// Custom Audio Player Component with Fade In
-const AudioPlayer = ({ src }) => {
-    const audioRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-        let fadeInterval = null;
+const sortByDateDesc = (records = [], field = "created_date") =>
+  [...records].sort((left, right) => {
+    const leftTime = Date.parse(left?.[field] || left?.created_date || "");
+    const rightTime = Date.parse(right?.[field] || right?.created_date || "");
 
-        audio.volume = 0;
+    if (Number.isFinite(leftTime) && Number.isFinite(rightTime)) {
+      return rightTime - leftTime;
+    }
 
-        const playPromise = audio.play();
+    const leftValue = String(left?.[field] ?? left?.created_date ?? "").trim();
+    const rightValue = String(right?.[field] ?? right?.created_date ?? "").trim();
+    return rightValue.localeCompare(leftValue);
+  });
 
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                setIsPlaying(true);
-                let vol = 0;
-                fadeInterval = setInterval(() => {
-                    if (vol < 0.8) {
-                        vol += 0.05;
-                        audio.volume = Math.min(vol, 0.8);
-                    } else {
-                        clearInterval(fadeInterval);
-                    }
-                }, 200);
-            }).catch(() => {
-                setIsPlaying(false);
-            });
-        }
-
-        return () => {
-            clearInterval(fadeInterval);
-            if (audio) {
-                audio.pause();
-                audio.src = "";
-            }
-        };
-    }, [src]);
-
-    const toggleMute = () => {
-        if (audioRef.current) {
-            audioRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
-        }
-    };
-
-    return (
-        <div className="flex items-center">
-            <audio ref={audioRef} src={src} loop />
-            <button 
-                onClick={toggleMute}
-                className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-        </div>
-    );
+const getCollection = (state, name) => {
+  if (!state?.collections?.[name]) return [];
+  return Array.isArray(state.collections[name]) ? state.collections[name] : [];
 };
+
+const isVideoUrl = (url) => typeof url === "string" && /\.(mp4|mov|webm|ogg)$/i.test(url);
+
+const ensureProtocol = (url) => {
+  if (!url) return "";
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
+const formatBudget = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return `₪${amount.toLocaleString()}`;
+};
+
+const formatSearchLocation = (profile) => {
+  const cities = Array.isArray(profile?.search_cities) ? profile.search_cities.filter(Boolean) : [];
+
+  if (profile?.current_status === "has_apartment") {
+    return profile?.location || cities[0] || "מיקום לא צוין";
+  }
+
+  if (cities.length === 0) {
+    return profile?.location || "מיקום לא צוין";
+  }
+
+  if (cities.length === 1) {
+    return cities[0];
+  }
+
+  return `${cities[0]} · ועוד ${cities.length - 1}`;
+};
+
+const formatRelativeDate = (value) => {
+  if (!value) return "עכשיו";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "עכשיו";
+
+  const diffDays = Math.floor((Date.now() - date.getTime()) / DAY_MS);
+  if (diffDays <= 0) return "היום";
+  if (diffDays === 1) return "אתמול";
+  if (diffDays < 7) return `לפני ${diffDays} ימים`;
+
+  return new Intl.DateTimeFormat("he-IL", {
+    day: "numeric",
+    month: "short",
+  }).format(date);
+};
+
+const getSocialIcon = (link) => {
+  if (!link) return <LinkIcon className="h-5 w-5" />;
+
+  const lower = link.toLowerCase();
+  if (lower.includes("facebook")) return <Facebook className="h-5 w-5" />;
+  if (lower.includes("instagram")) return <Instagram className="h-5 w-5" />;
+  if (lower.includes("twitter") || lower.includes("x.com")) return <Twitter className="h-5 w-5" />;
+  if (lower.includes("linkedin")) return <Linkedin className="h-5 w-5" />;
+  return <LinkIcon className="h-5 w-5" />;
+};
+
+const buildMedia = (profile) => {
+  const regularPhotos = profile?.photos?.filter(Boolean) || [];
+  const apartmentPhotos = profile?.current_status === "has_apartment" ? profile?.apartment_photos?.filter(Boolean) || [] : [];
+
+  const media = regularPhotos.map((url) => (isVideoUrl(url) ? { type: "video", url } : { type: "image", url }));
+  if (profile?.video_url) {
+    media.splice(1, 0, { type: "video", url: profile.video_url });
+  }
+
+  apartmentPhotos.forEach((url) => {
+    media.push({ type: "image", url, kind: "apartment" });
+  });
+
+  return media.length > 0
+    ? media
+    : [{ type: "image", url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
+};
+
+const buildProfileSnapshotFromSimulatorState = (state, targetUserId, currentUserId, fromLikes) => {
+  const profiles = getCollection(state, "Profile");
+  const profile = profiles.find((item) => String(item.user_id) === String(targetUserId)) || null;
+  if (!profile) return null;
+
+  const currentProfile = profiles.find((item) => String(item.user_id) === String(currentUserId)) || null;
+  const conversationMatch =
+    getCollection(state, "Match").find(
+      (match) =>
+        (String(match.user1_id) === String(currentUserId) && String(match.user2_id) === String(targetUserId)) ||
+        (String(match.user2_id) === String(currentUserId) && String(match.user1_id) === String(targetUserId))
+    ) || null;
+  const existingSwipe = getCollection(state, "Swipe").find(
+    (swipe) => String(swipe.swiper_id) === String(currentUserId) && String(swipe.swiped_id) === String(targetUserId)
+  );
+
+  return {
+    currentUser: state.currentUser || null,
+    currentProfile,
+    profile,
+    conversationMatch,
+    isExMatch: Boolean(conversationMatch),
+    showActions: Boolean(fromLikes) && !existingSwipe,
+  };
+};
+
+const AudioPreview = ({ src, image, title, artist }) => {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+
+    const handleEnded = () => setIsPlaying(false);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [src]);
+
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      if (audio.paused) {
+        await audio.play();
+        setIsPlaying(true);
+      } else {
+        audio.pause();
+        setIsPlaying(false);
+      }
+    } catch {
+      // Browser autoplay policies can block playback. The control still renders cleanly.
+    }
+  };
+
+  return (
+    <div className="rounded-[24px] border border-slate-200 bg-slate-950 p-3 text-white shadow-[0_18px_40px_rgba(15,23,42,0.18)]">
+      <audio ref={audioRef} src={src} loop />
+      <div className="flex items-center gap-3">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl">
+          <SmartImage src={image} alt={title || artist || "Song"} className="h-full w-full" priority={false} />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+        <div className="min-w-0 flex-1 text-right">
+          <p className="truncate text-sm font-bold">{title || "Track preview"}</p>
+          <p className="truncate text-xs text-white/65">{artist || "Artist"}</p>
+        </div>
+        <button
+          type="button"
+          onClick={togglePlay}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+          aria-label={isPlaying ? "Pause preview" : "Play preview"}
+        >
+          {isPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+function LoadingState() {
+  return (
+    <div className="mx-auto max-w-md space-y-4">
+      <div className="rounded-[2rem] border border-white/70 bg-white/78 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
+        <Skeleton className="h-3 w-24 rounded-full" />
+        <Skeleton className="mt-3 h-10 w-48 rounded-2xl" />
+        <Skeleton className="mt-3 h-4 w-[86%] rounded-full" />
+        <div className="mt-5 flex gap-2">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+          <Skeleton className="h-8 w-28 rounded-full" />
+        </div>
+      </div>
+      <Skeleton className="aspect-[4/5] rounded-[32px]" />
+      <Skeleton className="h-44 rounded-[28px]" />
+      <Skeleton className="h-48 rounded-[28px]" />
+    </div>
+  );
+}
+
+function ErrorState({ onBack }) {
+  return (
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4" dir="rtl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.16),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.92),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.04)_100%)]" />
+      <div className="relative w-full max-w-sm rounded-[2rem] border border-rose-200 bg-rose-50/90 p-6 text-right shadow-[0_24px_80px_rgba(244,63,94,0.08)] backdrop-blur-2xl">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm">
+            <X className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl font-black text-rose-950">לא הצלחנו לטעון את הפרופיל</h2>
+            <p className="mt-2 text-sm leading-6 text-rose-800/90">
+              יכול להיות שאין עדיין פרופיל כזה, או שהחיבור לא התייצב. אפשר לחזור לרשימות ולנסות שוב.
+            </p>
+            <button
+              onClick={onBack}
+              className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-200/60"
+            >
+              <ArrowRight className="h-4 w-4" />
+              חזרה ל-Matches
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Chip({ children, tone = "slate" }) {
+  const toneClasses = {
+    slate: "bg-slate-100 text-slate-600 ring-slate-200",
+    orange: "bg-orange-50 text-[--theme-orange] ring-orange-100",
+    green: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    white: "bg-white text-slate-500 ring-slate-200",
+  };
+
+  return (
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ${toneClasses[tone] || toneClasses.slate}`}>
+      {children}
+    </span>
+  );
+}
 
 export default function ProfileViewPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState(/** @type {any} */ (null));
+  const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [currentUser, setCurrentUser] = useState(/** @type {any} */ (null));
-  const [userProfile, setUserProfile] = useState(/** @type {any} */ (null));
-  const [matchData, setMatchData] = useState(/** @type {any} */ (null));
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [conversationMatch, setConversationMatch] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
+  const [matchData, setMatchData] = useState(null);
   const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
   const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
-  const isMixpanelTrackingEnabled = (() => {
-    const hostname = window.location.hostname.toLowerCase();
-    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
-  })();
+  const media = buildMedia(profile);
+  const matchScore = Number(plusMeta?.score);
+  const matchScoreLabel = Number.isFinite(matchScore) && matchScore > 0 ? `${Math.round(matchScore * 100)}% fit` : null;
+  const isVerified = profile?.is_verified !== false;
+  const currentStatusLabel = profile?.current_status === "has_apartment" ? "יש דירה" : "מחפש/ת דירה";
+  const apartmentStartIndex = media.findIndex((item) => item.kind === "apartment");
+  const petTypeLabel =
+    profile?.pet_type === "dog"
+      ? "כלב"
+      : profile?.pet_type === "cat"
+        ? "חתול"
+        : profile?.pet_type === "other"
+          ? profile?.pet_other_description || "אחר"
+          : null;
+  const petTypeIcon =
+    profile?.pet_type === "dog" ? (
+      <Dog className="ml-1 h-3.5 w-3.5" />
+    ) : profile?.pet_type === "cat" ? (
+      <Cat className="ml-1 h-3.5 w-3.5" />
+    ) : profile?.pet_type === "other" ? (
+      <PawPrint className="ml-1 h-3.5 w-3.5" />
+    ) : null;
 
   useEffect(() => {
-    loadProfile();
-  }, [location.search]); // Reload when URL changes
+    void loadProfile();
+  }, [location.search]);
+
+  useEffect(() => {
+    setCurrentPhotoIndex(0);
+  }, [profile?.id]);
+
+  useEffect(() => {
+    if (!media || media.length === 0) return;
+
+    if (currentPhotoIndex < media.length - 1 && media[currentPhotoIndex + 1]?.type === "image") {
+      const img = new Image();
+      img.src = media[currentPhotoIndex + 1].url;
+    }
+
+    if (currentPhotoIndex > 0 && media[currentPhotoIndex - 1]?.type === "image") {
+      const img = new Image();
+      img.src = media[currentPhotoIndex - 1].url;
+    }
+  }, [currentPhotoIndex, media]);
 
   const loadProfile = async () => {
     setIsLoading(true);
+
     try {
       const urlParams = new URLSearchParams(location.search);
       const userId = urlParams.get("userId");
-      const fromLikes = urlParams.get("fromLikes");
+      const fromLikes = urlParams.get("fromLikes") === "true";
 
       if (!userId) {
         navigate(createPageUrl("Matches"));
         return;
       }
 
-      // Always load current user so swipe actions always work
-      const user = await User.me();
-      setCurrentUser(user);
-
-      const [profilesResult, myProfilesResult] = await Promise.all([
-        Profile.filter({ user_id: userId }),
-        Profile.filter({ user_id: user.id }),
-      ]);
-
-      if (!profilesResult || profilesResult.length === 0) {
-        setIsLoading(false);
-        return;
+      if (isRuumrSimulatorMode()) {
+        enableSimulatorBackend(base44);
       }
 
-      setProfile(profilesResult[0]);
-      setUserProfile(myProfilesResult[0] || null);
-
-      // Check for existing match (to allow writing a review)
       try {
-        const [m1, m2] = await Promise.all([
+        const user = await User.me();
+        const [targetProfiles, myProfiles, matchOne, matchTwo, swipeRecords] = await Promise.all([
+          Profile.filter({ user_id: userId }),
+          Profile.filter({ user_id: user.id }),
           Match.filter({ user1_id: user.id, user2_id: userId }),
           Match.filter({ user2_id: user.id, user1_id: userId }),
+          fromLikes ? Swipe.filter({ swiper_id: user.id, swiped_id: userId }) : Promise.resolve([]),
         ]);
-        if (m1.length > 0 || m2.length > 0) setIsExMatch(true);
-      } catch(e) {}
 
-      // Show swipe actions only when coming from likes and not yet swiped
-      if (fromLikes === 'true') {
-        const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
-        setShowActions(existingSwipe.length === 0);
+        const targetProfile = targetProfiles[0] || null;
+        if (!targetProfile) {
+          throw new Error("Profile not found");
+        }
+
+        const existingMatch = matchOne[0] || matchTwo[0] || null;
+
+        setCurrentUser(user);
+        setUserProfile(myProfiles[0] || null);
+        setProfile(targetProfile);
+        setConversationMatch(existingMatch);
+        setIsExMatch(Boolean(existingMatch));
+        setShowActions(fromLikes && swipeRecords.length === 0);
+        return;
+      } catch (apiError) {
+        const simulatorState = getSimulatorBackendState();
+        if (simulatorState?.currentUser) {
+          const snapshot = buildProfileSnapshotFromSimulatorState(
+            simulatorState,
+            userId,
+            simulatorState.currentUser.id,
+            fromLikes
+          );
+
+          if (snapshot) {
+            setCurrentUser(snapshot.currentUser);
+            setUserProfile(snapshot.currentProfile);
+            setProfile(snapshot.profile);
+            setConversationMatch(snapshot.conversationMatch);
+            setIsExMatch(snapshot.isExMatch);
+            setShowActions(snapshot.showActions);
+            return;
+          }
+        }
+
+        throw apiError;
       }
     } catch (error) {
       console.error("Error loading profile:", error);
+      setProfile(null);
+      setUserProfile(null);
+      setConversationMatch(null);
+      setIsExMatch(false);
+      setShowActions(false);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
-  
+
   const handleSwipe = async (action) => {
     if (!currentUser || !userProfile || !profile) return;
-    
+
     setActionFeedback(action);
-    setTimeout(() => setActionFeedback(null), 600);
+    setTimeout(() => setActionFeedback(null), 650);
 
     try {
-      // Create swipe
       const swipeData = {
         swiper_id: userProfile.user_id,
         swiper_name: userProfile.name,
         swiped_id: profile.user_id,
         swiped_name: profile.name,
-        action
+        action,
       };
-      
-      await Swipe.create(swipeData);
-      console.log("✅ Swipe saved successfully:", swipeData);
-      if (isMixpanelTrackingEnabled) {
-        mixpanel.track('Swipe', {
-          direction: action === 'like' ? 'right' : 'left',
-          target_profile_id: profile.user_id,
-        });
-      }
 
-      // Check for match if liked
+      await Swipe.create(swipeData);
+
       let didMatch = false;
-      if (action === 'like') {
-        try {
-          const reverseSwipes = await Swipe.filter({ 
-            swiper_id: profile.user_id, 
-            swiped_id: userProfile.user_id, 
-            action: 'like' 
+      if (action === "like") {
+        const reverseSwipes = await Swipe.filter({
+          swiper_id: profile.user_id,
+          swiped_id: userProfile.user_id,
+          action: "like",
+        });
+
+        if (reverseSwipes && reverseSwipes.length > 0) {
+          didMatch = true;
+
+          const existingMatches = await Match.filter({
+            $or: [
+              { user1_id: userProfile.user_id, user2_id: profile.user_id },
+              { user1_id: profile.user_id, user2_id: userProfile.user_id },
+            ],
           });
 
-          if (reverseSwipes && reverseSwipes.length > 0) {
-            didMatch = true;
-
-            const existingMatches = await Match.filter({
-              $or: [
-                { user1_id: userProfile.user_id, user2_id: profile.user_id },
-                { user1_id: profile.user_id, user2_id: userProfile.user_id }
-              ]
+          let nextMatch = existingMatches[0] || null;
+          if (!nextMatch) {
+            nextMatch = await Match.create({
+              user1_id: userProfile.user_id,
+              user2_id: profile.user_id,
+              user1_name: userProfile.name,
+              user2_name: profile.name,
+              status: "active",
             });
-
-            if (existingMatches.length === 0) {
-              await Match.create({
-                user1_id: userProfile.user_id,
-                user2_id: profile.user_id,
-                user1_name: userProfile.name,
-                user2_name: profile.name,
-                status: 'active'
-              });
-              if (isMixpanelTrackingEnabled) {
-                mixpanel.track('Match Created', {
-                  matched_with_id: profile.user_id,
-                });
-              }
-            }
-
-            setMatchData({ profile1: userProfile, profile2: profile });
-
-            try {
-              const { base44: b44 } = await import('@/api/base44Client');
-              const functions = /** @type {any} */ (b44.functions);
-              if (functions?.handleSwipe) {
-                await functions.handleSwipe({
-                  swiper_id: userProfile.user_id,
-                  swiped_id: profile.user_id,
-                  action,
-                  origin: window.location.origin
-                });
-              }
-            } catch (e) {}
           }
-        } catch (matchError) {
-          console.error("❌ Error in match detection:", matchError);
+
+          setConversationMatch(nextMatch);
+          setIsExMatch(true);
+          setMatchData({ profile1: userProfile, profile2: profile });
         }
       }
-      
+
       setTimeout(() => {
-        navigate(createPageUrl('LikesYou'));
+        navigate(createPageUrl("LikesYou"));
       }, didMatch ? 4000 : 1000);
-      
-    } catch (error) { 
-      console.error("❌ Swipe save failed:", error); 
+    } catch (error) {
+      console.error("Swipe save failed:", error);
       alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
     }
   };
 
-  const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
-  const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
-  const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
-
-  // Calculate media safely (profile might be null)
-  const regularPhotos = profile?.photos?.filter(p => p) || [];
-  const apartmentPhotos = (profile?.current_status === 'has_apartment' && profile?.apartment_photos?.filter(p => p)) ? profile.apartment_photos.filter(p => p) : [];
-  
-  const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
-
-  let allMedia = [...regularPhotos].map(item => {
-      if (typeof item === 'string') {
-          return isVideoUrl(item) ? { type: 'video', url: item } : { type: 'image', url: item };
-      }
-      return item;
-  });
-
-  if (profile?.video_url) {
-      allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
-  }
-  
-  allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
-  
-  const media = allMedia.length > 0 ? allMedia : [{ type: 'image', url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
-
-  // Prefetch next and prev photos
-  useEffect(() => {
-    if (!media || media.length === 0) return;
-    
-    // Preload next
-    if (currentPhotoIndex < media.length - 1 && media[currentPhotoIndex + 1].type === 'image') {
-        const img = new Image();
-        img.src = media[currentPhotoIndex + 1].url;
-    }
-    // Preload prev
-    if (currentPhotoIndex > 0 && media[currentPhotoIndex - 1].type === 'image') {
-        const img = new Image();
-        img.src = media[currentPhotoIndex - 1].url;
-    }
-  }, [currentPhotoIndex, media]);
-
-  const getSocialIcon = (link) => {
-      if (!link) return null;
-      const l = link.toLowerCase();
-      // Only return icon, color handled by parent
-      if (l.includes('facebook')) return <Facebook className="w-5 h-5" />;
-      if (l.includes('instagram')) return <Instagram className="w-5 h-5" />;
-      if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5" />;
-      if (l.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
-      return <LinkIcon className="w-5 h-5" />;
+  const openChat = () => {
+    if (!conversationMatch?.id) return;
+    navigate(createPageUrl("Chat") + `?matchId=${conversationMatch.id}`);
   };
 
-  const ensureProtocol = (url) => {
-      if (!url) return '';
-      if (!/^https?:\/\//i.test(url)) {
-          return `https://${url}`;
-      }
-      return url;
-  };
+  const regularPhotos = profile?.photos?.filter((item) => item) || [];
+  const apartmentPhotos =
+    profile?.current_status === "has_apartment" && profile?.apartment_photos?.filter((item) => item)
+      ? profile.apartment_photos.filter((item) => item)
+      : [];
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <Skeleton className="w-40 h-64 rounded-2xl" />
-          <Skeleton className="w-48 h-4 rounded-full" />
-          <Skeleton className="w-32 h-4 rounded-full" />
-        </div>
+      <div className="relative min-h-[100dvh] overflow-hidden px-4 pt-4 pb-28" dir="rtl">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.14),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.9),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.64)_0%,_rgba(255,255,255,0.05)_100%)]" />
+        <LoadingState />
       </div>
     );
   }
 
   if (!profile) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p>לא נמצא פרופיל</p>
-      </div>
-    );
+    return <ErrorState onBack={() => navigate(createPageUrl("Matches"))} />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20" dir="rtl">
+    <div className="relative min-h-[100dvh] overflow-hidden px-4 pt-4 pb-32" dir="rtl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.14),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.9),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.64)_0%,_rgba(255,255,255,0.05)_100%)]" />
+
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>
@@ -330,183 +521,337 @@ export default function ProfileViewPage() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+            className="fixed left-1/2 top-1/2 z-[150] -translate-x-1/2 -translate-y-1/2"
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 0.5 }}
-              className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
-                actionFeedback === 'like' 
-                  ? 'bg-red-500' 
-                  : 'bg-black'
+              className={`flex h-32 w-32 items-center justify-center rounded-full shadow-2xl ${
+                actionFeedback === "like" ? "bg-[--theme-orange]" : "bg-slate-950"
               }`}
             >
-              {actionFeedback === 'like' ? (
-                <Heart className="w-16 h-16 text-white" fill="white" />
+              {actionFeedback === "like" ? (
+                <Heart className="h-16 w-16 text-white" fill="white" />
               ) : (
-                <X className="w-16 h-16 text-white" strokeWidth={4} />
+                <X className="h-16 w-16 text-white" strokeWidth={4} />
               )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-10" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
-        <button 
-          onClick={() => navigate(-1)} 
-          className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="חזור"
+      <div className="mx-auto max-w-md space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-[2rem] border border-white/70 bg-white/78 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
         >
-          <ArrowRight className="w-6 h-6 text-gray-600" />
-        </button>
-        <h2 className="font-bold text-gray-900 text-lg">{profile.name}</h2>
-      </div>
-
-      <div className="relative">
-        <div className="aspect-[3/4] bg-gray-200 relative">
-          {media[currentPhotoIndex].type === 'video' ? (
-              <video
-                  key={currentPhotoIndex}
-                  src={media[currentPhotoIndex].url}
-                  className="w-full h-full object-cover"
-                  controls
-                  playsInline
-              />
-          ) : (
-              <SmartImage
-                key={currentPhotoIndex}
-                src={media[currentPhotoIndex].url}
-                alt={profile.name}
-                className="w-full h-full"
-                priority={true}
-              />
-          )}
-          
-          {currentPhotoIndex === 0 && profile.social_link && (
-             <a 
-                 href={ensureProtocol(profile.social_link)}
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 onClick={(e) => e.stopPropagation()}
-                 className="absolute bottom-24 left-4 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform text-[--theme-orange]"
-             >
-                 {getSocialIcon(profile.social_link)}
-             </a>
-          )}
-          <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
-            {media.map((_, i) => (
-              <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'bg-white w-full' : 'w-0'}`} />
-              </div>
-            ))}
-          </div>
-          <div className="absolute inset-0 flex z-0">
-            <div className="w-1/6 h-full cursor-w-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length)} />
-            <div className="w-4/6 h-full" /> 
-            <div className="w-1/6 h-full cursor-e-resize z-10" onClick={() => setCurrentPhotoIndex(prev => (prev + 1) % media.length)} />
-          </div>
-        </div>
-      </div>
-      
-      <div className="p-4 space-y-4">
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
-          <div className="flex items-start text-gray-600 mb-3">
-            <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
-            <div className="flex flex-col">
-                 {profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0 ? (
-                    <>
-                        <span>{profile.search_cities[0]}</span>
-                        {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
-                        {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">ועוד...</span>}
-                    </>
-                 ) : (
-                    <span>{profile.location}</span>
-                 )}
-                 <span className="text-sm text-gray-500 mt-0.5">• {profile.search_area}</span>
-            </div>
-          </div>
-          {profile.current_status === 'has_apartment' && (
-            <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
-              <Home className="w-4 h-4 ml-1" />
-              יש לי דירה
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-2">קצת עליי</h4>
-          <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
-
-          {/* Custom Audio Player with Fade In */}
-          {profile.song_preview_url ? (
-              <div className="mb-4 bg-gray-900 rounded-xl p-3 flex items-center gap-3 shadow-md">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={profile.song_image || "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"} alt="Album" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                          <div className="bar-loader"></div>
-                      </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                      <div className="text-white font-bold truncate text-sm">{profile.song_name}</div>
-                      <div className="text-gray-400 text-xs truncate">{profile.song_artist}</div>
-                  </div>
-                  <AudioPlayer src={profile.song_preview_url} />
-              </div>
-          ) : profile.spotify_track_id && (
-              <div className="mb-4 rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                  <iframe 
-                      src={`https://open.spotify.com/embed/track/${profile.spotify_track_id}?utm_source=generator&theme=0`} 
-                      width="100%" 
-                      height="80" 
-                      frameBorder="0" 
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                      loading="lazy"
-                  ></iframe>
-              </div>
-          )}
-
-          {profile.social_link && (
-            <a 
-              href={ensureProtocol(profile.social_link)} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-4 py-2 rounded-full hover:brightness-110 transition-colors shadow-sm"
+          <div className="flex items-start justify-between gap-3" dir="ltr">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/88 text-slate-600 shadow-sm ring-1 ring-slate-200"
+              aria-label="חזור"
             >
-              {(() => { const icon = getSocialIcon(profile.social_link); return icon ? React.cloneElement(icon, { className: "w-5 h-5" }) : <LinkIcon className="w-5 h-5" />; })()}
-              בואו להכיר אותי
-            </a>
-          )}
-        </div>
+              <ArrowRight className="h-5 w-5" />
+            </button>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-2">מה אני מחפש/ת</h4>
-          <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
-        </div>
+            <div className="min-w-0 flex-1 text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Profile studio</p>
+              <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
+                {profile.name}, {profile.age}
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {formatSearchLocation(profile)}
+                {profile?.search_area ? ` · ${profile.search_area}` : ""}
+              </p>
+            </div>
 
-        {plusMeta && plusMeta.insight && (
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
-            <h4 className="font-bold text-lg mb-2 flex items-center gap-2 text-[--theme-orange]">
-              <Sparkles className="w-5 h-5" />
-              Ruumr Plus
-            </h4>
-            <p className="text-gray-700 leading-relaxed">{plusMeta.insight}</p>
-            {plusMeta.messageable !== undefined && (
-              <div className="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-[--theme-orange]">
-                {plusMeta.messageable ? "הודעות פתוחות" : "שיחה נעולה"}
+            {conversationMatch?.id ? (
+              <button
+                onClick={openChat}
+                className="flex min-h-[44px] items-center gap-2 rounded-full bg-[--theme-orange] px-4 text-sm font-bold text-white shadow-[0_14px_30px_rgba(255,122,69,0.24)]"
+              >
+                <MessageCircle className="h-4 w-4" />
+                צ'אט
+              </button>
+            ) : (
+              <div className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200">
+                <Sparkles className="mr-1 inline h-3.5 w-3.5 text-[--theme-orange]" />
+                {showActions ? "Swipe mode" : "Profile ready"}
               </div>
             )}
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Chip tone="white">{currentStatusLabel}</Chip>
+            {matchScoreLabel && <Chip tone="orange">{matchScoreLabel}</Chip>}
+            <Chip tone={isVerified ? "green" : "slate"}>
+              {isVerified ? (
+                <>
+                  <CheckCircle2 className="ml-1 h-3.5 w-3.5" />
+                  מאומת
+                </>
+              ) : (
+                "Needs verification"
+              )}
+            </Chip>
+            {profile.budget_max ? <Chip tone="slate">{formatBudget(profile.budget_max)}</Chip> : null}
+            {petTypeLabel ? (
+              <Chip tone="white">
+                {petTypeIcon}
+                {petTypeLabel}
+              </Chip>
+            ) : null}
+            <Chip tone="slate">נוסף {formatRelativeDate(profile.created_date)}</Chip>
+          </div>
+
+          {conversationMatch?.id && (
+            <button
+              onClick={openChat}
+              className="mt-4 w-full rounded-[24px] border border-emerald-100 bg-emerald-50/90 p-4 text-right shadow-[0_14px_30px_rgba(16,185,129,0.08)] transition-transform active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 text-right">
+                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-600">Conversation ready</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-700">
+                    ההתאמה פעילה. אפשר להמשיך ישר לשיחה.
+                  </p>
+                </div>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+                  <ArrowUpRight className="h-4 w-4" />
+                </div>
+              </div>
+            </button>
+          )}
+
+          {plusMeta?.insight && (
+            <div className="mt-4 rounded-[24px] border border-orange-100 bg-orange-50/80 p-4 text-right shadow-[0_12px_30px_rgba(255,122,69,0.10)]">
+              <div className="flex items-center gap-2 text-[--theme-orange]">
+                <Sparkles className="h-4 w-4" />
+                <p className="text-xs font-bold uppercase tracking-[0.28em]">Ruumr Plus</p>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{plusMeta.insight}</p>
+            </div>
+          )}
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-hidden rounded-[32px] border border-white/70 bg-white/76 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-2xl"
+        >
+          <div className="relative aspect-[4/5] bg-slate-100">
+            {media[currentPhotoIndex]?.type === "video" ? (
+              <video
+                key={currentPhotoIndex}
+                src={media[currentPhotoIndex].url}
+                className="h-full w-full object-cover"
+                controls
+                playsInline
+              />
+            ) : (
+              <SmartImage
+                key={currentPhotoIndex}
+                src={media[currentPhotoIndex]?.url}
+                alt={profile.name}
+                className="h-full w-full"
+                priority={true}
+              />
+            )}
+
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08)_0%,rgba(15,23,42,0.18)_42%,rgba(15,23,42,0.84)_100%)]" />
+
+            <div className="absolute left-4 right-4 top-4 flex items-center gap-1.5">
+              {media.map((_, index) => (
+                <div key={index} className="h-1 flex-1 overflow-hidden rounded-full bg-white/25">
+                  <div className={`h-full rounded-full transition-all ${index === currentPhotoIndex ? "w-full bg-white" : "w-0"}`} />
+                </div>
+              ))}
+            </div>
+
+            <div className="absolute inset-0 flex">
+              <button
+                type="button"
+                aria-label="Photo previous"
+                className="w-1/5 cursor-w-resize"
+                onClick={() => setCurrentPhotoIndex((prev) => (prev - 1 + media.length) % media.length)}
+              />
+              <div className="w-3/5" />
+              <button
+                type="button"
+                aria-label="Photo next"
+                className="w-1/5 cursor-e-resize"
+                onClick={() => setCurrentPhotoIndex((prev) => (prev + 1) % media.length)}
+              />
+            </div>
+
+            {currentPhotoIndex === 0 && profile.social_link && (
+              <a
+                href={ensureProtocol(profile.social_link)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="absolute bottom-24 left-4 z-20 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-[--theme-orange] shadow-lg backdrop-blur-sm transition-transform hover:scale-110"
+                aria-label="פתח/י קישור חברתי"
+              >
+                {getSocialIcon(profile.social_link)}
+              </a>
+            )}
+
+            <div className="absolute inset-x-4 bottom-4" dir="rtl">
+              <div className="flex items-end justify-between gap-3">
+                <div className="min-w-0 text-right">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-white/60">
+                    {currentPhotoIndex + 1}/{media.length}
+                  </p>
+                  <h2 className="mt-1 truncate text-3xl font-black tracking-tight text-white">
+                    {profile.name}, {profile.age}
+                  </h2>
+                  <p className="mt-2 flex items-center justify-end gap-1.5 text-sm text-white/82">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{formatSearchLocation(profile)}</span>
+                  </p>
+                </div>
+
+                <div className="rounded-[1.15rem] border border-white/15 bg-white/12 px-3 py-2 text-right backdrop-blur-md">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/55">
+                    {showActions ? "Action" : "Status"}
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-white">
+                    {showActions ? "Swipe now" : conversationMatch?.id ? "Conversation live" : "Open profile"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 p-4 text-right">
+            <div className="flex flex-wrap gap-2">
+              {profile.search_area && <Chip tone="slate">{profile.search_area}</Chip>}
+              {profile.budget_max ? <Chip tone="orange">{formatBudget(profile.budget_max)}</Chip> : null}
+              <Chip tone="white">{currentStatusLabel}</Chip>
+            </div>
+
+            <div className="rounded-[24px] border border-slate-100 bg-slate-50/90 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">Media note</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {currentPhotoIndex === 0
+                  ? "Swipe across the gallery to see portraits, apartment shots and any clip that was added."
+                  : "Portraits and apartment details are mixed together so you can judge the lifestyle, not just the cover photo."}
+              </p>
+            </div>
+
+            {profile.song_preview_url && (
+              <AudioPreview
+                src={profile.song_preview_url}
+                image={profile.song_image}
+                title={profile.song_name}
+                artist={profile.song_artist}
+              />
+            )}
+          </div>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-[28px] border border-white/70 bg-white/82 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
+        >
+          <h3 className="text-right text-lg font-black tracking-tight text-slate-950">קצת עליי</h3>
+          <div className="mt-4 space-y-4 text-right">
+            <p className="text-sm leading-7 text-slate-600">{profile.about_me || "אין עדיין טקסט קצר על הפרופיל הזה."}</p>
+
+            <div className="rounded-[24px] border border-orange-100 bg-orange-50/80 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[--theme-orange]">Looking for</p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">
+                {profile.looking_for_description || "עוד אין תיאור של מה שמחפשים."}
+              </p>
+            </div>
+
+            {profile.social_link && (
+              <a
+                href={ensureProtocol(profile.social_link)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[--theme-orange] px-4 py-2 text-sm font-bold text-white shadow-[0_14px_30px_rgba(255,122,69,0.24)]"
+              >
+                {getSocialIcon(profile.social_link)}
+                לפתוח רשת חברתית
+              </a>
+            )}
+          </div>
+        </motion.section>
+
+        {profile.current_status === "has_apartment" && apartmentPhotos.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-[28px] border border-white/70 bg-white/82 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
+          >
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <Chip tone="orange">
+                <Home className="ml-1 h-3.5 w-3.5" />
+                הדירה שלי
+              </Chip>
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-slate-400">Apartment</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {apartmentPhotos.slice(0, 4).map((url, index) => (
+                <button
+                  key={`${url}-${index}`}
+                  type="button"
+                  className="aspect-[4/3] overflow-hidden rounded-[20px] border border-slate-100 bg-slate-100 shadow-sm"
+                  onClick={() => setCurrentPhotoIndex(apartmentStartIndex >= 0 ? apartmentStartIndex + index : currentPhotoIndex)}
+                >
+                  <SmartImage src={url} alt={`Apartment ${index + 1}`} className="h-full w-full" priority={false} />
+                </button>
+              ))}
+            </div>
+          </motion.section>
         )}
+
+        {interestOptions.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-[28px] border border-orange-100 bg-orange-50/80 p-4 shadow-[0_18px_50px_rgba(255,122,69,0.08)]"
+          >
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <Chip tone="orange">
+                <Sparkles className="ml-1 h-3.5 w-3.5" />
+                תחומי עניין
+              </Chip>
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-slate-400">Interests</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {interestOptions.map((interest) => (
+                <span
+                  key={interest.id}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium ${interest.color}`}
+                >
+                  {interest.label}
+                </span>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        <HouseholdPreferencesGrid
+          profile={profile}
+          variant="light"
+          title="הרגלים בבית"
+          description="כך נראית השגרה בבית, כדי להבין אם זה מרגיש נכון עוד לפני הפגישה."
+          className="shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
+        />
 
         <ReviewsSection userId={profile.user_id} />
 
         {isExMatch && (
           <button
             onClick={() => setShowReviewModal(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[--theme-orange] text-[--theme-orange] font-bold text-sm"
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[24px] border-2 border-dashed border-[--theme-orange] bg-white/85 text-[--theme-orange] shadow-[0_18px_50px_rgba(255,122,69,0.08)]"
           >
-            <Star className="w-5 h-5" />
+            <Star className="h-5 w-5" />
             כתוב/י חוות דעת על השותפות
           </button>
         )}
@@ -520,83 +865,36 @@ export default function ProfileViewPage() {
           />
         )}
 
-        {interestOptions.length > 0 && (
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
-            <div className="flex flex-wrap gap-2">
-              {interestOptions.map((interest) => (
-                <span key={interest.id} className={`px-3 py-1.5 rounded-full text-sm font-medium border ${interest.color}`}>
-                  {interest.label}
-                </span>
-              ))}
-            </div>
+        {!showActions && !conversationMatch?.id && (
+          <div className="rounded-[28px] border border-white/70 bg-white/82 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
+            <p className="text-right text-sm font-bold text-slate-900">אין פעולות ישירות כרגע</p>
+            <p className="mt-2 text-right text-sm leading-6 text-slate-500">
+              אפשר להמשיך לגלריה או לחזור לרשימות כדי לבחור מישהו אחר.
+            </p>
           </div>
         )}
-
-        <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-3">פרטים נוספים</h4>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <span className="text-gray-500 text-sm block mb-1">דת</span>
-              <span className="font-semibold text-gray-900">{profile.religion ? religionText[profile.religion] : '-'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm block mb-1">וייב</span>
-              <span className="font-semibold text-gray-900">{profile.vibe_level ? vibeText[profile.vibe_level - 1] : '-'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm block mb-1">כשרות</span>
-              <span className="font-semibold text-gray-900">{profile.kosher_preference ? preferenceText[profile.kosher_preference] : '-'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm block mb-1">שבת</span>
-              <span className="font-semibold text-gray-900">{profile.shabbat_preference ? preferenceText[profile.shabbat_preference] : '-'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm block mb-1">תקציב</span>
-              <span className="font-semibold text-[--theme-orange]">{profile.budget_max != null ? `₪${profile.budget_max.toLocaleString()}` : '-'}</span>
-            </div>
-            {profile.pet_type !== 'none' && (
-              <div>
-                <span className="text-gray-500 text-sm block mb-1">חיית מחמד</span>
-                <div className="flex items-center">
-                  {profile.pet_type === 'dog' && <Dog className="w-4 h-4 ml-1" />}
-                  {profile.pet_type === 'cat' && <Cat className="w-4 h-4 ml-1" />}
-                  {profile.pet_type === 'other' && <PawPrint className="w-4 h-4 ml-1" />}
-                  <span className="font-semibold text-gray-900">
-                    {profile.pet_type === 'other' ? profile.pet_other_description : profile.pet_type === 'dog' ? 'כלב' : 'חתול'}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <HouseholdPreferencesGrid
-          profile={profile}
-          variant="light"
-          title="הרגלים בבית"
-          description="המידע הזה משמש את Ruumr Plus כדי להבין את שגרת החיים בדירה."
-        />
       </div>
-      
+
       {showActions && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
-          <div className="max-w-md mx-auto flex items-center justify-center gap-6">
+        <div
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-white/70 bg-white/90 px-4 pt-3 backdrop-blur-2xl"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+        >
+          <div className="mx-auto flex max-w-md items-center justify-center gap-5">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('dislike')}
-              className="w-16 h-16 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shadow-lg hover:border-gray-400 transition-colors"
+              onClick={() => handleSwipe("dislike")}
+              className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-white shadow-lg"
             >
-              <X className="w-8 h-8 text-gray-600" strokeWidth={3} />
+              <X className="h-8 w-8 text-slate-600" strokeWidth={3} />
             </motion.button>
-            
+
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('like')}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow"
+              onClick={() => handleSwipe("like")}
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] shadow-[0_18px_40px_rgba(255,122,69,0.30)]"
             >
-              <Heart className="w-10 h-10 text-white" fill="white" />
+              <Heart className="h-10 w-10 text-white" fill="white" />
             </motion.button>
           </div>
         </div>

@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Puzzle, CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Puzzle, CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  PremiumCard,
+  PremiumPageFrame,
+  PremiumPill,
+} from "@/components/shared/PremiumPageFrame";
 
 const CHARTER_QUESTIONS = [
   { id: "q_smoking", title: "עישון בדירה", emoji: "🚬", option_a: "בכיף, חופשי בסלון", option_b: "רק בחוץ/במרפסת", compromise: "מעשנים רק במרפסת (עם דלת סגורה!)" },
@@ -27,8 +33,12 @@ function CompatibilityRing({ percent, size = 80 }) {
     <svg width={size} height={size} className="-rotate-90">
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#f3f4f6" strokeWidth={6} />
       <motion.circle
-        cx={size / 2} cy={size / 2} r={r}
-        fill="none" stroke={color} strokeWidth={6}
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={6}
         strokeLinecap="round"
         strokeDasharray={circ}
         initial={{ strokeDashoffset: circ }}
@@ -45,7 +55,7 @@ function BreakdownPanel({ myMap, theirMap, memberName }) {
   const agrees = [];
   const disagrees = [];
 
-  CHARTER_QUESTIONS.forEach(q => {
+  CHARTER_QUESTIONS.forEach((q) => {
     const mine = myMap[q.id];
     const theirs = theirMap[q.id];
     if (!mine || !theirs) return;
@@ -57,13 +67,13 @@ function BreakdownPanel({ myMap, theirMap, memberName }) {
   });
 
   return (
-    <div className="mt-3 border-t border-gray-100 pt-3">
+    <div className="mt-4 border-t border-slate-100 pt-4">
       <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between text-xs font-bold text-gray-500 hover:text-gray-700"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between text-xs font-bold text-slate-500 hover:text-slate-700"
       >
         <span>פירוט הסכמות / חוסר הסכמות</span>
-        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
 
       <AnimatePresence>
@@ -74,35 +84,40 @@ function BreakdownPanel({ myMap, theirMap, memberName }) {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 space-y-3">
               {agrees.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-bold text-green-600 mb-1.5">✅ מסכימים ({agrees.length})</p>
+                  <p className="mb-1.5 text-[11px] font-bold text-emerald-600">✅ מסכימים ({agrees.length})</p>
                   <div className="space-y-1">
-                    {agrees.map(q => (
-                      <div key={q.id} className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2">
+                    {agrees.map((q) => (
+                      <div key={q.id} className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2">
                         <span className="text-base">{q.emoji}</span>
-                        <span className="text-xs font-medium text-gray-700">{q.title}</span>
+                        <span className="text-xs font-medium text-slate-700">{q.title}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+
               {disagrees.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-bold text-red-500 mb-1.5">❌ לא מסכימים ({disagrees.length})</p>
+                  <p className="mb-1.5 text-[11px] font-bold text-rose-500">❌ לא מסכימים ({disagrees.length})</p>
                   <div className="space-y-2">
-                    {disagrees.map(q => (
-                      <div key={q.id} className="bg-red-50 rounded-xl px-3 py-2">
-                        <div className="flex items-center gap-2 mb-1">
+                    {disagrees.map((q) => (
+                      <div key={q.id} className="rounded-xl bg-rose-50 px-3 py-2">
+                        <div className="mb-1 flex items-center gap-2">
                           <span className="text-base">{q.emoji}</span>
-                          <span className="text-xs font-bold text-gray-700">{q.title}</span>
+                          <span className="text-xs font-bold text-slate-700">{q.title}</span>
                         </div>
-                        <div className="flex gap-2 text-[10px] text-gray-500 mb-1">
-                          <span className="bg-[--theme-orange]/10 text-[--theme-orange] px-2 py-0.5 rounded-full font-medium">אני: {myMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
-                          <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{memberName}: {theirMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
+                        <div className="mb-1 flex flex-wrap gap-2 text-[10px] text-slate-500">
+                          <span className="rounded-full bg-orange-50 px-2 py-0.5 font-medium text-[--theme-orange]">
+                            אני: {myMap[q.id] === "a" ? q.option_a : q.option_b}
+                          </span>
+                          <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-700">
+                            {memberName}: {theirMap[q.id] === "a" ? q.option_a : q.option_b}
+                          </span>
                         </div>
-                        <p className="text-[10px] text-gray-500 font-medium">💡 פשרה: {q.compromise}</p>
+                        <p className="text-[10px] font-medium text-slate-500">💡 פשרה: {q.compromise}</p>
                       </div>
                     ))}
                   </div>
@@ -132,264 +147,276 @@ export default function GroupCompatibilityPage() {
         setUser(userData);
 
         const profiles = await base44.entities.Profile.filter({ user_id: userData.id });
-        if (profiles.length === 0) { navigate(createPageUrl('GroupTracker')); return; }
+        if (profiles.length === 0) {
+          navigate(createPageUrl("GroupTracker"));
+          return;
+        }
+
         const prof = profiles[0];
         setMyProfile(prof);
 
         const savedTeam = prof.team_members || [];
-        if (savedTeam.length === 0) { setIsLoading(false); return; }
+        if (savedTeam.length === 0) {
+          setIsLoading(false);
+          return;
+        }
 
         setTeamMembers(savedTeam);
 
         const compatibilityMap = {};
-        await Promise.all(savedTeam.map(async (member) => {
-          const matchId = member.match_id;
-          if (!matchId) return;
+        await Promise.all(
+          savedTeam.map(async (member) => {
+            const matchId = member.match_id;
+            if (!matchId) return;
 
-          const [myAnswers, allAnswers] = await Promise.all([
-            base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: userData.id }),
-            base44.entities.CharterAnswer.filter({ match_id: matchId })
-          ]);
+            const [myAnswers, allAnswers] = await Promise.all([
+              base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: userData.id }),
+              base44.entities.CharterAnswer.filter({ match_id: matchId }),
+            ]);
 
-          const theirAnswers = allAnswers.filter(a => a.user_id !== userData.id);
+            const theirAnswers = allAnswers.filter((answer) => answer.user_id !== userData.id);
 
-          const myMap = {};
-          myAnswers.forEach(a => { myMap[a.question_id] = a.answer; });
+            const myMap = {};
+            myAnswers.forEach((answer) => {
+              myMap[answer.question_id] = answer.answer;
+            });
 
-          const theirMap = {};
-          theirAnswers.forEach(a => { theirMap[a.question_id] = a.answer; });
+            const theirMap = {};
+            theirAnswers.forEach((answer) => {
+              theirMap[answer.question_id] = answer.answer;
+            });
 
-          const myCount = Object.keys(myMap).length;
-          const theirCount = Object.keys(theirMap).length;
+            let matches = 0;
+            let compared = 0;
+            CHARTER_QUESTIONS.forEach((question) => {
+              if (myMap[question.id] && theirMap[question.id]) {
+                compared += 1;
+                if (myMap[question.id] === theirMap[question.id]) {
+                  matches += 1;
+                }
+              }
+            });
 
-          let matches = 0;
-          let compared = 0;
-          CHARTER_QUESTIONS.forEach(q => {
-            if (myMap[q.id] && theirMap[q.id]) {
-              compared++;
-              if (myMap[q.id] === theirMap[q.id]) matches++;
-            }
-          });
-
-          compatibilityMap[matchId] = {
-            myAnswered: myCount,
-            theirAnswered: theirCount,
-            percent: compared > 0 ? Math.round((matches / compared) * 100) : null,
-            compared,
-            myMap,
-            theirMap,
-          };
-        }));
+            compatibilityMap[matchId] = {
+              myAnswered: Object.keys(myMap).length,
+              theirAnswered: Object.keys(theirMap).length,
+              percent: compared > 0 ? Math.round((matches / compared) * 100) : null,
+              compared,
+              myMap,
+              theirMap,
+            };
+          })
+        );
 
         setCompatibility(compatibilityMap);
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
       setIsLoading(false);
     };
+
     load();
-  }, []);
+  }, [navigate]);
 
   const getStatusLabel = (compat) => {
-    if (!compat) return { text: "טרם התחיל", color: "text-gray-400", icon: Clock };
+    if (!compat) return { text: "טרם התחיל", color: "text-slate-400", icon: Clock };
     if (compat.myAnswered < 8) return { text: "ממתין לתשובות שלך", color: "text-orange-500", icon: Clock };
     if (compat.theirAnswered < 8) return { text: "ממתין לשותף/ה", color: "text-blue-500", icon: Clock };
-    if (compat.percent >= 75) return { text: "התאמה מעולה! 🔥", color: "text-green-500", icon: CheckCircle2 };
+    if (compat.percent >= 75) return { text: "התאמה מעולה! 🔥", color: "text-emerald-600", icon: CheckCircle2 };
     if (compat.percent >= 50) return { text: "התאמה סבירה", color: "text-orange-500", icon: CheckCircle2 };
-    return { text: "יש הבדלים משמעותיים", color: "text-red-500", icon: CheckCircle2 };
+    return { text: "יש הבדלים משמעותיים", color: "text-rose-500", icon: CheckCircle2 };
   };
 
   const overallScore = (() => {
-    const scores = Object.values(compatibility).filter(c => c.percent !== null);
+    const scores = Object.values(compatibility).filter((item) => item.percent !== null);
     if (scores.length === 0) return null;
-    return Math.round(scores.reduce((s, c) => s + c.percent, 0) / scores.length);
+    return Math.round(scores.reduce((sum, item) => sum + item.percent, 0) / scores.length);
   })();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}>
-          <Puzzle className="w-10 h-10 text-[--theme-orange]" />
+          <Puzzle className="h-10 w-10 text-[--theme-orange]" />
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28" dir="rtl">
-      {/* Header */}
-      <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-3 mb-1">
-          <button onClick={() => navigate(createPageUrl('GroupTracker'))} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <ArrowRight className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Puzzle className="w-6 h-6 text-[--theme-orange]" />
-            Group Vibe Check
-          </h1>
-        </div>
-        <p className="text-gray-500 text-sm mr-10">בדיקת התאמה בין כל חברי הצוות</p>
-      </div>
+    <PremiumPageFrame
+      icon={Puzzle}
+      eyebrow="קשרי צוות"
+      title="Group Vibe Check"
+      subtitle="בדיקה מהירה של ההתאמה בין כל חברי הצוות, עם פירוט איפה זורם ואיפה צריך שיחה קצרה."
+      backTo={createPageUrl("GroupTracker")}
+      backLabel="חזרה לצוות"
+      badge={<PremiumPill tone="orange">{overallScore !== null ? `${overallScore}% ממוצע` : "אין ציון עדיין"}</PremiumPill>}
+      actions={<PremiumPill tone="neutral">{teamMembers.length} חברי צוות</PremiumPill>}
+    >
+      {overallScore !== null && (
+        <PremiumCard>
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Score</p>
+              <h2 className="mt-2 text-4xl font-black text-slate-950">{overallScore}%</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {overallScore >= 75
+                  ? "הצוות הזה יתחבר מעולה."
+                  : overallScore >= 50
+                    ? "יש כאן פוטנציאל, רק צריך לכוון ציפיות."
+                    : "כדאי לשוחח לעומק לפני שסוגרים."}
+              </p>
+            </div>
+            <div className="relative flex items-center justify-center">
+              <CompatibilityRing percent={overallScore} size={84} />
+              <span className="absolute text-lg font-black text-slate-800">{overallScore}%</span>
+            </div>
+          </div>
+        </PremiumCard>
+      )}
 
-      <div className="p-4 space-y-4">
+      {teamMembers.length > 0 ? (
+        <PremiumCard>
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Members</p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950">חברי הצוות</h2>
+            </div>
+          </div>
 
-        {/* Overall Score */}
-        {overallScore !== null && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-yellow-400 rounded-2xl p-5 text-center text-white"
-          >
-            <p className="text-white/80 text-sm font-bold mb-1">ציון הצוות הכולל</p>
-            <p className="text-6xl font-black">{overallScore}%</p>
-            <p className="text-white/80 text-sm mt-1">
-              {overallScore >= 75 ? "הצוות הזה יתחבר מעולה! 🔥" : overallScore >= 50 ? "יש פוטנציאל, כדאי לדבר על ההבדלים" : "כדאי לבדוק טוב טוב לפני שסוגרים"}
-            </p>
-          </motion.div>
-        )}
-
-        {/* Team avatars row */}
-        {teamMembers.length > 0 && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-500 mb-3">חברי הצוות</p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[--theme-orange] shadow">
-                  {myProfile?.photos?.[0] ? (
-                    <img src={myProfile.photos[0]} className="w-full h-full object-cover" />
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-[--theme-orange] shadow">
+                {myProfile?.photos?.[0] ? (
+                  <img src={myProfile.photos[0]} className="h-full w-full object-cover" alt="אני" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-lg font-black text-white">
+                    {user?.full_name?.[0]}
+                  </div>
+                )}
+              </div>
+              <span className="text-[10px] font-bold text-[--theme-orange]">אני</span>
+            </div>
+            {teamMembers.map((member, index) => (
+              <div key={index} className="flex flex-col items-center gap-1">
+                <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-slate-200 shadow">
+                  {member.photo ? (
+                    <img src={member.photo} className="h-full w-full object-cover" alt={member.name} />
                   ) : (
-                    <div className="w-full h-full gradient-orange flex items-center justify-center text-white font-black">
-                      {user?.full_name?.[0]}
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 font-black text-slate-500">
+                      {member.name?.[0]}
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] font-bold text-[--theme-orange]">אני</span>
+                <span className="max-w-[56px] truncate text-center text-[10px] font-medium text-slate-500">
+                  {member.name?.split(" ")[0]}
+                </span>
               </div>
-              {teamMembers.map((m, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 shadow">
-                    {m.photo ? (
-                      <img src={m.photo} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center font-black text-gray-500">
-                        {m.name?.[0]}
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] font-medium text-gray-500 max-w-[48px] truncate text-center">{m.name?.split(' ')[0]}</span>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
-        )}
-
-        {/* No team members */}
-        {teamMembers.length === 0 && (
-          <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="font-bold text-gray-600 mb-1">עוד אין חברי צוות</p>
-            <p className="text-gray-400 text-sm mb-4">הוסף שותפים מהצוות שלך כדי לבדוק התאמה</p>
-            <button
-              onClick={() => navigate(createPageUrl('GroupTracker'))}
-              className="gradient-orange text-white font-bold px-6 py-2.5 rounded-full text-sm"
+        </PremiumCard>
+      ) : (
+        <PremiumCard>
+          <div className="text-center">
+            <Users className="mx-auto h-12 w-12 text-slate-300" />
+            <p className="mt-3 text-xl font-black text-slate-700">עוד אין חברי צוות</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">הוסף/י שותפים מהצוות שלך כדי לבדוק התאמה אמיתית.</p>
+            <Button
+              onClick={() => navigate(createPageUrl("GroupTracker"))}
+              className="mt-4 rounded-[18px] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
             >
               לבניית הצוות
-            </button>
+            </Button>
           </div>
-        )}
+        </PremiumCard>
+      )}
 
-        {/* Compatibility Cards */}
-        {teamMembers.map((member, i) => {
-          const compat = compatibility[member.match_id];
-          const status = getStatusLabel(compat);
-          const StatusIcon = status.icon;
-          const myDone = compat ? compat.myAnswered >= 8 : false;
-          const theirDone = compat ? compat.theirAnswered >= 8 : false;
-          const bothDone = myDone && theirDone;
+      {teamMembers.map((member, index) => {
+        const compat = compatibility[member.match_id];
+        const status = getStatusLabel(compat);
+        const StatusIcon = status.icon;
+        const myDone = compat ? compat.myAnswered >= 8 : false;
+        const theirDone = compat ? compat.theirAnswered >= 8 : false;
+        const bothDone = myDone && theirDone;
 
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-            >
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.08 }}
+          >
+            <PremiumCard>
               <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-slate-200">
                   {member.photo ? (
-                    <img src={member.photo} className="w-full h-full object-cover" />
+                    <img src={member.photo} className="h-full w-full object-cover" alt={member.name} />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center font-black text-gray-400 text-xl">
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 font-black text-xl text-slate-400">
                       {member.name?.[0]}
                     </div>
                   )}
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900">{member.name?.split(' ')[0]}</p>
-                  <div className={`flex items-center gap-1 text-xs font-medium mt-0.5 ${status.color}`}>
-                    <StatusIcon className="w-3 h-3" />
+                <div className="min-w-0 flex-1 text-right">
+                  <p className="font-bold text-slate-950">{member.name?.split(" ")[0]}</p>
+                  <div className={`mt-1 flex items-center justify-end gap-1 text-xs font-medium ${status.color}`}>
                     {status.text}
+                    <StatusIcon className="h-3 w-3" />
                   </div>
 
-                  {/* Status chips instead of progress bars */}
                   {!bothDone && (
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                      <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${myDone ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {myDone ? '✓ מילאתי' : '⏳ לא מילאתי'}
+                    <div className="mt-2 flex flex-wrap justify-end gap-2">
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ${myDone ? "bg-emerald-50 text-emerald-700 ring-emerald-100" : "bg-orange-50 text-[--theme-orange] ring-orange-100"}`}>
+                        {myDone ? "✓ מילאתי" : "⏳ לא מילאתי"}
                       </span>
-                      <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${theirDone ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {theirDone ? `✓ ${member.name?.split(' ')[0]} מילא/ה` : `⏳ ${member.name?.split(' ')[0]} טרם מילא/ה`}
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ${theirDone ? "bg-emerald-50 text-emerald-700 ring-emerald-100" : "bg-blue-50 text-blue-700 ring-blue-100"}`}>
+                        {theirDone ? `✓ ${member.name?.split(" ")[0]} מילא/ה` : `⏳ ${member.name?.split(" ")[0]} טרם מילא/ה`}
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Score ring or CTA */}
-                <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                <div className="flex-shrink-0">
                   {bothDone && compat?.percent !== null ? (
                     <div className="relative flex items-center justify-center">
                       <CompatibilityRing percent={compat.percent} size={64} />
-                      <span className="absolute text-sm font-black text-gray-800">{compat.percent}%</span>
+                      <span className="absolute text-sm font-black text-slate-800">{compat.percent}%</span>
                     </div>
                   ) : (
                     !myDone && (
-                      <button
-                        onClick={() => navigate(createPageUrl('Charter') + `?matchId=${member.match_id}`)}
-                        className="gradient-orange text-white text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1 shadow"
+                      <Button
+                        onClick={() => navigate(createPageUrl("Charter") + `?matchId=${member.match_id}`)}
+                        className="rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.22)]"
                       >
-                        <Puzzle className="w-3 h-3" />
-                        {compat?.myAnswered > 0 ? "המשך" : "התחל"}
-                      </button>
+                        <Puzzle className="h-3 w-3" />
+                        <span className="mr-1">{compat?.myAnswered > 0 ? "המשך" : "התחל"}</span>
+                      </Button>
                     )
                   )}
                 </div>
               </div>
 
-              {/* Breakdown – only show when both filled */}
               {bothDone && compat?.myMap && compat?.theirMap && (
                 <BreakdownPanel
                   myMap={compat.myMap}
                   theirMap={compat.theirMap}
-                  memberName={member.name?.split(' ')[0]}
+                  memberName={member.name?.split(" ")[0]}
                 />
               )}
-            </motion.div>
-          );
-        })}
+            </PremiumCard>
+          </motion.div>
+        );
+      })}
 
-        {/* Tip */}
-        {teamMembers.length > 0 && (
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 text-center">
-            <p className="text-orange-700 text-sm font-medium">
-              💡 כדי לראות תוצאות, גם אתה/ת וגם השותפים צריכים למלא את השאלון
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+      {teamMembers.length > 0 && (
+        <PremiumCard>
+          <p className="text-center text-sm leading-6 text-slate-500">
+            כדי לראות תוצאות, גם אתה/ת וגם השותפים צריכים למלא את השאלון.
+          </p>
+        </PremiumCard>
+      )}
+    </PremiumPageFrame>
   );
 }

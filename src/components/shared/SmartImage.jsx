@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ImageOff } from "lucide-react";
 
+const premiumLoaderStyle = {
+    backgroundImage: [
+        "radial-gradient(circle at 18% 18%, rgba(255, 122, 69, 0.22), transparent 26%)",
+        "radial-gradient(circle at 82% 82%, rgba(255, 255, 255, 0.72), transparent 24%)",
+        "linear-gradient(180deg, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0.03) 100%)",
+    ].join(", "),
+};
+
 /**
  * SmartImage — reliable lazy-loading image component.
  * Uses IntersectionObserver to defer loading until near viewport.
@@ -75,8 +83,16 @@ export default function SmartImage({
                 showSkeleton ? (
                     <div className="absolute inset-0 animate-pulse bg-gray-200" />
                 ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                        <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-[--theme-orange] animate-spin" />
+                    <div
+                        className="absolute inset-0 overflow-hidden"
+                        style={premiumLoaderStyle}
+                        aria-hidden="true"
+                    >
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.03)_58%,rgba(15,23,42,0.10)_100%)]" />
+                        <div className="absolute -left-8 top-10 h-20 w-20 rounded-full bg-white/20 blur-3xl animate-pulse" />
+                        <div className="absolute right-6 top-6 h-10 w-10 rounded-full bg-white/25 blur-xl animate-pulse" />
+                        <div className="absolute bottom-4 left-4 h-16 w-16 rounded-full bg-[--theme-orange]/10 blur-2xl" />
+                        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
                 )
             )}

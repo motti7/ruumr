@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
-import { ArrowRight, Check, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
+import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Instagram, Facebook, Dog, Cat, Sparkles, ShieldCheck } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import CustomSelect from '@/components/shared/CustomSelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import { PremiumCard, PremiumPageFrame, PremiumPill } from '@/components/shared/PremiumPageFrame';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
@@ -44,6 +45,51 @@ const safeJsonParse = (value, fallbackValue) => {
   } catch (_) {
     return fallbackValue;
   }
+};
+
+const STEP_META = {
+  1: {
+    title: 'פרטים בסיסיים',
+    subtitle: 'השם, הגיל והוויב שלך הם הבסיס להתאמה טובה יותר.',
+    tone: 'orange',
+    icon: Sparkles,
+  },
+  2: {
+    title: 'מגורים ותקציב',
+    subtitle: 'איפה מחפשים, באיזה אזור, ומה הטווח הנכון.',
+    tone: 'blue',
+    icon: Home,
+  },
+  3: {
+    title: 'העדפות משותפות',
+    subtitle: 'כשרות, שבת, מגדר וחיית מחמד נכנסים לתמונה.',
+    tone: 'emerald',
+    icon: ShieldCheck,
+  },
+  4: {
+    title: 'פרטי הדירה',
+    subtitle: 'רק אם כבר יש לך דירה, נמלא גם את הצד הזה.',
+    tone: 'gold',
+    icon: Home,
+  },
+  5: {
+    title: 'תחומי עניין',
+    subtitle: 'מה הופך שיחה טובה לבית שנעים לחיות בו.',
+    tone: 'rose',
+    icon: Sparkles,
+  },
+  6: {
+    title: 'תמונות',
+    subtitle: 'הוויזואל שלך, מסודר ויפה.',
+    tone: 'blue',
+    icon: Camera,
+  },
+  7: {
+    title: 'סיום ואימות',
+    subtitle: 'עוד צעד קטן לפני שהתאמות מתחילות לזרום.',
+    tone: 'orange',
+    icon: CheckCircle,
+  },
 };
 
 const isAppleAuthUser = (user) => {
@@ -84,13 +130,35 @@ const Step = ({ children, step, currentStep, title }) =>
     animate={{ opacity: 1, x: 0 }}
     exit={{ opacity: 0, x: -50 }}
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
-    className="w-full flex flex-col h-full">
-    
-        {title && <h2 className="mb-2 text-3xl text-center" style={{ color: '#FA3803', fontFamily: "'Google Sans', 'Inter', sans-serif", fontWeight: 'bold' }}>{title}</h2>}
-        <div className="flex-1 overflow-y-auto px-1 py-4 custom-scrollbar">
-            {children}
-        </div>
-      </motion.div>
+    className="w-full">
+      {(() => {
+        const meta = STEP_META[step] || {};
+        const resolvedTitle = title || meta.title || `שלב ${step}`;
+        const Icon = meta.icon || Sparkles;
+        return (
+          <PremiumCard className="space-y-4 overflow-hidden">
+            <div className="flex items-start justify-between gap-4 border-b border-white/60 pb-4">
+              <div className="min-w-0 text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <PremiumPill tone={meta.tone || 'neutral'}>{`0${step}`.slice(-2)}</PremiumPill>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Onboarding</p>
+                </div>
+                <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">{resolvedTitle}</h2>
+                {meta.subtitle ? (
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{meta.subtitle}</p>
+                ) : null}
+              </div>
+
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]">
+                <Icon className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div className="space-y-4">{children}</div>
+          </PremiumCard>
+        );
+      })()}
+    </motion.div>
   }
   </AnimatePresence>;
 
@@ -475,16 +543,8 @@ export default function OnboardingPage() {
     }
   };
 
-  const VibeIcon = ({ level }) => {
-    if (level <= 1) return <Book className="w-16 h-16 text-blue-500 mb-4" />;
-    if (level === 2) return <Coffee className="w-16 h-16 text-green-500 mb-4" />;
-    if (level === 3) return <Music className="w-16 h-16 text-yellow-500 mb-4" />;
-    if (level >= 4) return <Beer className="w-16 h-16 text-red-500 mb-4" />;
-    return <Music className="w-16 h-16 text-gray-500 mb-4" />;
-  };
-
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
+    <div id="onboarding-root" className="relative min-h-[100dvh] overflow-hidden bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl" style={{ fontFamily: "'Inter', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
         #onboarding-root input[type=number]::-webkit-inner-spin-button,
         #onboarding-root input[type=number]::-webkit-outer-spin-button {
@@ -537,32 +597,56 @@ export default function OnboardingPage() {
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
-      <div className="w-full max-w-md flex flex-col h-[85vh]">
-        {/* Progress Bar - Hidden on Final Step */}
+      <PremiumPageFrame
+        eyebrow="Onboarding"
+        title="בואו נכיר!"
+        subtitle="נבנה פרופיל שנראה טוב, מרגיש אישי, ומוביל להתאמות חכמות יותר."
+        badge={<PremiumPill tone="orange">שלב {displayStep}/{displayTotal}</PremiumPill>}
+        actions={simulatorMode ? <PremiumPill tone="blue">Simulator mode</PremiumPill> : null}
+        className="pb-36"
+      >
         {step !== 7 && (
-        <div className="mb-6">
-             <div className="flex justify-between items-center mb-2">
-                 <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
-                     <ArrowRight className="h-6 w-6" />
-                 </Button>
-                 
-                 <div className="w-10" />
-             </div>
-             <div className="flex gap-1.5">
-                 {Array.from({ length: 5 }).map((_, i) => (
-                   <div
-                     key={i}
-                     className="h-2 flex-1 rounded-full"
-                     style={{
-                       backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FFE8E2'
-                     }}
-                   />
-                 ))}
-             </div>
-        </div>
+          <PremiumCard className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())}
+                className="h-11 w-11 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-orange-50 hover:text-[--theme-orange]"
+              >
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+
+              <div className="min-w-0 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Progress</p>
+                <p className="mt-1 text-sm font-semibold text-slate-700">
+                  {step === 1 ? 'מתחילים חזק' : step === 7 ? 'סיום' : `שלב ${displayStep} מתוך ${displayTotal}`}
+                </p>
+              </div>
+
+              <div className="w-11" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex gap-1.5" dir="ltr">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-2 flex-1 rounded-full"
+                    style={{
+                      backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FDE6DB'
+                    }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs leading-6 text-slate-500">
+                כל שלב נשמר בראש שקט, כדי שתוכל/י להתקדם בלי לאבד הקשר.
+              </p>
+            </div>
+          </PremiumCard>
         )}
 
-        <div className="flex-1 relative">
+        <div className="space-y-4">
             <Step step={1} currentStep={step} title="בואו נכיר!">
                 <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
@@ -945,26 +1029,25 @@ export default function OnboardingPage() {
             </Step>
         </div>
 
-        {/* Action Button */}
-        {step < 7 &&
-        <div className="mt-6">
-                <Button
-            onClick={nextStep}
-            className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`}
-            disabled={!canProceed() || isSubmitting}>
-            
-                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
-                </Button>
-            </div>
-        }
-      </div>
-      
-      <button
-        onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
-        className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors">
-        
-        Admin
-      </button>
+        {step < 7 && (
+          <PremiumCard className="sticky bottom-4 z-20 p-3">
+            <Button
+              onClick={nextStep}
+              className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`}
+              disabled={!canProceed() || isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
+            </Button>
+          </PremiumCard>
+        )}
+
+        <button
+          onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
+          className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors"
+        >
+          Admin
+        </button>
+      </PremiumPageFrame>
     </div>);
 
 }

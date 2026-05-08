@@ -7,6 +7,12 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import mixpanel from 'mixpanel-browser';
+import {
+  PremiumCard,
+  PremiumPill,
+} from '@/components/shared/PremiumPageFrame';
+import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
+import { isRuumrSimulatorMode } from '@/lib/simulatorMode';
 
 const CHARTER_DATA = {
   "game_title": "Roomi Vibe Check",
@@ -122,6 +128,47 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
   useEffect(() => {
     const loadData = async () => {
       try {
+        if (isRuumrSimulatorMode()) {
+          enableSimulatorBackend(base44);
+          const simulatorState = getSimulatorBackendState();
+          const currentUser = simulatorState?.currentUser || null;
+          setCurrentUserId(currentUser?.id || null);
+
+          const allAnswers = Array.isArray(simulatorState?.collections?.CharterAnswer)
+            ? simulatorState.collections.CharterAnswer.filter((answer) =>
+                String(answer.match_id) === String(matchId) &&
+                String(answer.user_id) === String(currentUser?.id)
+              )
+            : [];
+
+          const mine = {};
+          allAnswers.forEach(answer => {
+            mine[answer.question_id] = answer.answer;
+          });
+
+          setMyAnswers(mine);
+
+          if (Object.keys(mine).length === allQuestions.length) {
+            navigate(createPageUrl('Chat') + `?matchId=${matchId}`);
+            setIsLoading(false);
+            return;
+          }
+
+          for (let i = 0; i < allQuestions.length; i++) {
+            const q = allQuestions[i];
+            if (!mine[q.id]) {
+              const levelIndex = CHARTER_DATA.levels.findIndex(l => l.questions.some(qq => qq.id === q.id));
+              const questionIndex = CHARTER_DATA.levels[levelIndex].questions.findIndex(qq => qq.id === q.id);
+              setCurrentLevelIndex(levelIndex);
+              setCurrentQuestionIndex(questionIndex);
+              break;
+            }
+          }
+
+          setIsLoading(false);
+          return;
+        }
+
         const user = await User.me();
         setCurrentUserId(user.id);
 
@@ -229,11 +276,11 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 flex items-center justify-center" dir="rtl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full"
+          transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+          className="h-16 w-16 rounded-full border-4 border-slate-200 border-t-[--theme-orange]"
         />
       </div>
     );
@@ -245,7 +292,11 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
   const progress = (totalAnswered / allQuestions.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600 overflow-hidden" dir="rtl">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.18),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.88),_transparent_24%)]" />
+      <div className="absolute left-[-8rem] top-28 h-64 w-64 rounded-full bg-orange-100/50 blur-3xl" />
+      <div className="absolute right-[-6rem] bottom-24 h-72 w-72 rounded-full bg-rose-100/50 blur-3xl" />
+
       <button
         onClick={() => {
           if (onClose) {
@@ -254,58 +305,78 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
             navigate(-1);
           }
         }}
-        className="absolute top-4 left-4 z-20 min-w-[44px] min-h-[44px] bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/20 active:scale-95 transition-transform"
+        className="absolute top-4 left-4 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-700 shadow-sm backdrop-blur-md transition-transform hover:scale-[1.02]"
         aria-label="סגור"
       >
-        <X className="w-6 h-6 text-white" />
+        <X className="h-5 w-5" />
       </button>
 
-      {/* האזור שבין כפתור ה-X (72px מלמעלה) לפוטר (80px מלמטה) */}
-      <div
-        className="absolute flex items-center justify-center px-4"
-        style={{ top: '72px', bottom: '80px', left: 0, right: 0 }}
-      >
+      <div className="absolute inset-0 flex items-center justify-center px-4 pt-16 pb-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentQuestion.id}
-            initial={{ x: direction > 0 ? 300 : -300, opacity: 0, rotate: direction > 0 ? 20 : -20 }}
+            initial={{ x: direction > 0 ? 240 : -240, opacity: 0, rotate: direction > 0 ? 12 : -12 }}
             animate={{ x: 0, opacity: 1, rotate: 0 }}
-            exit={{ x: direction > 0 ? -300 : 300, opacity: 0, rotate: direction > 0 ? -20 : 20 }}
-            transition={{ type: "spring", damping: 20, stiffness: 100 }}
+            exit={{ x: direction > 0 ? -240 : 240, opacity: 0, rotate: direction > 0 ? -12 : 12 }}
+            transition={{ type: "spring", damping: 20, stiffness: 120 }}
             className="w-full max-w-md"
           >
-            <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl shadow-2xl overflow-hidden">
-              <div className="px-6 pt-12 pb-8 text-center">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-6xl mb-5"
-                >
+            <PremiumCard className="overflow-hidden bg-white/88">
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-right">
+                  <PremiumPill tone="orange">{currentLevel?.name}</PremiumPill>
+                  <h2 className="mt-3 text-2xl font-black text-slate-950">{currentQuestion.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    שאלה {totalAnswered + 1} מתוך {allQuestions.length}
+                  </p>
+                </div>
+
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-3xl shadow-[0_18px_40px_rgba(255,122,69,0.28)]">
                   {currentQuestion.emoji}
-                </motion.div>
-                <h2 className="text-2xl font-black text-white leading-snug mb-2">
-                  {currentQuestion.title}
-                </h2>
-                <p className="text-base text-white/80 font-bold">מה את/ה מעדיפ/ה?</p>
+                </div>
               </div>
-              
-              <div className="px-6 pb-12 space-y-4">
+
+              <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+                <motion.div
+                  className="h-full rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                />
+              </div>
+
+              <div className="mt-5 space-y-3">
                 <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleAnswer('a')}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-base py-8 px-4 rounded-2xl shadow-lg leading-snug text-right"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAnswer("a")}
+                  className="w-full rounded-[1.45rem] border border-orange-100 bg-[linear-gradient(135deg,#fff7ed_0%,#ffedd5_100%)] px-4 py-4 text-right shadow-sm transition-transform hover:shadow-md"
                 >
-                  {currentQuestion.option_a}
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-[--theme-orange] ring-1 ring-orange-100">
+                      א
+                    </span>
+                    <span className="text-base font-bold leading-7 text-slate-900">{currentQuestion.option_a}</span>
+                  </div>
                 </motion.button>
+
                 <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleAnswer('b')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-base py-8 px-4 rounded-2xl shadow-lg leading-snug text-right"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAnswer("b")}
+                  className="w-full rounded-[1.45rem] border border-blue-100 bg-[linear-gradient(135deg,#eff6ff_0%,#dbeafe_100%)] px-4 py-4 text-right shadow-sm transition-transform hover:shadow-md"
                 >
-                  {currentQuestion.option_b}
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-blue-700 ring-1 ring-blue-100">
+                      ב
+                    </span>
+                    <span className="text-base font-bold leading-7 text-slate-900">{currentQuestion.option_b}</span>
+                  </div>
                 </motion.button>
               </div>
-            </div>
+
+              <p className="mt-5 text-center text-xs leading-6 text-slate-400">
+                בוחרים את מה שנכון לכם עכשיו. בסיום נפתח צ'אט רך וישיר, בלי עוד מסכים מיותרים.
+              </p>
+            </PremiumCard>
           </motion.div>
         </AnimatePresence>
       </div>

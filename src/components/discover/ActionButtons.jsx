@@ -2,52 +2,65 @@ import React from "react";
 import { motion } from "framer-motion";
 import { X, Heart, RotateCcw } from "lucide-react";
 
-export default function ActionButtons({ onDislike, onLike, onRewind, showButtons = true }) {
+export default function ActionButtons({ onDislike, onBack, onLike, canGoBack = true, showButtons = true }) {
   if (!showButtons) return null;
 
   const buttonVariants = {
     initial: { scale: 1 },
-    hover: { scale: 1.1 },
-    tap: { scale: 0.9 }
+    hover: { scale: 1.06 },
+    tap: { scale: 0.94 }
   };
 
   return (
-    <div className="flex justify-center items-center gap-6 z-20 select-none" dir="ltr">
-      {/* Dislike — min 44px touch target */}
-      <motion.button
-        variants={buttonVariants}
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        onClick={onDislike}
-        className="w-20 h-20 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg flex items-center justify-center text-black border-2 border-gray-200 touch-manipulation"
-      >
-        <X className="w-10 h-10 pointer-events-none" strokeWidth={3} />
-      </motion.button>
-      
-      {/* Rewind — min 44px touch target */}
-      <motion.button
-        variants={buttonVariants}
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        onClick={onRewind}
-        className="w-16 h-16 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-md flex items-center justify-center text-yellow-500 border-2 border-gray-200 touch-manipulation"
-      >
-        <RotateCcw className="w-7 h-7 pointer-events-none" strokeWidth={2.5} />
-      </motion.button>
+    <div className="mx-auto flex w-full items-end justify-center gap-3 select-none" dir="ltr">
+      <div className="flex flex-1 flex-col items-center gap-2">
+        <motion.button
+          variants={buttonVariants}
+          initial="initial"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={onDislike}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_16px_34px_rgba(15,23,42,0.34)] ring-1 ring-white/30 transition-shadow touch-manipulation"
+        >
+          <X className="h-7 w-7 pointer-events-none" strokeWidth={2.8} />
+        </motion.button>
+        <span className="text-[11px] font-medium tracking-[-0.01em] text-white/90">
+          Pass
+        </span>
+      </div>
 
-      {/* Like — min 44px touch target */}
-      <motion.button
-        variants={buttonVariants}
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        onClick={onLike}
-        className="w-20 h-20 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg flex items-center justify-center text-red-500 border-2 border-gray-200 touch-manipulation"
-      >
-        <Heart className="w-10 h-10 pointer-events-none" fill="currentColor" />
-      </motion.button>
+      <div className="flex flex-1 flex-col items-center gap-2">
+        <motion.button
+          variants={buttonVariants}
+          initial="initial"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={onBack}
+          disabled={!canGoBack}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-950 shadow-[0_20px_44px_rgba(15,23,42,0.18)] ring-1 ring-white/70 transition-shadow touch-manipulation disabled:cursor-not-allowed disabled:opacity-55 disabled:shadow-none"
+        >
+          <RotateCcw className="h-6 w-6 pointer-events-none" strokeWidth={2.6} />
+        </motion.button>
+        <span className="text-[11px] font-medium tracking-[-0.01em] text-white/90">
+          Back
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center gap-2">
+        <motion.button
+          variants={buttonVariants}
+          initial="initial"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={onLike}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-[0_16px_34px_rgba(244,63,94,0.28)] ring-1 ring-white/30 transition-shadow touch-manipulation"
+        >
+          <Heart className="h-7 w-7 pointer-events-none" fill="currentColor" />
+        </motion.button>
+        <span className="text-[11px] font-medium tracking-[-0.01em] text-white/90">
+          Like
+        </span>
+      </div>
     </div>
   );
 }

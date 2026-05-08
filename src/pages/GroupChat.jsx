@@ -8,6 +8,11 @@ import { ArrowRight, Send, UsersRound } from "lucide-react";
 import SmartImage from "@/components/shared/SmartImage";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
+import { Button } from "@/components/ui/button";
+import {
+  PremiumCard,
+  PremiumPill,
+} from "@/components/shared/PremiumPageFrame";
 
 export default function GroupChatPage() {
   const navigate = useNavigate();
@@ -119,12 +124,12 @@ export default function GroupChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
-            <UsersRound className="w-7 h-7 text-white" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]">
+            <UsersRound className="h-7 w-7" />
           </div>
-          <p className="text-gray-500 font-medium text-sm">טוען צ'אט קבוצתי...</p>
+          <p className="text-sm font-medium text-slate-500">טוען צ'אט קבוצתי...</p>
         </div>
       </div>
     );
@@ -132,125 +137,146 @@ export default function GroupChatPage() {
 
   if (teamMembers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 p-8 text-center" dir="rtl">
-        <UsersRound className="w-16 h-16 text-gray-300 mb-4" />
-        <p className="font-black text-xl text-gray-700 mb-2">אין עדיין צוות</p>
-        <p className="text-gray-400 text-sm mb-6">הוסף שותפים לצוות כדי להתחיל צ'אט קבוצתי</p>
-        <button
-          onClick={() => navigate(createPageUrl('GroupTracker'))}
-          className="gradient-orange text-white font-bold px-6 py-3 rounded-full"
-        >
-          לבניית הצוות
-        </button>
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)] p-8 text-center" dir="rtl">
+        <PremiumCard className="max-w-md">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+            <UsersRound className="h-8 w-8" />
+          </div>
+          <p className="mt-4 text-2xl font-black text-slate-950">אין עדיין צוות</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">הוסף/י שותפים לצוות כדי להתחיל צ'אט קבוצתי.</p>
+          <Button
+            onClick={() => navigate(createPageUrl("GroupTracker"))}
+            className="mt-5 rounded-[18px] bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)]"
+          >
+            לבניית הצוות
+          </Button>
+        </PremiumCard>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
-        <button 
-          onClick={() => navigate(createPageUrl('GroupTracker'))} 
-          className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
-          aria-label="חזור"
-        >
-          <ArrowRight className="w-5 h-5 text-gray-600" />
-        </button>
-        <div className="flex items-center gap-2 flex-1">
-          {/* Avatar stack */}
-          <div className="flex -space-x-2 space-x-reverse">
-            {allParticipants.slice(0, 4).map((p, i) => (
-              <div key={i} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
-                {p.photo ? (
-                  <SmartImage src={p.photo} alt={p.name} className="w-full h-full" priority={false} />
-                ) : (
-                  <div className="w-full h-full gradient-orange flex items-center justify-center text-white text-xs font-black">
-                    {p.name?.[0]}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <div>
-            <p className="font-black text-gray-900 text-sm">צ'אט הצוות</p>
-            <p className="text-[10px] text-gray-400">{allParticipants.length} משתתפים</p>
-          </div>
-        </div>
-      </div>
+    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[linear-gradient(180deg,#fffaf6_0%,#fff_100%)]" dir="rtl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.18),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.88),_transparent_24%)]" />
 
-      {/* Messages */}
-      <VirtualizedMessageList
-       messages={messages}
-       containerHeight="flex-1"
-       renderMessage={(msg) => {
-         const isMe = msg.sender_id === user?.id;
-         return (
-           <motion.div
-             key={msg.id}
-             initial={{ opacity: 0, y: 10 }}
-             animate={{ opacity: 1, y: 0 }}
-             className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
-           >
-             {/* Avatar */}
-             {!isMe && (
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-gray-200 flex-shrink-0 mb-1">
-                  {msg.sender_photo ? (
-                    <SmartImage src={msg.sender_photo} alt={msg.sender_name} className="w-full h-full" priority={false} />
+      <div className="relative px-4 pt-4" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}>
+        <PremiumCard className="p-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(createPageUrl("GroupTracker"))}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-transform hover:scale-[1.02]"
+              aria-label="חזור"
+            >
+              <ArrowRight className="h-5 w-5" />
+            </button>
+
+            <div className="flex -space-x-2 space-x-reverse">
+              {allParticipants.slice(0, 4).map((p, i) => (
+                <div key={i} className="h-9 w-9 overflow-hidden rounded-full border-2 border-white shadow-sm flex-shrink-0">
+                  {p.photo ? (
+                    <SmartImage src={p.photo} alt={p.name} className="h-full w-full" priority={false} />
                   ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-black">
-                      {msg.sender_name?.[0]}
+                    <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-xs font-black text-white">
+                      {p.name?.[0]}
                     </div>
                   )}
                 </div>
-              )}
-             <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
-               {!isMe && (
-                 <span className="text-[10px] text-gray-400 font-medium px-1">{msg.sender_name}</span>
-               )}
-               <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                 isMe
-                   ? 'gradient-orange text-white rounded-tr-sm'
-                   : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
-               }`}>
-                 {msg.content}
-               </div>
-               <span className="text-[9px] text-gray-300 px-1">
-                 {new Date(msg.created_date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-               </span>
-             </div>
-           </motion.div>
-         );
-       }}
-      />
+              ))}
+            </div>
 
-      {messages.length === 0 && (
-       <div className="flex items-center justify-center flex-1">
-         <div className="text-center text-gray-400 text-sm">
-           <p className="text-3xl mb-2">👋</p>
-           <p>שלחו הודעה ראשונה לצוות!</p>
-         </div>
-       </div>
-      )}
+            <div className="min-w-0 flex-1 text-right">
+              <div className="flex items-center justify-end gap-2">
+                <p className="text-lg font-black text-slate-950">צ'אט הצוות</p>
+                <PremiumPill tone="emerald">פעיל עכשיו</PremiumPill>
+              </div>
+              <p className="text-[10px] text-slate-400">{allParticipants.length} משתתפים</p>
+            </div>
+          </div>
+        </PremiumCard>
+      </div>
 
-      {/* Input */}
-      <div className="bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3 flex-shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="כתוב הודעה לצוות..."
-          className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none text-gray-800 placeholder-gray-400"
-        />
-        <button
-           onClick={sendMessage}
-           disabled={!input.trim() || isSending}
-           className="min-w-[44px] min-h-[44px] gradient-orange rounded-full flex items-center justify-center shadow-md disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
-           aria-label="שלח הודעה"
-         >
-           <Send className="w-4 h-4 text-white" />
-         </button>
+      <div className="relative flex-1 px-3 pb-2 pt-3">
+        {messages.length === 0 ? (
+          <div className="flex h-full items-center justify-center p-4">
+            <PremiumCard className="max-w-md text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-slate-100 text-slate-400">
+                <UsersRound className="h-7 w-7" />
+              </div>
+              <p className="mt-4 text-xl font-black text-slate-950">שלחו הודעה ראשונה לצוות</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">כאן תתחיל השיחה שתהפוך את התיאום להרבה יותר פשוט.</p>
+            </PremiumCard>
+          </div>
+        ) : (
+          <VirtualizedMessageList
+            messages={messages}
+            containerHeight="flex-1"
+            renderMessage={(msg) => {
+              const isMe = msg.sender_id === user?.id;
+              return (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}
+                >
+                  {!isMe && (
+                    <div className="mb-1 h-7 w-7 flex-shrink-0 overflow-hidden rounded-full border border-slate-200">
+                      {msg.sender_photo ? (
+                        <SmartImage src={msg.sender_photo} alt={msg.sender_name} className="h-full w-full" priority={false} />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-slate-200 text-xs font-black text-slate-500">
+                          {msg.sender_name?.[0]}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className={`flex max-w-[78%] flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
+                    {!isMe && (
+                      <span className="px-1 text-[10px] font-medium text-slate-400">{msg.sender_name}</span>
+                    )}
+                    <div
+                      className={`rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                        isMe
+                          ? "rounded-tr-sm bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] text-white"
+                          : "rounded-tl-sm border border-slate-100 bg-white text-slate-800"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                    <span className="px-1 text-[9px] text-slate-300">
+                      {new Date(msg.created_date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            }}
+          />
+        )}
+      </div>
+
+      <div
+        className="relative px-4 pb-3 pt-2"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+      >
+        <PremiumCard className="flex items-center gap-3 p-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="כתוב/כתבי הודעה לצוות..."
+            className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-[--theme-orange] focus:ring-2 focus:ring-orange-100"
+          />
+          <Button
+            onClick={sendMessage}
+            disabled={!input.trim() || isSending}
+            className="h-12 w-12 rounded-full bg-[linear-gradient(135deg,#ff8a4c_0%,#ff5f2f_100%)] p-0 text-white shadow-[0_18px_40px_rgba(255,122,69,0.28)] disabled:opacity-40"
+            aria-label="שלח הודעה"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </PremiumCard>
       </div>
     </div>
   );

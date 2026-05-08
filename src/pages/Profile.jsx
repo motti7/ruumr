@@ -3,6 +3,9 @@ import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
+import { base44 } from "@/api/base44Client";
+import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,8 +39,30 @@ export default function ProfilePage() {
   const loadProfile = async () => {
     setIsLoading(true);
     try {
-      const userData = await User.me();
-      const userProfiles = await ProfileEntity.filter({ user_id: userData.id });
+      if (isRuumrSimulatorMode()) {
+        enableSimulatorBackend(base44);
+      }
+
+      let userData = null;
+      try {
+        userData = await User.me();
+      } catch (error) {
+        const simulatorState = getSimulatorBackendState();
+        if (simulatorState?.currentUser) {
+          userData = simulatorState.currentUser;
+        } else {
+          throw error;
+        }
+      }
+
+      let userProfiles = [];
+      try {
+        userProfiles = await ProfileEntity.filter({ user_id: userData.id });
+      } catch {
+        const simulatorState = getSimulatorBackendState();
+        userProfiles = simulatorState?.collections?.Profile?.filter((profile) => String(profile.user_id) === String(userData.id)) || [];
+      }
+
       if (userProfiles.length > 0) {
         const mergedProfile = createProfileDefaults({
           ...userProfiles[0],
@@ -59,6 +84,10 @@ export default function ProfilePage() {
     if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
         alert("אנא המתן לסיום העלאת התמונות");
         return;
+    }
+
+    if (isRuumrSimulatorMode()) {
+      enableSimulatorBackend(base44);
     }
 
     // Clean social link
@@ -272,29 +301,38 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 min-h-screen pb-24 p-4">
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-32" />
-          <div className="grid grid-cols-3 gap-2">
-            {[...Array(6)].map((_, i) => <Skeleton key={i} className="aspect-square rounded-lg" />)}
+      <div className="relative min-h-screen overflow-hidden px-4 pb-28 pt-6">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.16),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.92),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.04)_100%)]" />
+      <div className="mx-auto max-w-md space-y-4">
+        <div className="rounded-[2rem] border border-white/70 bg-white/78 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
+          <Skeleton className="h-3 w-24 rounded-full" />
+          <Skeleton className="mt-3 h-10 w-48 rounded-2xl" />
+          <Skeleton className="mt-3 h-4 w-[86%] rounded-full" />
+            <div className="mt-5 flex gap-2">
+              <Skeleton className="h-8 w-20 rounded-full" />
+              <Skeleton className="h-8 w-20 rounded-full" />
+              <Skeleton className="h-8 w-24 rounded-full" />
+            </div>
           </div>
-          <div className="space-y-3 mt-4">
-            <Skeleton className="h-24" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-20" />
+          <Skeleton className="aspect-[4/5] rounded-[32px]" />
+          <div className="space-y-3">
+            <Skeleton className="h-28 rounded-[28px]" />
+            <Skeleton className="h-36 rounded-[28px]" />
+            <Skeleton className="h-24 rounded-[28px]" />
           </div>
         </div>
       </div>
-    );
-  }
+  );
+}
   
   if (!profile) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center p-4">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-          <p className="text-red-700 font-medium">שגיאה בטעינת הפרופיל</p>
-          <button onClick={() => window.location.reload()} className="text-red-600 text-sm font-bold hover:underline mt-2">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.16),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.92),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.04)_100%)]" />
+        <div className="w-full max-w-sm rounded-[2rem] border border-rose-200 bg-rose-50/90 p-6 text-center shadow-[0_24px_80px_rgba(244,63,94,0.08)] backdrop-blur-2xl">
+          <AlertCircle className="mx-auto mb-3 h-12 w-12 text-rose-500" />
+          <p className="text-lg font-black text-rose-900">שגיאה בטעינת הפרופיל</p>
+          <button onClick={() => window.location.reload()} className="mt-3 text-sm font-bold text-rose-600 hover:underline">
             טען מחדש
           </button>
         </div>
@@ -303,7 +341,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
+    <div className="relative min-h-screen overflow-hidden px-4 pb-28 pt-6" dir="rtl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top_left,_rgba(255,111,63,0.16),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.92),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.04)_100%)]" />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
@@ -328,55 +367,93 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      <div className="bg-white">
-        <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
-          <h1 className="text-2xl font-black text-gray-800">הפרופיל שלי</h1>
-          <Button 
+      <div className="mx-auto max-w-md space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-[2rem] border border-white/70 bg-white/78 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[--theme-orange]">Profile studio</p>
+              <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">הפרופיל שלי</h1>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {profile.name}, {profile.age} · {profile.location || "מיקום לא צוין"}
+              </p>
+            </div>
+            <Button
               onClick={() => {
-                  if (!isEditing) {
-                      setIsEditing(true);
-                  } else {
-                      handleSave();
-                  }
-              }} 
-              className="rounded-full gradient-orange text-white shadow-lg"
-          >
-              {isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
-          </Button>
-        </div>
+                if (!isEditing) {
+                  setIsEditing(true);
+                } else {
+                  handleSave();
+                }
+              }}
+              className="min-h-[44px] rounded-full bg-[--theme-orange] px-4 text-white shadow-[0_14px_30px_rgba(255,122,69,0.24)]"
+            >
+              {isEditing ? <><Save className="w-4 h-4 ml-2" /> שמור</> : <><Edit className="w-4 h-4 ml-2" /> ערוך</>}
+            </Button>
+          </div>
 
-        {!profile.is_verified && (
-            <div className="px-4 mt-2">
-                <div 
-                    onClick={() => window.location.href = createPageUrl('Verification')}
-                    className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center justify-between cursor-pointer active:scale-95 transition-transform"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white p-2 rounded-full">
-                            <AlertCircle className="w-5 h-5 text-orange-500" />
-                        </div>
-                        <div>
-                            <p className="font-bold text-gray-900 text-sm">הפרופיל לא מאומת</p>
-                            <p className="text-xs text-gray-500">אמת את זהותך כדי לקבל יותר פניות</p>
-                        </div>
-                    </div>
-                    <div className="bg-[--theme-orange] text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap min-w-fit">
-                        אמת עכשיו
-                    </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+              {profile.is_verified ? "Verified" : "Needs verification"}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange] ring-1 ring-orange-100">
+              {formData.current_status === "has_apartment" ? "Has apartment" : "Looking"}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">
+              {formData.search_area || "Search area"}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">
+              {formData.budget_max ? `₪${Number(formData.budget_max).toLocaleString()}` : "Budget"}
+            </span>
+          </div>
+
+          {!profile.is_verified ? (
+            <div
+              onClick={() => window.location.href = createPageUrl("Verification")}
+              className="mt-4 rounded-[24px] border border-orange-100 bg-orange-50/80 p-4 text-right shadow-[0_12px_30px_rgba(255,122,69,0.10)] cursor-pointer active:scale-[0.99] transition-transform"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-white p-2 text-[--theme-orange] shadow-sm">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">הפרופיל לא מאומת</p>
+                    <p className="text-xs text-slate-500">אמת את זהותך כדי לקבל יותר פניות</p>
+                  </div>
                 </div>
+                <div className="rounded-full bg-[--theme-orange] px-4 py-2 text-xs font-bold text-white">
+                  אמת עכשיו
+                </div>
+              </div>
             </div>
-        )}
+          ) : (
+            <div className="mt-4 rounded-[24px] border border-emerald-100 bg-emerald-50/80 p-4 text-right shadow-[0_12px_30px_rgba(16,185,129,0.10)]">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-white p-2 text-emerald-600 shadow-sm">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <p className="font-bold text-emerald-700 text-sm">פרופיל מאומת</p>
+              </div>
+            </div>
+          )}
+        </motion.section>
 
-        {profile.is_verified && (
-            <div className="px-4 mt-2">
-                 <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5 text-green-600" />
-                    <p className="font-bold text-green-700 text-sm">פרופיל מאומת</p>
-                 </div>
-            </div>
-        )}
-        
-        <div className="px-2 pt-2 pb-2">
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-[2rem] border border-white/70 bg-white/76 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-2xl"
+        >
+          <div className="mb-3 flex items-center justify-between px-1" dir="ltr">
+            <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-slate-400">Portfolio</p>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
+              {isEditing ? "Drag to reorder" : "Tap to enlarge"}
+            </span>
+          </div>
+
           {isEditing ? (
             <DragDropContext onDragEnd={(result) => {
               if (!result.destination) return;
@@ -484,19 +561,18 @@ export default function ProfilePage() {
               })}
             </div>
           )}
-        </div>
-      </div>
+        </motion.section>
 
-      <div className="p-4 space-y-6">
+      <div className="space-y-4 pb-2">
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
             <div className="grid grid-cols-2 gap-4">
                 <div className="text-right">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
+                  <label className="mb-1 block text-sm font-medium text-slate-500">גיל</label>
                   <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
                 </div>
                 <div className="text-right">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">מגדר</label>
+                  <label className="mb-1 block text-sm font-medium text-slate-500">מגדר</label>
                   {isEditing ? (
                     <BottomSheetSelect
                       value={formData.gender}
@@ -516,8 +592,8 @@ export default function ProfilePage() {
         </div>
         
         <div className="space-y-4">
-            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <h3 className="font-bold text-gray-800 mb-3 text-right">בעלי חיים</h3>
+            <div className="rounded-[28px] border border-white/70 bg-white/76 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
+              <h3 className="mb-3 text-right text-lg font-black tracking-tight text-slate-950">בעלי חיים והעדפות</h3>
               <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
                       {['none', 'dog', 'cat', 'other'].map(type => (
@@ -546,10 +622,10 @@ export default function ProfilePage() {
                   )}
               </div>
 
-              <h3 className="font-bold text-gray-800 mb-3 text-right">העדפות דת ומסורת</h3>
+              <h3 className="mb-3 text-right text-lg font-black tracking-tight text-slate-950">העדפות דת ומסורת</h3>
               <div className="space-y-3">
                   <div>
-                      <label className="block text-right text-sm font-medium text-gray-600 mb-1">זיקה לדת</label>
+                      <label className="mb-1 block text-right text-sm font-medium text-slate-600">זיקה לדת</label>
                       <BottomSheetSelect
                            disabled={!isEditing}
                            value={formData.religion}
@@ -601,12 +677,12 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
+              <label className="mb-2 block text-right font-bold text-slate-700">קצת עליי</label>
               <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="mb-2 block text-right font-bold text-slate-700 flex items-center gap-2">
                   קישור לרשת חברתית
               </label>
               {isEditing && (
@@ -639,8 +715,8 @@ export default function ProfilePage() {
         
         <div className="space-y-4">
             {/* SONG SECTION - MOVED HERE */}
-            <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
-                <div className={`w-full h-full rounded-[2.5rem] bg-white p-6 shadow-2xl relative overflow-hidden border border-gray-200 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
+            <div className="relative mx-auto max-w-[280px] w-full aspect-square group">
+                <div className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#fffaf4_100%)] p-6 text-center shadow-[0_24px_80px_rgba(15,23,42,0.12)] transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
                      onClick={() => !isEditing && !formData.song_name && setIsEditing(true)}
                 >
                     
@@ -661,7 +737,7 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </motion.div>
-                        <div className="absolute -top-2 -right-2 bg-[#FFE8E2] text-[#FA3803] text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-10 animate-bounce">
+                        <div className="absolute -top-2 -right-2 rounded-full bg-[#FFE8E2] px-2 py-1 text-[10px] font-bold text-[#FA3803] shadow-lg z-10 animate-bounce">
                             MY VIBE
                         </div>
                     </div>
@@ -686,8 +762,8 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div className="relative z-20 w-full">
-                            <h3 className="text-black font-black text-xl mb-1 truncate px-2">{formData.song_name || "אם היית שיר..."}</h3>
-                            <p className="text-gray-700 text-sm truncate px-4">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
+                            <h3 className="mb-1 truncate px-2 text-xl font-black text-slate-950">{formData.song_name || "אם היית שיר..."}</h3>
+                            <p className="truncate px-4 text-sm text-slate-600">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
                             
                             {formData.song_preview_url && (
                                 <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
@@ -695,7 +771,7 @@ export default function ProfilePage() {
                             
                             {!formData.song_name && !isEditing && (
                                 <div className="mt-3">
-                                    <span className="inline-flex items-center gap-1 bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] text-xs px-3 py-1.5 rounded-full transition-colors font-semibold">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFE8E2] px-3 py-1.5 text-xs font-semibold text-[#FA3803] transition-colors hover:bg-[#FFDDD0]">
                                         <Plus className="w-3 h-3" /> בחר שיר או אמן
                                     </span>
                                 </div>
@@ -721,7 +797,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
+                <label className="mb-2 block text-right font-bold text-slate-700">
                   מחפש/ת
                 </label>
                 <BottomSheetSelect
@@ -738,7 +814,7 @@ export default function ProfilePage() {
                 />
             </div>
             <div>
-                <label className="block text-right font-bold text-gray-700 mb-3">
+                <label className="mb-3 block text-right font-bold text-slate-700">
                   וייב: <span className="text-[--theme-orange] font-black text-lg">{vibeText[formData.vibe_level-1] || 'מאוזן'}</span>
                 </label>
                 <div className="px-2 py-3">
@@ -809,8 +885,8 @@ export default function ProfilePage() {
         </div>
 
         {/* תחומי עניין */}
-        <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
-          <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
+        <div className="rounded-[28px] border border-orange-100 bg-orange-50/80 p-4 shadow-[0_18px_50px_rgba(255,122,69,0.08)]">
+          <h3 className="mb-3 text-right text-lg font-black tracking-tight text-slate-950">תחומי עניין</h3>
           <div className="flex flex-wrap gap-2">
             {INTEREST_OPTIONS.map(interest => {
               const selected = (formData.interests || []).includes(interest.id);
@@ -825,7 +901,7 @@ export default function ProfilePage() {
                       : [...current, interest.id]
                     );
                   }}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all ${
                     selected
                       ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]'
                       : 'border-gray-200 bg-white text-gray-600'
@@ -837,13 +913,13 @@ export default function ProfilePage() {
             })}
           </div>
           {!isEditing && (!formData.interests || formData.interests.length === 0) && (
-            <p className="text-gray-400 text-sm text-center mt-2">לחץ על "ערוך" להוספת תחומי עניין</p>
+            <p className="mt-2 text-center text-sm text-slate-400">לחץ על "ערוך" להוספת תחומי עניין</p>
           )}
         </div>
 
         <div className="space-y-4">
             <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
+                <label className="mb-2 block text-right font-bold text-slate-700">
                   סטטוס דירה
                 </label>
                 <BottomSheetSelect
@@ -860,12 +936,12 @@ export default function ProfilePage() {
             </div>
 
             {formData.current_status === 'has_apartment' && (
-            <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
-            <div className="flex items-center mb-3">
+            <div className="rounded-[28px] border border-orange-100 bg-orange-50/80 p-4 shadow-[0_18px_50px_rgba(255,122,69,0.08)]">
+            <div className="mb-3 flex items-center">
                 <div className="p-2 bg-[--theme-orange] rounded-full text-white ml-2">
                      <Home className="w-4 h-4" />
                 </div>
-                <label className="block text-lg font-bold text-gray-800">
+                <label className="block text-lg font-black tracking-tight text-slate-950">
                     הדירה שלי
                 </label>
             </div>
@@ -906,19 +982,19 @@ export default function ProfilePage() {
                     </div>
                 ))}
             </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="mt-2 text-center text-xs text-slate-500">
                 {isEditing ? 'יש להעלות תמונות ברורות של החללים המשותפים והחדר הפנוי' : 'לחץ על תמונה להגדלה'}
             </p>
             </div>
             )}
 
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">תקציב חודשי לשכירות</label>
+                <label className="mb-1 block text-right text-sm font-bold text-slate-700">תקציב חודשי לשכירות</label>
                 <Input disabled={!isEditing} type="number" placeholder="לדוגמה: 3500" value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-right" dir="rtl" />
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-2">איזור חיפוש מועדף</label>
+                <label className="mb-2 block text-right text-sm font-bold text-slate-700">איזור חיפוש מועדף</label>
                 <BottomSheetSelect
                     disabled={!isEditing}
                     value={formData.search_area}
@@ -935,11 +1011,12 @@ export default function ProfilePage() {
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">עיר מועדפת (אופציונלי)</label>
+                <label className="mb-1 block text-right text-sm font-bold text-slate-700">עיר מועדפת (אופציונלי)</label>
                 <Input disabled={!isEditing} value={formData.location} onChange={e => setFormField('location', e.target.value)} placeholder="לדוגמה: תל אביב" className="bg-white border-gray-300 text-right" dir="rtl" />
             </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

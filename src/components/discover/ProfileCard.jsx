@@ -1,10 +1,9 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Sparkles } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
-import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, normalizeInterestValues } from '@/lib/interests';
@@ -255,7 +254,6 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
-    const [avgRating, setAvgRating] = useState(null);
     const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
     const interests = normalizeInterestValues(profile.interests);
 
@@ -272,23 +270,6 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
         }
     }, []);
 
-    useEffect(() => {
-        if (!isActive) return; // Only load when card is visible
-        
-        const loadRating = async () => {
-            try {
-                const reviews = await base44.entities.Review.filter({ reviewed_id: profile.user_id });
-                if (reviews.length > 0) {
-                    const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-                    setAvgRating(avg);
-                }
-            } catch (e) {
-                console.error("Failed to load rating:", e);
-            }
-        };
-        loadRating();
-    }, [profile.user_id, isActive]);
-    
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -400,12 +381,14 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
         // Ignore tap if expanded or not active
         if (!isActive || isExpanded) return;
 
-        const rect = e.target.getBoundingClientRect();
+        if (media.length <= 1) {
+            setIsExpanded(true);
+            return;
+        }
+
+        const rect = e.currentTarget.getBoundingClientRect();
         const tapX = e.clientX - rect.left;
         const width = rect.width;
-
-        // If tapped on info button area (approx top left), don't change photo
-        if (tapX < 60 && e.clientY - rect.top < 60) return;
 
         if (tapX < width / 2) {
             setCurrentPhotoIndex(prev => (prev - 1 + media.length) % media.length);
@@ -415,6 +398,24 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
     }, [isActive, isExpanded, media.length]);
 
     const vibeText = useMemo(() => ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"], []);
+    const locationLabel = useMemo(() => {
+        if (profile.current_status !== 'has_apartment' && profile.search_cities && profile.search_cities.length > 0) {
+            const city = profile.search_cities[0];
+            return [city, profile.search_area].filter(Boolean).join(", ");
+        }
+
+        return [profile.location, profile.search_area].filter(Boolean).join(", ");
+    }, [profile.current_status, profile.location, profile.search_area, profile.search_cities]);
+
+    const budgetLabel = useMemo(() => {
+        if (!profile.budget_max) return null;
+        return `₪${Number(profile.budget_max).toLocaleString()}`;
+    }, [profile.budget_max]);
+
+    const matchScoreLabel = useMemo(() => {
+        const score = Math.round((Number(plusMeta?.score) || 0) * 100);
+        return score > 0 ? `${score}% Match` : "Smart fit";
+    }, [plusMeta?.score]);
 
     const getPhotoContent = (index) => {
         const isVideo = media[index].type === 'video';
@@ -440,90 +441,38 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
             if (index === 0) {
                 return (
                     <>
-                        {/* Right column: age tag + info button */}
-                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
-                            <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                גיל: {profile.age}
-                            </div>
-                            {profile.team_target && (
-                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                    <Users className="w-3 h-3" />
-                                    {1 + (profile.team_members?.length || 0)}/{profile.team_target}
-                                </div>
-                            )}
-                            {avgRating !== null && (
-                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                    <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
-                                    {avgRating.toFixed(1)}
-                                </div>
-                            )}
-                            {plusMeta && (
-                                <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-[--theme-orange]" />
-                                    {Math.round((Number(plusMeta.score) || 0) * 100)}%
-                                </div>
-                            )}
-                            {/* Info button below tags */}
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1 self-end"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
-                        </div>
-
-                        {profile.social_link && (
-                            <a 
-                                href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-24 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-                            >
-                                {(() => {
-                                    const l = String(profile.social_link).toLowerCase();
-                                    if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
-                                    if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
-                                    if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
-                                    if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
-                                    return <LinkIcon className="w-5 h-5 text-white" />;
-                                })()}
-                            </a>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
-                            <div className="flex items-center gap-2 mb-2">
-                                <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/92 via-black/62 to-transparent p-5 pb-44 pointer-events-none">
+                            <div className="flex items-end gap-2" dir="ltr">
+                                <h2 className="text-[2.1rem] font-black leading-none text-white drop-shadow-[0_6px_24px_rgba(0,0,0,0.25)]">
+                                    {profile.name}, {profile.age}
+                                </h2>
                                 {profile.is_verified && (
-                                    <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
+                                    <div className="mb-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 shadow-[0_10px_24px_rgba(59,130,246,0.35)]" title="מאומת">
                                         <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
                                     </div>
                                 )}
                             </div>
-                            {profile.current_status === 'has_apartment' ? null : (
-                                <div className="flex items-start text-white/90 text-base mb-3">
-                                    <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
-                                    <div className="flex flex-col">
-                                        {profile.search_cities && profile.search_cities.length > 0 ? (
-                                            <>
-                                                <span>{profile.search_cities[0]}</span>
-                                                {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
-                                                {profile.search_cities.length > 2 && <span className="text-xs opacity-90">ועוד...</span>}
-                                            </>
-                                        ) : (
-                                            <span>{profile.location}</span>
-                                        )}
-                                        <span className="text-sm opacity-80 mt-1">• {profile.search_area}</span>
-                                    </div>
-                                </div>
-                            )}
-                            {profile.current_status === 'has_apartment' && (
-                                <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
-                                    <Home className="w-4 h-4 ml-1" />
-                                    יש לי דירה!
-                                </div>
-                            )}
 
+                            <div className="mt-2 flex flex-wrap items-center gap-2" dir="ltr">
+                                {budgetLabel && (
+                                    <span className="inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-bold text-slate-900 shadow-sm">
+                                        {budgetLabel}
+                                    </span>
+                                )}
+                                {locationLabel && (
+                                    <span className="inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold text-slate-900 shadow-sm">
+                                        {locationLabel}
+                                    </span>
+                                )}
+                                <span className="inline-flex items-center rounded-full bg-white px-4 py-2 text-[12px] font-semibold text-slate-900 shadow-sm">
+                                    {matchScoreLabel}
+                                </span>
+                                {profile.current_status === 'has_apartment' && (
+                                    <span className="inline-flex items-center rounded-full bg-[--theme-orange] px-4 py-2 text-[12px] font-bold text-white shadow-[0_10px_24px_rgba(255,122,69,0.26)]">
+                                        יש לי דירה!
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </>
                 );
@@ -679,7 +628,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                         )}
                     </div>
 
-                    {media.length > 0 && (
+                    {media.length > 1 && currentPhotoIndex > 0 && (
                         <div className="absolute top-4 left-4 right-4 flex gap-1.5 z-10 pointer-events-none">
                             {media.map((_, i) => (
                                 <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
@@ -702,7 +651,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                     )}
 
                     {/* Music Player UI */}
-                    {profile.song_preview_url && profile.song_name && isActive && (
+                    {profile.song_preview_url && profile.song_name && isActive && currentPhotoIndex > 0 && (
                         <div className="absolute top-5 left-2 z-20 flex items-center gap-3 bg-black/60 backdrop-blur-md p-2 pl-4 rounded-full animate-in fade-in slide-in-from-bottom-4 duration-700">
                              <div className="relative w-10 h-10 bg-gray-900 rounded-full overflow-hidden border border-gray-700 animate-[spin_4s_linear_infinite]">
                                   {profile.song_image ? (
