@@ -122,40 +122,35 @@ export default function OnboardingPage() {
     const fetchUser = async () => {
       try {
         const userData = await User.me();
-        console.log('[ruumr] Onboarding userData:', JSON.stringify({ full_name: userData.full_name, name: userData.name, email: userData.email, id: userData.id }));
-        console.log('[ruumr] Onboarding authUser:', JSON.stringify({ full_name: authUser?.full_name, name: authUser?.name }));
         const isAppleUser = isAppleAuthUser(userData);
         const cachedIdentity = getCachedAppleIdentity(userData.id);
 
+        // authUser (from AuthContext) is the most reliable source — it's populated directly
+        // from the OAuth token (Google/Apple) immediately after login.
+        // userData.full_name may be empty on first login before the platform syncs it.
         const fullName =
-          userData.full_name ||
-          userData.name ||
           authUser?.full_name ||
           authUser?.name ||
+          userData.full_name ||
+          userData.name ||
           cachedIdentity?.fullName ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
         const firstName = fullName ? fullName.split(' ')[0] : '';
-        console.log('[ruumr] Onboarding resolved name:', JSON.stringify({ fullName, firstName }));
 
         if (isAppleUser) {
-          // Critical: persist first-login Apple identity immediately for future logins.
           persistAppleIdentity(userData.id, { fullName, email });
         }
 
         setFormData((prev) => ({ ...prev, name: firstName, user_id: userData.id }));
       } catch (e) {
-        console.error('[ruumr] Onboarding fetchUser error:', e?.status, e?.message, e);
-        // Only redirect to login on actual auth failures, not transient network errors.
-        // Treating every error as "not logged in" causes an infinite redirect loop on Android
-        // WebView when the first post-OAuth API call fails due to a race condition or network blip.
         if (e?.status === 401 || e?.status === 403) {
           base44.auth.redirectToLogin(getSafeAuthReturnUrl());
         }
       }
     };
     fetchUser();
-  }, [navigate]);
+  }, [authUser]);
 
   useEffect(() => {
     const trackStep = async () => {
