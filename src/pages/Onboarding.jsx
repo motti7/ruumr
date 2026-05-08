@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { User } from '@/entities/User';
 import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
@@ -97,6 +98,7 @@ const Step = ({ children, step, currentStep, title }) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(/** @type {any} */ (createProfileDefaults()));
@@ -126,6 +128,8 @@ export default function OnboardingPage() {
         const fullName =
           userData.full_name ||
           userData.name ||
+          authUser?.full_name ||
+          authUser?.name ||
           cachedIdentity?.fullName ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
