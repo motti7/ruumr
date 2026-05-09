@@ -72,13 +72,16 @@ export default function OnboardingPage() {
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.fullName || initialAppleIdentity.displayName } : {})
+    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.fullName } : {})
   ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
   const [appleDisplayName, setAppleDisplayName] = useState(
-    initialIsAppleUser ? initialAppleIdentity.displayName : ''
+    initialIsAppleUser ? initialAppleIdentity.fullName : ''
+  );
+  const [isResolvingAppleIdentity, setIsResolvingAppleIdentity] = useState(
+    initialIsAppleUser && !initialAppleIdentity.fullName
   );
 
   const fileInputRef = useRef(null);
@@ -101,6 +104,10 @@ export default function OnboardingPage() {
 
     const fetchUser = async () => {
       try {
+        if (initialIsAppleUser) {
+          setIsResolvingAppleIdentity(true);
+        }
+
         let userData = await User.me();
         let appleAuthUser = isAppleAuthUser(userData);
         let cachedIdentity = getCachedAppleIdentity(userData.id);
@@ -112,7 +119,7 @@ export default function OnboardingPage() {
         });
 
         if (appleAuthUser && !appleIdentity.fullName) {
-          for (const waitMs of [250, 500, 1000]) {
+          for (const waitMs of [300, 600, 1200, 2000, 3000]) {
             if (cancelled) return;
             await delay(waitMs);
             if (cancelled) return;
@@ -152,13 +159,15 @@ export default function OnboardingPage() {
         }
 
         setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? (appleIdentity.fullName || appleIdentity.displayName || '') : '');
+        setAppleDisplayName(appleAuthUser ? appleIdentity.fullName : '');
+        setIsResolvingAppleIdentity(false);
         setFormData((prev) => ({
           ...prev,
-          name: appleAuthUser ? (appleIdentity.fullName || appleIdentity.displayName || '') : firstName,
+          name: appleAuthUser ? appleIdentity.fullName : firstName,
           user_id: userData.id
         }));
       } catch (e) {
+        setIsResolvingAppleIdentity(false);
         if (e?.status === 401 || e?.status === 403) {
           base44.auth.redirectToLogin(getSafeAuthReturnUrl());
         }
@@ -278,7 +287,6 @@ export default function OnboardingPage() {
         formData.name.trim() ||
         appleDisplayName ||
         currentAppleIdentity.fullName ||
-        currentAppleIdentity.displayName ||
         'Ruumr user';
 
       const cleanedPhotos = formData.photos.filter((p) => p);
@@ -607,10 +615,16 @@ export default function OnboardingPage() {
                     <div className="space-y-1 text-right">
                         {isAppleUser && (
                             <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
-                                <p className="text-xs font-bold" style={{ color: '#FA3803' }}>שם מחשבון Apple</p>
-                                <p className="mt-1 text-base font-semibold text-gray-800">
-                                    {appleDisplayName || formData.name || ''}
-                                </p>
+                                {appleDisplayName || formData.name ? (
+                                    <p className="text-xl font-bold text-gray-800">
+                                        {appleDisplayName || formData.name}
+                                    </p>
+                                ) : isResolvingAppleIdentity ? (
+                                    <div className="flex items-center gap-2 text-gray-500">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-sm">טוען שם מחשבון Apple...</span>
+                                    </div>
+                                ) : null}
                             </div>
                         )}
                         {!isAppleUser && (
