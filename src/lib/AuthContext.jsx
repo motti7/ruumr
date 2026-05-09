@@ -8,7 +8,7 @@ import { clearClientUserData } from '@/lib/clientSessionCleanup';
 import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
-import { isAppleAuthUser, persistAppleIdentity } from '@/lib/appleIdentity';
+import { isAppleAuthUser, persistAppleIdentity, resolveAppleDisplayName } from '@/lib/appleIdentity';
 
 const AuthContext = createContext(null);
 
@@ -147,16 +147,23 @@ export const AuthProvider = ({ children }) => {
       // Apple returns name/email only on first authorization.
       // Persist immediately so future logins can rely on user ID lookup + cached profile data.
       if (isAppleAuthUser(currentUser)) {
+        const appleIdentity = resolveAppleDisplayName({
+          authUser: currentUser,
+          fallbackName: '',
+        });
         persistAppleIdentity(currentUser.id, {
-          fullName: currentUser.full_name || currentUser.name || '',
+          fullName: appleIdentity.fullName || appleIdentity.displayName || '',
           email: currentUser.email || '',
         });
       }
 
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
+        const appleIdentity = isAppleAuthUser(currentUser)
+          ? resolveAppleDisplayName({ authUser: currentUser, fallbackName: '' })
+          : null;
         mixpanel.identify(String(currentUser.id));
         mixpanel.people.set({
-          $name: currentUser.full_name || currentUser.name || '',
+          $name: appleIdentity?.fullName || appleIdentity?.displayName || currentUser.full_name || currentUser.name || '',
           $email: currentUser.email || '',
           user_id: currentUser.id,
         });

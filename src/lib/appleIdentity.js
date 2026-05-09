@@ -20,6 +20,67 @@ const getFirstWord = (value) => {
   return cleaned.split(/\s+/).filter(Boolean)[0] || '';
 };
 
+const pickFirstNonEmpty = (...values) => {
+  for (const value of values) {
+    const cleaned = safeTrim(value);
+    if (cleaned) {
+      return cleaned;
+    }
+  }
+
+  return '';
+};
+
+const extractAppleName = (source) => {
+  if (!source || typeof source !== 'object') {
+    return '';
+  }
+
+  const structuredName = source.name;
+  if (structuredName && typeof structuredName === 'object') {
+    const firstName = pickFirstNonEmpty(
+      structuredName.firstName,
+      structuredName.givenName,
+      structuredName.given_name,
+      structuredName.first_name
+    );
+    const lastName = pickFirstNonEmpty(
+      structuredName.lastName,
+      structuredName.familyName,
+      structuredName.family_name,
+      structuredName.last_name
+    );
+    const combined = [firstName, lastName].filter(Boolean).join(' ').trim();
+    if (combined) {
+      return combined;
+    }
+  }
+
+  const directCombined = [pickFirstNonEmpty(
+    source.given_name,
+    source.givenName,
+    source.first_name,
+    source.firstName
+  ), pickFirstNonEmpty(
+    source.family_name,
+    source.familyName,
+    source.last_name,
+    source.lastName
+  )].filter(Boolean).join(' ').trim();
+
+  if (directCombined) {
+    return directCombined;
+  }
+
+  return pickFirstNonEmpty(
+    source.full_name,
+    source.fullName,
+    source.display_name,
+    source.displayName,
+    typeof source.name === 'string' ? source.name : ''
+  );
+};
+
 export function isAppleAuthUser(user) {
   if (!user) return false;
 
@@ -54,17 +115,14 @@ export function persistAppleIdentity(userId, identity) {
 }
 
 export function resolveAppleDisplayName({ authUser, userData, cachedIdentity, fallbackName = 'Ruumr user' } = {}) {
-  const fullName = safeTrim(
-    authUser?.full_name ||
-      authUser?.name ||
-      userData?.full_name ||
-      userData?.name ||
-      cachedIdentity?.fullName ||
-      ''
+  const fullName = pickFirstNonEmpty(
+    extractAppleName(authUser),
+    extractAppleName(userData),
+    cachedIdentity?.fullName
   );
   const firstName = getFirstWord(fullName);
   const cachedFirstName = getFirstWord(cachedIdentity?.fullName);
-  const displayName = firstName || cachedFirstName || fallbackName;
+  const displayName = fullName || firstName || cachedFirstName || fallbackName;
 
   return {
     fullName,

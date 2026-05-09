@@ -45,7 +45,20 @@ describe('appleIdentity helpers', () => {
     ).toEqual({
       fullName: 'John Appleseed',
       firstName: 'John',
-      displayName: 'John',
+      displayName: 'John Appleseed',
+    });
+
+    expect(
+      resolveAppleDisplayName({
+        userData: {
+          given_name: 'John',
+          family_name: 'Appleseed',
+        },
+      })
+    ).toEqual({
+      fullName: 'John Appleseed',
+      firstName: 'John',
+      displayName: 'John Appleseed',
     });
 
     expect(

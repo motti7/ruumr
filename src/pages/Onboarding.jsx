@@ -67,12 +67,12 @@ const Step = ({ children, step, currentStep, title }) =>
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user: authUser, isLoadingAuth } = useAuth();
-  const initialAppleIdentity = resolveAppleDisplayName({ authUser });
+  const initialAppleIdentity = resolveAppleDisplayName({ authUser, fallbackName: '' });
   const initialIsAppleUser = isAppleAuthUser(authUser);
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.displayName } : {})
+    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.fullName || initialAppleIdentity.displayName } : {})
   ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -95,25 +95,53 @@ export default function OnboardingPage() {
   })();
 
   useEffect(() => {
+    let cancelled = false;
+
+    const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
     const fetchUser = async () => {
       try {
-        const userData = await User.me();
-        const appleAuthUser = isAppleAuthUser(userData);
-        const cachedIdentity = getCachedAppleIdentity(userData.id);
-        const appleIdentity = resolveAppleDisplayName({
+        let userData = await User.me();
+        let appleAuthUser = isAppleAuthUser(userData);
+        let cachedIdentity = getCachedAppleIdentity(userData.id);
+        let appleIdentity = resolveAppleDisplayName({
           authUser,
           userData,
           cachedIdentity,
+          fallbackName: '',
         });
+
+        if (appleAuthUser && !appleIdentity.fullName) {
+          for (const waitMs of [250, 500, 1000]) {
+            if (cancelled) return;
+            await delay(waitMs);
+            if (cancelled) return;
+
+            userData = await User.me();
+            appleAuthUser = isAppleAuthUser(userData);
+            cachedIdentity = getCachedAppleIdentity(userData.id);
+            appleIdentity = resolveAppleDisplayName({
+              authUser,
+              userData,
+              cachedIdentity,
+              fallbackName: '',
+            });
+
+            if (appleIdentity.fullName) {
+              break;
+            }
+          }
+        }
+
+        if (cancelled) return;
 
         // authUser (from AuthContext) is the most reliable source — it's populated directly
         // from the OAuth token (Google/Apple) immediately after login.
         // userData.full_name may be empty on first login before the platform syncs it.
         const fullName =
+          appleIdentity.fullName ||
           authUser?.full_name ||
-          authUser?.name ||
           userData.full_name ||
-          userData.name ||
           cachedIdentity?.fullName ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
@@ -124,10 +152,10 @@ export default function OnboardingPage() {
         }
 
         setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? appleIdentity.displayName : '');
+        setAppleDisplayName(appleAuthUser ? (appleIdentity.fullName || appleIdentity.displayName || '') : '');
         setFormData((prev) => ({
           ...prev,
-          name: appleAuthUser ? appleIdentity.displayName : firstName,
+          name: appleAuthUser ? (appleIdentity.fullName || appleIdentity.displayName || '') : firstName,
           user_id: userData.id
         }));
       } catch (e) {
@@ -137,6 +165,9 @@ export default function OnboardingPage() {
       }
     };
     fetchUser();
+    return () => {
+      cancelled = true;
+    };
   }, [authUser]);
 
   useEffect(() => {
@@ -238,7 +269,17 @@ export default function OnboardingPage() {
       // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
       const currentUser = await User.me();
       const userId = currentUser.id;
-      const resolvedProfileName = formData.name.trim() || appleDisplayName || 'Ruumr user';
+      const currentAppleIdentity = resolveAppleDisplayName({
+        authUser,
+        userData: currentUser,
+        cachedIdentity: getCachedAppleIdentity(userId),
+      });
+      const resolvedProfileName =
+        formData.name.trim() ||
+        appleDisplayName ||
+        currentAppleIdentity.fullName ||
+        currentAppleIdentity.displayName ||
+        'Ruumr user';
 
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
@@ -568,10 +609,7 @@ export default function OnboardingPage() {
                             <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
                                 <p className="text-xs font-bold" style={{ color: '#FA3803' }}>שם מחשבון Apple</p>
                                 <p className="mt-1 text-base font-semibold text-gray-800">
-                                    {appleDisplayName || formData.name || 'Ruumr user'}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    השם נשמר אוטומטית מחשבון Apple, בלי לבקש אותו שוב.
+                                    {appleDisplayName || formData.name || ''}
                                 </p>
                             </div>
                         )}

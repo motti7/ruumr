@@ -313,7 +313,6 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       user: {
         id: 'apple-user-1',
         email: 'user@privaterelay.appleid.com',
-        full_name: 'John Appleseed',
         auth_provider: 'apple',
       },
       isLoadingAuth: false,
@@ -321,8 +320,9 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     mockUserMe.mockResolvedValue({
       id: 'apple-user-1',
       email: 'user@privaterelay.appleid.com',
-      full_name: 'John Appleseed',
       auth_provider: 'apple',
+      given_name: 'John',
+      family_name: 'Appleseed',
     });
 
     render(
@@ -332,7 +332,9 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     );
 
     expect(screen.queryByRole('textbox')).toBeNull();
-    expect(screen.getByText(/נשמר אוטומטית מחשבון Apple/)).toBeTruthy();
-    await waitFor(() => expect(mockUserMe).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText('John Appleseed')).toBeTruthy());
+    expect(screen.queryByText('Ruumr user')).toBeNull();
+    expect(screen.queryByText(/נשמר אוטומטית מחשבון Apple/)).toBeNull();
+    expect(mockUserMe).toHaveBeenCalled();
   });
 });
