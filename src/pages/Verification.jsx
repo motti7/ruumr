@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
 export default function VerificationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromOnboarding = location.state?.fromOnboarding === true;
   const [step, setStep] = useState(1); // 1: Email Input, 2: Code Input, 3: Success
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", ""]);
@@ -99,7 +101,7 @@ export default function VerificationPage() {
 
         {/* Header */}
         <div className="flex items-center mt-4 mb-12 relative z-10">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={() => fromOnboarding ? navigate(createPageUrl('Onboarding'), { state: { resumeStep: 7 } }) : navigate(-1)}>
                 <ArrowRight className="w-6 h-6 text-gray-800" />
             </Button>
             <div className="w-full h-1 bg-gray-100 rounded-full mr-4 overflow-hidden">

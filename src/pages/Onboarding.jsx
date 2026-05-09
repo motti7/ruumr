@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { User } from '@/entities/User';
 import { Profile } from '@/entities/Profile';
@@ -68,6 +68,7 @@ const Step = ({ children, step, currentStep, title }) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser, isLoadingAuth } = useAuth();
   const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
   const authHints = appParams.authHints;
@@ -77,7 +78,7 @@ export default function OnboardingPage() {
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
     createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.displayName } : {})
   ));
@@ -474,7 +475,7 @@ export default function OnboardingPage() {
       }
 
       if (shouldVerify) {
-        navigate(createPageUrl('Verification'));
+        navigate(createPageUrl('Verification'), { state: { fromOnboarding: true } });
       } else {
         navigate(createPageUrl('Discover'));
       }
