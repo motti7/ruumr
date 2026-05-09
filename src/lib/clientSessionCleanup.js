@@ -1,5 +1,6 @@
 export const APPLE_IDENTITY_CACHE_KEY = 'ruumr_apple_identity_by_user_id';
 export const LAST_AUTH_PROVIDER_KEY = 'ruumr_last_auth_provider';
+export const LAST_USED_AUTH_METHOD_KEY = 'lastUsedAuthMethod';
 
 export const clearClientUserData = async () => {
   try {

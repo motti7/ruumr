@@ -1,4 +1,8 @@
-import { APPLE_IDENTITY_CACHE_KEY, LAST_AUTH_PROVIDER_KEY } from '@/lib/clientSessionCleanup';
+import {
+  APPLE_IDENTITY_CACHE_KEY,
+  LAST_AUTH_PROVIDER_KEY,
+  LAST_USED_AUTH_METHOD_KEY,
+} from '@/lib/clientSessionCleanup';
 
 const safeJsonParse = (value, fallbackValue) => {
   try {
@@ -44,6 +48,18 @@ const pickFirstNonEmpty = (...values) => {
   }
 
   return '';
+};
+
+const getStoredLastUsedAuthMethod = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  try {
+    return safeTrim(window.localStorage.getItem(LAST_USED_AUTH_METHOD_KEY)).toLowerCase();
+  } catch (_) {
+    return '';
+  }
 };
 
 const extractAppleName = (source, depth = 0) => {
@@ -141,8 +157,9 @@ export function isAppleAuthUser(user, cachedIdentity = null, authHints = null) {
     user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
   ).toLowerCase();
   const hintProvider = String(
-    authHints?.provider || authHints?.auth_provider || authHints?.identity_provider || ''
+    authHints?.provider || authHints?.auth_provider || authHints?.identity_provider || authHints?.auth_method || ''
   ).toLowerCase();
+  const storedAuthMethod = getStoredLastUsedAuthMethod();
   const email = safeTrim(user.email).toLowerCase();
   const cachedFullName = isRealAppleName(cachedIdentity?.fullName) ? safeTrim(cachedIdentity.fullName) : '';
   const currentFullName = safeTrim(user.full_name);
@@ -150,6 +167,7 @@ export function isAppleAuthUser(user, cachedIdentity = null, authHints = null) {
   return (
     provider.includes('apple') ||
     hintProvider.includes('apple') ||
+    storedAuthMethod.includes('apple') ||
     email.includes('privaterelay.appleid.com') ||
     Boolean(cachedFullName && !currentFullName)
   );

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/clientSessionCleanup', () => ({
   APPLE_IDENTITY_CACHE_KEY: 'ruumr_apple_identity_by_user_id',
   LAST_AUTH_PROVIDER_KEY: 'ruumr_last_auth_provider',
+  LAST_USED_AUTH_METHOD_KEY: 'lastUsedAuthMethod',
 }));
 
 import {
@@ -29,6 +30,16 @@ describe('appleIdentity helpers', () => {
       isAppleAuthUser({
         email: 'user@example.com',
         auth_provider: 'apple',
+      })
+    ).toBe(true);
+  });
+
+  it('detects Apple-authenticated users from the last used auth method', () => {
+    window.localStorage.setItem('lastUsedAuthMethod', 'apple');
+
+    expect(
+      isAppleAuthUser({
+        email: 'user@example.com',
       })
     ).toBe(true);
   });

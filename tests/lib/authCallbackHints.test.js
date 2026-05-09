@@ -14,9 +14,10 @@ describe('authCallbackHints helpers', () => {
 
   it('captures Apple auth hints only when an access token is present', () => {
     expect(
-      captureAuthCallbackHints(new URLSearchParams('access_token=abc123&provider=apple&name=John%20Appleseed'))
+      captureAuthCallbackHints(new URLSearchParams('access_token=abc123&provider=apple&auth_method=apple&name=John%20Appleseed'))
     ).toEqual({
       provider: 'apple',
+      auth_method: 'apple',
       name: 'John Appleseed',
     });
 
@@ -39,4 +40,3 @@ describe('authCallbackHints helpers', () => {
     expect(getStoredAuthCallbackHints()).toBeNull();
   });
 });
-

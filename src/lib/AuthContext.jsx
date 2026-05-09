@@ -15,6 +15,7 @@ import {
   syncAppleDisplayNameToBase44,
 } from '@/lib/appleIdentity';
 import { clearAuthCallbackHints } from '@/lib/authCallbackHints';
+import { LAST_USED_AUTH_METHOD_KEY } from '@/lib/clientSessionCleanup';
 
 const AuthContext = createContext(null);
 
@@ -211,6 +212,10 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null);
     setAppPublicSettings(null);
     clearAuthCallbackHints();
+
+    try {
+      window.localStorage?.removeItem(LAST_USED_AUTH_METHOD_KEY);
+    } catch (_) {}
 
     if (shouldRedirect) {
       base44.auth.logout(getSafeAuthReturnUrl());

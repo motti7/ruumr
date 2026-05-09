@@ -8,6 +8,7 @@ const HINT_KEYS = [
   'provider',
   'auth_provider',
   'identity_provider',
+  'auth_method',
   'full_name',
   'fullName',
   'display_name',
@@ -100,4 +101,3 @@ export function clearAuthCallbackHints() {
     window.sessionStorage.removeItem(AUTH_CALLBACK_HINT_STORAGE_KEY);
   } catch (_) {}
 }
-
