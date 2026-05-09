@@ -4,12 +4,12 @@ import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import mixpanel from 'mixpanel-browser';
-import { clearClientUserData } from '@/lib/clientSessionCleanup';
 import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
 import {
   isAppleAuthUser,
+  getCachedAppleIdentity,
   persistAppleIdentity,
   resolveAppleDisplayName,
   syncAppleDisplayNameToBase44,
@@ -146,27 +146,33 @@ export const AuthProvider = ({ children }) => {
       console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
       let currentUser = await base44.auth.me();
       console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
+      const cachedIdentity = currentUser?.id ? getCachedAppleIdentity(currentUser.id) : null;
 
       // Apple returns name/email only on first authorization.
       // Persist immediately so future logins can rely on Base44 + cached profile data.
-      if (isAppleAuthUser(currentUser)) {
+      if (isAppleAuthUser(currentUser, cachedIdentity)) {
         const appleIdentity = resolveAppleDisplayName({
           authUser: currentUser,
+          cachedIdentity,
           fallbackName: '',
         });
-        currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity);
-        persistAppleIdentity(currentUser.id, {
-          fullName: appleIdentity.fullName || appleIdentity.displayName || '',
-          email: currentUser.email || '',
-        });
+        currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity, cachedIdentity);
+        try {
+          persistAppleIdentity(currentUser.id, {
+            fullName: appleIdentity.fullName || '',
+            email: currentUser.email || '',
+          });
+        } catch (persistError) {
+          console.warn('Failed to cache Apple identity locally:', persistError);
+        }
       }
 
       setUser(currentUser);
       setIsAuthenticated(true);
 
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
-        const appleIdentity = isAppleAuthUser(currentUser)
-          ? resolveAppleDisplayName({ authUser: currentUser, fallbackName: '' })
+        const appleIdentity = isAppleAuthUser(currentUser, cachedIdentity)
+          ? resolveAppleDisplayName({ authUser: currentUser, cachedIdentity, fallbackName: '' })
           : null;
         mixpanel.identify(String(currentUser.id));
         mixpanel.people.set({
@@ -203,8 +209,6 @@ export const AuthProvider = ({ children }) => {
     } else {
       base44.auth.logout();
     }
-
-    await clearClientUserData();
   };
 
   const navigateToLogin = () => {

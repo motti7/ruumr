@@ -226,6 +226,8 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
 
   beforeEach(async () => {
     vi.resetModules();
+    window.localStorage.clear();
+    window.sessionStorage.clear();
     mockUseAuth.mockReturnValue({ user: null });
     mockUserMe.mockReset();
     mockRedirectToLogin.mockClear();
@@ -308,7 +310,7 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     expect(screen.queryByText('Admin')).toBeNull();
   });
 
-  it('does not render a name input for Apple-authenticated users', async () => {
+  it('prefills the name field for Apple-authenticated users when Apple provides a name', async () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'apple-user-1',
@@ -331,14 +333,13 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    expect(screen.queryByRole('textbox')).toBeNull();
-    await waitFor(() => expect(screen.getByText('John Appleseed')).toBeTruthy());
+    await waitFor(() => expect(screen.getByDisplayValue('John Appleseed')).toBeTruthy());
+    expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull();
     expect(screen.queryByText('Ruumr user')).toBeNull();
-    expect(screen.queryByText(/נשמר אוטומטית מחשבון Apple/)).toBeNull();
     expect(mockUserMe).toHaveBeenCalled();
   });
 
-  it('stops showing the Apple loading state when the name has not synced yet', async () => {
+  it('requires manual name entry when Apple does not provide a name', async () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'apple-user-2',
@@ -359,10 +360,10 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/טוען שם מחשבון Apple/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByPlaceholderText('השם המלא שלך')).toBeTruthy());
+    expect(screen.getByPlaceholderText('השם המלא שלך')).toHaveValue('');
     await waitFor(() => expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull(), {
       timeout: 5000,
     });
-    expect(screen.queryByText('Ruumr user')).toBeNull();
   });
 });

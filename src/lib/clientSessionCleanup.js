@@ -13,12 +13,6 @@ export const clearClientUserData = async () => {
       window.localStorage?.clear();
     } catch (_) {}
 
-    // Extra safety: explicitly remove critical auth-related keys.
-    try {
-      window.localStorage?.removeItem(APPLE_IDENTITY_CACHE_KEY);
-      window.localStorage?.removeItem(LAST_AUTH_PROVIDER_KEY);
-    } catch (_) {}
-
     try {
       if ('caches' in window) {
         const cacheKeys = await window.caches.keys();

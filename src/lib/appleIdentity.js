@@ -11,6 +11,21 @@ const safeJsonParse = (value, fallbackValue) => {
 
 const safeTrim = (value) => String(value ?? '').trim();
 
+const APPLE_NAME_PLACEHOLDERS = new Set([
+  'ruumr user',
+  'apple account name',
+  'שם מחשבון apple',
+]);
+
+const isRealAppleName = (value) => {
+  const cleaned = safeTrim(value);
+  if (!cleaned) {
+    return false;
+  }
+
+  return !APPLE_NAME_PLACEHOLDERS.has(cleaned.toLowerCase());
+};
+
 const getFirstWord = (value) => {
   const cleaned = safeTrim(value);
   if (!cleaned) {
@@ -81,17 +96,21 @@ const extractAppleName = (source) => {
   );
 };
 
-export function isAppleAuthUser(user) {
+export function isAppleAuthUser(user, cachedIdentity = null) {
   if (!user) return false;
 
   const provider = String(
     user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
   ).toLowerCase();
   const email = safeTrim(user.email).toLowerCase();
-  const lastAuthProvider =
-    typeof window !== 'undefined' ? window.localStorage.getItem(LAST_AUTH_PROVIDER_KEY) : null;
+  const cachedFullName = isRealAppleName(cachedIdentity?.fullName) ? safeTrim(cachedIdentity.fullName) : '';
+  const currentFullName = safeTrim(user.full_name);
 
-  return provider.includes('apple') || email.includes('privaterelay.appleid.com') || lastAuthProvider === 'apple';
+  return (
+    provider.includes('apple') ||
+    email.includes('privaterelay.appleid.com') ||
+    Boolean(cachedFullName && !currentFullName)
+  );
 }
 
 export function getCachedAppleIdentity(userId) {
@@ -105,24 +124,36 @@ export function persistAppleIdentity(userId, identity) {
   if (!userId || typeof window === 'undefined') return;
 
   const cache = safeJsonParse(window.localStorage.getItem(APPLE_IDENTITY_CACHE_KEY), {});
-  const previous = cache[String(userId)] || {};
+  const fullName = isRealAppleName(identity?.fullName) ? safeTrim(identity.fullName) : '';
+
+  if (!fullName) {
+    delete cache[String(userId)];
+
+    if (Object.keys(cache).length > 0) {
+      window.localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(cache));
+    } else {
+      window.localStorage.removeItem(APPLE_IDENTITY_CACHE_KEY);
+    }
+
+    window.localStorage.removeItem(LAST_AUTH_PROVIDER_KEY);
+    return;
+  }
+
   cache[String(userId)] = {
-    fullName: identity?.fullName || previous.fullName || '',
-    email: identity?.email || previous.email || '',
+    fullName,
+    email: safeTrim(identity?.email),
   };
   window.localStorage.setItem(APPLE_IDENTITY_CACHE_KEY, JSON.stringify(cache));
   window.localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
 }
 
-export function resolveAppleDisplayName({ authUser, userData, cachedIdentity, fallbackName = 'Ruumr user' } = {}) {
+export function resolveAppleDisplayName({ authUser, userData, fallbackName = 'Ruumr user' } = {}) {
   const fullName = pickFirstNonEmpty(
     extractAppleName(authUser),
     extractAppleName(userData),
-    cachedIdentity?.fullName
   );
   const firstName = getFirstWord(fullName);
-  const cachedFirstName = getFirstWord(cachedIdentity?.fullName);
-  const displayName = fullName || firstName || cachedFirstName || fallbackName;
+  const displayName = fullName || fallbackName;
 
   return {
     fullName,
@@ -131,8 +162,8 @@ export function resolveAppleDisplayName({ authUser, userData, cachedIdentity, fa
   };
 }
 
-export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null) {
-  if (!authModule?.updateMe || !isAppleAuthUser(user)) {
+export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null, cachedIdentity = null) {
+  if (!authModule?.updateMe || !isAppleAuthUser(user, cachedIdentity)) {
     return user;
   }
 

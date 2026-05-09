@@ -68,8 +68,9 @@ const Step = ({ children, step, currentStep, title }) =>
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user: authUser, isLoadingAuth } = useAuth();
-  const initialAppleIdentity = resolveAppleDisplayName({ authUser, fallbackName: '' });
-  const initialIsAppleUser = isAppleAuthUser(authUser);
+  const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
+  const initialAppleIdentity = resolveAppleDisplayName({ authUser, cachedIdentity: initialCachedIdentity, fallbackName: '' });
+  const initialIsAppleUser = isAppleAuthUser(authUser, initialCachedIdentity);
   const appleNameTimeoutMs = 2000;
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
@@ -124,8 +125,8 @@ export default function OnboardingPage() {
 
     const readAppleIdentity = async () => {
       const userData = await withTimeout(User.me(), appleNameTimeoutMs);
-      const appleAuthUser = isAppleAuthUser(userData);
       const cachedIdentity = getCachedAppleIdentity(userData.id);
+      const appleAuthUser = isAppleAuthUser(userData, cachedIdentity);
       const appleIdentity = resolveAppleDisplayName({
         authUser,
         userData,
@@ -137,9 +138,8 @@ export default function OnboardingPage() {
         appleIdentity.fullName ||
         authUser?.full_name ||
         userData.full_name ||
-        cachedIdentity?.fullName ||
         '';
-      const displayName = appleIdentity.displayName || '';
+      const displayName = appleIdentity.fullName || '';
       const email = userData.email || cachedIdentity?.email || '';
       const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
@@ -147,11 +147,11 @@ export default function OnboardingPage() {
         userData,
         appleAuthUser,
         cachedIdentity,
-        fullName,
-        displayName,
-        email,
-        firstName,
-      };
+          fullName,
+          displayName,
+          email,
+          firstName,
+        };
     };
 
     const fetchUser = async () => {
@@ -200,6 +200,7 @@ export default function OnboardingPage() {
           const {
             userData,
             appleAuthUser,
+            cachedIdentity,
             fullName,
             displayName,
             email,
@@ -207,15 +208,19 @@ export default function OnboardingPage() {
           } = snapshot;
 
           if (appleAuthUser) {
-            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName });
-            persistAppleIdentity(userData.id, { fullName, email });
+            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity);
+            try {
+              persistAppleIdentity(userData.id, { fullName, email });
+            } catch (persistError) {
+              console.warn('Failed to cache Apple identity locally during onboarding:', persistError);
+            }
           }
 
           setIsAppleUser(appleAuthUser);
           setAppleDisplayName(appleAuthUser ? displayName : '');
           setFormData((prev) => ({
             ...prev,
-            name: appleAuthUser ? (displayName || prev.name) : firstName,
+            name: appleAuthUser ? (prev.name.trim() || displayName || prev.name) : firstName,
             user_id: userData.id
           }));
         }
@@ -263,8 +268,8 @@ export default function OnboardingPage() {
         const userData = await withTimeout(User.me(), appleNameTimeoutMs);
         if (cancelled) return;
 
-        const appleAuthUser = isAppleAuthUser(userData);
         const cachedIdentity = getCachedAppleIdentity(userData.id);
+        const appleAuthUser = isAppleAuthUser(userData, cachedIdentity);
         const appleIdentity = resolveAppleDisplayName({
           authUser,
           userData,
@@ -272,7 +277,7 @@ export default function OnboardingPage() {
           fallbackName: '',
         });
 
-        if (!appleIdentity.displayName) {
+        if (!appleIdentity.fullName) {
           return;
         }
 
@@ -280,21 +285,24 @@ export default function OnboardingPage() {
           appleIdentity.fullName ||
           authUser?.full_name ||
           userData.full_name ||
-          cachedIdentity?.fullName ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
         const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
         if (appleAuthUser) {
-          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName });
-          persistAppleIdentity(userData.id, { fullName, email });
+          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity);
+          try {
+            persistAppleIdentity(userData.id, { fullName, email });
+          } catch (persistError) {
+            console.warn('Failed to cache Apple identity locally during Apple refresh:', persistError);
+          }
         }
 
         setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? appleIdentity.displayName : '');
+        setAppleDisplayName(appleAuthUser ? appleIdentity.fullName : '');
         setFormData((prev) => ({
           ...prev,
-          name: appleAuthUser ? (appleIdentity.displayName || prev.name) : firstName,
+          name: appleAuthUser ? (prev.name.trim() || appleIdentity.fullName || prev.name) : firstName,
           user_id: userData.id
         }));
       } catch (error) {
@@ -333,7 +341,7 @@ export default function OnboardingPage() {
   const canProceed = () => {
   switch (step) {
     case 1: // Basic Info + Vibe
-      return (isAppleUser || formData.name.trim()) && formData.age >= 18 && formData.gender && formData.vibe_level;
+      return (formData.name.trim() || appleDisplayName.trim()) && formData.age >= 18 && formData.gender && formData.vibe_level;
     case 2: // Status + Location + Budget (combined)
       return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
     case 3: // Preferences + Pets (merged)
@@ -413,16 +421,13 @@ export default function OnboardingPage() {
       // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
       const currentUser = await User.me();
       const userId = currentUser.id;
-      const currentAppleIdentity = resolveAppleDisplayName({
-        authUser,
-        userData: currentUser,
-        cachedIdentity: getCachedAppleIdentity(userId),
-      });
-      const resolvedProfileName =
-        formData.name.trim() ||
-        appleDisplayName ||
-        currentAppleIdentity.fullName ||
-        'Ruumr user';
+      const resolvedProfileName = formData.name.trim() || appleDisplayName.trim();
+
+      if (!resolvedProfileName) {
+        alert("נא למלא שם מלא לפני ההמשך");
+        setIsSubmitting(false);
+        return;
+      }
 
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
@@ -751,29 +756,18 @@ export default function OnboardingPage() {
                 <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        {isAppleUser && (
-                            <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
-                                {appleNameText ? (
-                                    <p className="text-xl font-bold text-gray-800">
-                                        {appleNameText}
-                                    </p>
-                                ) : shouldShowAppleNameLoading || isResolvingAppleIdentity ? (
-                                    <div className="flex items-center gap-2 text-gray-500">
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span className="text-sm">טוען שם מחשבון Apple...</span>
-                                    </div>
-                                ) : null}
+                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם מלא</label>
+                        <Input
+                            value={formData.name}
+                            onChange={(e) => setFormField('name', e.target.value)}
+                            placeholder={isAppleUser ? 'השם המלא שלך' : ''}
+                            className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
+                        />
+                        {isAppleUser && shouldShowAppleNameLoading && (
+                            <div className="flex items-center gap-2 text-gray-500">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span className="text-sm">טוען שם מחשבון Apple...</span>
                             </div>
-                        )}
-                        {!isAppleUser && (
-                            <>
-                                <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם פרטי</label>
-                                <Input
-                                    value={formData.name}
-                                    onChange={(e) => setFormField('name', e.target.value)}
-                                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
-                                />
-                            </>
                         )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
