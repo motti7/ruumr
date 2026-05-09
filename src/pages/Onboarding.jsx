@@ -72,16 +72,16 @@ export default function OnboardingPage() {
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.fullName } : {})
+    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.displayName } : {})
   ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
   const [appleDisplayName, setAppleDisplayName] = useState(
-    initialIsAppleUser ? initialAppleIdentity.fullName : ''
+    initialIsAppleUser ? initialAppleIdentity.displayName : ''
   );
   const [isResolvingAppleIdentity, setIsResolvingAppleIdentity] = useState(
-    initialIsAppleUser && !initialAppleIdentity.fullName
+    initialIsAppleUser && !initialAppleIdentity.displayName
   );
 
   const fileInputRef = useRef(null);
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
         });
 
         if (appleAuthUser && !appleIdentity.fullName) {
-          for (const waitMs of [300, 600, 1200, 2000, 3000]) {
+          for (const waitMs of [300, 600, 1200, 2000, 3000, 5000, 5000, 5000]) {
             if (cancelled) return;
             await delay(waitMs);
             if (cancelled) return;
@@ -151,6 +151,7 @@ export default function OnboardingPage() {
           userData.full_name ||
           cachedIdentity?.fullName ||
           '';
+        const displayName = appleIdentity.displayName || '';
         const email = userData.email || cachedIdentity?.email || '';
         const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
@@ -159,11 +160,11 @@ export default function OnboardingPage() {
         }
 
         setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? appleIdentity.fullName : '');
-        setIsResolvingAppleIdentity(false);
+        setAppleDisplayName(appleAuthUser ? displayName : '');
+        setIsResolvingAppleIdentity(Boolean(appleAuthUser && !displayName));
         setFormData((prev) => ({
           ...prev,
-          name: appleAuthUser ? appleIdentity.fullName : firstName,
+          name: appleAuthUser ? (displayName || prev.name) : firstName,
           user_id: userData.id
         }));
       } catch (e) {
@@ -343,6 +344,9 @@ export default function OnboardingPage() {
   const setFormField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const appleNameText = appleDisplayName || formData.name.trim();
+  const shouldShowAppleNameLoading = isAppleUser && !appleNameText;
 
   // Image compression utility
   const compressImage = async (file) => {
@@ -615,11 +619,11 @@ export default function OnboardingPage() {
                     <div className="space-y-1 text-right">
                         {isAppleUser && (
                             <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
-                                {appleDisplayName || formData.name ? (
+                                {appleNameText ? (
                                     <p className="text-xl font-bold text-gray-800">
-                                        {appleDisplayName || formData.name}
+                                        {appleNameText}
                                     </p>
-                                ) : isResolvingAppleIdentity ? (
+                                ) : shouldShowAppleNameLoading || isResolvingAppleIdentity ? (
                                     <div className="flex items-center gap-2 text-gray-500">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         <span className="text-sm">טוען שם מחשבון Apple...</span>
