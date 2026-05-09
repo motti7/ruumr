@@ -48,6 +48,21 @@ describe('appleIdentity helpers', () => {
     ).toBe(true);
   });
 
+  it('detects Apple-authenticated users from explicit auth callback hints', () => {
+    expect(
+      isAppleAuthUser(
+        {
+          email: 'john@example.com',
+          full_name: '',
+        },
+        null,
+        {
+          provider: 'apple',
+        }
+      )
+    ).toBe(true);
+  });
+
   it('persists and reads cached Apple identity', () => {
     persistAppleIdentity('user-1', { fullName: 'John Appleseed', email: 'john@example.com' });
 
@@ -81,6 +96,33 @@ describe('appleIdentity helpers', () => {
         userData: {
           given_name: 'John',
           family_name: 'Appleseed',
+        },
+      })
+    ).toEqual({
+      fullName: 'John Appleseed',
+      firstName: 'John',
+      displayName: 'John Appleseed',
+    });
+
+    expect(
+      resolveAppleDisplayName({
+        authHints: {
+          provider: 'apple',
+          name: 'John Appleseed',
+        },
+      })
+    ).toEqual({
+      fullName: 'John Appleseed',
+      firstName: 'John',
+      displayName: 'John Appleseed',
+    });
+
+    expect(
+      resolveAppleDisplayName({
+        authUser: {
+          profile: {
+            full_name: 'John Appleseed',
+          },
         },
       })
     ).toEqual({

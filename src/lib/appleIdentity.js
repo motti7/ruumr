@@ -46,9 +46,29 @@ const pickFirstNonEmpty = (...values) => {
   return '';
 };
 
-const extractAppleName = (source) => {
+const extractAppleName = (source, depth = 0) => {
   if (!source || typeof source !== 'object') {
     return '';
+  }
+
+  if (depth > 2) {
+    return '';
+  }
+
+  const nestedSources = [
+    source.profile,
+    source.user_profile,
+    source.user_metadata,
+    source.raw_user_meta_data,
+    source.metadata,
+    source.user,
+  ];
+
+  for (const nestedSource of nestedSources) {
+    const nestedName = extractAppleName(nestedSource, depth + 1);
+    if (nestedName) {
+      return nestedName;
+    }
   }
 
   const structuredName = source.name;
@@ -57,7 +77,11 @@ const extractAppleName = (source) => {
       structuredName.firstName,
       structuredName.givenName,
       structuredName.given_name,
-      structuredName.first_name
+      structuredName.first_name,
+      structuredName.fullName,
+      structuredName.full_name,
+      structuredName.displayName,
+      structuredName.display_name
     );
     const lastName = pickFirstNonEmpty(
       structuredName.lastName,
@@ -68,6 +92,16 @@ const extractAppleName = (source) => {
     const combined = [firstName, lastName].filter(Boolean).join(' ').trim();
     if (combined) {
       return combined;
+    }
+
+    const structuredDirect = pickFirstNonEmpty(
+      structuredName.full_name,
+      structuredName.fullName,
+      structuredName.display_name,
+      structuredName.displayName
+    );
+    if (structuredDirect) {
+      return structuredDirect;
     }
   }
 
@@ -92,15 +126,22 @@ const extractAppleName = (source) => {
     source.fullName,
     source.display_name,
     source.displayName,
+    source.apple_name,
+    source.appleName,
+    source.profile_name,
+    source.profileName,
     typeof source.name === 'string' ? source.name : ''
   );
 };
 
-export function isAppleAuthUser(user, cachedIdentity = null) {
+export function isAppleAuthUser(user, cachedIdentity = null, authHints = null) {
   if (!user) return false;
 
   const provider = String(
     user.auth_provider || user.provider || user.sign_in_provider || user.identity_provider || ''
+  ).toLowerCase();
+  const hintProvider = String(
+    authHints?.provider || authHints?.auth_provider || authHints?.identity_provider || ''
   ).toLowerCase();
   const email = safeTrim(user.email).toLowerCase();
   const cachedFullName = isRealAppleName(cachedIdentity?.fullName) ? safeTrim(cachedIdentity.fullName) : '';
@@ -108,6 +149,7 @@ export function isAppleAuthUser(user, cachedIdentity = null) {
 
   return (
     provider.includes('apple') ||
+    hintProvider.includes('apple') ||
     email.includes('privaterelay.appleid.com') ||
     Boolean(cachedFullName && !currentFullName)
   );
@@ -147,8 +189,9 @@ export function persistAppleIdentity(userId, identity) {
   window.localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
 }
 
-export function resolveAppleDisplayName({ authUser, userData, fallbackName = 'Ruumr user' } = {}) {
+export function resolveAppleDisplayName({ authUser, userData, authHints, fallbackName = 'Ruumr user' } = {}) {
   const fullName = pickFirstNonEmpty(
+    extractAppleName(authHints),
     extractAppleName(authUser),
     extractAppleName(userData),
   );
@@ -162,13 +205,14 @@ export function resolveAppleDisplayName({ authUser, userData, fallbackName = 'Ru
   };
 }
 
-export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null, cachedIdentity = null) {
-  if (!authModule?.updateMe || !isAppleAuthUser(user, cachedIdentity)) {
+export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null, cachedIdentity = null, authHints = null) {
+  if (!authModule?.updateMe || !isAppleAuthUser(user, cachedIdentity, authHints)) {
     return user;
   }
 
   const resolvedAppleIdentity = appleIdentity || resolveAppleDisplayName({
     authUser: user,
+    authHints,
     cachedIdentity: getCachedAppleIdentity(user?.id),
     fallbackName: '',
   });

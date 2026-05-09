@@ -14,6 +14,7 @@ import {
   resolveAppleDisplayName,
   syncAppleDisplayNameToBase44,
 } from '@/lib/appleIdentity';
+import { clearAuthCallbackHints } from '@/lib/authCallbackHints';
 
 const AuthContext = createContext(null);
 
@@ -147,16 +148,22 @@ export const AuthProvider = ({ children }) => {
       let currentUser = await base44.auth.me();
       console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
       const cachedIdentity = currentUser?.id ? getCachedAppleIdentity(currentUser.id) : null;
+      const authHints = appParams.authHints;
 
       // Apple returns name/email only on first authorization.
       // Persist immediately so future logins can rely on Base44 + cached profile data.
-      if (isAppleAuthUser(currentUser, cachedIdentity)) {
+      if (isAppleAuthUser(currentUser, cachedIdentity, authHints)) {
         const appleIdentity = resolveAppleDisplayName({
           authUser: currentUser,
+          authHints,
           cachedIdentity,
           fallbackName: '',
         });
-        currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity, cachedIdentity);
+        currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity, cachedIdentity, authHints);
+        currentUser = {
+          ...currentUser,
+          full_name: currentUser.full_name || appleIdentity.fullName || '',
+        };
         try {
           persistAppleIdentity(currentUser.id, {
             fullName: appleIdentity.fullName || '',
@@ -171,8 +178,8 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
 
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
-        const appleIdentity = isAppleAuthUser(currentUser, cachedIdentity)
-          ? resolveAppleDisplayName({ authUser: currentUser, cachedIdentity, fallbackName: '' })
+        const appleIdentity = isAppleAuthUser(currentUser, cachedIdentity, authHints)
+          ? resolveAppleDisplayName({ authUser: currentUser, authHints, cachedIdentity, fallbackName: '' })
           : null;
         mixpanel.identify(String(currentUser.id));
         mixpanel.people.set({
@@ -203,6 +210,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setAuthError(null);
     setAppPublicSettings(null);
+    clearAuthCallbackHints();
 
     if (shouldRedirect) {
       base44.auth.logout(getSafeAuthReturnUrl());

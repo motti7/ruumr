@@ -19,6 +19,7 @@ import CustomSelect from '@/components/shared/CustomSelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+import { appParams } from '@/lib/app-params';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
     getCachedAppleIdentity,
@@ -69,8 +70,9 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user: authUser, isLoadingAuth } = useAuth();
   const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
-  const initialAppleIdentity = resolveAppleDisplayName({ authUser, cachedIdentity: initialCachedIdentity, fallbackName: '' });
-  const initialIsAppleUser = isAppleAuthUser(authUser, initialCachedIdentity);
+  const authHints = appParams.authHints;
+  const initialAppleIdentity = resolveAppleDisplayName({ authUser, authHints, cachedIdentity: initialCachedIdentity, fallbackName: '' });
+  const initialIsAppleUser = isAppleAuthUser(authUser, initialCachedIdentity, authHints);
   const appleNameTimeoutMs = 2000;
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
@@ -126,9 +128,10 @@ export default function OnboardingPage() {
     const readAppleIdentity = async () => {
       const userData = await withTimeout(User.me(), appleNameTimeoutMs);
       const cachedIdentity = getCachedAppleIdentity(userData.id);
-      const appleAuthUser = isAppleAuthUser(userData, cachedIdentity);
+      const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
       const appleIdentity = resolveAppleDisplayName({
         authUser,
+        authHints,
         userData,
         cachedIdentity,
         fallbackName: '',
@@ -208,7 +211,7 @@ export default function OnboardingPage() {
           } = snapshot;
 
           if (appleAuthUser) {
-            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity);
+            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity, authHints);
             try {
               persistAppleIdentity(userData.id, { fullName, email });
             } catch (persistError) {
@@ -269,9 +272,10 @@ export default function OnboardingPage() {
         if (cancelled) return;
 
         const cachedIdentity = getCachedAppleIdentity(userData.id);
-        const appleAuthUser = isAppleAuthUser(userData, cachedIdentity);
+        const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
         const appleIdentity = resolveAppleDisplayName({
           authUser,
+          authHints,
           userData,
           cachedIdentity,
           fallbackName: '',
@@ -290,7 +294,7 @@ export default function OnboardingPage() {
         const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
         if (appleAuthUser) {
-          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity);
+          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity, authHints);
           try {
             persistAppleIdentity(userData.id, { fullName, email });
           } catch (persistError) {

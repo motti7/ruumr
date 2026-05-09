@@ -1,4 +1,10 @@
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
+import {
+	captureAuthCallbackHints,
+	clearAuthCallbackHints,
+	getStoredAuthCallbackHints,
+	persistAuthCallbackHints,
+} from '@/lib/authCallbackHints';
 
 const isNode = typeof window === 'undefined';
 const storage = isNode ? null : window.localStorage;
@@ -39,16 +45,36 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 }
 
 const getAppParams = () => {
-	if (getAppParamValue("clear_access_token") === 'true') {
+	const urlParams = isNode ? null : new URLSearchParams(window.location.search);
+	const incomingAccessToken = urlParams?.get('access_token') || null;
+	const shouldClearAuthHints = getAppParamValue("clear_access_token") === 'true';
+
+	if (shouldClearAuthHints) {
 		storage?.removeItem('base44_access_token');
 		storage?.removeItem('token');
+		clearAuthCallbackHints();
 	}
+
+	let authHints = null;
+	if (!isNode) {
+		authHints = shouldClearAuthHints
+			? null
+			: (incomingAccessToken ? captureAuthCallbackHints(urlParams) : getStoredAuthCallbackHints());
+		if (incomingAccessToken && authHints) {
+			Object.keys(authHints).forEach((key) => urlParams.delete(key));
+			const cleanedUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}${window.location.hash}`;
+			window.history.replaceState({}, document.title, cleanedUrl);
+		}
+		persistAuthCallbackHints(authHints);
+	}
+
 	return {
 		appId: getAppParamValue("app_id", { defaultValue: DEFAULT_BASE44_APP_ID }),
 		serverUrl: getAppParamValue("server_url", { defaultValue: DEFAULT_BASE44_SERVER_URL }),
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: getSafeAuthReturnUrl() }),
 		functionsVersion: getAppParamValue("functions_version"),
+		authHints,
 	}
 }
 
