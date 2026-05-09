@@ -8,7 +8,12 @@ import { clearClientUserData } from '@/lib/clientSessionCleanup';
 import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
-import { isAppleAuthUser, persistAppleIdentity, resolveAppleDisplayName } from '@/lib/appleIdentity';
+import {
+  isAppleAuthUser,
+  persistAppleIdentity,
+  resolveAppleDisplayName,
+  syncAppleDisplayNameToBase44,
+} from '@/lib/appleIdentity';
 
 const AuthContext = createContext(null);
 
@@ -139,23 +144,25 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
-      const currentUser = await base44.auth.me();
+      let currentUser = await base44.auth.me();
       console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
-      setUser(currentUser);
-      setIsAuthenticated(true);
 
       // Apple returns name/email only on first authorization.
-      // Persist immediately so future logins can rely on user ID lookup + cached profile data.
+      // Persist immediately so future logins can rely on Base44 + cached profile data.
       if (isAppleAuthUser(currentUser)) {
         const appleIdentity = resolveAppleDisplayName({
           authUser: currentUser,
           fallbackName: '',
         });
+        currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity);
         persistAppleIdentity(currentUser.id, {
           fullName: appleIdentity.fullName || appleIdentity.displayName || '',
           email: currentUser.email || '',
         });
       }
+
+      setUser(currentUser);
+      setIsAuthenticated(true);
 
       if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
         const appleIdentity = isAppleAuthUser(currentUser)

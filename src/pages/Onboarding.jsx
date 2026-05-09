@@ -25,6 +25,7 @@ import {
     isAppleAuthUser,
     persistAppleIdentity,
     resolveAppleDisplayName,
+    syncAppleDisplayNameToBase44,
 } from '@/lib/appleIdentity';
 import {
     buildSimulatorApartmentPhotos,
@@ -153,36 +154,6 @@ export default function OnboardingPage() {
       };
     };
 
-    const applyAppleIdentity = (snapshot) => {
-      if (!snapshot) {
-        return;
-      }
-
-      const {
-        userData,
-        appleAuthUser,
-        cachedIdentity,
-        fullName,
-        displayName,
-        email,
-        firstName,
-      } = snapshot;
-
-      if (appleAuthUser) {
-        persistAppleIdentity(userData.id, { fullName, email });
-      }
-
-      setIsAppleUser(appleAuthUser);
-      setAppleDisplayName(appleAuthUser ? displayName : '');
-      setFormData((prev) => ({
-        ...prev,
-        name: appleAuthUser ? (displayName || prev.name) : firstName,
-        user_id: userData.id
-      }));
-
-      return cachedIdentity;
-    };
-
     const fetchUser = async () => {
       try {
         if (initialIsAppleUser) {
@@ -226,7 +197,27 @@ export default function OnboardingPage() {
         // from the OAuth token (Google/Apple) immediately after login.
         // userData.full_name may be empty on first login before the platform syncs it.
         if (snapshot) {
-          applyAppleIdentity(snapshot);
+          const {
+            userData,
+            appleAuthUser,
+            fullName,
+            displayName,
+            email,
+            firstName,
+          } = snapshot;
+
+          if (appleAuthUser) {
+            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName });
+            persistAppleIdentity(userData.id, { fullName, email });
+          }
+
+          setIsAppleUser(appleAuthUser);
+          setAppleDisplayName(appleAuthUser ? displayName : '');
+          setFormData((prev) => ({
+            ...prev,
+            name: appleAuthUser ? (displayName || prev.name) : firstName,
+            user_id: userData.id
+          }));
         }
 
         setIsResolvingAppleIdentity(false);
@@ -295,6 +286,7 @@ export default function OnboardingPage() {
         const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
         if (appleAuthUser) {
+          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName });
           persistAppleIdentity(userData.id, { fullName, email });
         }
 

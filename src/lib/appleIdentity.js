@@ -130,3 +130,28 @@ export function resolveAppleDisplayName({ authUser, userData, cachedIdentity, fa
     displayName,
   };
 }
+
+export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null) {
+  if (!authModule?.updateMe || !isAppleAuthUser(user)) {
+    return user;
+  }
+
+  const resolvedAppleIdentity = appleIdentity || resolveAppleDisplayName({
+    authUser: user,
+    cachedIdentity: getCachedAppleIdentity(user?.id),
+    fallbackName: '',
+  });
+  const fullName = safeTrim(resolvedAppleIdentity.fullName);
+  const currentFullName = safeTrim(user?.full_name);
+
+  if (!fullName || fullName === currentFullName) {
+    return user;
+  }
+
+  try {
+    return await authModule.updateMe({ full_name: fullName });
+  } catch (error) {
+    console.error('Failed to persist Apple full name to Base44:', error);
+    return user;
+  }
+}

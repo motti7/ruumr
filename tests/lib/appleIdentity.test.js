@@ -10,6 +10,7 @@ import {
   isAppleAuthUser,
   persistAppleIdentity,
   resolveAppleDisplayName,
+  syncAppleDisplayNameToBase44,
 } from '@/lib/appleIdentity';
 
 describe('appleIdentity helpers', () => {
@@ -70,5 +71,46 @@ describe('appleIdentity helpers', () => {
       firstName: '',
       displayName: 'Ruumr user',
     });
+  });
+
+  it('persists the Apple full name back to Base44 when it is available', async () => {
+    const updateMe = vi.fn().mockResolvedValue({
+      id: 'user-2',
+      email: 'john@example.com',
+      full_name: 'John Appleseed',
+    });
+
+    const updatedUser = await syncAppleDisplayNameToBase44(
+      { updateMe },
+      {
+        id: 'user-2',
+        email: 'john@example.com',
+        auth_provider: 'apple',
+        full_name: '',
+      },
+      {
+        fullName: 'John Appleseed',
+      }
+    );
+
+    expect(updateMe).toHaveBeenCalledWith({ full_name: 'John Appleseed' });
+    expect(updatedUser.full_name).toBe('John Appleseed');
+  });
+
+  it('does not write a fallback-only Apple name back to Base44', async () => {
+    const updateMe = vi.fn();
+
+    const updatedUser = await syncAppleDisplayNameToBase44(
+      { updateMe },
+      {
+        id: 'user-3',
+        email: 'john@example.com',
+        auth_provider: 'apple',
+        full_name: '',
+      }
+    );
+
+    expect(updateMe).not.toHaveBeenCalled();
+    expect(updatedUser.full_name).toBe('');
   });
 });
