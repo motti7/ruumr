@@ -337,4 +337,32 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     expect(screen.queryByText(/נשמר אוטומטית מחשבון Apple/)).toBeNull();
     expect(mockUserMe).toHaveBeenCalled();
   });
+
+  it('stops showing the Apple loading state when the name has not synced yet', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'apple-user-2',
+        email: 'user@privaterelay.appleid.com',
+        auth_provider: 'apple',
+      },
+      isLoadingAuth: false,
+    });
+    mockUserMe.mockResolvedValue({
+      id: 'apple-user-2',
+      email: 'user@privaterelay.appleid.com',
+      auth_provider: 'apple',
+    });
+
+    render(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/טוען שם מחשבון Apple/)).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull(), {
+      timeout: 5000,
+    });
+    expect(screen.queryByText('Ruumr user')).toBeNull();
+  });
 });

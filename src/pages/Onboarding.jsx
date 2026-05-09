@@ -69,6 +69,9 @@ export default function OnboardingPage() {
   const { user: authUser, isLoadingAuth } = useAuth();
   const initialAppleIdentity = resolveAppleDisplayName({ authUser, fallbackName: '' });
   const initialIsAppleUser = isAppleAuthUser(authUser);
+  const appleNameTimeoutMs = 2000;
+  const appleNameRetryDelaysMs = [250, 500, 1000];
+  const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
@@ -101,6 +104,84 @@ export default function OnboardingPage() {
     let cancelled = false;
 
     const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+    const withTimeout = async (promise, timeoutMs) => {
+      let timeoutId;
+
+      try {
+        return await Promise.race([
+          promise,
+          new Promise((_, reject) => {
+            timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
+          }),
+        ]);
+      } finally {
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
+      }
+    };
+
+    const readAppleIdentity = async () => {
+      const userData = await withTimeout(User.me(), appleNameTimeoutMs);
+      const appleAuthUser = isAppleAuthUser(userData);
+      const cachedIdentity = getCachedAppleIdentity(userData.id);
+      const appleIdentity = resolveAppleDisplayName({
+        authUser,
+        userData,
+        cachedIdentity,
+        fallbackName: '',
+      });
+
+      const fullName =
+        appleIdentity.fullName ||
+        authUser?.full_name ||
+        userData.full_name ||
+        cachedIdentity?.fullName ||
+        '';
+      const displayName = appleIdentity.displayName || '';
+      const email = userData.email || cachedIdentity?.email || '';
+      const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
+
+      return {
+        userData,
+        appleAuthUser,
+        cachedIdentity,
+        fullName,
+        displayName,
+        email,
+        firstName,
+      };
+    };
+
+    const applyAppleIdentity = (snapshot) => {
+      if (!snapshot) {
+        return;
+      }
+
+      const {
+        userData,
+        appleAuthUser,
+        cachedIdentity,
+        fullName,
+        displayName,
+        email,
+        firstName,
+      } = snapshot;
+
+      if (appleAuthUser) {
+        persistAppleIdentity(userData.id, { fullName, email });
+      }
+
+      setIsAppleUser(appleAuthUser);
+      setAppleDisplayName(appleAuthUser ? displayName : '');
+      setFormData((prev) => ({
+        ...prev,
+        name: appleAuthUser ? (displayName || prev.name) : firstName,
+        user_id: userData.id
+      }));
+
+      return cachedIdentity;
+    };
 
     const fetchUser = async () => {
       try {
@@ -108,33 +189,32 @@ export default function OnboardingPage() {
           setIsResolvingAppleIdentity(true);
         }
 
-        let userData = await User.me();
-        let appleAuthUser = isAppleAuthUser(userData);
-        let cachedIdentity = getCachedAppleIdentity(userData.id);
-        let appleIdentity = resolveAppleDisplayName({
-          authUser,
-          userData,
-          cachedIdentity,
-          fallbackName: '',
-        });
+        let snapshot = null;
 
-        if (appleAuthUser && !appleIdentity.fullName) {
-          for (const waitMs of [300, 600, 1200, 2000, 3000, 5000, 5000, 5000]) {
+        try {
+          snapshot = await readAppleIdentity();
+        } catch (error) {
+          if (error?.message !== 'timeout') {
+            throw error;
+          }
+        }
+
+        if (snapshot?.appleAuthUser && !snapshot.displayName) {
+          for (const waitMs of appleNameRetryDelaysMs) {
             if (cancelled) return;
             await delay(waitMs);
             if (cancelled) return;
 
-            userData = await User.me();
-            appleAuthUser = isAppleAuthUser(userData);
-            cachedIdentity = getCachedAppleIdentity(userData.id);
-            appleIdentity = resolveAppleDisplayName({
-              authUser,
-              userData,
-              cachedIdentity,
-              fallbackName: '',
-            });
+            try {
+              snapshot = await readAppleIdentity();
+            } catch (error) {
+              if (error?.message !== 'timeout') {
+                throw error;
+              }
+              continue;
+            }
 
-            if (appleIdentity.fullName) {
+            if (snapshot.displayName) {
               break;
             }
           }
@@ -145,28 +225,11 @@ export default function OnboardingPage() {
         // authUser (from AuthContext) is the most reliable source — it's populated directly
         // from the OAuth token (Google/Apple) immediately after login.
         // userData.full_name may be empty on first login before the platform syncs it.
-        const fullName =
-          appleIdentity.fullName ||
-          authUser?.full_name ||
-          userData.full_name ||
-          cachedIdentity?.fullName ||
-          '';
-        const displayName = appleIdentity.displayName || '';
-        const email = userData.email || cachedIdentity?.email || '';
-        const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
-
-        if (appleAuthUser) {
-          persistAppleIdentity(userData.id, { fullName, email });
+        if (snapshot) {
+          applyAppleIdentity(snapshot);
         }
 
-        setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? displayName : '');
-        setIsResolvingAppleIdentity(Boolean(appleAuthUser && !displayName));
-        setFormData((prev) => ({
-          ...prev,
-          name: appleAuthUser ? (displayName || prev.name) : firstName,
-          user_id: userData.id
-        }));
+        setIsResolvingAppleIdentity(false);
       } catch (e) {
         setIsResolvingAppleIdentity(false);
         if (e?.status === 401 || e?.status === 403) {
@@ -179,6 +242,85 @@ export default function OnboardingPage() {
       cancelled = true;
     };
   }, [authUser]);
+
+  useEffect(() => {
+    if (!isAppleUser || appleDisplayName || isResolvingAppleIdentity) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const withTimeout = async (promise, timeoutMs) => {
+      let timeoutId;
+
+      try {
+        return await Promise.race([
+          promise,
+          new Promise((_, reject) => {
+            timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
+          }),
+        ]);
+      } finally {
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
+      }
+    };
+
+    const refreshAppleIdentity = async () => {
+      try {
+        const userData = await withTimeout(User.me(), appleNameTimeoutMs);
+        if (cancelled) return;
+
+        const appleAuthUser = isAppleAuthUser(userData);
+        const cachedIdentity = getCachedAppleIdentity(userData.id);
+        const appleIdentity = resolveAppleDisplayName({
+          authUser,
+          userData,
+          cachedIdentity,
+          fallbackName: '',
+        });
+
+        if (!appleIdentity.displayName) {
+          return;
+        }
+
+        const fullName =
+          appleIdentity.fullName ||
+          authUser?.full_name ||
+          userData.full_name ||
+          cachedIdentity?.fullName ||
+          '';
+        const email = userData.email || cachedIdentity?.email || '';
+        const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
+
+        if (appleAuthUser) {
+          persistAppleIdentity(userData.id, { fullName, email });
+        }
+
+        setIsAppleUser(appleAuthUser);
+        setAppleDisplayName(appleAuthUser ? appleIdentity.displayName : '');
+        setFormData((prev) => ({
+          ...prev,
+          name: appleAuthUser ? (appleIdentity.displayName || prev.name) : firstName,
+          user_id: userData.id
+        }));
+      } catch (error) {
+        if (error?.message !== 'timeout' && error?.status !== 401 && error?.status !== 403) {
+          console.error('Failed to refresh Apple identity:', error);
+        }
+      }
+    };
+
+    const timers = appleNameBackgroundDelaysMs.map((waitMs) => window.setTimeout(() => {
+      void refreshAppleIdentity();
+    }, waitMs));
+
+    return () => {
+      cancelled = true;
+      timers.forEach((timerId) => window.clearTimeout(timerId));
+    };
+  }, [isAppleUser, appleDisplayName, isResolvingAppleIdentity, authUser]);
 
   useEffect(() => {
     const trackStep = async () => {
@@ -346,7 +488,7 @@ export default function OnboardingPage() {
   };
 
   const appleNameText = appleDisplayName || formData.name.trim();
-  const shouldShowAppleNameLoading = isAppleUser && !appleNameText;
+  const shouldShowAppleNameLoading = isAppleUser && isResolvingAppleIdentity && !appleNameText;
 
   // Image compression utility
   const compressImage = async (file) => {
