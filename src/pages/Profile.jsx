@@ -739,7 +739,7 @@ export default function ProfilePage() {
             </div>
             <div>
                 <label className="block text-right font-bold text-gray-700 mb-3">
-                  וייב: <span className="text-[--theme-orange] font-black text-lg">{vibeText[formData.vibe_level-1] || 'מאוזן'}</span>
+                  וייב: <span className="text-[--theme-orange] font-bold text-lg">{vibeText[formData.vibe_level-1] || 'מאוזן'}</span>
                 </label>
                 <div className="px-2 py-3">
                   <div className="relative">
