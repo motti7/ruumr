@@ -21,7 +21,7 @@ const APPLE_NAME_PLACEHOLDERS = new Set([
   'שם מחשבון apple',
 ]);
 
-const isRealAppleName = (value) => {
+export const isRealAppleName = (value) => {
   const cleaned = safeTrim(value);
   if (!cleaned) {
     return false;
@@ -207,11 +207,18 @@ export function persistAppleIdentity(userId, identity) {
   window.localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
 }
 
-export function resolveAppleDisplayName({ authUser, userData, authHints, fallbackName = 'Ruumr user' } = {}) {
+export function resolveAppleDisplayName({ authUser, userData, authHints, cachedIdentity, fallbackName = 'Ruumr user' } = {}) {
   const fullName = pickFirstNonEmpty(
+    // 1. Auth hints from OAuth callback URL (most reliable on first login)
     extractAppleName(authHints),
+    // 2. authUser from AuthContext (populated from OAuth token)
     extractAppleName(authUser),
+    isRealAppleName(authUser?.full_name) ? safeTrim(authUser?.full_name) : '',
+    // 3. userData from User.me() API
     extractAppleName(userData),
+    isRealAppleName(userData?.full_name) ? safeTrim(userData?.full_name) : '',
+    // 4. Cached Apple identity from localStorage (persisted from previous session)
+    isRealAppleName(cachedIdentity?.fullName) ? safeTrim(cachedIdentity?.fullName) : '',
   );
   const firstName = getFirstWord(fullName);
   const displayName = fullName || fallbackName;
@@ -231,6 +238,7 @@ export async function syncAppleDisplayNameToBase44(authModule, user, appleIdenti
   const resolvedAppleIdentity = appleIdentity || resolveAppleDisplayName({
     authUser: user,
     authHints,
+    userData: user,
     cachedIdentity: getCachedAppleIdentity(user?.id),
     fallbackName: '',
   });
