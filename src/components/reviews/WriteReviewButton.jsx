@@ -72,7 +72,7 @@ export default function WriteReviewButton() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-5">
-                <h3 className="text-xl font-black text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> כתוב חוות דעת</h3>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> כתוב חוות דעת</h3>
                 <button onClick={() => setShowPicker(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
 
