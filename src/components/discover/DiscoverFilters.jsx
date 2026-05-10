@@ -118,7 +118,7 @@ export default function DiscoverFilters({ filters, onChange }) {
                       onChange={handleCityInputChange}
                       onKeyDown={handleCityKeyDown}
                       placeholder="הקלד עיר..."
-                      className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[--theme-orange] transition-colors"
+                      className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:outline-none focus:ring-0 focus:border-[--theme-orange] transition-colors"
                       dir="rtl"
                     />
                     <button
