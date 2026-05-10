@@ -225,6 +225,10 @@ export function resolveAppleDisplayName({ authUser, userData, authHints, fallbac
 
 export async function syncAppleDisplayNameToBase44(authModule, user, appleIdentity = null, cachedIdentity = null, authHints = null) {
   if (!authModule?.updateMe || !isAppleAuthUser(user, cachedIdentity, authHints)) {
+    console.log('[apple-debug] sync skipped: not an Apple user or updateMe missing', {
+      hasUpdateMe: Boolean(authModule?.updateMe),
+      isAppleUser: isAppleAuthUser(user, cachedIdentity, authHints),
+    });
     return user;
   }
 
@@ -237,14 +241,24 @@ export async function syncAppleDisplayNameToBase44(authModule, user, appleIdenti
   const fullName = safeTrim(resolvedAppleIdentity.fullName);
   const currentFullName = safeTrim(user?.full_name);
 
-  if (!fullName || fullName === currentFullName) {
+  if (!fullName) {
+    console.log('[apple-debug] sync skipped: no resolved full name to write to Base44 — name was never captured');
+    return user;
+  }
+  if (fullName === currentFullName) {
+    console.log('[apple-debug] sync skipped: Base44 already has correct full_name', { fullName });
     return user;
   }
 
+  console.log('[apple-debug] calling base44.auth.updateMe({ full_name }):', { fullName, previous: currentFullName });
   try {
-    return await authModule.updateMe({ full_name: fullName });
+    const updated = await authModule.updateMe({ full_name: fullName });
+    console.log('[apple-debug] updateMe success — Base44 now has:', {
+      full_name: updated?.full_name ?? null,
+    });
+    return updated;
   } catch (error) {
-    console.error('Failed to persist Apple full name to Base44:', error);
+    console.error('[apple-debug] updateMe FAILED — Base44 rejected the update:', error?.status, error?.message, error);
     return user;
   }
 }

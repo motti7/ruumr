@@ -126,7 +126,7 @@ export default function OnboardingPage() {
       }
     };
 
-    const readAppleIdentity = async () => {
+    const readAppleIdentity = async (attemptLabel = 'initial') => {
       const userData = await withTimeout(User.me(), appleNameTimeoutMs);
       const cachedIdentity = getCachedAppleIdentity(userData.id);
       const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
@@ -146,6 +146,23 @@ export default function OnboardingPage() {
       const displayName = appleIdentity.fullName || '';
       const email = userData.email || cachedIdentity?.email || '';
       const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
+
+      console.log('[apple-debug] Onboarding readAppleIdentity:', {
+        attempt: attemptLabel,
+        isAppleUser: appleAuthUser,
+        sources: {
+          fromAuthHints: authHints || null,
+          fromAuthUserFullName: authUser?.full_name ?? null,
+          fromUserDataFullName: userData?.full_name ?? null,
+          fromCache: cachedIdentity || null,
+        },
+        resolved: {
+          fullName: appleIdentity.fullName,
+          firstName: appleIdentity.firstName,
+          displayName: appleIdentity.displayName,
+        },
+        finalFirstName: firstName,
+      });
 
       return {
         userData,
@@ -175,13 +192,14 @@ export default function OnboardingPage() {
         }
 
         if (snapshot?.appleAuthUser && !snapshot.displayName) {
+          console.log('[apple-debug] Apple user detected but no name yet — entering retry loop');
           for (const waitMs of appleNameRetryDelaysMs) {
             if (cancelled) return;
             await delay(waitMs);
             if (cancelled) return;
 
             try {
-              snapshot = await readAppleIdentity();
+              snapshot = await readAppleIdentity(`retry-${waitMs}ms`);
             } catch (error) {
               if (error?.message !== 'timeout') {
                 throw error;
@@ -190,8 +208,12 @@ export default function OnboardingPage() {
             }
 
             if (snapshot.displayName) {
+              console.log('[apple-debug] Retry succeeded after', waitMs, 'ms');
               break;
             }
+          }
+          if (!snapshot?.displayName) {
+            console.warn('[apple-debug] All immediate retries exhausted — falling back to manual entry. Likely root cause: Apple did not return name to Base44 OR Base44 did not forward it.');
           }
         }
 
