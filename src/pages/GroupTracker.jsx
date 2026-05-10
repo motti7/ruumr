@@ -115,7 +115,7 @@ export default function GroupTrackerPage() {
     <div className="min-h-screen bg-gray-50 pb-28" dir="rtl">
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black text-gray-900">הצוות שלי</h1>
+          <h1 className="text-3xl font-bold text-gray-900">הצוות שלי</h1>
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate(createPageUrl('GroupChat'))}
@@ -146,7 +146,7 @@ export default function GroupTrackerPage() {
               <button
                 key={n}
                 onClick={() => handleTargetChange(n)}
-                className={`w-12 h-12 rounded-full font-black text-lg transition-all ${
+                className={`w-12 h-12 rounded-full font-bold text-lg transition-all ${
                   targetCount === n ? 'gradient-orange text-white shadow-md scale-110' : 'bg-gray-100 text-gray-500'
                 }`}
               >
@@ -160,7 +160,7 @@ export default function GroupTrackerPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <div className="text-right">
-              <p className="text-4xl font-black text-[--theme-orange]">
+              <p className="text-4xl font-bold text-[--theme-orange]">
                 {currentCount}<span className="text-2xl text-gray-300">/{targetCount}</span>
               </p>
               <p className="text-sm text-gray-500 mt-0.5">
@@ -194,7 +194,7 @@ export default function GroupTrackerPage() {
                 {myProfile?.photos?.[0] ? (
                   <img src={myProfile.photos[0]} className="w-full h-full object-cover" alt="אני" />
                 ) : (
-                  <div className="w-full h-full gradient-orange flex items-center justify-center text-white font-black text-xl">
+                  <div className="w-full h-full gradient-orange flex items-center justify-center text-white font-bold text-xl">
                     {user?.full_name?.[0] || '?'}
                   </div>
                 )}
@@ -216,7 +216,7 @@ export default function GroupTrackerPage() {
                       {match.photo ? (
                         <img src={match.photo} className="w-full h-full object-cover" alt={match.name} />
                       ) : (
-                        <div className="w-full h-full bg-green-100 flex items-center justify-center text-green-600 font-black text-xl">
+                        <div className="w-full h-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
                           {match.name?.[0] || '?'}
                         </div>
                       )}
@@ -298,7 +298,7 @@ export default function GroupTrackerPage() {
             <div className="flex justify-center mb-2">
               <img src="https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/2509c2cb9_home1.png" className="w-14 h-14 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
             </div>
-            <p className="font-black text-white text-xl">ה Team מוכן 😎</p>
+            <p className="font-bold text-white text-xl">ה Team מוכן 😎</p>
             <p className="text-white/80 text-sm mt-1">מצאת את כל השותפים שרצית. זמן לחפש דירה ביחד!</p>
           </div>
         )}
@@ -307,7 +307,7 @@ export default function GroupTrackerPage() {
         {remaining > 0 && (
           <button
             onClick={() => navigate(createPageUrl('Discover'))}
-            className="w-full py-4 rounded-2xl gradient-orange text-white font-black text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-2xl gradient-orange text-white font-bold text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
           >
             <Search className="w-5 h-5" />
             {`חפש שותפים`}
