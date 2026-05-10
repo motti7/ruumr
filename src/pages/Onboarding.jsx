@@ -763,14 +763,19 @@ export default function OnboardingPage() {
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם מלא</label>
                         {isAppleUser && appleDisplayName ? (
-                            // Apple Sign-In returned a valid name — display read-only.
+                            // Apple Sign-In returned a valid name — show the input with
+                            // the Apple-provided value locked in (readOnly + no onChange).
                             // App Store guideline 5.1.1.iv prohibits re-collecting info
-                            // already provided by Sign in with Apple. The name is still
-                            // saved to the profile via formData.name + appleDisplayName
-                            // fallback in canProceed() and handleFinish().
-                            <div className="h-11 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-md text-base text-gray-700">
-                                {appleDisplayName}
-                            </div>
+                            // already provided by Sign in with Apple, so the user can't
+                            // edit this field. The name is saved to the profile via
+                            // appleDisplayName fallback in canProceed() and handleFinish().
+                            <Input
+                                value={appleDisplayName}
+                                readOnly
+                                tabIndex={-1}
+                                aria-readonly="true"
+                                className="h-11 text-base bg-gray-50 border-gray-200 text-gray-700 cursor-default focus:border-gray-200 focus:ring-0 focus-visible:ring-0"
+                            />
                         ) : (
                             // Fallback: no name from Apple (user hid it, returning user
                             // with no cached name, or platform did not capture it on first

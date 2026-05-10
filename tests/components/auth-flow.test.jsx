@@ -310,7 +310,7 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     expect(screen.queryByText('Admin')).toBeNull();
   });
 
-  it('shows Apple name as read-only and hides the input when Apple provides a name (App Store guideline 5.1.1.iv)', async () => {
+  it('shows Apple name in a locked, non-editable input when Apple provides a name (App Store guideline 5.1.1.iv)', async () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'apple-user-1',
@@ -333,16 +333,18 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    // Name appears as read-only display text, not as an editable input.
-    await waitFor(() => expect(screen.getByText('John Appleseed')).toBeTruthy());
-    expect(screen.queryByDisplayValue('John Appleseed')).toBeNull();
+    // Apple name appears as the value of a readOnly input (user can see but not edit).
+    const input = await screen.findByDisplayValue('John Appleseed');
+    expect(input).toBeTruthy();
+    expect(input.hasAttribute('readonly')).toBe(true);
+    // No editable placeholder input, no loading text, no fallback name.
     expect(screen.queryByPlaceholderText('השם המלא שלך')).toBeNull();
     expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull();
     expect(screen.queryByText('Ruumr user')).toBeNull();
     expect(mockUserMe).toHaveBeenCalled();
   });
 
-  it('shows Apple name as read-only even when Apple provides only firstName (partial-name handling)', async () => {
+  it('shows Apple name in a locked input even when Apple provides only firstName (partial-name handling)', async () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'apple-user-3',
@@ -364,7 +366,8 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(screen.getByText('Eitan')).toBeTruthy());
+    const input = await screen.findByDisplayValue('Eitan');
+    expect(input.hasAttribute('readonly')).toBe(true);
     expect(screen.queryByPlaceholderText('השם המלא שלך')).toBeNull();
   });
 
