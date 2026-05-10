@@ -17,7 +17,7 @@ export default function MatchesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]'); } catch { return []; }
+    try {return JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');} catch {return [];}
   });
 
   const loadMatches = useCallback(async () => {
@@ -44,7 +44,7 @@ export default function MatchesPage() {
         })
       );
 
-      setMatches(matchesWithProfiles.filter(m => m.profile));
+      setMatches(matchesWithProfiles.filter((m) => m.profile));
     } catch (error) {
       console.error("Error loading matches:", error);
       setError("שגיאה בטעינת ההתאמות. אנא נסה שוב.");
@@ -60,7 +60,7 @@ export default function MatchesPage() {
   // Listen for seen updates (e.g. from Charter click)
   useEffect(() => {
     const handler = () => {
-      try { setSeenMatchIds(JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]')); } catch {}
+      try {setSeenMatchIds(JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]'));} catch {}
     };
     window.addEventListener('roomi_seen_updated', handler);
     return () => window.removeEventListener('roomi_seen_updated', handler);
@@ -69,10 +69,10 @@ export default function MatchesPage() {
   const handleDeleteMatch = useCallback(async (matchId) => {
     try {
       await Match.delete(matchId);
-      setMatches(prev => prev.filter(m => m.id !== matchId));
+      setMatches((prev) => prev.filter((m) => m.id !== matchId));
       // Also remove from seen
       const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
-      localStorage.setItem('roomi_seen_match_ids', JSON.stringify(seenIds.filter(id => id !== matchId)));
+      localStorage.setItem('roomi_seen_match_ids', JSON.stringify(seenIds.filter((id) => id !== matchId)));
       window.dispatchEvent(new Event('roomi_seen_updated'));
     } catch (e) {
       console.error("Error deleting match:", e);
@@ -89,8 +89,8 @@ export default function MatchesPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 p-4">
         <div className="space-y-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+          {[...Array(6)].map((_, i) =>
+          <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-4">
                 <Skeleton className="w-16 h-16 rounded-full" />
                 <div className="flex-1 space-y-2">
@@ -101,10 +101,10 @@ export default function MatchesPage() {
                 <Skeleton className="w-12 h-12 rounded-full" />
               </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -114,31 +114,31 @@ export default function MatchesPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">התאמות</h1>
           <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full select-none touch-manipulation"
-            aria-label="רענן"
-          >
+              whileTap={{ scale: 0.9 }}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full select-none touch-manipulation"
+              aria-label="רענן">
+              
             <motion.span
-              animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
-              transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}
-            >
+                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}>
+                
               <Puzzle className={`w-6 h-6 ${isRefreshing ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
             </motion.span>
           </motion.button>
         </div>
         {(() => {
-          const unseen = matches.filter(m => !seenMatchIds.includes(m.id)).length;
-          return unseen > 0 ? (
-            <p className="font-medium text-[--theme-orange]">
+            const unseen = matches.filter((m) => !seenMatchIds.includes(m.id)).length;
+            return unseen > 0 ?
+            <p className="font-medium text-black">
               {unseen} {unseen === 1 ? "התאמה חדשה" : "התאמות חדשות"}
-            </p>
-          ) : null;
-        })()}
+            </p> :
+            null;
+          })()}
       </div>
 
-      {error && (
+      {error &&
         <div className="mx-4 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
           <div>
@@ -146,73 +146,73 @@ export default function MatchesPage() {
             <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">נסה שוב</button>
           </div>
         </div>
-      )}
+        }
 
       <div className="px-4">
-         {matches.length === 0 && !error ? (
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             className="text-center py-16 flex flex-col items-center"
-           >
+         {matches.length === 0 && !error ?
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 flex flex-col items-center">
+            
              <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
                כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
              </p>
              <Link
-               to={createPageUrl("Discover")}
-               className="inline-block"
-             >
+              to={createPageUrl("Discover")}
+              className="inline-block">
+              
                <motion.button
-                 whileTap={{ scale: 0.95 }}
-                 whileHover={{ scale: 1.05 }}
-                 className="gradient-orange text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform"
-               >
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05 }}
+                className="gradient-orange text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform">
+                
                  חפש שותפים
                </motion.button>
              </Link>
-           </motion.div>
-         ) : (
+           </motion.div> :
+
           <div className="space-y-2 pb-4">
-            {matches.map((match, index) => (
-              <motion.div
-                key={match.id}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-              >
+            {matches.map((match, index) =>
+            <motion.div
+              key={match.id}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}>
+              
                 <MatchCard
-                  match={match.profile}
-                  isOnline={match.isOnline}
-                  matchId={match.id}
-                  onClickProfile={() => {
-                    if (match.profile && match.profile.user_id) {
-                        navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
-                    } else {
-                        console.error("Missing profile ID", match);
-                    }
-                  }}
-                  onClickChat={() => {
-                     navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
-                  }}
-                  isOpened={seenMatchIds.includes(match.id)}
-                  onClickCharter={() => {
-                    // Mark match as seen (removes from unseen count badge)
-                    const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
-                    if (!seenIds.includes(match.id)) {
-                      localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
-                      window.dispatchEvent(new Event('roomi_seen_updated'));
-                    }
-                    navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
-                  }}
-                  onDelete={handleDeleteMatch}
-                  />
+                match={match.profile}
+                isOnline={match.isOnline}
+                matchId={match.id}
+                onClickProfile={() => {
+                  if (match.profile && match.profile.user_id) {
+                    navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
+                  } else {
+                    console.error("Missing profile ID", match);
+                  }
+                }}
+                onClickChat={() => {
+                  navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                }}
+                isOpened={seenMatchIds.includes(match.id)}
+                onClickCharter={() => {
+                  // Mark match as seen (removes from unseen count badge)
+                  const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+                  if (!seenIds.includes(match.id)) {
+                    localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
+                    window.dispatchEvent(new Event('roomi_seen_updated'));
+                  }
+                  navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                }}
+                onDelete={handleDeleteMatch} />
+              
               </motion.div>
-            ))}
+            )}
           </div>
-        )}
+          }
       </div>
       </PullToRefresh>
-    </div>
-  );
+    </div>);
+
 }
