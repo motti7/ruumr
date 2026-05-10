@@ -112,7 +112,7 @@ export default function MatchesPage() {
       <PullToRefresh onRefresh={loadMatches}>
       <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">התאמות</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">התאמות</h1>
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleRefresh}
