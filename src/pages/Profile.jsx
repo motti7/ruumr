@@ -330,7 +330,7 @@ export default function ProfilePage() {
 
       <div className="bg-white">
         <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
-          <h1 className="text-2xl font-black text-gray-800">הפרופיל שלי</h1>
+          <h1 className="text-2xl font-bold text-gray-800">הפרופיל שלי</h1>
           <Button 
               onClick={() => {
                   if (!isEditing) {
