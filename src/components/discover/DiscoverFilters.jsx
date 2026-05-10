@@ -95,7 +95,7 @@ export default function DiscoverFilters({ filters, onChange }) {
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-gray-900">פילטרים</h3>
+                <h3 className="text-xl font-bold text-gray-900">פילטרים</h3>
                 <button
                   aria-label="סגור פילטרים"
                   onClick={() => setOpen(false)}
