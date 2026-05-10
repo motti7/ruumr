@@ -24,7 +24,6 @@ import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
     getCachedAppleIdentity,
     isAppleAuthUser,
-    isRealAppleName,
     persistAppleIdentity,
     resolveAppleDisplayName,
     syncAppleDisplayNameToBase44,
@@ -141,11 +140,10 @@ export default function OnboardingPage() {
 
       const fullName =
         appleIdentity.fullName ||
-        (isRealAppleName(authUser?.full_name) ? authUser?.full_name : '') ||
-        (isRealAppleName(userData?.full_name) ? userData?.full_name : '') ||
-        (isRealAppleName(cachedIdentity?.fullName) ? cachedIdentity?.fullName : '') ||
+        authUser?.full_name ||
+        userData.full_name ||
         '';
-      const displayName = fullName;
+      const displayName = appleIdentity.fullName || '';
       const email = userData.email || cachedIdentity?.email || '';
       const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
 
@@ -290,9 +288,8 @@ export default function OnboardingPage() {
 
         const fullName =
           appleIdentity.fullName ||
-          (isRealAppleName(authUser?.full_name) ? authUser?.full_name : '') ||
-          (isRealAppleName(userData?.full_name) ? userData?.full_name : '') ||
-          (isRealAppleName(cachedIdentity?.fullName) ? cachedIdentity?.fullName : '') ||
+          authUser?.full_name ||
+          userData.full_name ||
           '';
         const email = userData.email || cachedIdentity?.email || '';
         const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
