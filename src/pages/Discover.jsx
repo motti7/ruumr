@@ -383,7 +383,7 @@ export default function DiscoverPage() {
         <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl">
           <Puzzle className="h-10 w-10 text-[--theme-orange]" />
         </div>
-        <h2 className="mb-3 text-2xl font-black text-gray-900">הייתה בעיה בטעינת המסך</h2>
+        <h2 className="mb-3 text-2xl font-bold text-gray-900">הייתה בעיה בטעינת המסך</h2>
         <p className="mb-6 max-w-sm text-sm leading-relaxed text-gray-600">
           אפשר לנסות שוב. אם זה ממשיך לקרות, צריך לבדוק את חיבור הנתונים של הסימולטור.
         </p>
@@ -472,7 +472,7 @@ export default function DiscoverPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center h-full text-center px-8"
               >
-                <h2 className="text-2xl font-black text-gray-800 mb-3">זה הכל לעכשיו!</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-3">זה הכל לעכשיו!</h2>
                 <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
                 <Button onClick={loadData} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
               </motion.div>
