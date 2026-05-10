@@ -126,7 +126,7 @@ export default function OnboardingPage() {
       }
     };
 
-    const readAppleIdentity = async (attemptLabel = 'initial') => {
+    const readAppleIdentity = async () => {
       const userData = await withTimeout(User.me(), appleNameTimeoutMs);
       const cachedIdentity = getCachedAppleIdentity(userData.id);
       const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
@@ -146,23 +146,6 @@ export default function OnboardingPage() {
       const displayName = appleIdentity.fullName || '';
       const email = userData.email || cachedIdentity?.email || '';
       const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
-
-      console.log('[apple-debug] Onboarding readAppleIdentity:', {
-        attempt: attemptLabel,
-        isAppleUser: appleAuthUser,
-        sources: {
-          fromAuthHints: authHints || null,
-          fromAuthUserFullName: authUser?.full_name ?? null,
-          fromUserDataFullName: userData?.full_name ?? null,
-          fromCache: cachedIdentity || null,
-        },
-        resolved: {
-          fullName: appleIdentity.fullName,
-          firstName: appleIdentity.firstName,
-          displayName: appleIdentity.displayName,
-        },
-        finalFirstName: firstName,
-      });
 
       return {
         userData,
@@ -192,14 +175,13 @@ export default function OnboardingPage() {
         }
 
         if (snapshot?.appleAuthUser && !snapshot.displayName) {
-          console.log('[apple-debug] Apple user detected but no name yet — entering retry loop');
           for (const waitMs of appleNameRetryDelaysMs) {
             if (cancelled) return;
             await delay(waitMs);
             if (cancelled) return;
 
             try {
-              snapshot = await readAppleIdentity(`retry-${waitMs}ms`);
+              snapshot = await readAppleIdentity();
             } catch (error) {
               if (error?.message !== 'timeout') {
                 throw error;
@@ -208,12 +190,8 @@ export default function OnboardingPage() {
             }
 
             if (snapshot.displayName) {
-              console.log('[apple-debug] Retry succeeded after', waitMs, 'ms');
               break;
             }
-          }
-          if (!snapshot?.displayName) {
-            console.warn('[apple-debug] All immediate retries exhausted — falling back to manual entry. Likely root cause: Apple did not return name to Base44 OR Base44 did not forward it.');
           }
         }
 
@@ -784,17 +762,33 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם מלא</label>
-                        <Input
-                            value={formData.name}
-                            onChange={(e) => setFormField('name', e.target.value)}
-                            placeholder={isAppleUser ? 'השם המלא שלך' : ''}
-                            className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
-                        />
-                        {isAppleUser && shouldShowAppleNameLoading && (
-                            <div className="flex items-center gap-2 text-gray-500">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="text-sm">טוען שם מחשבון Apple...</span>
+                        {isAppleUser && appleDisplayName ? (
+                            // Apple Sign-In returned a valid name — display read-only.
+                            // App Store guideline 5.1.1.iv prohibits re-collecting info
+                            // already provided by Sign in with Apple. The name is still
+                            // saved to the profile via formData.name + appleDisplayName
+                            // fallback in canProceed() and handleFinish().
+                            <div className="h-11 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-md text-base text-gray-700">
+                                {appleDisplayName}
                             </div>
+                        ) : (
+                            // Fallback: no name from Apple (user hid it, returning user
+                            // with no cached name, or platform did not capture it on first
+                            // auth). The user must enter it manually to complete onboarding.
+                            <>
+                                <Input
+                                    value={formData.name}
+                                    onChange={(e) => setFormField('name', e.target.value)}
+                                    placeholder={isAppleUser ? 'השם המלא שלך' : ''}
+                                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
+                                />
+                                {isAppleUser && shouldShowAppleNameLoading && (
+                                    <div className="flex items-center gap-2 text-gray-500">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-sm">טוען שם מחשבון Apple...</span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">

@@ -33,14 +33,6 @@ export function captureAuthCallbackHints(searchParams) {
     return null;
   }
 
-  const allParamKeys = [];
-  if (typeof searchParams.keys === 'function') {
-    for (const k of searchParams.keys()) {
-      allParamKeys.push(k);
-    }
-  }
-  console.log('[apple-debug] captureAuthCallbackHints — all callback param keys:', allParamKeys);
-
   const hints = {};
 
   for (const key of HINT_KEYS) {
@@ -63,7 +55,6 @@ export function captureAuthCallbackHints(searchParams) {
     hints[key] = value;
   }
 
-  console.log('[apple-debug] captureAuthCallbackHints — extracted hints:', hints);
   return Object.keys(hints).length > 0 ? hints : null;
 }
 

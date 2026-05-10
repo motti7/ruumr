@@ -148,24 +148,8 @@ export const AuthProvider = ({ children }) => {
       console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
       let currentUser = await base44.auth.me();
       console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
-      console.log('[apple-debug] base44.auth.me() user record:', {
-        id: currentUser?.id,
-        full_name: currentUser?.full_name ?? null,
-        name: currentUser?.name ?? null,
-        email: currentUser?.email ?? null,
-        auth_provider: currentUser?.auth_provider ?? null,
-        provider: currentUser?.provider ?? null,
-        identity_provider: currentUser?.identity_provider ?? null,
-        sign_in_provider: currentUser?.sign_in_provider ?? null,
-        emailIsPrivateRelay: String(currentUser?.email || '').includes('privaterelay.appleid.com'),
-      });
       const cachedIdentity = currentUser?.id ? getCachedAppleIdentity(currentUser.id) : null;
       const authHints = appParams.authHints;
-      console.log('[apple-debug] checkUserAuth context:', {
-        cachedIdentity,
-        authHints,
-        isAppleAuthUser: isAppleAuthUser(currentUser, cachedIdentity, authHints),
-      });
 
       // Apple returns name/email only on first authorization.
       // Persist immediately so future logins can rely on Base44 + cached profile data.
@@ -176,14 +160,7 @@ export const AuthProvider = ({ children }) => {
           cachedIdentity,
           fallbackName: '',
         });
-        console.log('[apple-debug] resolveAppleDisplayName (AuthContext):', appleIdentity);
-        const beforeSyncFullName = currentUser?.full_name ?? null;
         currentUser = await syncAppleDisplayNameToBase44(base44.auth, currentUser, appleIdentity, cachedIdentity, authHints);
-        console.log('[apple-debug] after syncAppleDisplayNameToBase44:', {
-          beforeFullName: beforeSyncFullName,
-          afterFullName: currentUser?.full_name ?? null,
-          changed: beforeSyncFullName !== (currentUser?.full_name ?? null),
-        });
         currentUser = {
           ...currentUser,
           full_name: currentUser.full_name || appleIdentity.fullName || '',

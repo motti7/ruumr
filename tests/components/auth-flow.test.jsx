@@ -310,7 +310,7 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
     expect(screen.queryByText('Admin')).toBeNull();
   });
 
-  it('prefills the name field for Apple-authenticated users when Apple provides a name', async () => {
+  it('shows Apple name as read-only and hides the input when Apple provides a name (App Store guideline 5.1.1.iv)', async () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'apple-user-1',
@@ -333,10 +333,67 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(screen.getByDisplayValue('John Appleseed')).toBeTruthy());
+    // Name appears as read-only display text, not as an editable input.
+    await waitFor(() => expect(screen.getByText('John Appleseed')).toBeTruthy());
+    expect(screen.queryByDisplayValue('John Appleseed')).toBeNull();
+    expect(screen.queryByPlaceholderText('השם המלא שלך')).toBeNull();
     expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull();
     expect(screen.queryByText('Ruumr user')).toBeNull();
     expect(mockUserMe).toHaveBeenCalled();
+  });
+
+  it('shows Apple name as read-only even when Apple provides only firstName (partial-name handling)', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'apple-user-3',
+        email: 'user@privaterelay.appleid.com',
+        auth_provider: 'apple',
+      },
+      isLoadingAuth: false,
+    });
+    mockUserMe.mockResolvedValue({
+      id: 'apple-user-3',
+      email: 'user@privaterelay.appleid.com',
+      auth_provider: 'apple',
+      given_name: 'Eitan',
+    });
+
+    render(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Eitan')).toBeTruthy());
+    expect(screen.queryByPlaceholderText('השם המלא שלך')).toBeNull();
+  });
+
+  it('shows the editable input for non-Apple users (Google etc.) so behavior is unchanged', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'google-user-1',
+        email: 'someone@gmail.com',
+        auth_provider: 'google',
+        full_name: 'Some Person',
+      },
+      isLoadingAuth: false,
+    });
+    mockUserMe.mockResolvedValue({
+      id: 'google-user-1',
+      email: 'someone@gmail.com',
+      auth_provider: 'google',
+      full_name: 'Some Person',
+    });
+
+    render(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    // Non-Apple users get the regular input (their name is pre-filled in formData
+    // and shown as the input's value, not as read-only display text).
+    await waitFor(() => expect(screen.getByDisplayValue('Some')).toBeTruthy());
   });
 
   it('requires manual name entry when Apple does not provide a name', async () => {

@@ -60,16 +60,6 @@ const getAppParams = () => {
 		authHints = shouldClearAuthHints
 			? null
 			: (incomingAccessToken ? captureAuthCallbackHints(urlParams) : getStoredAuthCallbackHints());
-		console.log('[apple-debug] OAuth callback params at boot:', {
-			url: window.location.href,
-			hasIncomingToken: Boolean(incomingAccessToken),
-			capturedSource: incomingAccessToken ? 'url' : 'sessionStorage',
-			authHints,
-			rawProviderParam: urlParams?.get('provider') || null,
-			rawFullNameParam: urlParams?.get('full_name') || null,
-			rawNameParam: urlParams?.get('name') || null,
-			rawEmailParam: urlParams?.get('email') || null,
-		});
 		if (incomingAccessToken && authHints) {
 			Object.keys(authHints).forEach((key) => urlParams.delete(key));
 			const cleanedUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}${window.location.hash}`;
