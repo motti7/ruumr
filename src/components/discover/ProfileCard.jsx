@@ -8,6 +8,7 @@ import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, normalizeInterestValues } from '@/lib/interests';
+import { getCitiesRegion } from '@/lib/cityToRegion';
 
 const ProfileDetail = ({ profile, onClose }) => {
     const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
@@ -78,7 +79,10 @@ const ProfileDetail = ({ profile, onClose }) => {
                              ) : (
                                 <span>{profile.location}</span>
                              )}
-                             <span className="text-sm opacity-80">{profile.search_area}</span>
+                             {(() => {
+                             const region = getCitiesRegion(profile.search_cities) || profile.search_area;
+                             return region ? <span className="text-sm opacity-80">• {region}</span> : null;
+                         })()}
                         </div>
                     </div>
                 </div>
@@ -513,7 +517,10 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                         ) : (
                                             <span>{profile.location}</span>
                                         )}
-                                        <span className="text-sm opacity-80 mt-1">• {profile.search_area}</span>
+                                        {(() => {
+                                            const region = getCitiesRegion(profile.search_cities) || profile.search_area;
+                                            return region ? <span className="text-sm opacity-80 mt-1">• {region}</span> : null;
+                                        })()}
                                     </div>
                                 </div>
                             )}

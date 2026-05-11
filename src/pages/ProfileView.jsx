@@ -12,6 +12,7 @@ import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
+import { getCitiesRegion } from '@/lib/cityToRegion';
 import mixpanel from 'mixpanel-browser';
 
 // Custom Audio Player Component with Fade In
@@ -423,7 +424,10 @@ export default function ProfileViewPage() {
                  ) : (
                     <span>{profile.location}</span>
                  )}
-                 <span className="text-sm text-gray-500 mt-0.5">• {profile.search_area}</span>
+                 {(() => {
+                     const region = getCitiesRegion(profile.search_cities) || profile.search_area;
+                     return region ? <span className="text-sm text-gray-500 mt-0.5">• {region}</span> : null;
+                 })()}
             </div>
           </div>
           {profile.current_status === 'has_apartment' && (
