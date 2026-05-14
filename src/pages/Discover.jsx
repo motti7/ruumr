@@ -269,6 +269,10 @@ export default function DiscoverPage() {
       };
 
       await swipeMutation.mutateAsync(swipeData);
+      base44.analytics.track('profile_swiped', {
+        direction: action === 'like' ? 'right' : 'left',
+        target_profile_id: swipedProfile.user_id,
+      });
       if (shouldTrackMixpanel) {
         mixpanel.track('Swipe', {
           direction: action === 'like' ? 'right' : 'left',
@@ -299,6 +303,9 @@ export default function DiscoverPage() {
                       user1_name: userProfile.name,
                       user2_name: swipedProfile.name,
                       status: 'active'
+                  });
+                  base44.analytics.track('match_created', {
+                    matched_with_id: swipedProfile.user_id,
                   });
                   if (shouldTrackMixpanel) {
                     mixpanel.track('Match Created', {
