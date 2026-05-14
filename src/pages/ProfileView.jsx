@@ -13,6 +13,7 @@ import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion } from '@/lib/cityToRegion';
+import { base44 } from '@/api/base44Client';
 import mixpanel from 'mixpanel-browser';
 
 // Custom Audio Player Component with Fade In
@@ -201,6 +202,9 @@ export default function ProfileViewPage() {
                 user1_name: userProfile.name,
                 user2_name: profile.name,
                 status: 'active'
+              });
+              base44.analytics.track('match_created', {
+                matched_with_id: profile.user_id,
               });
               if (isMixpanelTrackingEnabled) {
                 mixpanel.track('Match Created', {
