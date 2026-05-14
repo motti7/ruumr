@@ -473,6 +473,11 @@ export default function OnboardingPage() {
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Registration Completed');
       }
+      base44.analytics.track('signup_completed', {
+        has_apartment: finalData.current_status === 'has_apartment',
+        gender: finalData.gender,
+        city_count: finalData.search_cities?.length || 0,
+      });
 
       if (shouldVerify) {
         navigate(createPageUrl('Verification'), { state: { fromOnboarding: true } });
