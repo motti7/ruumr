@@ -168,6 +168,10 @@ export default function ProfileViewPage() {
       
       await Swipe.create(swipeData);
       console.log("✅ Swipe saved successfully:", swipeData);
+      base44.analytics.track('profile_swiped', {
+        direction: action === 'like' ? 'right' : 'left',
+        target_profile_id: profile.user_id,
+      });
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Swipe', {
           direction: action === 'like' ? 'right' : 'left',
