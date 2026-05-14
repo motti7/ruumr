@@ -175,10 +175,12 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "update": true,
-    "delete": {
+    "read": true,
+    "update": {
       "created_by": "{{user.email}}"
     },
-    "write": true
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
   }
 }
