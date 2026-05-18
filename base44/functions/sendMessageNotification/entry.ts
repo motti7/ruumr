@@ -3,14 +3,29 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
+
+        let currentUser = null;
+        try {
+            currentUser = await base44.auth.me();
+        } catch (_) {
+            currentUser = null;
+        }
+        if (!currentUser?.id) {
+            return Response.json({ error: 'Authentication required' }, { status: 401 });
+        }
+
         const { event, data } = await req.json();
 
-        if (event.type !== 'create' || !data) {
+        if (event?.type !== 'create' || !data) {
             return Response.json({ success: false, reason: 'Not a create event' });
         }
 
         const message = data;
         const { match_id, sender_id, content } = message;
+
+        if (String(sender_id) !== String(currentUser.id) && currentUser.role !== 'admin') {
+            return Response.json({ error: 'Not authorized to notify for this message' }, { status: 403 });
+        }
 
         // Get the match to find the receiver
         const matches = await base44.asServiceRole.entities.Match.filter({ id: match_id });

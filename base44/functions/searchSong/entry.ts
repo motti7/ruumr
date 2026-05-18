@@ -6,11 +6,15 @@ function getRequiredSecret(name) {
     return value;
 }
 
-export default async function(input) {
-    const { query } = input;
-    if (!query) return { error: "Query is required" };
-
+export default async function({ base44, query }) {
     try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser?.id) {
+            return { error: 'Authentication required' };
+        }
+
+        if (!query) return { error: "Query is required" };
+
         const clientId = getRequiredSecret('SPOTIFY_CLIENT_ID');
         const clientSecret = getRequiredSecret('SPOTIFY_CLIENT_SECRET');
 
