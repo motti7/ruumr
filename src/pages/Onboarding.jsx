@@ -23,10 +23,8 @@ import { appParams } from '@/lib/app-params';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
     getCachedAppleIdentity,
-    isAppleAuthUser,
-    persistAppleIdentity,
-    resolveAppleDisplayName,
-    syncAppleDisplayNameToBase44,
+    resolveAndSyncAppleIdentity,
+    resolveAppleIdentitySnapshot,
 } from '@/lib/appleIdentity';
 import {
     buildSimulatorApartmentPhotos,
@@ -72,24 +70,29 @@ export default function OnboardingPage() {
   const { user: authUser, isLoadingAuth } = useAuth();
   const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
   const authHints = appParams.authHints;
-  const initialAppleIdentity = resolveAppleDisplayName({ authUser, authHints, cachedIdentity: initialCachedIdentity, fallbackName: '' });
-  const initialIsAppleUser = isAppleAuthUser(authUser, initialCachedIdentity, authHints);
+  const initialAppleSnapshot = resolveAppleIdentitySnapshot({
+    authUser,
+    authHints,
+    cachedIdentity: initialCachedIdentity,
+    fallbackName: '',
+  });
+  const initialIsAppleUser = initialAppleSnapshot.appleAuthUser;
   const appleNameTimeoutMs = 2000;
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(initialIsAppleUser ? { name: initialAppleIdentity.displayName } : {})
+    createProfileDefaults(initialIsAppleUser ? { name: initialAppleSnapshot.displayName } : {})
   ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
   const [appleDisplayName, setAppleDisplayName] = useState(
-    initialIsAppleUser ? initialAppleIdentity.displayName : ''
+    initialIsAppleUser ? initialAppleSnapshot.displayName : ''
   );
   const [isResolvingAppleIdentity, setIsResolvingAppleIdentity] = useState(
-    initialIsAppleUser && !initialAppleIdentity.displayName
+    initialIsAppleUser && !initialAppleSnapshot.displayName
   );
 
   const fileInputRef = useRef(null);
@@ -104,6 +107,41 @@ export default function OnboardingPage() {
     const hostname = window.location.hostname.toLowerCase();
     return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
   })();
+
+  const syncAppleSnapshot = async (snapshot, warningMessage) => {
+    if (!snapshot?.appleAuthUser) {
+      return snapshot;
+    }
+
+    return resolveAndSyncAppleIdentity({
+      authModule: base44.auth,
+      user: snapshot.userData,
+      authUser,
+      authHints,
+      cachedIdentity: snapshot.cachedIdentity,
+      fallbackName: '',
+      onPersistError: (persistError) => {
+        console.warn(warningMessage, persistError);
+      },
+    });
+  };
+
+  const applyIdentitySnapshot = (snapshot) => {
+    const userData = snapshot?.userData;
+    if (!userData?.id) {
+      return;
+    }
+
+    setIsAppleUser(snapshot.appleAuthUser);
+    setAppleDisplayName(snapshot.appleAuthUser ? snapshot.displayName : '');
+    setFormData((prev) => ({
+      ...prev,
+      name: snapshot.appleAuthUser
+        ? (prev.name.trim() || snapshot.displayName || prev.name)
+        : snapshot.firstName,
+      user_id: userData.id,
+    }));
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -129,33 +167,13 @@ export default function OnboardingPage() {
     const readAppleIdentity = async () => {
       const userData = await withTimeout(User.me(), appleNameTimeoutMs);
       const cachedIdentity = getCachedAppleIdentity(userData.id);
-      const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
-      const appleIdentity = resolveAppleDisplayName({
+      return resolveAppleIdentitySnapshot({
         authUser,
         authHints,
         userData,
         cachedIdentity,
         fallbackName: '',
       });
-
-      const fullName =
-        appleIdentity.fullName ||
-        authUser?.full_name ||
-        userData.full_name ||
-        '';
-      const displayName = appleIdentity.fullName || '';
-      const email = userData.email || cachedIdentity?.email || '';
-      const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
-
-      return {
-        userData,
-        appleAuthUser,
-        cachedIdentity,
-          fullName,
-          displayName,
-          email,
-          firstName,
-        };
     };
 
     const fetchUser = async () => {
@@ -201,32 +219,11 @@ export default function OnboardingPage() {
         // from the OAuth token (Google/Apple) immediately after login.
         // userData.full_name may be empty on first login before the platform syncs it.
         if (snapshot) {
-          const {
-            userData,
-            appleAuthUser,
-            cachedIdentity,
-            fullName,
-            displayName,
-            email,
-            firstName,
-          } = snapshot;
-
-          if (appleAuthUser) {
-            await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity, authHints);
-            try {
-              persistAppleIdentity(userData.id, { fullName, email });
-            } catch (persistError) {
-              console.warn('Failed to cache Apple identity locally during onboarding:', persistError);
-            }
-          }
-
-          setIsAppleUser(appleAuthUser);
-          setAppleDisplayName(appleAuthUser ? displayName : '');
-          setFormData((prev) => ({
-            ...prev,
-            name: appleAuthUser ? (prev.name.trim() || displayName || prev.name) : firstName,
-            user_id: userData.id
-          }));
+          snapshot = await syncAppleSnapshot(
+            snapshot,
+            'Failed to cache Apple identity locally during onboarding:'
+          );
+          applyIdentitySnapshot(snapshot);
         }
 
         setIsResolvingAppleIdentity(false);
@@ -273,8 +270,7 @@ export default function OnboardingPage() {
         if (cancelled) return;
 
         const cachedIdentity = getCachedAppleIdentity(userData.id);
-        const appleAuthUser = isAppleAuthUser(userData, cachedIdentity, authHints);
-        const appleIdentity = resolveAppleDisplayName({
+        let snapshot = resolveAppleIdentitySnapshot({
           authUser,
           authHints,
           userData,
@@ -282,34 +278,15 @@ export default function OnboardingPage() {
           fallbackName: '',
         });
 
-        if (!appleIdentity.fullName) {
+        if (!snapshot.fullName) {
           return;
         }
 
-        const fullName =
-          appleIdentity.fullName ||
-          authUser?.full_name ||
-          userData.full_name ||
-          '';
-        const email = userData.email || cachedIdentity?.email || '';
-        const firstName = appleIdentity.firstName || fullName.split(' ')[0] || '';
-
-        if (appleAuthUser) {
-          await syncAppleDisplayNameToBase44(base44.auth, userData, { fullName }, cachedIdentity, authHints);
-          try {
-            persistAppleIdentity(userData.id, { fullName, email });
-          } catch (persistError) {
-            console.warn('Failed to cache Apple identity locally during Apple refresh:', persistError);
-          }
-        }
-
-        setIsAppleUser(appleAuthUser);
-        setAppleDisplayName(appleAuthUser ? appleIdentity.fullName : '');
-        setFormData((prev) => ({
-          ...prev,
-          name: appleAuthUser ? (prev.name.trim() || appleIdentity.fullName || prev.name) : firstName,
-          user_id: userData.id
-        }));
+        snapshot = await syncAppleSnapshot(
+          snapshot,
+          'Failed to cache Apple identity locally during Apple refresh:'
+        );
+        applyIdentitySnapshot(snapshot);
       } catch (error) {
         if (error?.message !== 'timeout' && error?.status !== 401 && error?.status !== 403) {
           console.error('Failed to refresh Apple identity:', error);
@@ -484,11 +461,16 @@ export default function OnboardingPage() {
       } else {
         navigate(createPageUrl('Discover'));
       }
-    } catch (error) {
-      console.error("Failed to create profile:", error);
-      setIsSubmitting(false);
-    }
-  };
+	    } catch (error) {
+	      console.error("Failed to create profile:", error);
+	      if (error?.status === 401 || error?.status === 403) {
+	        setIsSubmitting(false);
+	        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+	        return;
+	      }
+	      setIsSubmitting(false);
+	    }
+	  };
 
   const setFormField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

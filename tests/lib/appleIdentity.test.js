@@ -10,7 +10,9 @@ import {
   getCachedAppleIdentity,
   isAppleAuthUser,
   persistAppleIdentity,
+  resolveAndSyncAppleIdentity,
   resolveAppleDisplayName,
+  resolveAppleIdentitySnapshot,
   syncAppleDisplayNameToBase44,
 } from '@/lib/appleIdentity';
 
@@ -148,9 +150,21 @@ describe('appleIdentity helpers', () => {
         fallbackName: '',
       })
     ).toEqual({
-      fullName: '',
-      firstName: '',
-      displayName: '',
+      fullName: 'John Appleseed',
+      firstName: 'John',
+      displayName: 'John Appleseed',
+    });
+
+    expect(
+      resolveAppleDisplayName({
+        authHints: { name: 'Callback Name' },
+        cachedIdentity: { fullName: 'Cached Name', email: 'john@example.com' },
+        fallbackName: '',
+      })
+    ).toEqual({
+      fullName: 'Callback Name',
+      firstName: 'Callback',
+      displayName: 'Callback Name',
     });
 
     expect(
@@ -163,6 +177,27 @@ describe('appleIdentity helpers', () => {
       firstName: '',
       displayName: '',
     });
+  });
+
+  it('builds a reusable Apple identity snapshot from cached identity when fresher sources are empty', () => {
+    const snapshot = resolveAppleIdentitySnapshot({
+      userData: {
+        id: 'user-4',
+        email: 'john@example.com',
+        full_name: '',
+      },
+      cachedIdentity: {
+        fullName: 'John Appleseed',
+        email: 'john@example.com',
+      },
+      fallbackName: '',
+    });
+
+    expect(snapshot.appleAuthUser).toBe(true);
+    expect(snapshot.fullName).toBe('John Appleseed');
+    expect(snapshot.displayName).toBe('John Appleseed');
+    expect(snapshot.firstName).toBe('John');
+    expect(snapshot.email).toBe('john@example.com');
   });
 
   it('persists the Apple full name back to Base44 when it is available', async () => {
@@ -204,5 +239,34 @@ describe('appleIdentity helpers', () => {
 
     expect(updateMe).not.toHaveBeenCalled();
     expect(updatedUser.full_name).toBe('');
+  });
+
+  it('syncs cached Apple identity back to Base44 through the centralized helper', async () => {
+    const updateMe = vi.fn().mockResolvedValue({
+      id: 'user-4',
+      email: 'john@example.com',
+      full_name: 'John Appleseed',
+    });
+
+    const result = await resolveAndSyncAppleIdentity({
+      authModule: { updateMe },
+      user: {
+        id: 'user-4',
+        email: 'john@example.com',
+        full_name: '',
+      },
+      cachedIdentity: {
+        fullName: 'John Appleseed',
+        email: 'john@example.com',
+      },
+      fallbackName: '',
+    });
+
+    expect(updateMe).toHaveBeenCalledWith({ full_name: 'John Appleseed' });
+    expect(result.user.full_name).toBe('John Appleseed');
+    expect(getCachedAppleIdentity('user-4')).toEqual({
+      fullName: 'John Appleseed',
+      email: 'john@example.com',
+    });
   });
 });

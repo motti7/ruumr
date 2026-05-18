@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 
@@ -273,6 +273,36 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
         <OnboardingPage />
       </MemoryRouter>
     );
+
+    await waitFor(() => expect(mockRedirectToLogin).toHaveBeenCalledTimes(1));
+    expect(mockRedirectToLogin).toHaveBeenCalledWith('https://example.com');
+  });
+
+  it('redirects to login when final onboarding submit loses auth', async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'submit-user-1',
+        email: 'submit@example.com',
+        full_name: 'Submit User',
+      },
+      isLoadingAuth: false,
+    });
+    mockUserMe
+      .mockResolvedValueOnce({
+        id: 'submit-user-1',
+        email: 'submit@example.com',
+        full_name: 'Submit User',
+      })
+      .mockRejectedValueOnce({ status: 401, message: 'Unauthorized' });
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/Onboarding', state: { resumeStep: 7 } }]}>
+        <OnboardingPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(mockUserMe).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByText('אולי אחר כך'));
 
     await waitFor(() => expect(mockRedirectToLogin).toHaveBeenCalledTimes(1));
     expect(mockRedirectToLogin).toHaveBeenCalledWith('https://example.com');

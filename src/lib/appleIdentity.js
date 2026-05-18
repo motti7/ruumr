@@ -207,11 +207,22 @@ export function persistAppleIdentity(userId, identity) {
   window.localStorage.setItem(LAST_AUTH_PROVIDER_KEY, 'apple');
 }
 
-export function resolveAppleDisplayName({ authUser, userData, authHints, fallbackName = 'Ruumr user' } = {}) {
+/**
+ * @param {{
+ *   authUser?: any,
+ *   userData?: any,
+ *   authHints?: any,
+ *   cachedIdentity?: any,
+ *   fallbackName?: string,
+ * }} [params]
+ */
+export function resolveAppleDisplayName({ authUser, userData, authHints, cachedIdentity, fallbackName = 'Ruumr user' } = {}) {
+  const cachedFullName = isRealAppleName(cachedIdentity?.fullName) ? safeTrim(cachedIdentity.fullName) : '';
   const fullName = pickFirstNonEmpty(
     extractAppleName(authHints),
     extractAppleName(authUser),
     extractAppleName(userData),
+    cachedFullName,
   );
   const firstName = getFirstWord(fullName);
   const displayName = fullName || fallbackName;
@@ -220,6 +231,52 @@ export function resolveAppleDisplayName({ authUser, userData, authHints, fallbac
     fullName,
     firstName,
     displayName,
+  };
+}
+
+/**
+ * @param {{
+ *   authUser?: any,
+ *   userData?: any,
+ *   authHints?: any,
+ *   cachedIdentity?: any,
+ *   fallbackName?: string,
+ * }} [params]
+ */
+export function resolveAppleIdentitySnapshot({
+  authUser,
+  userData,
+  authHints,
+  cachedIdentity,
+  fallbackName = '',
+} = {}) {
+  const primaryUser = userData || authUser;
+  const appleAuthUser = Boolean(
+    isAppleAuthUser(primaryUser, cachedIdentity, authHints) ||
+    (authUser && authUser !== primaryUser && isAppleAuthUser(authUser, cachedIdentity, authHints))
+  );
+  const appleIdentity = resolveAppleDisplayName({
+    authUser,
+    userData,
+    authHints,
+    cachedIdentity,
+    fallbackName,
+  });
+  const fullName = safeTrim(appleIdentity.fullName);
+  const displayName = safeTrim(appleIdentity.displayName);
+  const email = pickFirstNonEmpty(userData?.email, authUser?.email, cachedIdentity?.email);
+  const firstName = appleIdentity.firstName || getFirstWord(fullName);
+
+  return {
+    authUser,
+    userData,
+    cachedIdentity,
+    appleAuthUser,
+    appleIdentity,
+    fullName,
+    displayName,
+    email,
+    firstName,
   };
 }
 
@@ -247,4 +304,85 @@ export async function syncAppleDisplayNameToBase44(authModule, user, appleIdenti
     console.error('Failed to persist Apple full name to Base44:', error);
     return user;
   }
+}
+
+/**
+ * @param {{
+ *   authModule?: any,
+ *   user?: any,
+ *   authUser?: any,
+ *   authHints?: any,
+ *   cachedIdentity?: any,
+ *   fallbackName?: string,
+ *   onPersistError?: (error: any) => void,
+ * }} [params]
+ */
+export async function resolveAndSyncAppleIdentity({
+  authModule,
+  user,
+  authUser,
+  authHints,
+  cachedIdentity,
+  fallbackName = '',
+  onPersistError,
+} = {}) {
+  const resolvedCachedIdentity = cachedIdentity || getCachedAppleIdentity(user?.id || authUser?.id);
+  const snapshot = resolveAppleIdentitySnapshot({
+    authUser,
+    userData: user,
+    authHints,
+    cachedIdentity: resolvedCachedIdentity,
+    fallbackName,
+  });
+
+  if (!user || !snapshot.appleAuthUser) {
+    return {
+      ...snapshot,
+      user,
+    };
+  }
+
+  const syncedUser = await syncAppleDisplayNameToBase44(
+    authModule,
+    user,
+    snapshot.appleIdentity,
+    resolvedCachedIdentity,
+    authHints
+  );
+  const nextUser = {
+    ...user,
+    ...syncedUser,
+    full_name: safeTrim(syncedUser?.full_name) || snapshot.fullName || '',
+  };
+  const nextFullName = safeTrim(nextUser.full_name) || snapshot.fullName || '';
+  const nextEmail = pickFirstNonEmpty(nextUser.email, snapshot.email);
+
+  try {
+    persistAppleIdentity(nextUser.id || user.id, {
+      fullName: nextFullName,
+      email: nextEmail,
+    });
+  } catch (persistError) {
+    if (onPersistError) {
+      onPersistError(persistError);
+    }
+  }
+
+  const nextIdentity = {
+    ...snapshot.appleIdentity,
+    fullName: nextFullName,
+    firstName: getFirstWord(nextFullName),
+    displayName: nextFullName || snapshot.displayName,
+  };
+
+  return {
+    ...snapshot,
+    user: nextUser,
+    userData: nextUser,
+    appleIdentity: nextIdentity,
+    fullName: nextFullName,
+    displayName: nextIdentity.displayName,
+    email: nextEmail,
+    firstName: nextIdentity.firstName,
+  };
 }
