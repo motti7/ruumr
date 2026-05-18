@@ -1,11 +1,19 @@
+function getRequiredSecret(name) {
+    const value = (Deno.env.get(name) || '').trim();
+    if (!value) {
+        throw new Error(`${name} is not configured`);
+    }
+    return value;
+}
+
 export default async function(input) {
     const { query } = input;
     if (!query) return { error: "Query is required" };
 
-    const clientId = 'eb6ba9e897e14d43b4c8fb4165c56b46';
-    const clientSecret = '9832c946b9b34d2595f2ef1cb00becba';
-
     try {
+        const clientId = getRequiredSecret('SPOTIFY_CLIENT_ID');
+        const clientSecret = getRequiredSecret('SPOTIFY_CLIENT_SECRET');
+
         // 1. Get Access Token (Client Credentials Flow)
         // Note: We use global fetch which is available in Node 18+ environments
         const authString = btoa(`${clientId}:${clientSecret}`);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
-import { Profile, Swipe, Match } from "@/entities/all";
+import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileCard from "../components/discover/ProfileCard";
@@ -17,6 +17,7 @@ import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import mixpanel from 'mixpanel-browser';
 
 const sortProfilesByCreatedDateDesc = (records = []) => {
@@ -283,58 +284,32 @@ export default function DiscoverPage() {
         });
       }
 
-      // Check for match only on 'like'
       if (action === 'like') {
-          const reverseSwipes = await Swipe.filter({ 
-              swiper_id: swipedProfile.user_id, 
-              swiped_id: userProfile.user_id, 
-              action: 'like' 
+        try {
+          const matchResult = await processSwipeMatch({
+            swiperId: userProfile.user_id,
+            swipedId: swipedProfile.user_id,
+            action,
+            origin: window.location.origin,
           });
 
-          if (reverseSwipes?.length > 0) {
-              const existingMatches = await Match.filter({
-                  $or: [
-                      { user1_id: userProfile.user_id, user2_id: swipedProfile.user_id },
-                      { user1_id: swipedProfile.user_id, user2_id: userProfile.user_id }
-                  ]
+          if (matchResult?.match) {
+            base44.analytics.track({
+              eventName: 'match_created',
+              properties: {
+                matched_with_id: swipedProfile.user_id,
+              },
+            });
+            if (shouldTrackMixpanel) {
+              mixpanel.track('Match Created', {
+                matched_with_id: swipedProfile.user_id,
               });
-
-              if (existingMatches.length === 0) {
-                  await Match.create({
-                      user1_id: userProfile.user_id,
-                      user2_id: swipedProfile.user_id,
-                      user1_name: userProfile.name,
-                      user2_name: swipedProfile.name,
-                      status: 'active'
-                  });
-                  base44.analytics.track({
-                    eventName: 'match_created',
-                    properties: {
-                      matched_with_id: swipedProfile.user_id,
-                    },
-                  });
-                  if (shouldTrackMixpanel) {
-                    mixpanel.track('Match Created', {
-                      matched_with_id: swipedProfile.user_id,
-                    });
-                  }
-              }
-
-              setMatchData({ profile1: userProfile, profile2: swipedProfile });
-
-              // Async email notification (fire-and-forget)
-              import('@/api/base44Client').then(({ base44: b44 }) => {
-                  const functions = /** @type {any} */ (b44.functions);
-                  if (functions?.handleSwipe) {
-                    functions.handleSwipe({
-                      swiper_id: userProfile.user_id,
-                      swiped_id: swipedProfile.user_id,
-                      action,
-                      origin: window.location.origin
-                    });
-                  }
-              }).catch(() => {});
+            }
+            setMatchData({ profile1: userProfile, profile2: swipedProfile });
           }
+        } catch (matchError) {
+          console.error("Failed to process swipe match:", matchError);
+        }
       }
     } catch (error) { 
         console.error("Swipe save failed:", error);

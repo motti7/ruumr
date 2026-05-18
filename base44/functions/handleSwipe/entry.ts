@@ -5,12 +5,43 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         const { swiper_id, swiped_id, action, origin } = await req.json();
 
+        if (!swiper_id || !swiped_id || !action) {
+            return Response.json({ error: 'swiper_id, swiped_id, and action are required' }, { status: 400 });
+        }
+
+        let currentUser;
+        try {
+            currentUser = await base44.auth.me();
+        } catch (_) {
+            return Response.json({ error: 'Authentication required' }, { status: 401 });
+        }
+
+        if (String(currentUser?.id || '') !== String(swiper_id)) {
+            return Response.json({ error: 'Cannot process a swipe for another user' }, { status: 403 });
+        }
+
+        if (action !== 'like' && action !== 'dislike') {
+            return Response.json({ error: 'Unsupported swipe action' }, { status: 400 });
+        }
+
         if (action !== 'like') {
             return Response.json({ match: false });
         }
 
+        const sr = base44.asServiceRole.entities;
+
+        const currentSwipes = await sr.Swipe.filter({
+            swiper_id,
+            swiped_id,
+            action: 'like'
+        });
+
+        if (!currentSwipes || currentSwipes.length === 0) {
+            return Response.json({ match: false, reason: 'swipe_not_found' });
+        }
+
         // Check for reverse like
-        const reverseSwipes = await base44.asServiceRole.entities.Swipe.filter({
+        const reverseSwipes = await sr.Swipe.filter({
             swiper_id: swiped_id,
             swiped_id: swiper_id,
             action: 'like'
@@ -20,7 +51,7 @@ Deno.serve(async (req) => {
             // It's a match!
             
             // Check if match already exists
-            const existingMatches = await base44.asServiceRole.entities.Match.filter({
+            const existingMatches = await sr.Match.filter({
                 $or: [
                     { user1_id: swiper_id, user2_id: swiped_id },
                     { user1_id: swiped_id, user2_id: swiper_id }
@@ -29,8 +60,8 @@ Deno.serve(async (req) => {
 
             // Get profile names
             const [profile1List, profile2List] = await Promise.all([
-                base44.asServiceRole.entities.Profile.filter({ user_id: swiper_id }),
-                base44.asServiceRole.entities.Profile.filter({ user_id: swiped_id })
+                sr.Profile.filter({ user_id: swiper_id }),
+                sr.Profile.filter({ user_id: swiped_id })
             ]);
             
             const p1 = profile1List[0];
@@ -38,7 +69,7 @@ Deno.serve(async (req) => {
 
             let match_id;
             if (existingMatches.length === 0) {
-                const match = await base44.asServiceRole.entities.Match.create({
+                const match = await sr.Match.create({
                     user1_id: swiper_id,
                     user2_id: swiped_id,
                     user1_name: p1?.name || '',
@@ -51,7 +82,7 @@ Deno.serve(async (req) => {
             }
 
             // Get user emails for email notifications
-            const allUsers = await base44.asServiceRole.entities.User.list();
+            const allUsers = await sr.User.list();
             const user1 = allUsers.find(u => u.id === swiper_id);
             const user2 = allUsers.find(u => u.id === swiped_id);
 
@@ -114,14 +145,14 @@ Deno.serve(async (req) => {
         } else {
             // No match, but check if we should send likes notification
             try {
-                const allLikesForSwipedUser = await base44.asServiceRole.entities.Swipe.filter({
+                const allLikesForSwipedUser = await sr.Swipe.filter({
                     swiped_id: swiped_id,
                     action: 'like'
                 });
                 
                 const totalLikes = allLikesForSwipedUser.length;
                 
-                const allUsers = await base44.asServiceRole.entities.User.list();
+                const allUsers = await sr.User.list();
                 const swipedUser = allUsers.find(u => u.id === swiped_id);
                 
                 if (swipedUser) {
@@ -158,7 +189,7 @@ Deno.serve(async (req) => {
                         }
 
                         // Update the notification counter
-                        await base44.asServiceRole.entities.User.update(swipedUser.id, {
+                        await sr.User.update(swipedUser.id, {
                             last_likes_notification_count: totalLikes
                         });
                         

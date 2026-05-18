@@ -14,6 +14,7 @@ import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesG
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
+import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import mixpanel from 'mixpanel-browser';
 
 // Custom Audio Player Component with Fade In
@@ -186,57 +187,27 @@ export default function ProfileViewPage() {
       let didMatch = false;
       if (action === 'like') {
         try {
-          const reverseSwipes = await Swipe.filter({ 
-            swiper_id: profile.user_id, 
-            swiped_id: userProfile.user_id, 
-            action: 'like' 
+          const matchResult = await processSwipeMatch({
+            swiperId: userProfile.user_id,
+            swipedId: profile.user_id,
+            action,
+            origin: window.location.origin,
           });
 
-          if (reverseSwipes && reverseSwipes.length > 0) {
+          if (matchResult?.match) {
             didMatch = true;
-
-            const existingMatches = await Match.filter({
-              $or: [
-                { user1_id: userProfile.user_id, user2_id: profile.user_id },
-                { user1_id: profile.user_id, user2_id: userProfile.user_id }
-              ]
+            base44.analytics.track({
+              eventName: 'match_created',
+              properties: {
+                matched_with_id: profile.user_id,
+              },
             });
-
-            if (existingMatches.length === 0) {
-              await Match.create({
-                user1_id: userProfile.user_id,
-                user2_id: profile.user_id,
-                user1_name: userProfile.name,
-                user2_name: profile.name,
-                status: 'active'
+            if (isMixpanelTrackingEnabled) {
+              mixpanel.track('Match Created', {
+                matched_with_id: profile.user_id,
               });
-              base44.analytics.track({
-                eventName: 'match_created',
-                properties: {
-                  matched_with_id: profile.user_id,
-                },
-              });
-              if (isMixpanelTrackingEnabled) {
-                mixpanel.track('Match Created', {
-                  matched_with_id: profile.user_id,
-                });
-              }
             }
-
             setMatchData({ profile1: userProfile, profile2: profile });
-
-            try {
-              const { base44: b44 } = await import('@/api/base44Client');
-              const functions = /** @type {any} */ (b44.functions);
-              if (functions?.handleSwipe) {
-                await functions.handleSwipe({
-                  swiper_id: userProfile.user_id,
-                  swiped_id: profile.user_id,
-                  action,
-                  origin: window.location.origin
-                });
-              }
-            } catch (e) {}
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);
