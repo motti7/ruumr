@@ -3,19 +3,24 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string"
+      "type": "string",
+      "description": "ID of the group (user ID of the group creator / owner)"
     },
     "sender_id": {
-      "type": "string"
+      "type": "string",
+      "description": "User ID of the sender"
     },
     "sender_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Display name of the sender"
     },
     "sender_photo": {
-      "type": "string"
+      "type": "string",
+      "description": "Profile photo URL of the sender"
     },
     "content": {
-      "type": "string"
+      "type": "string",
+      "description": "Message text"
     }
   },
   "required": [
@@ -28,7 +33,16 @@
       "created_by": "{{user.email}}"
     },
     "read": {
-      "created_by": "{{user.email}}"
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
       "created_by": "{{user.email}}"
