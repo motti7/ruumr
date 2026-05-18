@@ -39,11 +39,6 @@
         },
         {
           "data.user2_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
         }
       ]
     },
