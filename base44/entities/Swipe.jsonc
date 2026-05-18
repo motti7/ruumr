@@ -34,14 +34,7 @@
   ],
   "rls": {
     "create": {
-      "$and": [
-        {
-          "data.swiper_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "swiper_id": "{{user.id}}"
     },
     "read": {
       "$or": [
@@ -50,33 +43,14 @@
         },
         {
           "data.swiped_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
         }
       ]
     },
     "update": {
-      "$and": [
-        {
-          "data.swiper_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "data.swiper_id": "{{user.id}}"
     },
     "delete": {
-      "$and": [
-        {
-          "data.swiper_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "data.swiper_id": "{{user.id}}"
     }
   }
 }
