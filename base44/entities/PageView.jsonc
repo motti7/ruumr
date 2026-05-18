@@ -16,25 +16,29 @@
   ],
   "rls": {
     "create": {
-      "data.user_id": "{{user.id}}"
-    },
-    "read": {
-      "$or": [
+      "$and": [
         {
-          "data.user_id": "{{user.id}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "data.user_id": "{{user.id}}"
         }
       ]
     },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "update": {
-      "data.user_id": "{{user.id}}"
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
-      "data.user_id": "{{user.id}}"
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
