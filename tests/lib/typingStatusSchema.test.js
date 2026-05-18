@@ -28,13 +28,8 @@ describe('TypingStatus entity schema', () => {
     expect(schema.rls.delete).toEqual(ownerOnly);
   });
 
-  it('restricts read to the record owner or an admin', () => {
-    expect(schema.rls.read).toEqual({
-      $or: [
-        { 'data.user_id': '{{user.id}}' },
-        { user_condition: { role: 'admin' } },
-      ],
-    });
+  it('allows all users to read typing status signals (permissive by functional necessity)', () => {
+    expect(schema.rls.read).toBe(true);
   });
 
   it('requires match_id and user_id', () => {
