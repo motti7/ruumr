@@ -1,0 +1,96 @@
+{
+  "name": "Match",
+  "type": "object",
+  "properties": {
+    "user1_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05de\u05e9\u05ea\u05de\u05e9 \u05e8\u05d0\u05e9\u05d5\u05df"
+    },
+    "user1_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05de\u05e9\u05ea\u05de\u05e9 \u05e8\u05d0\u05e9\u05d5\u05df"
+    },
+    "user2_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e0\u05d9"
+    },
+    "user2_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e0\u05d9"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "blocked"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "user1_id",
+    "user2_id"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
