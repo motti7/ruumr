@@ -1,0 +1,47 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "reviewer_id": {
+      "type": "string"
+    },
+    "reviewed_id": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "text": {
+      "type": "string"
+    },
+    "reviewer_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reviewer_id",
+    "reviewed_id",
+    "rating"
+  ],
+  "rls": {
+    "create": {
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
+    },
+    "delete": {
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
+    }
+  }
+}
