@@ -13,6 +13,18 @@ import { LAST_USED_AUTH_METHOD_KEY } from '@/lib/clientSessionCleanup';
 
 const AuthContext = createContext(null);
 
+const missingAuthContext = {
+  user: null,
+  isAuthenticated: false,
+  isLoadingAuth: false,
+  isLoadingPublicSettings: false,
+  authError: null,
+  appPublicSettings: null,
+  logout: async () => undefined,
+  navigateToLogin: () => undefined,
+  checkAppState: async () => undefined,
+};
+
 const isMixpanelEnabledForHostname = (hostname) => {
   const normalizedHostname = (hostname || '').toLowerCase();
   return (
@@ -251,3 +263,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export const useOptionalAuth = () => useContext(AuthContext) || missingAuthContext;

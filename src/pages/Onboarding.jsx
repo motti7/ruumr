@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/lib/AuthContext';
+import { useOptionalAuth } from '@/lib/AuthContext';
 import { User } from '@/entities/User';
 import { Profile } from '@/entities/Profile';
 import { createPageUrl } from '@/utils';
@@ -67,7 +67,7 @@ const Step = ({ children, step, currentStep, title }) =>
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user: authUser, isLoadingAuth } = useAuth();
+  const { user: authUser, isLoadingAuth } = useOptionalAuth();
   const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
   const authHints = appParams.authHints;
   const initialAppleSnapshot = resolveAppleIdentitySnapshot({
@@ -450,10 +450,13 @@ export default function OnboardingPage() {
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Registration Completed');
       }
-      base44.analytics.track('signup_completed', {
-        has_apartment: finalData.current_status === 'has_apartment',
-        gender: finalData.gender,
-        city_count: finalData.search_cities?.length || 0,
+      base44.analytics.track({
+        eventName: 'signup_completed',
+        properties: {
+          has_apartment: finalData.current_status === 'has_apartment',
+          gender: finalData.gender,
+          city_count: finalData.search_cities?.length || 0,
+        },
       });
 
       if (shouldVerify) {

@@ -168,9 +168,12 @@ export default function ProfileViewPage() {
       
       await Swipe.create(swipeData);
       console.log("✅ Swipe saved successfully:", swipeData);
-      base44.analytics.track('profile_swiped', {
-        direction: action === 'like' ? 'right' : 'left',
-        target_profile_id: profile.user_id,
+      base44.analytics.track({
+        eventName: 'profile_swiped',
+        properties: {
+          direction: action === 'like' ? 'right' : 'left',
+          target_profile_id: profile.user_id,
+        },
       });
       if (isMixpanelTrackingEnabled) {
         mixpanel.track('Swipe', {
@@ -207,8 +210,11 @@ export default function ProfileViewPage() {
                 user2_name: profile.name,
                 status: 'active'
               });
-              base44.analytics.track('match_created', {
-                matched_with_id: profile.user_id,
+              base44.analytics.track({
+                eventName: 'match_created',
+                properties: {
+                  matched_with_id: profile.user_id,
+                },
               });
               if (isMixpanelTrackingEnabled) {
                 mixpanel.track('Match Created', {

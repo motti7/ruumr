@@ -44,6 +44,7 @@ const mockUseAuth = vi.fn();
 
 vi.mock('@/lib/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
+  useOptionalAuth: () => mockUseAuth(),
 }));
 
 vi.mock('@/components/UserNotRegisteredError', () => ({
