@@ -45,7 +45,7 @@ const shouldEnableMixpanel =
   !hostname.includes('base44')
 
 if (shouldEnableMixpanel) {
-  mixpanel.init('57193f6883f7a3d0281c5fbbdf952fb2', {
+  mixpanel.init(import.meta.env.VITE_MIXPANEL_TOKEN, {
     debug: true,
     autocapture: true,
     record_sessions_percent: 100,
