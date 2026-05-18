@@ -1,0 +1,61 @@
+{
+  "name": "Swipe",
+  "type": "object",
+  "properties": {
+    "swiper_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e2\u05e9\u05d4 \u05d4\u05d7\u05dc\u05e7\u05d4"
+    },
+    "swiper_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e2\u05e9\u05d4 \u05d4\u05d7\u05dc\u05e7\u05d4"
+    },
+    "swiped_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e7\u05d9\u05d1\u05dc \u05d4\u05d7\u05dc\u05e7\u05d4"
+    },
+    "swiped_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e7\u05d9\u05d1\u05dc \u05d4\u05d7\u05dc\u05e7\u05d4"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "like",
+        "dislike"
+      ],
+      "description": "\u05e4\u05e2\u05d5\u05dc\u05ea \u05d4\u05d7\u05dc\u05e7\u05d4"
+    }
+  },
+  "required": [
+    "swiper_id",
+    "swiped_id",
+    "action"
+  ],
+  "rls": {
+    "create": {
+      "data.swiper_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.swiper_id": "{{user.id}}"
+        },
+        {
+          "data.swiped_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.swiper_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.swiper_id": "{{user.id}}"
+    }
+  }
+}
