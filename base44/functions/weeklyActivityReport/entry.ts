@@ -5,6 +5,15 @@ const RECIPIENT_EMAIL = 'mottishif7@gmail.com';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const currentUser = await base44.auth.me();
+
+    if (!currentUser?.id) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    if (currentUser.role !== 'admin') {
+      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    }
 
     // Calculate date 7 days ago
     const oneWeekAgo = new Date();

@@ -1,5 +1,20 @@
 export default async function sendEmailToMotti({ base44 }) {
     try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser?.id) {
+            return {
+                success: false,
+                error: 'Authentication required'
+            };
+        }
+
+        if (currentUser.role !== 'admin') {
+            return {
+                success: false,
+                error: 'Admin access required'
+            };
+        }
+
         console.log('📧 Starting to send email to Motti...');
         
         // Get Motti's profile

@@ -215,7 +215,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
                 user_id: partnerId,
                 title: '📋 השאלון מחכה לך!',
                 message: 'השותף שלך כבר מילא את שאלון הדירה – עכשיו התור שלך!',
-                data: { matchId }
+                data: { type: 'charter', match_id: matchId }
               });
             }
           } catch(e) { console.log("Push notification skipped", e); }
