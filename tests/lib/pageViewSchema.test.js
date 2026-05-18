@@ -25,14 +25,19 @@ describe('PageView entity schema', () => {
     });
   });
 
-  it('restricts read and delete to admins', () => {
-    const adminOnly = { user_condition: { role: 'admin' } };
-    expect(schema.rls.read).toEqual(adminOnly);
-    expect(schema.rls.delete).toEqual(adminOnly);
+  it('allows the record owner or an admin to read', () => {
+    expect(schema.rls.read).toEqual({
+      $or: [
+        { 'data.user_id': '{{user.id}}' },
+        { user_condition: { role: 'admin' } },
+      ],
+    });
   });
 
-  it('blocks update for everyone — page views are immutable', () => {
-    expect(schema.rls.update).toBe(false);
+  it('restricts update and delete to admins', () => {
+    const adminOnly = { user_condition: { role: 'admin' } };
+    expect(schema.rls.update).toEqual(adminOnly);
+    expect(schema.rls.delete).toEqual(adminOnly);
   });
 
   it('requires page_name', () => {
