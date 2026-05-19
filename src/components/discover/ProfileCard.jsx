@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
 import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 import { base44 } from '@/api/base44Client';
@@ -28,6 +29,7 @@ const ProfileDetail = ({ profile, onClose }) => {
         const l = String(link).toLowerCase();
         if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
         if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+        if (l.includes('tiktok')) return <SiTiktok className="w-5 h-5 text-white" />;
         if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
         if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
         return <LinkIcon className="w-5 h-5 text-white" />;
@@ -489,6 +491,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                     const l = String(profile.social_link).toLowerCase();
                                     if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
                                     if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+                                    if (l.includes('tiktok')) return <SiTiktok className="w-5 h-5 text-white" />;
                                     if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
                                     if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
                                     return <LinkIcon className="w-5 h-5 text-white" />;

@@ -4,6 +4,7 @@ import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import SmartImage from '@/components/shared/SmartImage';
@@ -268,9 +269,9 @@ export default function ProfileViewPage() {
   const getSocialIcon = (link) => {
       if (!link) return null;
       const l = link.toLowerCase();
-      // Only return icon, color handled by parent
       if (l.includes('facebook')) return <Facebook className="w-5 h-5" />;
       if (l.includes('instagram')) return <Instagram className="w-5 h-5" />;
+      if (l.includes('tiktok')) return <SiTiktok className="w-5 h-5" />;
       if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5" />;
       if (l.includes('linkedin')) return <Linkedin className="w-5 h-5" />;
       return <LinkIcon className="w-5 h-5" />;
