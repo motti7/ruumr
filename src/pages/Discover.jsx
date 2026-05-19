@@ -40,6 +40,7 @@ export default function DiscoverPage() {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userProfile, setUserProfile] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [lastSwipes, setLastSwipes] = useState([]);
@@ -110,6 +111,7 @@ export default function DiscoverPage() {
       }
       const currentUserProfile = userProfiles[0];
       setUserProfile(currentUserProfile);
+      setCurrentUserId(user.id);
       
       let allProfiles = [];
       try {
@@ -252,7 +254,8 @@ export default function DiscoverPage() {
 
     const swipedProfile = profiles[currentIndex];
     const prevIndex = currentIndex;
-    const optimisticSwipe = { swiper_id: userProfile.user_id, swiped_id: swipedProfile.user_id, action };
+    const swiperId = currentUserId || userProfile.user_id;
+    const optimisticSwipe = { swiper_id: swiperId, swiped_id: swipedProfile.user_id, action };
 
     // Standardized optimistic UI pattern: update state BEFORE server call
     setCurrentIndex(prev => prev + 1);
@@ -262,7 +265,7 @@ export default function DiscoverPage() {
 
     try {
       const swipeData = {
-          swiper_id: userProfile.user_id,
+          swiper_id: swiperId,
           swiper_name: userProfile.name,
           swiped_id: swipedProfile.user_id,
           swiped_name: swipedProfile.name,
@@ -287,7 +290,7 @@ export default function DiscoverPage() {
       if (action === 'like') {
         try {
           const matchResult = await processSwipeMatch({
-            swiperId: userProfile.user_id,
+            swiperId: swiperId,
             swipedId: swipedProfile.user_id,
             action,
             origin: window.location.origin,
@@ -317,7 +320,7 @@ export default function DiscoverPage() {
         setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
     }
-  }, [currentIndex, profiles, shouldTrackMixpanel, userProfile, swipeMutation]);
+  }, [currentIndex, profiles, shouldTrackMixpanel, userProfile, currentUserId, swipeMutation]);
   
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
