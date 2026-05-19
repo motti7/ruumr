@@ -12,7 +12,11 @@ export default function CustomSelect({ label, value, onChange, options }) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, []);
 
   return (
@@ -46,7 +50,7 @@ export default function CustomSelect({ label, value, onChange, options }) {
             <button
               key={opt.v}
               type="button"
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
                 e.preventDefault();
                 onChange(opt.v);
                 setOpen(false);
