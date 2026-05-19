@@ -62,11 +62,12 @@ const CITY_REGION_MAP = {
   'טייבה': 'מרכז',
   'טירה': 'מרכז',
   'קלנסואה': 'מרכז',
-  'ירושלים': 'מרכז',
-  'בית שמש': 'מרכז',
-  'מעלה אדומים': 'מרכז',
-  'אלעד': 'מרכז',
-  'ביתר עילית': 'מרכז',
+  // ירושלים (אזור נפרד)
+  'ירושלים': 'ירושלים',
+  'בית שמש': 'ירושלים',
+  'מעלה אדומים': 'ירושלים',
+  'אלעד': 'ירושלים',
+  'ביתר עילית': 'ירושלים',
 
   // דרום
   'באר שבע': 'דרום',
@@ -97,18 +98,17 @@ const CITY_REGION_MAP = {
 export function getCitiesRegion(cities) {
   if (!cities || cities.length === 0) return null;
 
-  const counts = { 'צפון': 0, 'מרכז': 0, 'דרום': 0 };
+  const counts = { 'צפון': 0, 'מרכז': 0, 'דרום': 0, 'ירושלים': 0 };
 
   for (const city of cities) {
     const region = CITY_REGION_MAP[city?.trim()];
     if (region) counts[region]++;
   }
 
-  const total = counts['צפון'] + counts['מרכז'] + counts['דרום'];
+  const total = counts['צפון'] + counts['מרכז'] + counts['דרום'] + counts['ירושלים'];
   if (total === 0) return null;
 
-  // Return all regions that are tied for first (majority or all equal)
-  const maxCount = Math.max(counts['צפון'], counts['מרכז'], counts['דרום']);
+  const maxCount = Math.max(counts['צפון'], counts['מרכז'], counts['דרום'], counts['ירושלים']);
   const winners = Object.entries(counts)
     .filter(([, c]) => c === maxCount && c > 0)
     .map(([r]) => r);
