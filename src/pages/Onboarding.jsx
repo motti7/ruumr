@@ -322,10 +322,17 @@ export default function OnboardingPage() {
 
   const canProceed = () => {
   switch (step) {
-    case 1: // Basic Info + Vibe
-      return (formData.name.trim() || appleDisplayName.trim()) && formData.age >= 18 && formData.gender && formData.vibe_level;
+    case 1: { // Basic Info + Vibe
+      const hasName = !!(formData.name.trim() || appleDisplayName.trim());
+      const hasAge = Number(formData.age) >= 18;
+      const hasGender = !!formData.gender;
+      const hasVibe = !!formData.vibe_level;
+      console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });
+      return hasName && hasAge && hasGender && hasVibe;
+    }
     case 2: // Status + Location + Budget (combined)
       return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
+
     case 3: // Preferences + Pets (merged)
       return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
         formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
