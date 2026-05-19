@@ -83,7 +83,11 @@ export default function OnboardingPage() {
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(initialIsAppleUser ? { name: initialAppleSnapshot.displayName } : {})
+    createProfileDefaults(
+      initialIsAppleUser
+        ? { name: initialAppleSnapshot.displayName }
+        : { name: authUser?.full_name || '' }
+    )
   ));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -143,15 +147,7 @@ export default function OnboardingPage() {
     }));
   };
 
-  // Sync authUser name into formData once auth loads (handles non-Apple users)
-  useEffect(() => {
-    if (!authUser?.id) return;
-    setFormData((prev) => ({
-      ...prev,
-      user_id: authUser.id,
-      name: prev.name.trim() ? prev.name : (authUser.full_name || ''),
-    }));
-  }, [authUser?.id]);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -768,7 +764,7 @@ export default function OnboardingPage() {
                 <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם מלא</label>
+                        <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
                         {isAppleUser && appleDisplayName ? (
                             // Apple Sign-In returned a valid name — show the input with
                             // the Apple-provided value locked in (readOnly + no onChange).
