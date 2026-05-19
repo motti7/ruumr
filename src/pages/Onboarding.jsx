@@ -138,10 +138,20 @@ export default function OnboardingPage() {
       ...prev,
       name: snapshot.appleAuthUser
         ? (prev.name.trim() || snapshot.displayName || prev.name)
-        : snapshot.firstName,
+        : (snapshot.firstName || prev.name || authUser?.full_name || ''),
       user_id: userData.id,
     }));
   };
+
+  // Sync authUser name into formData once auth loads (handles non-Apple users)
+  useEffect(() => {
+    if (!authUser?.id) return;
+    setFormData((prev) => ({
+      ...prev,
+      user_id: authUser.id,
+      name: prev.name.trim() ? prev.name : (authUser.full_name || ''),
+    }));
+  }, [authUser?.id]);
 
   useEffect(() => {
     let cancelled = false;
