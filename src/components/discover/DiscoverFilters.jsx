@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, MapPin, ChevronDown } from "lucide-react";
+import { X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const ISRAEL_CITIES = [
@@ -97,19 +97,18 @@ export default function DiscoverFilters({ filters, onChange }) {
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">פילטרים</h3>
                 <button
                   aria-label="סגור פילטרים"
                   onClick={() => setOpen(false)}
                   className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full"
                 >
-                  <ChevronDown className="w-6 h-6 text-gray-400" />
+                  <X className="w-5 h-5 text-gray-400" />
                 </button>
-                <h3 className="text-xl font-bold text-gray-900">פילטרים</h3>
-                <div className="w-[44px]" />
               </div>
 
               {/* City free-text */}
-              <div className="mb-6 mt-2">
+              <div className="mb-6">
                 <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
                   <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים רצוי
                 </label>
