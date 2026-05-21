@@ -15,12 +15,12 @@ const ISRAEL_CITIES = [
 
 export default function DiscoverFilters({ filters, onChange }) {
   const [open, setOpen] = useState(false);
-  const [local, setLocal] = useState({ ...filters, maxAge: filters.maxAge ?? 60 });
+  const [local, setLocal] = useState({ kosher: 'all', shabbat: 'all', ...filters, maxAge: filters.maxAge ?? 60 });
   const [cityInput, setCityInput] = useState("");
   const [citySuggestions, setCitySuggestions] = useState([]);
 
   useEffect(() => {
-    const handler = () => { setLocal(filters); setCityInput(""); setOpen(true); };
+    const handler = () => { setLocal({ kosher: 'all', shabbat: 'all', ...filters }); setCityInput(""); setOpen(true); };
     window.addEventListener('openDiscoverFilters', handler);
     return () => window.removeEventListener('openDiscoverFilters', handler);
   }, [filters]);
@@ -29,6 +29,8 @@ export default function DiscoverFilters({ filters, onChange }) {
     local.cities?.length > 0,
     local.maxBudget < 10000,
     local.minAge > 18 || local.maxAge < 50,
+    local.kosher && local.kosher !== 'all',
+    local.shabbat && local.shabbat !== 'all',
   ].filter(Boolean).length;
 
   const apply = () => {
@@ -37,7 +39,7 @@ export default function DiscoverFilters({ filters, onChange }) {
   };
 
   const reset = () => {
-    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 };
+    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' };
     setLocal(defaults);
     setCityInput("");
     onChange(defaults);
@@ -178,6 +180,46 @@ export default function DiscoverFilters({ filters, onChange }) {
                     <span>₪1,000</span>
                     <span>₪10,000</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Kosher */}
+              <div className="mb-6">
+                <label className="text-sm font-bold text-gray-700 mb-2 block">כשרות</label>
+                <div className="flex bg-gray-100 p-1 rounded-xl">
+                  {[
+                    { v: 'all', l: 'הכל' },
+                    { v: 'for_or_flow', l: 'בעד / זורם' },
+                    { v: 'against', l: 'נגד' },
+                  ].map(opt => (
+                    <button
+                      key={opt.v}
+                      onClick={() => setLocal(prev => ({ ...prev, kosher: opt.v }))}
+                      className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${local.kosher === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}
+                    >
+                      {opt.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shabbat */}
+              <div className="mb-6">
+                <label className="text-sm font-bold text-gray-700 mb-2 block">שמירת שבת</label>
+                <div className="flex bg-gray-100 p-1 rounded-xl">
+                  {[
+                    { v: 'all', l: 'הכל' },
+                    { v: 'for_or_flow', l: 'בעד / זורם' },
+                    { v: 'against', l: 'נגד' },
+                  ].map(opt => (
+                    <button
+                      key={opt.v}
+                      onClick={() => setLocal(prev => ({ ...prev, shabbat: opt.v }))}
+                      className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${local.shabbat === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}
+                    >
+                      {opt.l}
+                    </button>
+                  ))}
                 </div>
               </div>
 

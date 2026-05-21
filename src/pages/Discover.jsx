@@ -47,7 +47,7 @@ export default function DiscoverPage() {
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
-  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 });
+  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
   const [allProfiles, setAllProfiles] = useState([]);
   useEffect(() => {
     try {
@@ -336,6 +336,20 @@ export default function DiscoverPage() {
       }
       if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
       if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
+      if (newFilters.kosher && newFilters.kosher !== 'all') {
+        if (newFilters.kosher === 'for_or_flow') {
+          if (p.kosher_preference && p.kosher_preference === 'against') return false;
+        } else if (newFilters.kosher === 'against') {
+          if (p.kosher_preference && p.kosher_preference !== 'against') return false;
+        }
+      }
+      if (newFilters.shabbat && newFilters.shabbat !== 'all') {
+        if (newFilters.shabbat === 'for_or_flow') {
+          if (p.shabbat_preference && p.shabbat_preference === 'against') return false;
+        } else if (newFilters.shabbat === 'against') {
+          if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
+        }
+      }
       return true;
     });
     setProfiles(filtered);

@@ -448,20 +448,18 @@ export default function OnboardingPage() {
         await Profile.create(finalData);
 
         // Fire "Profile Completed" only the first time a profile is created
-        if (isMixpanelTrackingEnabled) {
-          mixpanel.track('Profile Completed', {
-            gender: finalData.gender,
-            current_status: finalData.current_status,
-            city_count: finalData.search_cities?.length || 0,
-            has_photos: finalData.photos?.length > 0,
-            photo_count: finalData.photos?.length || 0,
-            has_apartment_photos: finalData.apartment_photos?.length > 0,
-            has_about_me: !!finalData.about_me?.trim(),
-            has_looking_for: !!finalData.looking_for_description?.trim(),
-            religion: finalData.religion,
-            vibe_level: finalData.vibe_level,
-          });
-        }
+        trackMixpanel('Profile Completed', {
+          gender: finalData.gender,
+          current_status: finalData.current_status,
+          city_count: finalData.search_cities?.length || 0,
+          has_photos: finalData.photos?.length > 0,
+          photo_count: finalData.photos?.length || 0,
+          has_apartment_photos: finalData.apartment_photos?.length > 0,
+          has_about_me: !!finalData.about_me?.trim(),
+          has_looking_for: !!finalData.looking_for_description?.trim(),
+          religion: finalData.religion,
+          vibe_level: finalData.vibe_level,
+        });
       }
 
       try {
