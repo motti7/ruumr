@@ -244,6 +244,11 @@ export default function DiscoverPage() {
 
   }, [currentIndex, profiles]);
 
+  const handleSwipeIntent = useCallback((action) => {
+    setActionFeedback(action);
+    setTimeout(() => setActionFeedback(null), 600);
+  }, []);
+
   const handleSwipe = useCallback(async (action) => {
     if (currentIndex >= profiles.length || !userProfile) return;
 
@@ -441,6 +446,7 @@ export default function DiscoverPage() {
                       <ProfileCard
                         profile={profile}
                         onSwipe={handleSwipe}
+                        onSwipeIntent={handleSwipeIntent}
                         isActive={isTopCard}
                       />
                     </div>

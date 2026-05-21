@@ -257,7 +257,7 @@ const ProfileDetail = ({ profile, onClose }) => {
     );
 };
 
-const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onSwipe, isActive }) {
+const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onSwipe, onSwipeIntent, isActive }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
@@ -353,9 +353,9 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
     const rotate = useTransform(x, [-200, 200], [-15, 15]);
     const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
     
-    // Badge opacities
-    const likeOpacity = useTransform(x, [20, 150], [0, 1]);
-    const nopeOpacity = useTransform(x, [-20, -150], [0, 1]);
+    // Badge opacities — appear immediately on drag, full opacity well before the 100px swipe-commit threshold
+    const likeOpacity = useTransform(x, [5, 60], [0, 1]);
+    const nopeOpacity = useTransform(x, [-5, -60], [0, 1]);
     
     const controls = useAnimation();
 
@@ -392,15 +392,17 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
         const velocity = info.velocity.x;
 
         if (offset > 100 || velocity > 500) {
+            onSwipeIntent?.("like");
             await controls.start({ x: 500, opacity: 0 });
             onSwipe("like");
         } else if (offset < -100 || velocity < -500) {
+            onSwipeIntent?.("dislike");
             await controls.start({ x: -500, opacity: 0 });
             onSwipe("dislike");
         } else {
             controls.start({ x: 0 });
         }
-    }, [controls, onSwipe]);
+    }, [controls, onSwipe, onSwipeIntent]);
 
     const handleTap = useCallback((e) => {
         // Ignore tap if expanded or not active
