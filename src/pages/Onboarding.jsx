@@ -448,10 +448,27 @@ export default function OnboardingPage() {
 
       // If user already has a profile (e.g. navigated back), update instead of create
       const existingProfiles = await Profile.filter({ user_id: userId });
-      if (existingProfiles.length > 0) {
+      const isFirstTimeCompletion = existingProfiles.length === 0;
+      if (!isFirstTimeCompletion) {
         await Profile.update(existingProfiles[0].id, finalData);
       } else {
         await Profile.create(finalData);
+
+        // Fire "Profile Completed" only the first time a profile is created
+        if (isMixpanelTrackingEnabled) {
+          mixpanel.track('Profile Completed', {
+            gender: finalData.gender,
+            current_status: finalData.current_status,
+            city_count: finalData.search_cities?.length || 0,
+            has_photos: finalData.photos?.length > 0,
+            photo_count: finalData.photos?.length || 0,
+            has_apartment_photos: finalData.apartment_photos?.length > 0,
+            has_about_me: !!finalData.about_me?.trim(),
+            has_looking_for: !!finalData.looking_for_description?.trim(),
+            religion: finalData.religion,
+            vibe_level: finalData.vibe_level,
+          });
+        }
       }
 
       try {

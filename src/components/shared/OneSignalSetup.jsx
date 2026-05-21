@@ -3,28 +3,19 @@ import { Capacitor } from '@capacitor/core';
 import { isRuumrSimulatorMode } from '@/lib/simulatorMode';
 
 const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID;
-const ONESIGNAL_REST_API_KEY = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
 const ONESIGNAL_SCRIPT_ID = 'ruumr-onesignal-web-sdk';
 const ONESIGNAL_SCRIPT_SRC = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-const NATIVE_ONE_SIGNAL_PLATFORMS = new Set(['android', 'ios']);
 const PUSH_PERMISSION_REQUESTED_KEY = 'ruumr_push_permission_requested';
 
-let nativeOneSignalSdkPromise = null;
-let nativeOneSignalInitPromise = null;
+let nativeInitPromise = null;
 
 function isDesktopBrowserContext() {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-        return false;
-    }
-
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 }
 
 function isIosLikeBrowserContext() {
-    if (typeof navigator === 'undefined') {
-        return false;
-    }
-
+    if (typeof navigator === 'undefined') return false;
     const ua = navigator.userAgent || '';
     const platform = navigator.platform || '';
     return /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -41,34 +32,132 @@ function canUseWebOneSignal() {
     );
 }
 
+// ב-Wix/Base44 native wrapper הפלאגין חי ב-window.plugins.OneSignal
+// גם כאשר Capacitor.isNativePlatform() לא מחזיר true
+function getNativeOneSignal() {
+    return window?.plugins?.OneSignal ?? null;
+}
+
 function canUseNativeOneSignal() {
-    return (
-        typeof window !== 'undefined' &&
-        !isRuumrSimulatorMode() &&
-        Capacitor.isNativePlatform() &&
-        NATIVE_ONE_SIGNAL_PLATFORMS.has(Capacitor.getPlatform())
-    );
+    if (isRuumrSimulatorMode()) return false;
+    if (typeof window === 'undefined') return false;
+    // תמיכה גם ב-Capacitor native וגם ב-Wix/Cordova WebView
+    if (getNativeOneSignal()) return true;
+    if (Capacitor.isNativePlatform()) {
+        const platform = Capacitor.getPlatform();
+        return platform === 'android' || platform === 'ios';
+    }
+    return false;
+}
+
+// ממתין עד ש-window.plugins.OneSignal יהיה זמין (עד 5 שניות)
+function waitForNativePlugin(timeoutMs = 5000) {
+    return new Promise((resolve) => {
+        if (getNativeOneSignal()) {
+            resolve(getNativeOneSignal());
+            return;
+        }
+
+        const start = Date.now();
+        const check = () => {
+            const plugin = getNativeOneSignal();
+            if (plugin) {
+                resolve(plugin);
+                return;
+            }
+            if (Date.now() - start > timeoutMs) {
+                resolve(null);
+                return;
+            }
+            setTimeout(check, 100);
+        };
+
+        // deviceready event (Cordova/Wix WebView)
+        document.addEventListener('deviceready', () => resolve(getNativeOneSignal()), { once: true });
+        check();
+    });
+}
+
+async function initializeNativeOneSignal() {
+    if (!canUseNativeOneSignal()) return null;
+
+    if (nativeInitPromise) return nativeInitPromise;
+
+    nativeInitPromise = (async () => {
+        // נסה לטעון את הפלאגין — קודם window.plugins, אחר כך npm
+        let OneSignal = await waitForNativePlugin();
+
+        if (!OneSignal) {
+            try {
+                const mod = await import('onesignal-cordova-plugin');
+                OneSignal = mod?.default ?? mod ?? null;
+            } catch {
+                // npm package לא זמין — מסתמכים על window.plugins בלבד
+            }
+        }
+
+        if (!OneSignal) {
+            console.warn('[OneSignal] Native plugin not found (window.plugins.OneSignal is null)');
+            return null;
+        }
+
+        if (window.__ruumrOneSignalInitialized) return OneSignal;
+
+        console.info('[OneSignal] Initializing native with App ID:', ONESIGNAL_APP_ID);
+
+        try {
+            OneSignal.initialize(ONESIGNAL_APP_ID);
+        } catch (e) {
+            // ייתכן שהפלאגין כבר אותחל
+            console.warn('[OneSignal] initialize() threw:', e);
+        }
+
+        window.__ruumrOneSignalInitialized = true;
+
+        // בקשת הרשאה — תמיד לאחר initialize, ללא בדיקת localStorage
+        // כדי לוודא רישום תקין מול OneSignal
+        try {
+            if (OneSignal.Notifications?.requestPermission) {
+                await OneSignal.Notifications.requestPermission(true);
+                window.localStorage.setItem(PUSH_PERMISSION_REQUESTED_KEY, '1');
+                console.info('[OneSignal] Permission requested successfully');
+            }
+        } catch (error) {
+            console.warn('[OneSignal] Permission request failed:', error);
+        }
+
+        return OneSignal;
+    })().catch((error) => {
+        nativeInitPromise = null;
+        console.warn('[OneSignal] Native init failed:', error);
+        return null;
+    });
+
+    return nativeInitPromise;
+}
+
+async function loginNativeOneSignal(userId) {
+    if (!userId) return;
+    const OneSignal = await initializeNativeOneSignal();
+    if (!OneSignal) return;
+    try {
+        await OneSignal.login(String(userId));
+        console.info('[OneSignal] Native login set for userId:', userId);
+    } catch (error) {
+        console.warn('[OneSignal] Native login failed:', error);
+    }
 }
 
 function loadOneSignalWebSdk() {
     return new Promise((resolve, reject) => {
-        if (typeof window === 'undefined') {
-            resolve(null);
-            return;
-        }
-
-        if (window.OneSignal) {
-            resolve(window.OneSignal);
-            return;
-        }
-
+        if (typeof window === 'undefined') { resolve(null); return; }
+        if (window.OneSignal) { resolve(window.OneSignal); return; }
         const existingScript = document.getElementById(ONESIGNAL_SCRIPT_ID);
         if (existingScript) {
             existingScript.addEventListener('load', () => resolve(window.OneSignal), { once: true });
             existingScript.addEventListener('error', () => reject(new Error('Failed to load OneSignal web SDK')), { once: true });
             return;
         }
-
         const script = document.createElement('script');
         script.id = ONESIGNAL_SCRIPT_ID;
         script.src = ONESIGNAL_SCRIPT_SRC;
@@ -80,167 +169,51 @@ function loadOneSignalWebSdk() {
     });
 }
 
-async function loadOneSignalNativeSdk() {
-    if (!canUseNativeOneSignal()) {
-        return null;
-    }
-
-    if (window.plugins?.OneSignal) {
-        return window.plugins.OneSignal;
-    }
-
-    if (!nativeOneSignalSdkPromise) {
-        nativeOneSignalSdkPromise = import('onesignal-cordova-plugin')
-            .then((module) => module?.default ?? module ?? window.plugins?.OneSignal ?? null)
-            .catch((error) => {
-                nativeOneSignalSdkPromise = null;
-                throw error;
-            });
-    }
-
-    const module = await nativeOneSignalSdkPromise;
-    return module?.default ?? module ?? window.plugins?.OneSignal ?? null;
-}
-
-async function initializeNativeOneSignal() {
-    if (!canUseNativeOneSignal()) {
-        return null;
-    }
-
-    if (nativeOneSignalInitPromise) {
-        return nativeOneSignalInitPromise;
-    }
-
-    nativeOneSignalInitPromise = (async () => {
-        const OneSignal = await loadOneSignalNativeSdk();
-        if (!OneSignal) {
-            return null;
-        }
-
-        if (window.__ruumrOneSignalInitialized) {
-            return OneSignal;
-        }
-
-        if (import.meta.env.DEV && OneSignal.Debug?.setLogLevel) {
-            OneSignal.Debug.setLogLevel(6);
-        }
-
-        OneSignal.initialize(ONESIGNAL_APP_ID);
-        window.__ruumrOneSignalInitialized = true;
-
-        try {
-            const alreadyAsked = window.localStorage.getItem(PUSH_PERMISSION_REQUESTED_KEY) === '1';
-            if (!alreadyAsked && OneSignal.Notifications?.requestPermission) {
-                await OneSignal.Notifications.requestPermission(true);
-                window.localStorage.setItem(PUSH_PERMISSION_REQUESTED_KEY, '1');
-            }
-        } catch (error) {
-            console.warn('OneSignal permission prompt skipped:', error);
-        }
-
-        return OneSignal;
-    })().catch((error) => {
-        nativeOneSignalInitPromise = null;
-        throw error;
-    });
-
-    return nativeOneSignalInitPromise;
-}
-
-async function loginNativeOneSignal(userId) {
-    if (!userId || !canUseNativeOneSignal()) {
-        return null;
-    }
-
-    const OneSignal = await initializeNativeOneSignal();
-    if (!OneSignal) {
-        return null;
-    }
-
-    try {
-        await OneSignal.login(userId);
-    } catch (error) {
-        console.warn('OneSignal native login skipped:', error);
-    }
-}
-
 export default function OneSignalSetup({ userId }) {
     useEffect(() => {
-        try {
-            window.localStorage.setItem('ruumr_debug_protocol', window.location.protocol);
-            window.localStorage.setItem('ruumr_debug_href', window.location.href);
-            window.localStorage.setItem('ruumr_debug_platform', Capacitor.getPlatform());
-            window.localStorage.setItem('ruumr_debug_has_bridge', String(Boolean(window.webkit?.messageHandlers?.bridge)));
-            window.localStorage.setItem('ruumr_debug_simulator_mode', String(isRuumrSimulatorMode()));
-            window.localStorage.setItem('ruumr_debug_can_web', String(canUseWebOneSignal()));
-            window.localStorage.setItem('ruumr_debug_can_native', String(canUseNativeOneSignal()));
-        } catch {
-            // Debug-only values; ignore storage failures.
-        }
+        const platform = Capacitor.getPlatform();
+        const hasWindowPlugin = Boolean(window?.plugins?.OneSignal);
 
         console.info('[ruumr] OneSignalSetup', {
-            protocol: typeof window !== 'undefined' ? window.location.protocol : 'n/a',
-            href: typeof window !== 'undefined' ? window.location.href : 'n/a',
+            protocol: window.location.protocol,
+            platform,
+            isNative: Capacitor.isNativePlatform(),
+            hasWindowPlugin,
             simulatorMode: isRuumrSimulatorMode(),
             canUseWeb: canUseWebOneSignal(),
             canUseNative: canUseNativeOneSignal(),
-            platform: Capacitor.getPlatform(),
+            appId: ONESIGNAL_APP_ID,
         });
 
         if (canUseWebOneSignal()) {
             if (window.__ruumrOneSignalInitQueued || window.__ruumrOneSignalInitialized) return;
-
             window.__ruumrOneSignalInitQueued = true;
-
             window.OneSignalDeferred = window.OneSignalDeferred || [];
-
             window.OneSignalDeferred.push(async function(OneSignal) {
-                if (window.__ruumrOneSignalInitialized) {
-                    return;
-                }
-
+                if (window.__ruumrOneSignalInitialized) return;
                 await OneSignal.init({
                     appId: ONESIGNAL_APP_ID,
                     notifyButton: { enable: false },
                     allowLocalhostAsSecureOrigin: true,
                 });
-
                 window.__ruumrOneSignalInitialized = true;
-
             });
-
-            void loadOneSignalWebSdk().catch((error) => {
-                console.warn('OneSignal web SDK could not be loaded:', error);
-            });
+            void loadOneSignalWebSdk().catch((e) => console.warn('[OneSignal] Web SDK load failed:', e));
             return;
         }
 
-        if (!canUseNativeOneSignal()) {
-            return;
-        }
-
-        void initializeNativeOneSignal().catch((error) => {
-            console.warn('OneSignal native SDK could not be initialized:', error);
-        });
+        // Native (Capacitor / Wix WebView / Cordova)
+        void initializeNativeOneSignal();
     }, []);
 
-    // כאשר יש userId — מגדירים External User ID כדי שנוכל לשלוח לו התראות
     useEffect(() => {
         if (!userId) return;
 
         if (canUseWebOneSignal()) {
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             window.OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                    await OneSignal.login(userId);
-                } catch (error) {
-                    console.warn('OneSignal login skipped:', error);
-                }
+                try { await OneSignal.login(String(userId)); } catch (e) { console.warn('[OneSignal] Web login failed:', e); }
             });
-            return;
-        }
-
-        if (!canUseNativeOneSignal()) {
             return;
         }
 
@@ -250,108 +223,37 @@ export default function OneSignalSetup({ userId }) {
     return null;
 }
 
-// פונקציות עזר לשימוש בכל האפליקציה
 export const OneSignalHelpers = {
-    // בקשת הרשאות
     async requestPermission() {
-        if (canUseWebOneSignal() && window.OneSignal) {
-            await window.OneSignal.push(function() {
-                window.OneSignal.showNativePrompt();
-            });
-            return true;
-        }
-
         if (canUseNativeOneSignal()) {
             const OneSignal = await initializeNativeOneSignal();
-            if (!OneSignal?.Notifications?.requestPermission) {
-                return null;
+            if (OneSignal?.Notifications?.requestPermission) {
+                await OneSignal.Notifications.requestPermission(true);
+                return true;
             }
-
-            await OneSignal.Notifications.requestPermission(true);
-            try {
-                window.localStorage.setItem(PUSH_PERMISSION_REQUESTED_KEY, '1');
-            } catch {
-                // ignore storage failure
-            }
+        }
+        if (canUseWebOneSignal() && window.OneSignal) {
+            await window.OneSignal.push(() => window.OneSignal.showNativePrompt());
             return true;
         }
-
         return null;
     },
 
-    // שליחת notification
-    async sendNotification(userId, title, message, url) {
-        // זה צריך להיעשות מהצד server
-        // אבל אפשר להשתמש ב-OneSignal REST API
-        if (!ONESIGNAL_REST_API_KEY) {
-            console.error('OneSignal: Missing VITE_ONESIGNAL_REST_API_KEY');
-            return null;
-        }
-
-        try {
-            const response = await fetch('https://api.onesignal.com/notifications', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Key ${ONESIGNAL_REST_API_KEY}`
-                },
-                body: JSON.stringify({
-                    app_id: ONESIGNAL_APP_ID,
-                    target_channel: 'push',
-                    include_aliases: {
-                        external_id: [String(userId)],
-                    },
-                    headings: { en: title },
-                    contents: { en: message },
-                    url
-                })
-            });
-            return await response.json();
-        } catch (e) {
-            console.error('Error sending notification:', e);
-        }
-    },
-
-    // קבלת Player ID של המשתמש הנוכחי
     async getPlayerId() {
-        if (canUseWebOneSignal() && window.OneSignal) {
-            return (
-                window.OneSignal?.User?.pushSubscription?.id ??
-                window.OneSignal?.User?.PushSubscription?.id ??
-                window.OneSignal?.User?.onesignalId ??
-                null
-            );
-        }
-
         if (canUseNativeOneSignal()) {
-            const OneSignal = await loadOneSignalNativeSdk();
-            return (
-                OneSignal?.User?.pushSubscription?.id ??
-                OneSignal?.User?.PushSubscription?.id ??
-                OneSignal?.User?.onesignalId ??
-                null
-            );
+            const OneSignal = await initializeNativeOneSignal();
+            return OneSignal?.User?.pushSubscription?.id ?? OneSignal?.User?.onesignalId ?? null;
         }
-
+        if (canUseWebOneSignal() && window.OneSignal) {
+            return window.OneSignal?.User?.pushSubscription?.id ?? window.OneSignal?.User?.onesignalId ?? null;
+        }
         return null;
     },
 
-    // הגדרת External User ID (ID מהמערכת שלנו)
     async setExternalUserId(userId) {
-        if (!userId) {
-            return null;
-        }
-
-        if (canUseWebOneSignal() && window.OneSignal) {
-            await window.OneSignal.login(userId);
-            return true;
-        }
-
-        if (canUseNativeOneSignal()) {
-            await loginNativeOneSignal(userId);
-            return true;
-        }
-
+        if (!userId) return null;
+        if (canUseNativeOneSignal()) { await loginNativeOneSignal(userId); return true; }
+        if (canUseWebOneSignal() && window.OneSignal) { await window.OneSignal.login(String(userId)); return true; }
         return null;
     }
 };
