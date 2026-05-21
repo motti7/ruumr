@@ -17,6 +17,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        try {
+          var url = new URL(window.location.href);
+          var queryValue = url.searchParams.get('simulator_mode');
+          var simulatorMode =
+            queryValue === 'true' ||
+            queryValue === '1' ||
+            window.localStorage.getItem('ruumr_simulator_mode') === 'true';
+
+          if (simulatorMode && !url.searchParams.has('analytics-enable')) {
+            url.searchParams.set('analytics-enable', 'false');
+            window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+          }
+        } catch (_) {}
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

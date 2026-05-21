@@ -6,7 +6,7 @@ import { User } from '@/entities/User';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import mixpanel from 'mixpanel-browser';
+import { trackMixpanel } from '@/lib/mixpanelTracking';
 
 const CHARTER_DATA = {
   "game_title": "Roomi Vibe Check",
@@ -106,11 +106,6 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [direction, setDirection] = useState(0);
-  const isMixpanelTrackingEnabled = (() => {
-    const hostname = window.location.hostname.toLowerCase();
-    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
-  })();
-
   const allQuestions = CHARTER_DATA.levels.flatMap(level => level.questions);
   const currentLevel = CHARTER_DATA.levels[currentLevelIndex];
   const currentQuestion = currentLevel?.questions[currentQuestionIndex];
@@ -190,9 +185,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         setCurrentQuestionIndex(0);
       } else {
         // סיימנו - עובר לצ'אט מיד (הניווט לא תלוי ב-push notification)
-        if (isMixpanelTrackingEnabled) {
-          mixpanel.track('Match Questionnaire Completed');
-        }
+        trackMixpanel('Match Questionnaire Completed');
         confetti({
           particleCount: 200,
           spread: 120,

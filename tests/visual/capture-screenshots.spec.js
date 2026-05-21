@@ -16,12 +16,17 @@ const PAGES = [
   { name: 'Settings', path: '/Settings' },
 ];
 
+function withSimulatorMode(path) {
+  return `${path}${path.includes('?') ? '&' : '?'}simulator_mode=true`;
+}
+
 for (const viewport of VIEWPORTS) {
   for (const page of PAGES) {
     test(`screenshot: ${page.name} @ ${viewport.name} (${viewport.width}x${viewport.height})`, async ({ page: pw }) => {
       await pw.setViewportSize({ width: viewport.width, height: viewport.height });
-      await pw.goto(page.path, { waitUntil: 'domcontentloaded', timeout: 10_000 }).catch(() => {});
-      await pw.waitForTimeout(1500);
+      await pw.goto(withSimulatorMode(page.path), { waitUntil: 'domcontentloaded', timeout: 10_000 });
+      await pw.locator('main').first().waitFor({ state: 'visible', timeout: 15_000 });
+      await pw.waitForTimeout(1000);
 
       await pw.screenshot({
         path: `tests/visual/screenshots/${viewport.name}--${page.name}.png`,
@@ -33,8 +38,9 @@ for (const viewport of VIEWPORTS) {
   test(`screenshot: ${viewport.name} dark-mode Discover`, async ({ page: pw }) => {
     await pw.setViewportSize({ width: viewport.width, height: viewport.height });
     await pw.emulateMedia({ colorScheme: 'dark' });
-    await pw.goto('/', { waitUntil: 'domcontentloaded', timeout: 10_000 }).catch(() => {});
-    await pw.waitForTimeout(1500);
+    await pw.goto(withSimulatorMode('/'), { waitUntil: 'domcontentloaded', timeout: 10_000 });
+    await pw.locator('main').first().waitFor({ state: 'visible', timeout: 15_000 });
+    await pw.waitForTimeout(1000);
 
     await pw.screenshot({
       path: `tests/visual/screenshots/${viewport.name}--Discover--dark.png`,

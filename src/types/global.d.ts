@@ -4,6 +4,7 @@ declare global {
   interface ImportMetaEnv {
     readonly VITE_BASE44_APP_ID?: string;
     readonly VITE_BASE44_BACKEND_URL?: string;
+    readonly VITE_BASE44_APP_BASE_URL?: string;
     readonly VITE_ONESIGNAL_APP_ID?: string;
     readonly VITE_RUUMR_SIMULATOR_MODE?: string;
     readonly [key: string]: string | undefined;

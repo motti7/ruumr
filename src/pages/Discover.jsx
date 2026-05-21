@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -18,7 +18,7 @@ import { base44 } from "@/api/base44Client";
 import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
-import mixpanel from 'mixpanel-browser';
+import { trackMixpanel } from '@/lib/mixpanelTracking';
 
 const sortProfilesByCreatedDateDesc = (records = []) => {
   return [...records].sort((left, right) => {
@@ -49,11 +49,6 @@ export default function DiscoverPage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60 });
   const [allProfiles, setAllProfiles] = useState([]);
-  const shouldTrackMixpanel = useMemo(() => {
-    const hostname = window.location.hostname.toLowerCase();
-    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
-  }, []);
-
   useEffect(() => {
     try {
       window.localStorage.setItem('ruumr_discover_marker', 'discover-mounted');
@@ -280,12 +275,10 @@ export default function DiscoverPage() {
           target_profile_id: swipedProfile.user_id,
         },
       });
-      if (shouldTrackMixpanel) {
-        mixpanel.track('Swipe', {
-          direction: action === 'like' ? 'right' : 'left',
-          target_profile_id: swipedProfile.user_id,
-        });
-      }
+      trackMixpanel('Swipe', {
+        direction: action === 'like' ? 'right' : 'left',
+        target_profile_id: swipedProfile.user_id,
+      });
 
       if (action === 'like') {
         try {
@@ -303,11 +296,9 @@ export default function DiscoverPage() {
                 matched_with_id: swipedProfile.user_id,
               },
             });
-            if (shouldTrackMixpanel) {
-              mixpanel.track('Match Created', {
-                matched_with_id: swipedProfile.user_id,
-              });
-            }
+            trackMixpanel('Match Created', {
+              matched_with_id: swipedProfile.user_id,
+            });
             setMatchData({ profile1: userProfile, profile2: swipedProfile });
           }
         } catch (matchError) {
@@ -320,7 +311,7 @@ export default function DiscoverPage() {
         setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
     }
-  }, [currentIndex, profiles, shouldTrackMixpanel, userProfile, currentUserId, swipeMutation]);
+  }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
   
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
@@ -473,7 +464,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 40px)' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 72px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}

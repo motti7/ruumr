@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
-import mixpanel from 'mixpanel-browser'
+import { initMixpanel } from '@/lib/mixpanelTracking'
 // Configure the native Android status bar when running inside Capacitor.
 // Dynamically imported to avoid breaking the web build.
 
@@ -37,21 +37,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-
-const hostname = window.location.hostname.toLowerCase()
-const shouldEnableMixpanel =
-  !hostname.includes('localhost') &&
-  !hostname.includes('preview-sandbox') &&
-  !hostname.includes('base44')
-
-if (shouldEnableMixpanel) {
-  mixpanel.init(import.meta.env.VITE_MIXPANEL_TOKEN, {
-    debug: true,
-    autocapture: true,
-    record_sessions_percent: 100,
-    api_host: 'https://api-eu.mixpanel.com',
-  })
-}
+initMixpanel()
 
 // Capacitor status bar is configured natively via the Android build.
 

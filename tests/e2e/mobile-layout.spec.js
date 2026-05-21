@@ -3,12 +3,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Mobile Layout — Viewport & Safe Areas', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
+    await page.goto('/?simulator_mode=true');
     await page.waitForLoadState('domcontentloaded');
+    await page.locator('main').first().waitFor({ state: 'visible' });
   });
 
   test('root container uses 100dvh and has no unexpected vertical scrollbar', async ({ page }) => {
-    const root = page.locator('[dir="rtl"]').first();
+    const root = page.locator('div[dir="rtl"]').first();
     await expect(root).toBeVisible();
 
     const hasMinH = await root.evaluate((el) => {

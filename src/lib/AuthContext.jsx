@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
-import mixpanel from 'mixpanel-browser';
+import { identifyMixpanelUser } from '@/lib/mixpanelTracking';
 import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
@@ -23,15 +23,6 @@ const missingAuthContext = {
   logout: async () => undefined,
   navigateToLogin: () => undefined,
   checkAppState: async () => undefined,
-};
-
-const isMixpanelEnabledForHostname = (hostname) => {
-  const normalizedHostname = (hostname || '').toLowerCase();
-  return (
-    !normalizedHostname.includes('localhost') &&
-    !normalizedHostname.includes('preview-sandbox') &&
-    !normalizedHostname.includes('base44')
-  );
 };
 
 const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
@@ -175,10 +166,9 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
 
-      if (isMixpanelEnabledForHostname(window.location.hostname) && currentUser?.id) {
+      if (currentUser?.id) {
         const appleIdentity = appleIdentitySnapshot.appleAuthUser ? appleIdentitySnapshot.appleIdentity : null;
-        mixpanel.identify(String(currentUser.id));
-        mixpanel.people.set({
+        identifyMixpanelUser(currentUser.id, {
           $name: appleIdentity?.fullName || appleIdentity?.displayName || currentUser.full_name || currentUser.name || '',
           $email: currentUser.email || '',
           user_id: currentUser.id,

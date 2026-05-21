@@ -16,7 +16,7 @@ import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interes
 import { getCitiesRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
-import mixpanel from 'mixpanel-browser';
+import { trackMixpanel } from '@/lib/mixpanelTracking';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -94,11 +94,6 @@ export default function ProfileViewPage() {
   const [isExMatch, setIsExMatch] = useState(false);
   const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
   const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
-  const isMixpanelTrackingEnabled = (() => {
-    const hostname = window.location.hostname.toLowerCase();
-    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
-  })();
-
   useEffect(() => {
     loadProfile();
   }, [location.search]); // Reload when URL changes
@@ -177,12 +172,10 @@ export default function ProfileViewPage() {
           target_profile_id: profile.user_id,
         },
       });
-      if (isMixpanelTrackingEnabled) {
-        mixpanel.track('Swipe', {
-          direction: action === 'like' ? 'right' : 'left',
-          target_profile_id: profile.user_id,
-        });
-      }
+      trackMixpanel('Swipe', {
+        direction: action === 'like' ? 'right' : 'left',
+        target_profile_id: profile.user_id,
+      });
 
       // Check for match if liked
       let didMatch = false;
@@ -203,11 +196,9 @@ export default function ProfileViewPage() {
                 matched_with_id: profile.user_id,
               },
             });
-            if (isMixpanelTrackingEnabled) {
-              mixpanel.track('Match Created', {
-                matched_with_id: profile.user_id,
-              });
-            }
+            trackMixpanel('Match Created', {
+              matched_with_id: profile.user_id,
+            });
             setMatchData({ profile1: userProfile, profile2: profile });
           }
         } catch (matchError) {

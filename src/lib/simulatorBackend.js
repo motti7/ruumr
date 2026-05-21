@@ -807,8 +807,9 @@ function createCollectionApi(state, collectionName) {
 
   const list = async (orderBy = null, limit = null) => {
     let records = sortRecords(getCollection(), orderBy);
+    const hasLimit = limit !== null && limit !== undefined && limit !== "";
     const limitNumber = Number(limit);
-    if (Number.isFinite(limitNumber) && limitNumber >= 0) {
+    if (hasLimit && Number.isFinite(limitNumber) && limitNumber >= 0) {
       records = records.slice(0, limitNumber);
     }
     return cloneRecords(records);
@@ -817,8 +818,9 @@ function createCollectionApi(state, collectionName) {
   const filter = async (query = {}, orderBy = null, limit = null) => {
     let records = getCollection().filter((record) => matchesQuery(record, query));
     records = sortRecords(records, orderBy);
+    const hasLimit = limit !== null && limit !== undefined && limit !== "";
     const limitNumber = Number(limit);
-    if (Number.isFinite(limitNumber) && limitNumber >= 0) {
+    if (hasLimit && Number.isFinite(limitNumber) && limitNumber >= 0) {
       records = records.slice(0, limitNumber);
     }
     return cloneRecords(records);
@@ -978,6 +980,31 @@ function createAuthApi(state) {
   };
 }
 
+function createSimulatorEntitiesModule(state, existingEntities = {}) {
+  const apiCache = new Map();
+
+  const getApi = (collectionName) => {
+    if (!apiCache.has(collectionName)) {
+      apiCache.set(collectionName, createCollectionApi(state, collectionName));
+    }
+    return apiCache.get(collectionName);
+  };
+
+  return new Proxy(existingEntities || {}, {
+    get(target, entityName, receiver) {
+      if (
+        typeof entityName !== "string" ||
+        entityName === "then" ||
+        entityName.startsWith("_")
+      ) {
+        return Reflect.get(target, entityName, receiver);
+      }
+
+      return getApi(entityName);
+    },
+  });
+}
+
 export function enableSimulatorBackend(base44) {
   if (!base44 || typeof base44 !== "object") {
     return false;
@@ -1011,31 +1038,21 @@ export function enableSimulatorBackend(base44) {
     base44.auth = simulatorAuth;
   }
 
-  Object.entries(base44.entities || {}).forEach(([name, entity]) => {
-    if (!entity || typeof entity !== "object") {
-      return;
-    }
-
-    const api = createCollectionApi(state, name);
-    if (typeof entity.list === "function") {
-      entity.list = api.list;
-    }
-    if (typeof entity.filter === "function") {
-      entity.filter = api.filter;
-    }
-    if (typeof entity.create === "function") {
-      entity.create = api.create;
-    }
-    if (typeof entity.update === "function") {
-      entity.update = api.update;
-    }
-    if (typeof entity.delete === "function") {
-      entity.delete = api.delete;
-    }
-    if (typeof entity.subscribe === "function") {
-      entity.subscribe = api.subscribe;
-    }
-  });
+  base44.entities = createSimulatorEntitiesModule(state, base44.entities);
+  try {
+    base44.analytics?.cleanup?.();
+  } catch {
+    // Simulator mode should never depend on remote analytics cleanup.
+  }
+  base44.analytics = {
+    track: () => undefined,
+    cleanup: () => undefined,
+  };
+  base44.appLogs = {
+    logUserInApp: async () => true,
+    fetchLogs: async () => [],
+    getStats: async () => ({}),
+  };
 
   return true;
 }

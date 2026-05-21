@@ -31,7 +31,7 @@ import {
     buildSimulatorProfilePhotos,
     isRuumrSimulatorMode,
 } from '@/lib/simulatorMode';
-import mixpanel from 'mixpanel-browser';
+import { trackMixpanel } from '@/lib/mixpanelTracking';
 
 const TOTAL_STEPS = 7;
 const STEP_NAMES = {
@@ -107,11 +107,6 @@ export default function OnboardingPage() {
   const [spotifySearch, setSpotifySearch] = useState("");
   const [isSearchingSong, setIsSearchingSong] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const isMixpanelTrackingEnabled = (() => {
-    const hostname = window.location.hostname.toLowerCase();
-    return !hostname.includes('localhost') && !hostname.includes('preview-sandbox') && !hostname.includes('base44');
-  })();
-
   const syncAppleSnapshot = async (snapshot, warningMessage) => {
     if (!snapshot?.appleAuthUser) {
       return snapshot;
@@ -368,12 +363,10 @@ export default function OnboardingPage() {
   const nextStep = () => {
   const currentStep = step;
   const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;
-  if (isMixpanelTrackingEnabled) {
-    mixpanel.track('Registration Step Completed', {
-      step_number: currentStep,
-      step_name: stepName,
-    });
-  }
+  trackMixpanel('Registration Step Completed', {
+    step_number: currentStep,
+    step_name: stepName,
+  });
 
   if (step === 3 && formData.current_status === 'seeking_apartment') {
     setStep(5); // Skip apartment details
@@ -477,9 +470,7 @@ export default function OnboardingPage() {
         console.error("Failed to sync onboarding profile to Ruumr Plus:", syncError);
       }
 
-      if (isMixpanelTrackingEnabled) {
-        mixpanel.track('Registration Completed');
-      }
+      trackMixpanel('Registration Completed');
       base44.analytics.track({
         eventName: 'signup_completed',
         properties: {
