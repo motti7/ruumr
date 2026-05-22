@@ -10,7 +10,7 @@ const isNode = typeof window === 'undefined';
 const storage = isNode ? null : window.localStorage;
 
 const DEFAULT_BASE44_APP_ID = import.meta.env.VITE_BASE44_APP_ID;
-const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL;
+const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'https://api.base44.app';
 const DEFAULT_BASE44_APP_BASE_URL = import.meta.env.VITE_BASE44_APP_BASE_URL || DEFAULT_BASE44_SERVER_URL;
 
 const toSnakeCase = (str) => {
@@ -79,10 +79,17 @@ const getAppParams = () => {
 		persistAuthCallbackHints(authHints);
 	}
 
+	// ניקוי ערכים ישנים של server_url/app_id שנשמרו מסשן פריוויו
+	try {
+		storage?.removeItem('base44_server_url');
+		storage?.removeItem('base44_app_id');
+		storage?.removeItem('base44_app_base_url');
+	} catch (_) {}
+
 	return {
-		appId: getAppParamValue("app_id", { defaultValue: DEFAULT_BASE44_APP_ID }),
-		serverUrl: getAppParamValue("server_url", { defaultValue: DEFAULT_BASE44_SERVER_URL }),
-		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: DEFAULT_BASE44_APP_BASE_URL }),
+		appId: DEFAULT_BASE44_APP_ID,
+		serverUrl: DEFAULT_BASE44_SERVER_URL,
+		appBaseUrl: DEFAULT_BASE44_APP_BASE_URL,
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: getSafeAuthReturnUrl() }),
 		functionsVersion: getAppParamValue("functions_version"),
