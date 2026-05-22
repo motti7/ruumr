@@ -244,13 +244,15 @@ export default function Layout({ children, currentPageName }) {
                 </div>
             </div>
         )}
+        {!Capacitor.isNativePlatform() && (
         <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
             <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
                 {children}
             </div>
         </div>
+        )}
 
-        <div className="sm:hidden">
+        <div className={Capacitor.isNativePlatform() ? "" : "sm:hidden"}>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]">
                 <div className="max-w-md mx-auto px-2 flex items-center h-12 relative">
