@@ -5,8 +5,14 @@ import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
 import RoomiCharter from './RoomiCharter';
 import SmartImage from '@/components/shared/SmartImage';
+import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+
+const TOTAL_CHARTER_QUESTIONS = 8; // סה"כ שאלות בשאלון
 
 export default function CharterMatchSelector({ onClose }) {
+  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -111,7 +117,21 @@ export default function CharterMatchSelector({ onClose }) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  onClick={() => setSelectedMatch(match)}
+                  onClick={async () => {
+                    // אם המשתמש כבר מילא את כל השאלון — עבור ישירות לצ'אט
+                    try {
+                      const answers = await base44.entities.CharterAnswer.filter({
+                        match_id: match.id,
+                        user_id: user.id
+                      });
+                      if (answers.length >= TOTAL_CHARTER_QUESTIONS) {
+                        onClose();
+                        navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                        return;
+                      }
+                    } catch (e) {}
+                    setSelectedMatch(match);
+                  }}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-shadow active:scale-95"
                 >
                   <div className="aspect-[3/4] relative">

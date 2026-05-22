@@ -133,9 +133,9 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
 
         setMyAnswers(mine);
 
-        // בדיקה אם כבר סיימתי
-        if (Object.keys(mine).length === allQuestions.length) {
-          // סיימתי - עובר לצ'אט
+        // בדיקה אם כבר סיימתי — עובר ישירות לצ'אט בלי להציג את השאלון מחדש
+        if (Object.keys(mine).length >= allQuestions.length) {
+          setIsLoading(false);
           navigate(createPageUrl('Chat') + `?matchId=${matchId}`);
           return;
         }
