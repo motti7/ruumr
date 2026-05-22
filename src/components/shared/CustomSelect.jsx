@@ -43,7 +43,7 @@ export default function CustomSelect({ label, value, onChange, options }) {
           style={{
             top: 'calc(100% + 4px)',
             boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-            maxHeight: '132px',
+            maxHeight: '220px',
           }}
         >
           {options.map((opt) => (
