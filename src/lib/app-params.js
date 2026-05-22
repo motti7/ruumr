@@ -34,6 +34,14 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 		storage?.setItem(storageKey, searchParam);
 		return searchParam;
 	}
+	// app_id ו-server_url תמיד מה-env (לא מה-localStorage) כדי למנוע קריאת ערכים ישנים/שגויים
+	if (paramName === 'app_id' || paramName === 'server_url') {
+		if (defaultValue) {
+			storage?.setItem(storageKey, defaultValue);
+			return defaultValue;
+		}
+		return null;
+	}
 	if (defaultValue) {
 		storage?.setItem(storageKey, defaultValue);
 		return defaultValue;
