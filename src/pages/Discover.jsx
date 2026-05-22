@@ -37,6 +37,8 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
+  // profiles = רשימת הפרופילים שעוד לא נראו (מתקצרת בכל swipe)
+  // allProfiles = כל הפרופילים הזמינים (לפני פילטרים), ללא מי שנראה
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userProfile, setUserProfile] = useState(null);
@@ -48,7 +50,7 @@ export default function DiscoverPage() {
   const [actionFeedback, setActionFeedback] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
-  const [allProfiles, setAllProfiles] = useState([]);
+  const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
   const [seenUserIds, setSeenUserIds] = useState(new Set());
   useEffect(() => {
     try {
@@ -258,9 +260,10 @@ export default function DiscoverPage() {
     const swiperId = currentUserId || userProfile.user_id;
     const optimisticSwipe = { swiper_id: swiperId, swiped_id: swipedProfile.user_id, action };
 
-    // Standardized optimistic UI pattern: update state BEFORE server call
-    setCurrentIndex(prev => prev + 1);
+    // הסרת הפרופיל שנראה מ-allProfiles — כך שגם אחרי שינוי פילטרים הוא לא יחזור
+    setAllProfiles(prev => prev.filter(p => String(p.user_id) !== String(swipedProfile.user_id)));
     setSeenUserIds(prev => new Set([...prev, String(swipedProfile.user_id)]));
+    setCurrentIndex(prev => prev + 1);
     setLastSwipes(prev => [...prev, optimisticSwipe]);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
@@ -315,8 +318,14 @@ export default function DiscoverPage() {
     } catch (error) { 
         console.error("Swipe save failed:", error);
         // Rollback optimistic update on server failure
-        setCurrentIndex(prevIndex);
+        setAllProfiles(prev => {
+          // מחזירים את הפרופיל למקומו המקורי
+          const withProfile = [...prev];
+          withProfile.splice(prevIndex, 0, swipedProfile);
+          return withProfile;
+        });
         setSeenUserIds(prev => { const next = new Set(prev); next.delete(String(swipedProfile.user_id)); return next; });
+        setCurrentIndex(prevIndex);
         setLastSwipes(prev => prev.slice(0, -1));
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
@@ -330,12 +339,9 @@ export default function DiscoverPage() {
 
   const applyFilters = (newFilters) => {
     setFilters(newFilters);
-    // משתמשים ב-seenUserIds שמתעדכן בכל swipe — אמין תמיד
-    setSeenUserIds(currentSeenIds => {
-      const filtered = allProfiles.filter(p => {
-        // לעולם לא מציגים מחדש מי שכבר נראה
-        if (currentSeenIds.has(String(p.user_id))) return false;
-
+    // allProfiles כבר לא מכיל את מי שנראה — פשוט מפלטרים ממנו
+    setAllProfiles(currentAll => {
+      const filtered = currentAll.filter(p => {
         if (newFilters.cities.length > 0) {
           const profileCities = p.search_cities || (p.location ? [p.location] : []);
           const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
@@ -361,7 +367,7 @@ export default function DiscoverPage() {
       });
       setCurrentIndex(0);
       setProfiles(filtered);
-      return currentSeenIds; // לא משנים את seenUserIds, רק קוראים אותו
+      return currentAll; // לא משנים את allProfiles עצמו בפילטור
     });
   };
 
