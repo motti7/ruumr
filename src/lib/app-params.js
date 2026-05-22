@@ -31,16 +31,18 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 		window.history.replaceState({}, document.title, newUrl);
 	}
 	if (searchParam) {
-		storage?.setItem(storageKey, searchParam);
+		// שומרים רק access_token ב-localStorage, לא app_id/server_url
+		// כי הם מגיעים מ-URL של פריוויו ויגרמו לבעיות בפתיחה הבאה
+		if (paramName !== 'app_id' && paramName !== 'server_url' && paramName !== 'app_base_url') {
+			storage?.setItem(storageKey, searchParam);
+		}
 		return searchParam;
 	}
-	// app_id ו-server_url תמיד מה-env (לא מה-localStorage) כדי למנוע קריאת ערכים ישנים/שגויים
-	if (paramName === 'app_id' || paramName === 'server_url') {
-		if (defaultValue) {
-			storage?.setItem(storageKey, defaultValue);
-			return defaultValue;
-		}
-		return null;
+	// app_id, server_url ו-app_base_url תמיד מה-env בלבד — לא מה-localStorage
+	if (paramName === 'app_id' || paramName === 'server_url' || paramName === 'app_base_url') {
+		// מנקים ערכים ישנים שאולי נשמרו בעבר
+		storage?.removeItem(storageKey);
+		return defaultValue || null;
 	}
 	if (defaultValue) {
 		storage?.setItem(storageKey, defaultValue);
