@@ -49,6 +49,7 @@ export default function DiscoverPage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
   const [allProfiles, setAllProfiles] = useState([]);
+  const [seenUserIds, setSeenUserIds] = useState(new Set());
   useEffect(() => {
     try {
       window.localStorage.setItem('ruumr_discover_marker', 'discover-mounted');
@@ -259,6 +260,7 @@ export default function DiscoverPage() {
 
     // Standardized optimistic UI pattern: update state BEFORE server call
     setCurrentIndex(prev => prev + 1);
+    setSeenUserIds(prev => new Set([...prev, String(swipedProfile.user_id)]));
     setLastSwipes(prev => [...prev, optimisticSwipe]);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
@@ -314,6 +316,7 @@ export default function DiscoverPage() {
         console.error("Swipe save failed:", error);
         // Rollback optimistic update on server failure
         setCurrentIndex(prevIndex);
+        setSeenUserIds(prev => { const next = new Set(prev); next.delete(String(swipedProfile.user_id)); return next; });
         setLastSwipes(prev => prev.slice(0, -1));
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
@@ -327,41 +330,39 @@ export default function DiscoverPage() {
 
   const applyFilters = (newFilters) => {
     setFilters(newFilters);
+    // משתמשים ב-seenUserIds שמתעדכן בכל swipe — אמין תמיד
+    setSeenUserIds(currentSeenIds => {
+      const filtered = allProfiles.filter(p => {
+        // לעולם לא מציגים מחדש מי שכבר נראה
+        if (currentSeenIds.has(String(p.user_id))) return false;
 
-    // אוסף את ה-IDs של כל מי שכבר נראה (לפי currentIndex הנוכחי בתוך profiles)
-    const alreadySeenIds = new Set(profiles.slice(0, currentIndex).map(p => p.user_id));
-
-    const filtered = allProfiles.filter(p => {
-      // לעולם לא מציגים מחדש מי שכבר נראה
-      if (alreadySeenIds.has(p.user_id)) return false;
-
-      if (newFilters.cities.length > 0) {
-        const profileCities = p.search_cities || (p.location ? [p.location] : []);
-        const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
-        if (!match) return false;
-      }
-      if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
-      if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
-      if (newFilters.kosher && newFilters.kosher !== 'all') {
-        if (newFilters.kosher === 'for_or_flow') {
-          if (p.kosher_preference && p.kosher_preference === 'against') return false;
-        } else if (newFilters.kosher === 'against') {
-          if (p.kosher_preference && p.kosher_preference !== 'against') return false;
+        if (newFilters.cities.length > 0) {
+          const profileCities = p.search_cities || (p.location ? [p.location] : []);
+          const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
+          if (!match) return false;
         }
-      }
-      if (newFilters.shabbat && newFilters.shabbat !== 'all') {
-        if (newFilters.shabbat === 'for_or_flow') {
-          if (p.shabbat_preference && p.shabbat_preference === 'against') return false;
-        } else if (newFilters.shabbat === 'against') {
-          if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
+        if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
+        if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
+        if (newFilters.kosher && newFilters.kosher !== 'all') {
+          if (newFilters.kosher === 'for_or_flow') {
+            if (p.kosher_preference && p.kosher_preference === 'against') return false;
+          } else if (newFilters.kosher === 'against') {
+            if (p.kosher_preference && p.kosher_preference !== 'against') return false;
+          }
         }
-      }
-      return true;
+        if (newFilters.shabbat && newFilters.shabbat !== 'all') {
+          if (newFilters.shabbat === 'for_or_flow') {
+            if (p.shabbat_preference && p.shabbat_preference === 'against') return false;
+          } else if (newFilters.shabbat === 'against') {
+            if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
+          }
+        }
+        return true;
+      });
+      setCurrentIndex(0);
+      setProfiles(filtered);
+      return currentSeenIds; // לא משנים את seenUserIds, רק קוראים אותו
     });
-
-    // מאפסים את האינדקס ל-0 כי הרשימה החדשה כבר לא כוללת את שנראו
-    setCurrentIndex(0);
-    setProfiles(filtered);
   };
 
   const hasProfiles = profiles.length > 0 && currentIndex < profiles.length;
