@@ -327,8 +327,14 @@ export default function DiscoverPage() {
 
   const applyFilters = (newFilters) => {
     setFilters(newFilters);
-    setCurrentIndex(0);
+
+    // אוסף את ה-IDs של כל מי שכבר נראה (לפי currentIndex הנוכחי בתוך profiles)
+    const alreadySeenIds = new Set(profiles.slice(0, currentIndex).map(p => p.user_id));
+
     const filtered = allProfiles.filter(p => {
+      // לעולם לא מציגים מחדש מי שכבר נראה
+      if (alreadySeenIds.has(p.user_id)) return false;
+
       if (newFilters.cities.length > 0) {
         const profileCities = p.search_cities || (p.location ? [p.location] : []);
         const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
@@ -352,6 +358,9 @@ export default function DiscoverPage() {
       }
       return true;
     });
+
+    // מאפסים את האינדקס ל-0 כי הרשימה החדשה כבר לא כוללת את שנראו
+    setCurrentIndex(0);
     setProfiles(filtered);
   };
 
