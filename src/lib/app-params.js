@@ -13,7 +13,7 @@ const storage = isNode ? null : window.localStorage;
 // so previews that do not inject VITE_* env vars still resolve Ruumr.
 const DEFAULT_BASE44_APP_ID = import.meta.env.VITE_BASE44_APP_ID || '68c919adff6ac6fafb51bed6';
 const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'https://api.base44.app';
-const DEFAULT_BASE44_APP_BASE_URL = import.meta.env.VITE_BASE44_APP_BASE_URL || 'https://app.base44.com';
+const DEFAULT_BASE44_APP_BASE_URL = import.meta.env.VITE_BASE44_APP_BASE_URL || 'https://app.ruumrapp.com';
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();

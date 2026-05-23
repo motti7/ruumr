@@ -14,7 +14,6 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import AuthRequiredLogin from '@/components/AuthRequiredLogin';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
@@ -53,7 +52,7 @@ const writeBootMarker = (value) => {
 };
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -67,7 +66,13 @@ const AuthenticatedApp = () => {
       isAuthenticated,
       authErrorType: authError?.type ?? null,
     });
-  }, [authError, isLoadingAuth, isLoadingPublicSettings, isAuthenticated]);
+    // Redirect to the branded Base44 login page for this app. The app base URL
+    // must stay on app.ruumrapp.com so Base44 includes Ruumr's app_id in OAuth.
+    if (authError?.type === 'auth_required' && !isLoadingAuth && !isLoadingPublicSettings) {
+      console.log('[ruumr] navigateToLogin: auth_required and loading complete');
+      navigateToLogin();
+    }
+  }, [authError, isLoadingAuth, isLoadingPublicSettings, isAuthenticated, navigateToLogin]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -88,7 +93,7 @@ const AuthenticatedApp = () => {
 
     if (authError.type === 'auth_required') {
       writeBootMarker('authenticated-app-auth-required');
-      return <AuthRequiredLogin />;
+      return null;
     }
   }
 

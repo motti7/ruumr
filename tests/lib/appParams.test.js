@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const RUUMR_APP_ID = '68c919adff6ac6fafb51bed6';
 const DEFAULT_BASE44_URL = 'https://api.base44.app';
-const DEFAULT_BASE44_APP_BASE_URL = 'https://app.base44.com';
+const DEFAULT_BASE44_APP_BASE_URL = 'https://app.ruumrapp.com';
 
 const loadAppParams = async ({
   url = '/',
