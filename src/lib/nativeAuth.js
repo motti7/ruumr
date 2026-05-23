@@ -29,7 +29,7 @@ export function isNativeAuthCallbackUrl(rawUrl) {
 
 export function buildNativeProviderLoginUrl(provider, callbackUrl = NATIVE_AUTH_CALLBACK_URL) {
   const providerPath = provider === 'google' ? '' : `/${provider}`;
-  const loginUrl = new URL(`/api/apps/auth${providerPath}/login`, appParams.appBaseUrl);
+  const loginUrl = new URL(`/api/apps/auth${providerPath}/login`, appParams.serverUrl);
   loginUrl.searchParams.set('app_id', appParams.appId);
   loginUrl.searchParams.set('from_url', callbackUrl);
   return loginUrl.toString();
