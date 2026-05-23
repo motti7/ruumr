@@ -8,6 +8,14 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     handleApplicationNotifications: false,
   },
+  server: {
+    allowNavigation: [
+      'app.ruumrapp.com',
+      '*.ruumrapp.com',
+      'accounts.google.com',
+      '*.google.com',
+    ],
+  },
   plugins: {
     StatusBar: {
       style: 'dark',
