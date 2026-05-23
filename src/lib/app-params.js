@@ -13,7 +13,17 @@ const storage = isNode ? null : window.localStorage;
 // so previews that do not inject VITE_* env vars still resolve Ruumr.
 const DEFAULT_BASE44_APP_ID = import.meta.env.VITE_BASE44_APP_ID || '68c919adff6ac6fafb51bed6';
 const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'https://api.base44.app';
-const DEFAULT_BASE44_APP_BASE_URL = import.meta.env.VITE_BASE44_APP_BASE_URL || 'https://app.ruumrapp.com';
+// appBaseUrl drives auth/login redirects, so it must match the origin actually
+// serving the app — otherwise login navigates off-origin. In the Base44 mobile
+// wrapper the app is served from the built-in *.base44.app URL, while the web
+// app is served from the custom domain. Using the live origin keeps auth
+// same-origin (and in-app) on both; an explicit env var still wins for local
+// dev, and the hardcoded value is only a non-browser/SSR fallback.
+const DEFAULT_BASE44_APP_BASE_URL =
+	import.meta.env.VITE_BASE44_APP_BASE_URL ||
+	(typeof window !== 'undefined' && window.location?.origin
+		? window.location.origin
+		: 'https://app.ruumrapp.com');
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
