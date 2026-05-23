@@ -14,6 +14,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import NativeAuthLogin from '@/components/NativeAuthLogin';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
@@ -68,7 +69,12 @@ const AuthenticatedApp = () => {
     });
     // Redirect to the branded Base44 login page for this app. The app base URL
     // must stay on app.ruumrapp.com so Base44 includes Ruumr's app_id in OAuth.
-    if (authError?.type === 'auth_required' && !isLoadingAuth && !isLoadingPublicSettings) {
+    if (
+      authError?.type === 'auth_required' &&
+      !isNativePlatform &&
+      !isLoadingAuth &&
+      !isLoadingPublicSettings
+    ) {
       console.log('[ruumr] navigateToLogin: auth_required and loading complete');
       navigateToLogin();
     }
@@ -93,7 +99,7 @@ const AuthenticatedApp = () => {
 
     if (authError.type === 'auth_required') {
       writeBootMarker('authenticated-app-auth-required');
-      return null;
+      return isNativePlatform ? <NativeAuthLogin /> : null;
     }
   }
 

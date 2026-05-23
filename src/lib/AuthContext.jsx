@@ -8,8 +8,13 @@ import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
 import { resolveAndSyncAppleIdentity } from '@/lib/appleIdentity';
-import { clearAuthCallbackHints } from '@/lib/authCallbackHints';
+import { clearAuthCallbackHints, getStoredAuthCallbackHints } from '@/lib/authCallbackHints';
 import { LAST_USED_AUTH_METHOD_KEY } from '@/lib/clientSessionCleanup';
+import {
+  isNativeAuthAvailable,
+  openNativeProviderLogin,
+  registerNativeAuthCallbackHandler,
+} from '@/lib/nativeAuth';
 
 const AuthContext = createContext(null);
 
@@ -22,6 +27,7 @@ const missingAuthContext = {
   appPublicSettings: null,
   logout: async () => undefined,
   navigateToLogin: () => undefined,
+  loginWithProvider: async () => undefined,
   checkAppState: async () => undefined,
 };
 
@@ -145,7 +151,7 @@ export const AuthProvider = ({ children }) => {
       console.log('[ruumr] checkUserAuth: calling base44.auth.me()');
       let currentUser = await base44.auth.me();
       console.log('[ruumr] checkUserAuth: success, user id =', currentUser?.id);
-      const authHints = appParams.authHints;
+      const authHints = getStoredAuthCallbackHints() || appParams.authHints;
       const appleIdentitySnapshot = await resolveAndSyncAppleIdentity({
         authModule: base44.auth,
         user: currentUser,
@@ -191,6 +197,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    return registerNativeAuthCallbackHandler({
+      onToken: async (accessToken) => {
+        base44.auth.setToken(accessToken);
+        setAuthError(null);
+        setIsLoadingPublicSettings(false);
+        await checkUserAuth();
+      },
+    });
+  }, []);
+
   const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
@@ -210,8 +227,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
+    if (isNativeAuthAvailable()) {
+      return;
+    }
+
     // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+  };
+
+  const loginWithProvider = async (provider) => {
+    if (isNativeAuthAvailable()) {
+      await openNativeProviderLogin(provider);
+      return;
+    }
+
+    base44.auth.loginWithProvider(provider, getSafeAuthReturnUrl());
   };
 
   useEffect(() => {
@@ -239,6 +269,7 @@ export const AuthProvider = ({ children }) => {
       appPublicSettings,
       logout,
       navigateToLogin,
+      loginWithProvider,
       checkAppState
     }}>
       {children}

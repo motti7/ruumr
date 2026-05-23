@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.ruumr.app',
   appName: 'Ruumr',
   webDir: 'dist',
+  server: {
+    allowNavigation: ['app.ruumrapp.com', 'app.base44.com'],
+  },
   ios: {
     contentInset: 'automatic',
     handleApplicationNotifications: false,
