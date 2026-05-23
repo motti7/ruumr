@@ -12,6 +12,15 @@ export default function ServiceWorkerRegister() {
       return;
     }
 
+    // Never register the SW in dev — stale cached JS causes React hook errors
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((reg) => reg.unregister());
+      });
+      caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+      return;
+    }
+
     const registerServiceWorker = async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js', {
