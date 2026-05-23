@@ -29,7 +29,9 @@ export function isNativeAuthCallbackUrl(rawUrl) {
 
 export function buildNativeProviderLoginUrl(provider, callbackUrl = NATIVE_AUTH_CALLBACK_URL) {
   const providerPath = provider === 'google' ? '' : `/${provider}`;
-  const loginUrl = new URL(`/api/apps/auth${providerPath}/login`, appParams.serverUrl);
+  // Always use the Base44 app base URL for the auth endpoint so OAuth redirects work correctly.
+  // The from_url must be the native deep-link so the OS reopens the app after login.
+  const loginUrl = new URL(`/api/apps/auth${providerPath}/login`, appParams.appBaseUrl);
   loginUrl.searchParams.set('app_id', appParams.appId);
   loginUrl.searchParams.set('from_url', callbackUrl);
   return loginUrl.toString();
