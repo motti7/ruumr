@@ -14,6 +14,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import AuthRequiredLogin from '@/components/AuthRequiredLogin';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
@@ -52,7 +53,7 @@ const writeBootMarker = (value) => {
 };
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -66,14 +67,7 @@ const AuthenticatedApp = () => {
       isAuthenticated,
       authErrorType: authError?.type ?? null,
     });
-    // Only redirect once both loading phases are done. The 3-second native fallback timer
-    // can clear loading flags before auth resolves; without this guard, a subsequent auth
-    // failure would fire navigateToLogin while the actual auth request is still in-flight.
-    if (authError?.type === 'auth_required' && !isLoadingAuth && !isLoadingPublicSettings) {
-      console.log('[ruumr] navigateToLogin: auth_required and loading complete');
-      navigateToLogin();
-    }
-  }, [authError, isLoadingAuth, isLoadingPublicSettings, navigateToLogin]);
+  }, [authError, isLoadingAuth, isLoadingPublicSettings, isAuthenticated]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -94,7 +88,7 @@ const AuthenticatedApp = () => {
 
     if (authError.type === 'auth_required') {
       writeBootMarker('authenticated-app-auth-required');
-      return null;
+      return <AuthRequiredLogin />;
     }
   }
 
