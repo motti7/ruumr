@@ -135,12 +135,11 @@ const ProfileDetail = ({ profile, onClose }) => {
                     </div>
                 )}
 
-                {/* Remaining interests (those not shown on the card) */}
-                {interests.length > 3 && (
+                {interests.length > 0 && (
                     <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                         <h4 className="font-bold mb-3 text-white text-lg">תחומי עניין</h4>
                         <div className="flex flex-wrap gap-2">
-                            {interests.slice(3).map((interest) => (
+                            {interests.map((interest) => (
                                 <span key={interest} className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium border border-white/30">
                                     {getInterestLabel(interest)}
                                 </span>
