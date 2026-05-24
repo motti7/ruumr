@@ -11,8 +11,8 @@ function buildMatchEmailHtml({ name, gender, matchName }) {
     ? `ישנה התעניינות הדדית בינך לבין <strong style="color:${ORANGE};">${matchName}</strong>!`
     : `ישנה התעניינות הדדית בינך לבין <strong style="color:${ORANGE};">${matchName}</strong>!`;
   const subLine = isFemale
-    ? 'זה אומר שגם את מצאת אותו/ה מעניין/ת — וגם הם אותך! 🎉'
-    : 'זה אומר שגם אתה מצאת אותו/ה מעניין/ת — וגם הם אותך! 🎉';
+    ? 'שניכם הראתם התעניינות אחד בשני — זה הזמן לדבר! 🎉'
+    : 'שניכם הראתם התעניינות אחד בשני — זה הזמן לדבר! 🎉';
   const ctaLine = isFemale
     ? 'זמן להיכנסי לאפליקציה ולהתחיל לדבר! 💬'
     : 'זמן להיכנס לאפליקציה ולהתחיל לדבר! 💬';
