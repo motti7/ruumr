@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 import { initMixpanel } from '@/lib/mixpanelTracking'
+import { initSafeAreaInsets } from '@/lib/safeAreaInsets'
 // Configure the native Android status bar when running inside Capacitor.
 // Dynamically imported to avoid breaking the web build.
 
@@ -38,6 +39,7 @@ if (typeof window !== 'undefined') {
 }
 
 initMixpanel()
+initSafeAreaInsets()
 
 // Capacitor status bar is configured natively via the Android build.
 

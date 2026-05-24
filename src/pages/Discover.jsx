@@ -500,7 +500,7 @@ export default function DiscoverPage() {
       </div>
       
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, env(safe-area-inset-bottom, 0px)) + 72px)' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 72px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}

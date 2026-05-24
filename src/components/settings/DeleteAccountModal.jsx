@@ -69,7 +69,7 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
             exit={{ y: 300 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="bg-white rounded-t-3xl w-full max-w-md shadow-2xl"
-            style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+            style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

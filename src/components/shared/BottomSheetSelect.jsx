@@ -60,7 +60,7 @@ export default function BottomSheetSelect({
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
               className="bg-white rounded-t-3xl w-full max-w-md overflow-hidden"
-              style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+              style={{ paddingBottom: "calc(1rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))" }}
               dir={dir}
               onClick={e => e.stopPropagation()}
             >
