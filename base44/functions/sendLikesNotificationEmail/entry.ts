@@ -30,7 +30,7 @@ function buildEmailHtml({ name, gender, likesCount }) {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,${ORANGE} 0%,${ORANGE_DARK} 100%);padding:36px 32px;text-align:center;">
-              <div style="font-size:42px;margin-bottom:8px;">❤️‍🔥</div>
+              <div style="font-size:42px;margin-bottom:8px;">🏠</div>
               <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Ruumr</h1>
               <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px;letter-spacing:1px;">find your perfect roommates</p>
             </td>
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: swiped_email,
       from_name: 'Ruumr 🏠',
-      subject: `❤️‍🔥 יש לך ${likes_count || 2} התעניינויות חדשות ב-Ruumr!`,
+      subject: `🏠 יש לך ${likes_count || 2} התעניינויות חדשות ב-Ruumr!`,
       body: html,
     });
 
