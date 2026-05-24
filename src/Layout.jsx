@@ -334,7 +334,7 @@ export default function Layout({ children, currentPageName }) {
                                 </div>
                             ) : (
                                 <div className={isPlusItem ? 'flex items-center gap-1.5' : ''}>
-                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill={isActive ? 'currentColor' : 'none'} />
+                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill="none" />
                                     {isPlusItem && <span className="text-[10px] font-bold leading-none">Plus</span>}
                                 </div>
                             )}
