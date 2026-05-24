@@ -295,7 +295,8 @@ export default function Layout({ children, currentPageName }) {
                 <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl z-50 rounded-2xl" style={{ bottom: 'max(8px, env(safe-area-inset-bottom, 0px))' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path;
+                        const isActive = location.pathname === item.path || 
+                            (item.name === "גלה" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
                         const isPlusItem = item.name === "Plus";
                         const handleClick = (e) => {
