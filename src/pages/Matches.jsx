@@ -155,7 +155,7 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 flex flex-col items-center">
             
-             <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
+             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
                כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
              </p>

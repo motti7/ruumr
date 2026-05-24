@@ -292,10 +292,11 @@ export default function Layout({ children, currentPageName }) {
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-2 border-yellow-400 z-50 rounded-2xl shadow-lg shadow-yellow-100" style={{ bottom: 'max(8px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}>
+                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl z-50 rounded-2xl" style={{ bottom: 'max(8px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path;
+                        const isActive = location.pathname === item.path || 
+                            (item.name === "גלה" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
                         const isPlusItem = item.name === "Plus";
                         const handleClick = (e) => {
@@ -333,7 +334,7 @@ export default function Layout({ children, currentPageName }) {
                                 </div>
                             ) : (
                                 <div className={isPlusItem ? 'flex items-center gap-1.5' : ''}>
-                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill={isActive ? 'currentColor' : 'none'} />
+                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill="none" />
                                     {isPlusItem && <span className="text-[10px] font-bold leading-none">Plus</span>}
                                 </div>
                             )}
