@@ -1185,7 +1185,7 @@ export default function OnboardingPage() {
         <div className="mt-6">
                 <Button
             onClick={nextStep}
-            className={`w-full h-14 rounded-full text-lg font-bold shadow-lg transition-all transform active:scale-95 ${canProceed() ? 'gradient-orange text-white hover:brightness-110' : 'bg-gray-200 text-gray-400'}`}
+            className={`w-3/4 mx-auto h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
             disabled={!canProceed() || isSubmitting}>
             
                     {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
