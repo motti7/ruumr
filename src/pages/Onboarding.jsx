@@ -344,6 +344,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -351,8 +352,7 @@ export default function OnboardingPage() {
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
         if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}return true;case 5: // Interests + About + Looking For
         return formData.about_me.trim() && formData.looking_for_description.trim();case 6: // Photos
-        if (simulatorMode) {return true;}
-        return formData.photos.filter((p) => p).length >= 2;
+        if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;
       case 7: // Final step
         return true;
       default:
@@ -1035,7 +1035,7 @@ export default function OnboardingPage() {
             <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center mb-4 -mt-3 text-base" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
-                    <div className="flex flex-wrap justify-center gap-2 overflow-hidden mt-1">
+                    <div className="flex flex-wrap justify-center gap-2 overflow-hidden">
                         {INTEREST_OPTIONS.map((interest) => {
                   const selected = (formData.interests || []).includes(interest.id);
                   const Icon = interest.Icon;
