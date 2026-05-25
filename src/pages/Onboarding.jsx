@@ -321,9 +321,9 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
-      }};trackStep();}, [step]);const canProceed = () => {switch (step) {
-      case 1:{// Basic Info + Vibe
+      }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());
           const hasAge = Number(formData.age) >= 18;
           const hasGender = !!formData.gender;
@@ -767,7 +767,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center mb-" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
