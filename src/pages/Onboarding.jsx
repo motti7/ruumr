@@ -1182,17 +1182,22 @@ export default function OnboardingPage() {
 
         {/* Action Button */}
         {step < 7 &&
-        <div className="mt-6 flex justify-center">
-            <Button
-            onClick={nextStep}
-            className={`w-3/4 h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
-            disabled={!canProceed() || isSubmitting}>
-                {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
-            </Button>
-        </div>
+        <div className="h-20" /> /* spacer so content doesn't hide behind fixed button */
         }
       </div>
       
+      {/* Fixed bottom continue button */}
+      {step < 7 &&
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+        <Button
+          onClick={nextStep}
+          className={`w-3/4 max-w-xs h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
+          disabled={!canProceed() || isSubmitting}>
+          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
+        </Button>
+      </div>
+      }
+
       {authUser?.role === 'admin' &&
       <button
         onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
