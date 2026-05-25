@@ -333,13 +333,13 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
-        if (simulatorMode) {
-          return true;
+        if (simulatorMode) {return true;
         }
         if (formData.current_status === 'has_apartment') {
           const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
@@ -767,7 +767,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center mb-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center mb-4 text-base" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
