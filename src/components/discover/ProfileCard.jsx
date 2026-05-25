@@ -448,7 +448,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 return (
                     <>
                         {/* Right column: info button + tags */}
-                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
+                        <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Users className="w-3 h-3" />
@@ -541,7 +541,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 return (
                     <>
                         {/* Right column: vibe tag + info button */}
-                        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
+                        <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
@@ -555,7 +555,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                         </div>
                         {/* Interests scattered: top-left */}
                         {interests.length > 0 && (
-                            <div className="absolute top-3 left-4 z-20 flex flex-col items-start gap-2">
+                            <div className="absolute top-12 left-4 z-20 flex flex-col items-start gap-2">
                                 {interests.slice(0, 2).map((interest) => (
                                     <span key={interest} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
                                         {getInterestLabel(interest)}
@@ -588,7 +588,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 return (
                     <>
                         {/* Info button on right */}
-                        <div className="absolute top-3 right-4 z-20">
+<div className="absolute top-12 right-4 z-20">
                             <button
                                 onClick={handleExpandOpen}
                                 className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation"
@@ -652,7 +652,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 className={`absolute w-full h-full cursor-grab active:cursor-grabbing z-10`}
             >
                 <div 
-                    className={`relative w-full h-full overflow-hidden bg-black ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
+                    className={`relative w-full h-full overflow-hidden rounded-2xl bg-black ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
                     <div className="absolute inset-0 bg-black">
