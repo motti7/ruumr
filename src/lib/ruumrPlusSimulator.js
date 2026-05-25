@@ -1,5 +1,6 @@
 import { Profile } from "@/entities/Profile";
 import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
+import { applyTwoStageSwipeFilter } from "@/lib/ruumrPlusDisplayFilter";
 
 /**
  * @typedef {Object} SimulatorRecommendationOptions
@@ -533,6 +534,7 @@ export async function buildSimulatorRuumrPlusRecommendations({
   requirePlus = true,
   localProfiles = null,
   currentProfile = null,
+  userSwipes = [],
 } = {}) {
   const { requestor, allProfiles } = await loadSimulatorProfiles({
     userId,
@@ -572,7 +574,7 @@ export async function buildSimulatorRuumrPlusRecommendations({
     })
   );
 
-  const recommendations = candidateProfiles
+  const rankedCandidates = candidateProfiles
     .map((candidate) => evaluateCandidate(requestorProfile, candidate))
     .filter(Boolean)
     .sort((left, right) => {
@@ -581,8 +583,11 @@ export async function buildSimulatorRuumrPlusRecommendations({
         return right.semantic_similarity - left.semantic_similarity;
       }
       return right.structured_score - left.structured_score;
-    })
-    .slice(0, safeLimit || 12);
+    });
+
+  // Mirror the production service: hard-exclude disliked, prefer-out liked with
+  // backfill from the full ranked pool so the result still reaches the limit.
+  const recommendations = applyTwoStageSwipeFilter(rankedCandidates, userSwipes, safeLimit || 12);
 
   return {
     ok: true,

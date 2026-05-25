@@ -280,6 +280,31 @@ async function snapshotAllProfiles(base44: ReturnType<typeof createClientFromReq
     });
 }
 
+async function loadSwipeExclusions(base44: ReturnType<typeof createClientFromRequest>, userId: unknown) {
+    const exclude: string[] = [];
+    const liked: string[] = [];
+
+    try {
+        const swipes = await base44.asServiceRole.entities.Swipe.filter({ swiper_id: userId });
+        for (const swipe of Array.isArray(swipes) ? swipes : []) {
+            const swipedId = String((swipe as Record<string, unknown>)?.swiped_id ?? '').trim();
+            if (!swipedId) {
+                continue;
+            }
+            const action = String((swipe as Record<string, unknown>)?.action ?? '').trim();
+            if (action === 'like') {
+                liked.push(swipedId);
+            } else if (action === 'dislike') {
+                exclude.push(swipedId);
+            }
+        }
+    } catch (error) {
+        console.error(`[${FUNCTION_NAME}] Failed to load swipes for recommendation exclusions`, error);
+    }
+
+    return { exclude_user_ids: exclude, liked_user_ids: liked };
+}
+
 function normalizeRecommendationBody(body: Record<string, unknown>) {
     return cleanObject({
         request_id: body.request_id || `req_${Date.now()}`,
@@ -301,14 +326,21 @@ async function handleAction(base44: ReturnType<typeof createClientFromRequest>, 
                 throw new Error('Admin access required for profile snapshots');
             }
             return snapshotAllProfiles(base44, currentUser, req);
-        case 'recommendations':
+        case 'recommendations': {
+            const recommendationUserId = body.user_id || currentUser.id;
+            const swipeExclusions = await loadSwipeExclusions(base44, recommendationUserId);
             return serviceRequest(req, '/recommendations', {
-                body: normalizeRecommendationBody({
-                    ...body,
-                    user_id: body.user_id || currentUser.id,
-                }),
+                body: {
+                    ...normalizeRecommendationBody({
+                        ...body,
+                        user_id: recommendationUserId,
+                    }),
+                    exclude_user_ids: swipeExclusions.exclude_user_ids,
+                    liked_user_ids: swipeExclusions.liked_user_ids,
+                },
                 requireAuth: true,
             });
+        }
         case 'admin.stats':
             if (currentUser.role !== 'admin') {
                 throw new Error('Admin access required');

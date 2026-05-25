@@ -3,10 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
+import { Swipe } from "@/entities/all";
 import { createPageUrl } from "@/utils";
 import {
   activateRuumrPlusRecommendations,
   mergeRuumrPlusRecommendations,
+  RUUMR_PLUS_RECOMMENDATION_LIMIT,
 } from "@/api/ruumrPlus";
 import {
   buildSimulatorRuumrPlusRecommendations,
@@ -182,6 +184,7 @@ export default function RuumrPlusPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [localProfiles, setLocalProfiles] = useState([]);
+  const [userSwipes, setUserSwipes] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const resultsRef = useRef(null);
   const activationIntentRef = useRef(null);
@@ -258,9 +261,10 @@ export default function RuumrPlusPage() {
       setCurrentUser(user);
       setIsAdmin(user?.role === "admin");
 
-      const [userProfilesResult, allProfilesResult] = await Promise.allSettled([
+      const [userProfilesResult, allProfilesResult, swipesResult] = await Promise.allSettled([
         Profile.filter({ user_id: user.id }),
         Profile.list("-created_date", 500),
+        Swipe.filter({ swiper_id: user.id }),
       ]);
 
       const profile =
@@ -275,10 +279,16 @@ export default function RuumrPlusPage() {
             ? [profile]
             : [];
 
+      const swipes =
+        swipesResult.status === "fulfilled" && Array.isArray(swipesResult.value)
+          ? swipesResult.value
+          : [];
+
       if (cancelledRef.current) return;
 
       setCurrentProfile(profile);
       setLocalProfiles(profiles);
+      setUserSwipes(swipes);
 
       const savedActivation = loadRuumrPlusActivation(user.id);
       if (savedActivation) {
@@ -357,6 +367,7 @@ export default function RuumrPlusPage() {
         userId: currentUser.id,
         localProfiles,
         currentProfile,
+        userSwipes,
       });
 
       const visibleUserIds = new Set(localProfiles.map((profile) => String(profile.user_id)));
@@ -418,11 +429,12 @@ export default function RuumrPlusPage() {
         try {
           const simulatorResponse = await buildSimulatorRuumrPlusRecommendations({
             userId: currentUser.id,
-            limit: 5,
+            limit: RUUMR_PLUS_RECOMMENDATION_LIMIT,
             refresh: false,
             requirePlus: true,
             localProfiles,
             currentProfile,
+            userSwipes,
           });
 
           const activationRecord = buildRuumrPlusActivationRecord({
@@ -460,7 +472,7 @@ export default function RuumrPlusPage() {
     } finally {
       setIsActivating(false);
     }
-  }, [applyActivationRecord, currentProfile, currentUser, isActivating, localProfiles]);
+  }, [applyActivationRecord, currentProfile, currentUser, isActivating, localProfiles, userSwipes]);
 
   useEffect(() => {
     if (!currentUser || !currentProfile) {
@@ -641,7 +653,7 @@ export default function RuumrPlusPage() {
             </div>
           ) : plusRecommendations.length > 0 ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {plusRecommendations.slice(0, 5).map((profile) => (
+              {plusRecommendations.slice(0, RUUMR_PLUS_RECOMMENDATION_LIMIT).map((profile) => (
                 <RuumrPlusRecommendationCard key={profile.user_id} profile={profile} />
               ))}
             </div>

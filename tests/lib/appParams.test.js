@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const RUUMR_APP_ID = '68c919adff6ac6fafb51bed6';
 const DEFAULT_BASE44_URL = 'https://api.base44.app';
-const DEFAULT_BASE44_APP_BASE_URL = 'https://app.ruumrapp.com';
 
 const loadAppParams = async ({
   url = '/',
@@ -35,7 +34,10 @@ describe('app params', () => {
 
     expect(appParams.appId).toBe(RUUMR_APP_ID);
     expect(appParams.serverUrl).toBe(DEFAULT_BASE44_URL);
-    expect(appParams.appBaseUrl).toBe(DEFAULT_BASE44_APP_BASE_URL);
+    // appBaseUrl drives auth/login redirects, so it falls back to the live
+    // origin (not a hardcoded domain) to keep auth same-origin in the Base44
+    // mobile wrapper and the web app alike.
+    expect(appParams.appBaseUrl).toBe(window.location.origin);
   });
 
   it('keeps env values as overrides', async () => {
@@ -72,7 +74,7 @@ describe('app params', () => {
 
     expect(appParams.appId).toBe(RUUMR_APP_ID);
     expect(appParams.serverUrl).toBe(DEFAULT_BASE44_URL);
-    expect(appParams.appBaseUrl).toBe(DEFAULT_BASE44_APP_BASE_URL);
+    expect(appParams.appBaseUrl).toBe(window.location.origin);
     expect(window.localStorage.getItem('base44_app_id')).toBeNull();
     expect(window.localStorage.getItem('base44_server_url')).toBeNull();
     expect(window.localStorage.getItem('base44_app_base_url')).toBeNull();

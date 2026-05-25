@@ -76,9 +76,12 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
     userId = null,
     localProfiles = null,
     currentProfile = null,
+    userSwipes = [],
   } = options;
 
   if (isRuumrSimulatorMode()) {
+    // Simulator runs entirely client-side, so it needs the swipe list to mirror
+    // the swipe filtering the bridge applies server-side in production.
     return buildSimulatorRuumrPlusRecommendations({
       userId,
       limit,
@@ -86,9 +89,12 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
       requirePlus,
       localProfiles,
       currentProfile,
+      userSwipes,
     });
   }
 
+  // Production path: the ruumrPlusBridge function fetches the user's swipes from
+  // Base44 and passes the exclusions to the service authoritatively.
   return invokeBridge("recommendations", {
     limit,
     refresh,
