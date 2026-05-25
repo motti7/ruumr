@@ -48,7 +48,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
     <div ref={containerRef} className="relative w-full">
       {/* Main input trigger */}
       <div
-        className="w-full min-h-[44px] px-3 rounded-md border border-input bg-white text-sm shadow-sm flex items-center gap-1.5 cursor-text py-2 my-1"
+        className="w-full min-h-[44px] px-3 rounded-md border border-input bg-white text-sm shadow-sm flex items-center gap-1.5 cursor-text py-2 my-2"
         onClick={() => {setOpen(true);inputRef.current?.focus();}}>
         
         {/* Selected city tags */}
