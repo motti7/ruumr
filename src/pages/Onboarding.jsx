@@ -770,7 +770,7 @@ export default function OnboardingPage() {
                 <p className="text-center text-base mb-6 -mt-2" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        <label className="text-sm font-semibold" style={{ color: '#FA3803' }}>שם</label>
+                        <label className="text-base font-semibold" style={{ color: '#FA3803' }}>שם</label>
                         {isAppleUser && appleDisplayName ?
                 // Apple Sign-In returned a valid name — show the input with
                 // the Apple-provided value locked in (readOnly + no onChange).
@@ -828,7 +828,7 @@ export default function OnboardingPage() {
 
                     {/* Vibe Section */}
                     <div className="pt-1 text-right">
-                        <label className="font-bold block mb-4 mt-1 text-s" style={{ color: '#FA3803' }}>מה הוויב שלך?</label>
+                        <label className="text-base font-semibold block mb-4 mt-1" style={{ color: '#FA3803' }}>מה הוויב שלך?</label>
                         <Slider
                   dir="ltr"
                   value={[formData.vibe_level]}
@@ -1007,7 +1007,7 @@ export default function OnboardingPage() {
                             </div>
                         </div>
                         
-                        <label className="text-sm font-bold mb-3 block" style={{ color: '#FA3803' }}>תמונות (מינימום 3)</label>
+                        <label className="text-base font-semibold mb-3 block" style={{ color: '#FA3803' }}>תמונות (מינימום 3)</label>
                         <div className="grid grid-cols-3 gap-2">
                             {formData.apartment_photos.map((_, i) =>
                   <div
@@ -1063,13 +1063,13 @@ export default function OnboardingPage() {
                     <div className="flex flex-col gap-6 pt-2">
                         {/* קצת עליי */}
                         <div className="flex flex-col">
-                            <label className="font-bold block text-s my-1" style={{ color: '#FA3803' }}>קצת עליי</label>
+                            <label className="text-base font-semibold block my-1" style={{ color: '#FA3803' }}>קצת עליי</label>
                             <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px]" style={{ borderColor: '#B9BFC8' }} />
                         </div>
 
                         {/* מה אני מחפש/ת */}
                         <div className="flex flex-col">
-                            <label className="font-bold block mb-0.5 text-s" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
+                            <label className="text-base font-semibold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
                             <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px]" style={{ borderColor: '#B9BFC8' }} />
                         </div>
                     </div>
