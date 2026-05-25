@@ -22,15 +22,15 @@ import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import { appParams } from '@/lib/app-params';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 import {
-    getCachedAppleIdentity,
-    resolveAndSyncAppleIdentity,
-    resolveAppleIdentitySnapshot,
-} from '@/lib/appleIdentity';
+  getCachedAppleIdentity,
+  resolveAndSyncAppleIdentity,
+  resolveAppleIdentitySnapshot } from
+'@/lib/appleIdentity';
 import {
-    buildSimulatorApartmentPhotos,
-    buildSimulatorProfilePhotos,
-    isRuumrSimulatorMode,
-} from '@/lib/simulatorMode';
+  buildSimulatorApartmentPhotos,
+  buildSimulatorProfilePhotos,
+  isRuumrSimulatorMode } from
+'@/lib/simulatorMode';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 
 const TOTAL_STEPS = 7;
@@ -41,7 +41,7 @@ const STEP_NAMES = {
   4: 'Apartment Details',
   5: 'Interests And About',
   6: 'Photos',
-  7: 'Final Review',
+  7: 'Final Review'
 };
 
 const Step = ({ children, step, currentStep, title }) =>
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
     authUser,
     authHints,
     cachedIdentity: initialCachedIdentity,
-    fallbackName: '',
+    fallbackName: ''
   });
   const initialIsAppleUser = initialAppleSnapshot.appleAuthUser;
   const appleNameTimeoutMs = 2000;
@@ -82,13 +82,13 @@ export default function OnboardingPage() {
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
-  const [formData, setFormData] = useState(() => /** @type {any} */ (
-    createProfileDefaults(
-      initialIsAppleUser
-        ? { name: initialAppleSnapshot.displayName }
-        : { name: authUser?.full_name || '' }
-    )
-  ));
+  const [formData, setFormData] = useState(() => (/** @type {any} */
+  createProfileDefaults(
+    initialIsAppleUser ?
+    { name: initialAppleSnapshot.displayName } :
+    { name: authUser?.full_name || '' }
+  ))
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
@@ -121,7 +121,7 @@ export default function OnboardingPage() {
       fallbackName: '',
       onPersistError: (persistError) => {
         console.warn(warningMessage, persistError);
-      },
+      }
     });
   };
 
@@ -135,10 +135,10 @@ export default function OnboardingPage() {
     setAppleDisplayName(snapshot.appleAuthUser ? snapshot.displayName : '');
     setFormData((prev) => ({
       ...prev,
-      name: snapshot.appleAuthUser
-        ? (prev.name.trim() || snapshot.displayName || prev.name)
-        : (snapshot.firstName || prev.name || authUser?.full_name || ''),
-      user_id: userData.id,
+      name: snapshot.appleAuthUser ?
+      prev.name.trim() || snapshot.displayName || prev.name :
+      snapshot.firstName || prev.name || authUser?.full_name || '',
+      user_id: userData.id
     }));
   };
 
@@ -153,11 +153,11 @@ export default function OnboardingPage() {
 
       try {
         return await Promise.race([
-          promise,
-          new Promise((_, reject) => {
-            timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
-          }),
-        ]);
+        promise,
+        new Promise((_, reject) => {
+          timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
+        })]
+        );
       } finally {
         if (timeoutId) {
           window.clearTimeout(timeoutId);
@@ -173,7 +173,7 @@ export default function OnboardingPage() {
         authHints,
         userData,
         cachedIdentity,
-        fallbackName: '',
+        fallbackName: ''
       });
     };
 
@@ -253,11 +253,11 @@ export default function OnboardingPage() {
 
       try {
         return await Promise.race([
-          promise,
-          new Promise((_, reject) => {
-            timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
-          }),
-        ]);
+        promise,
+        new Promise((_, reject) => {
+          timeoutId = window.setTimeout(() => reject(new Error('timeout')), timeoutMs);
+        })]
+        );
       } finally {
         if (timeoutId) {
           window.clearTimeout(timeoutId);
@@ -276,7 +276,7 @@ export default function OnboardingPage() {
           authHints,
           userData,
           cachedIdentity,
-          fallbackName: '',
+          fallbackName: ''
         });
 
         if (!snapshot.fullName) {
@@ -315,66 +315,66 @@ export default function OnboardingPage() {
           user_id: formData.user_id
         });
       } catch (e) {
+
         // silent fail - tracking is non-critical
-      }
-    };
+      }};
     trackStep();
   }, [step]);
 
   const canProceed = () => {
-  switch (step) {
-    case 1: { // Basic Info + Vibe
-      const hasName = !!(formData.name.trim() || appleDisplayName.trim());
-      const hasAge = Number(formData.age) >= 18;
-      const hasGender = !!formData.gender;
-      const hasVibe = !!formData.vibe_level;
-      console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });
-      return hasName && hasAge && hasGender && hasVibe;
-    }
-    case 2: // Status + Location + Budget (combined)
-      return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
+    switch (step) {
+      case 1:{// Basic Info + Vibe
+          const hasName = !!(formData.name.trim() || appleDisplayName.trim());
+          const hasAge = Number(formData.age) >= 18;
+          const hasGender = !!formData.gender;
+          const hasVibe = !!formData.vibe_level;
+          console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });
+          return hasName && hasAge && hasGender && hasVibe;
+        }
+      case 2: // Status + Location + Budget (combined)
+        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;
 
-    case 3: // Preferences + Pets (merged)
-      return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
+      case 3: // Preferences + Pets (merged)
+        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference &&
         formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());
-    case 4: // Apartment Details - Conditional
-      if (simulatorMode) {
+      case 4: // Apartment Details - Conditional
+        if (simulatorMode) {
+          return true;
+        }
+        if (formData.current_status === 'has_apartment') {
+          const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
+          return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
+        }
         return true;
-      }
-      if (formData.current_status === 'has_apartment') {
-        const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
-        return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
-      }
-      return true;
-    case 5: // Interests + About + Looking For
-      return formData.about_me.trim() && formData.looking_for_description.trim();
-    case 6: // Photos
-      if (simulatorMode) {
+      case 5: // Interests + About + Looking For
+        return formData.about_me.trim() && formData.looking_for_description.trim();
+      case 6: // Photos
+        if (simulatorMode) {
+          return true;
+        }
+        return formData.photos.filter((p) => p).length >= 2;
+      case 7: // Final step
         return true;
-      }
-      return formData.photos.filter((p) => p).length >= 2;
-    case 7: // Final step
-      return true;
-    default:
-      return true;
-  }
+      default:
+        return true;
+    }
   };
 
   const nextStep = () => {
-  const currentStep = step;
-  const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;
-  trackMixpanel('Registration Step Completed', {
-    step_number: currentStep,
-    step_name: stepName,
-  });
+    const currentStep = step;
+    const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;
+    trackMixpanel('Registration Step Completed', {
+      step_number: currentStep,
+      step_name: stepName
+    });
 
-  if (step === 3 && formData.current_status === 'seeking_apartment') {
-    setStep(5); // Skip apartment details
-  } else if (step === 5) {
-    setStep(6); // Go to photos
-  } else {
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
-  }
+    if (step === 3 && formData.current_status === 'seeking_apartment') {
+      setStep(5); // Skip apartment details
+    } else if (step === 5) {
+      setStep(6); // Go to photos
+    } else {
+      setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));
+    }
   };
 
   const isHasApartment = formData.current_status === 'has_apartment';
@@ -383,11 +383,11 @@ export default function OnboardingPage() {
   const displayTotal = isHasApartment ? 8 : 7;
 
   const prevStep = () => {
-  if (step === 5 && formData.current_status === 'seeking_apartment') {
-    setStep(3);
-  } else {
-    setStep((s) => Math.max(s - 1, 1));
-  }
+    if (step === 5 && formData.current_status === 'seeking_apartment') {
+      setStep(3);
+    } else {
+      setStep((s) => Math.max(s - 1, 1));
+    }
   };
 
   const handleFinish = async (shouldVerify = false) => {
@@ -420,9 +420,9 @@ export default function OnboardingPage() {
       const cleanedPhotos = formData.photos.filter((p) => p);
       const cleanedApartmentPhotos = formData.apartment_photos ? formData.apartment_photos.filter((p) => p) : [];
       const finalPhotos = simulatorMode ? buildSimulatorProfilePhotos(resolvedProfileName, cleanedPhotos, 2) : cleanedPhotos;
-      const finalApartmentPhotos = simulatorMode && formData.current_status === 'has_apartment'
-        ? buildSimulatorApartmentPhotos(resolvedProfileName, cleanedApartmentPhotos, 3)
-        : cleanedApartmentPhotos;
+      const finalApartmentPhotos = simulatorMode && formData.current_status === 'has_apartment' ?
+      buildSimulatorApartmentPhotos(resolvedProfileName, cleanedApartmentPhotos, 3) :
+      cleanedApartmentPhotos;
 
       const finalData = {
         ...formData,
@@ -458,7 +458,7 @@ export default function OnboardingPage() {
           has_about_me: !!finalData.about_me?.trim(),
           has_looking_for: !!finalData.looking_for_description?.trim(),
           religion: finalData.religion,
-          vibe_level: finalData.vibe_level,
+          vibe_level: finalData.vibe_level
         });
       }
 
@@ -474,8 +474,8 @@ export default function OnboardingPage() {
         properties: {
           has_apartment: finalData.current_status === 'has_apartment',
           gender: finalData.gender,
-          city_count: finalData.search_cities?.length || 0,
-        },
+          city_count: finalData.search_cities?.length || 0
+        }
       });
 
       if (shouldVerify) {
@@ -483,16 +483,16 @@ export default function OnboardingPage() {
       } else {
         navigate(createPageUrl('Discover'));
       }
-	    } catch (error) {
-	      console.error("Failed to create profile:", error);
-	      if (error?.status === 401 || error?.status === 403) {
-	        setIsSubmitting(false);
-	        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
-	        return;
-	      }
-	      setIsSubmitting(false);
-	    }
-	  };
+    } catch (error) {
+      console.error("Failed to create profile:", error);
+      if (error?.status === 401 || error?.status === 403) {
+        setIsSubmitting(false);
+        base44.auth.redirectToLogin(getSafeAuthReturnUrl());
+        return;
+      }
+      setIsSubmitting(false);
+    }
+  };
 
   const setFormField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -509,7 +509,7 @@ export default function OnboardingPage() {
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
-        img.src = /** @type {string} */ (event.target?.result || "");
+        img.src = /** @type {string} */event.target?.result || "";
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const maxWidth = 800;
@@ -682,8 +682,8 @@ export default function OnboardingPage() {
           <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-[--theme-orange] animate-spin" />
           <span className="text-sm font-semibold text-gray-500">טוען...</span>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -742,7 +742,7 @@ export default function OnboardingPage() {
 
       <div className="w-full max-w-md flex flex-col h-[85vh]">
         {/* Progress Bar - Hidden on Final Step */}
-        {step !== 7 && (
+        {step !== 7 &&
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
@@ -752,18 +752,18 @@ export default function OnboardingPage() {
                  <div className="w-10" />
              </div>
              <div className="flex gap-1.5">
-                 {Array.from({ length: 5 }).map((_, i) => (
-                   <div
-                     key={i}
-                     className="h-2 flex-1 rounded-full"
-                     style={{
-                       backgroundColor: i < Math.round((displayStep / displayTotal) * 5) ? '#FA3803' : '#FFE8E2'
-                     }}
-                   />
-                 ))}
+                 {Array.from({ length: 5 }).map((_, i) =>
+            <div
+              key={i}
+              className="h-2 flex-1 rounded-full"
+              style={{
+                backgroundColor: i < Math.round(displayStep / displayTotal * 5) ? '#FA3803' : '#FFE8E2'
+              }} />
+
+            )}
              </div>
         </div>
-        )}
+        }
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
@@ -771,59 +771,59 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
-                        {isAppleUser && appleDisplayName ? (
-                            // Apple Sign-In returned a valid name — show the input with
-                            // the Apple-provided value locked in (readOnly + no onChange).
-                            // App Store guideline 5.1.1.iv prohibits re-collecting info
-                            // already provided by Sign in with Apple, so the user can't
-                            // edit this field. The name is saved to the profile via
-                            // appleDisplayName fallback in canProceed() and handleFinish().
-                            <Input
-                                value={appleDisplayName}
-                                readOnly
-                                tabIndex={-1}
-                                aria-readonly="true"
-                                className="h-11 text-base bg-gray-50 border-gray-200 text-gray-700 cursor-default focus:border-gray-200 focus:ring-0 focus-visible:ring-0"
-                            />
-                        ) : (
-                            // Fallback: no name from Apple (user hid it, returning user
-                            // with no cached name, or platform did not capture it on first
-                            // auth). The user must enter it manually to complete onboarding.
-                            <>
+                        {isAppleUser && appleDisplayName ?
+                // Apple Sign-In returned a valid name — show the input with
+                // the Apple-provided value locked in (readOnly + no onChange).
+                // App Store guideline 5.1.1.iv prohibits re-collecting info
+                // already provided by Sign in with Apple, so the user can't
+                // edit this field. The name is saved to the profile via
+                // appleDisplayName fallback in canProceed() and handleFinish().
+                <Input
+                  value={appleDisplayName}
+                  readOnly
+                  tabIndex={-1}
+                  aria-readonly="true"
+                  className="h-11 text-base bg-gray-50 border-gray-200 text-gray-700 cursor-default focus:border-gray-200 focus:ring-0 focus-visible:ring-0" /> :
+
+
+                // Fallback: no name from Apple (user hid it, returning user
+                // with no cached name, or platform did not capture it on first
+                // auth). The user must enter it manually to complete onboarding.
+                <>
                                 <Input
-                                    value={formData.name}
-                                    onChange={(e) => setFormField('name', e.target.value)}
-                                    placeholder={isAppleUser ? 'השם המלא שלך' : ''}
-                                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0"
-                                />
-                                {isAppleUser && shouldShowAppleNameLoading && (
-                                    <div className="flex items-center gap-2 text-gray-500">
+                    value={formData.name}
+                    onChange={(e) => setFormField('name', e.target.value)}
+                    placeholder={isAppleUser ? 'השם המלא שלך' : ''}
+                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
+                  
+                                {isAppleUser && shouldShowAppleNameLoading &&
+                  <div className="flex items-center gap-2 text-gray-500">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         <span className="text-sm">טוען שם מחשבון Apple...</span>
                                     </div>
-                                )}
+                  }
                             </>
-                        )}
+                }
                     </div>
                     <div className="grid grid-cols-2 gap-4 items-end">
                         <div className="space-y-1 text-right">
                             <label className="text-sm font-bold block" style={{ color: '#FA3803' }}>גיל</label>
                             <Input
-                                type="number"
-                                value={formData.age || ''}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setFormField('age', val === '' ? '' : parseInt(val));
-                                }}
-                                className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
+                    type="number"
+                    value={formData.age || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormField('age', val === '' ? '' : parseInt(val));
+                    }}
+                    className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="text-right">
                             <CustomSelect
-                                label="מגדר"
-                                value={formData.gender}
-                                onChange={(v) => setFormField('gender', v)}
-                                options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]}
-                            />
+                    label="מגדר"
+                    value={formData.gender}
+                    onChange={(v) => setFormField('gender', v)}
+                    options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]} />
+                  
                         </div>
                     </div>
 
@@ -831,13 +831,13 @@ export default function OnboardingPage() {
                     <div className="pt-1 text-right">
                         <label className="text-sm font-bold block mb-2" style={{ color: '#FA3803' }}>מה הוויב שלך?</label>
                         <Slider
-                            dir="ltr"
-                            value={[formData.vibe_level]}
-                            onValueChange={(v) => setFormField('vibe_level', v[0])}
-                            max={5}
-                            min={1}
-                            step={1}
-                            className="py-2" />
+                  dir="ltr"
+                  value={[formData.vibe_level]}
+                  onValueChange={(v) => setFormField('vibe_level', v[0])}
+                  max={5}
+                  min={1}
+                  step={1}
+                  className="py-2" />
                         <div className="flex justify-between text-xs font-medium mt-1" style={{ color: '#B9BFC8' }}>
                             <span>תוסס ומסיבתי</span>
                             <span>מאוזן</span>
@@ -879,27 +879,27 @@ export default function OnboardingPage() {
                        {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
                        <div className="relative w-full mb-2" dir="ltr">
                            <div
-                               className="absolute text-sm text-black"
-                               style={{
-                                   left: `calc(${((formData.budget_max - 1000) / (10000 - 1000)) * 100}% - 20px)`,
-                                   bottom: 0,
-                                   minWidth: '40px',
-                                   textAlign: 'center',
-                                   fontWeight: 'normal'
-                               }}
-                           >
+                    className="absolute text-sm text-black"
+                    style={{
+                      left: `calc(${(formData.budget_max - 1000) / (10000 - 1000) * 100}% - 20px)`,
+                      bottom: 0,
+                      minWidth: '40px',
+                      textAlign: 'center',
+                      fontWeight: 'normal'
+                    }}>
+                    
                                {formData.budget_max.toLocaleString()}
                            </div>
                            <div className="h-6" />
                        </div>
                        <Slider
-                           dir="ltr"
-                           value={[formData.budget_max]}
-                           min={1000}
-                           max={10000}
-                           step={100}
-                           onValueChange={(v) => setFormField('budget_max', v[0])}
-                           className="py-0" />
+                  dir="ltr"
+                  value={[formData.budget_max]}
+                  min={1000}
+                  max={10000}
+                  step={100}
+                  onValueChange={(v) => setFormField('budget_max', v[0])}
+                  className="py-0" />
                        {/* Min / Max labels — explicitly LTR: 1,000 left, 10,000 right */}
                        <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
                            <div className="flex flex-col items-start">
@@ -922,76 +922,76 @@ export default function OnboardingPage() {
                         <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>אני מחפש/ת</label>
                         <div className="flex bg-gray-100 p-1 rounded-xl">
                             {[{ v: 'male', l: 'שותף' }, { v: 'female', l: 'שותפה' }, { v: 'any', l: 'לא משנה' }].map((opt) =>
-                                <button key={opt.v} onClick={() => setFormField('looking_for_gender', opt.v)}
-                                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}>
+                  <button key={opt.v} onClick={() => setFormField('looking_for_gender', opt.v)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}>
                                     {opt.l}
                                 </button>
-                            )}
+                  )}
                         </div>
                     </div>
 
                     {/* כשרות + שבת */}
                     <div className="grid grid-cols-2 gap-3">
                         <CustomSelect
-                            label="כשרות"
-                            value={formData.kosher_preference}
-                            onChange={(v) => setFormField('kosher_preference', v)}
-                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
-                        />
+                  label="כשרות"
+                  value={formData.kosher_preference}
+                  onChange={(v) => setFormField('kosher_preference', v)}
+                  options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]} />
+                
                         <CustomSelect
-                            label="שומר/ת שבת"
-                            value={formData.shabbat_preference}
-                            onChange={(v) => setFormField('shabbat_preference', v)}
-                            options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]}
-                        />
+                  label="שומר/ת שבת"
+                  value={formData.shabbat_preference}
+                  onChange={(v) => setFormField('shabbat_preference', v)}
+                  options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]} />
+                
                     </div>
 
                     {/* זיקה לדת */}
                     <CustomSelect
-                        label="זיקה לדת"
-                        value={formData.religion}
-                        onChange={(v) => setFormField('religion', v)}
-                        options={[
-                            { v: 'secular', l: 'חילוני/ת' },
-                            { v: 'traditional', l: 'מסורתי/ת' },
-                            { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
-                            { v: 'religious', l: 'דתי/ה' },
-                            { v: 'haredi', l: 'חרדי/ת' },
-                        ]}
-                    />
+                label="זיקה לדת"
+                value={formData.religion}
+                onChange={(v) => setFormField('religion', v)}
+                options={[
+                { v: 'secular', l: 'חילוני/ת' },
+                { v: 'traditional', l: 'מסורתי/ת' },
+                { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
+                { v: 'religious', l: 'דתי/ה' },
+                { v: 'haredi', l: 'חרדי/ת' }]
+                } />
+              
 
                     {/* חיית מחמד */}
                     <div>
                         <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>חיית מחמד שמצטרפת?</label>
                         <div className="flex gap-2 flex-wrap">
                             {[
-                                { type: 'none', label: 'אין', icon: null },
-                                { type: 'dog', label: 'כלב', icon: null },
-                                { type: 'cat', label: 'חתול', icon: null },
-                                { type: 'other', label: 'אחר', icon: null }
-                            ].map(({ type, label, icon }) =>
-                                <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
-                                    className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all flex items-center gap-1 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
+                  { type: 'none', label: 'אין', icon: null },
+                  { type: 'dog', label: 'כלב', icon: null },
+                  { type: 'cat', label: 'חתול', icon: null },
+                  { type: 'other', label: 'אחר', icon: null }].
+                  map(({ type, label, icon }) =>
+                  <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
+                  className={`py-1.5 rounded-full border text-sm font-semibold transition-all flex items-center gap-1 px-3 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
                                     {label}{icon}
                                 </button>
-                            )}
+                  )}
                         </div>
                         {formData.pet_type === 'other' &&
-                            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-2">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-2">
                                 <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
                             </motion.div>
-                        }
+                }
                     </div>
                 </div>
             </Step>
 
             <Step step={4} currentStep={step} title="פרטי הדירה">
                 <div className="space-y-6 text-right">
-                    {simulatorMode && (
-                        <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+                    {simulatorMode &&
+              <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
                             Simulator mode is on, so apartment photos are optional here. We’ll fill them with demo images if you continue.
                         </div>
-                    )}
+              }
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
                             <Home className="w-5 h-5" />
@@ -1037,28 +1037,28 @@ export default function OnboardingPage() {
                     <p className="text-center text-xs mb-4 -mt-3" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap gap-3 justify-center mb-1.5 px-0 overflow-hidden">
                         {INTEREST_OPTIONS.map((interest) => {
-                    const selected = (formData.interests || []).includes(interest.id);
-                    const Icon = interest.Icon;
-                    return (
-                      <button
-                        key={interest.id}
-                        type="button"
-                        onClick={() => {
-                          const current = formData.interests || [];
-                          setFormField('interests', selected ?
-                          current.filter((i) => i !== interest.id) :
-                          [...current, interest.id]
-                          );
-                        }}
-                        className={`px-1 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 ${
-                        selected ?
-                        'bg-[#FA3803] text-white border-[#FA3803]' :
-                        'bg-white text-black border-[#B9BFC8]'}`
-                        }>
+                  const selected = (formData.interests || []).includes(interest.id);
+                  const Icon = interest.Icon;
+                  return (
+                    <button
+                      key={interest.id}
+                      type="button"
+                      onClick={() => {
+                        const current = formData.interests || [];
+                        setFormField('interests', selected ?
+                        current.filter((i) => i !== interest.id) :
+                        [...current, interest.id]
+                        );
+                      }}
+                      className={`px-1 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 ${
+                      selected ?
+                      'bg-[#FA3803] text-white border-[#FA3803]' :
+                      'bg-white text-black border-[#B9BFC8]'}`
+                      }>
                         {interest.label}
                         <Icon className={`w-4 h-4 flex-shrink-0 stroke-current`} strokeWidth={2} fill="none" />
                             </button>);
-                  })}
+                })}
                     </div>
 
                     <div className="flex flex-col gap-6 pt-4">
@@ -1079,11 +1079,11 @@ export default function OnboardingPage() {
 
             <Step step={6} currentStep={step} title="התמונות שלי">
                 <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
-                {simulatorMode && (
-                    <div className="mb-4 rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 text-center">
+                {simulatorMode &&
+            <div className="mb-4 rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 text-center">
                         Simulator mode is on, so you can continue without uploading photos. Demo photos will be generated automatically.
                     </div>
-                )}
+            }
                 <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) =>
               <div key={i} className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm hover:shadow-md transition-all bg-gray-50 group">
@@ -1105,7 +1105,7 @@ export default function OnboardingPage() {
                                     </button>
                                     <button
                     className="absolute top-1 left-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {e.stopPropagation();setFormData((prev) => {const newPhotos = [...prev.photos];newPhotos[i] = null;return {...prev, photos: newPhotos};});}}>
+                    onClick={(e) => {e.stopPropagation();setFormData((prev) => {const newPhotos = [...prev.photos];newPhotos[i] = null;return { ...prev, photos: newPhotos };});}}>
                     
                                         <X className="w-4 h-4 text-gray-600" />
                                     </button>
@@ -1146,12 +1146,12 @@ export default function OnboardingPage() {
                             </div>
                         </div>
                         <Input
-                            value={formData.social_link}
-                            onChange={(e) => setFormField('social_link', e.target.value)}
-                            placeholder="הדבק קישור כאן"
-                            className="h-8 text-sm bg-gray-50 border-gray-200 w-full"
-                            dir="rtl"
-                        />
+                  value={formData.social_link}
+                  onChange={(e) => setFormField('social_link', e.target.value)}
+                  placeholder="הדבק קישור כאן"
+                  className="h-8 text-sm bg-gray-50 border-gray-200 w-full"
+                  dir="rtl" />
+                
                     </div>
 
                     {/* Verification section */}
@@ -1164,15 +1164,15 @@ export default function OnboardingPage() {
 
                     <div className="w-full space-y-3">
                         <Button
-                            onClick={() => handleFinish(true)}
-                            disabled={isSubmitting}
-                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                  onClick={() => handleFinish(true)}
+                  disabled={isSubmitting}
+                  className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
                             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
                         </Button>
                         <button
-                            onClick={() => !isSubmitting && handleFinish(false)}
-                            disabled={isSubmitting}
-                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
+                  onClick={() => !isSubmitting && handleFinish(false)}
+                  disabled={isSubmitting}
+                  className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
                             אולי אחר כך
                         </button>
                     </div>
@@ -1184,22 +1184,22 @@ export default function OnboardingPage() {
         {step < 7 &&
         <div className="mt-6 flex justify-center">
             <Button
-                onClick={nextStep}
-                className={`w-3/4 h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
-                disabled={!canProceed() || isSubmitting}>
+            onClick={nextStep}
+            className={`w-3/4 h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
+            disabled={!canProceed() || isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
             </Button>
         </div>
         }
       </div>
       
-      {authUser?.role === 'admin' && (
-        <button
-          onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
-          className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors">
+      {authUser?.role === 'admin' &&
+      <button
+        onClick={() => window.location.href = createPageUrl('AdminAnalytics')}
+        className="fixed bottom-4 left-4 text-[10px] text-gray-300 hover:text-gray-500 transition-colors">
           Admin
         </button>
-      )}
+      }
     </div>);
 
 }
