@@ -27,7 +27,7 @@ export default function CustomSelect({ label, value, onChange, options }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full h-11 px-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 flex items-center justify-between gap-2 transition-colors"
+        className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-sm text-gray-800 flex items-center justify-between gap-2 transition-colors"
         style={{ borderColor: open ? '#FA3803' : undefined }}
       >
         <span>{selected ? selected.l : 'בחר/י'}</span>
