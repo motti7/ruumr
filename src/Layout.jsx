@@ -21,7 +21,7 @@ function FilterHintButton() {
       aria-label="פילטרים"
       className="hover:scale-110 transition-transform select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
     >
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ pointerEvents: 'none' }}>
         {/* Line 1 */}
         <line x1="3" y1="7" x2="23" y2="7" stroke="#FF5722" strokeWidth="2.2" strokeLinecap="round"/>
         <circle cx="9" cy="7" r="3" fill="#FF5722"/>
@@ -255,11 +255,11 @@ export default function Layout({ children, currentPageName }) {
         <div className={Capacitor.isNativePlatform() ? "" : "sm:hidden"}>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className="max-w-md mx-auto px-2 flex items-center h-12 relative">
+                <div className="max-w-md mx-auto flex items-center h-12 relative">
         
-        {/* קבוצה ימין: הגדרות הכי ימני, ואז כוכב */}
-        <div className="flex items-center gap-2 z-10">
-            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation">
+        {/* קבוצה ימין */}
+        <div className="flex items-center w-[96px] justify-start gap-1 pr-2 z-10">
+            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
             <WriteReviewButton />
@@ -272,12 +272,12 @@ export default function Layout({ children, currentPageName }) {
             </Link>
         </div>
 
-        {/* קבוצה שמאל: מסננים ופרופיל */}
-        <div className="flex items-center gap-2 z-10 mr-auto">
+        {/* קבוצה שמאל */}
+        <div className="flex items-center w-[96px] justify-end gap-1 pl-2 z-10 mr-auto">
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation">
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
         </div>
