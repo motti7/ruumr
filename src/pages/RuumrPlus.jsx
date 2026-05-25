@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
 import { Swipe } from "@/entities/all";
+import { base44 } from "@/api/base44Client";
+import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { createPageUrl } from "@/utils";
 import {
   activateRuumrPlusRecommendations,
@@ -99,7 +101,21 @@ function formatActivationWindow(milliseconds = 0) {
   return `${totalMinutes} דקות`;
 }
 
-function RuumrPlusRecommendationCard({ profile }) {
+// Fire to both analytics sinks (Base44 + Mixpanel) without ever disrupting the
+// Plus flow if a sink throws or its async call rejects.
+function trackPlusEvent(eventName, mixpanelName, properties = {}) {
+  try {
+    const result = base44.analytics?.track?.({ eventName, properties });
+    if (result && typeof result.then === "function") {
+      result.catch(() => {});
+    }
+  } catch (_) {
+    // Analytics is best-effort; swallow.
+  }
+  trackMixpanel(mixpanelName, properties);
+}
+
+function RuumrPlusRecommendationCard({ profile, position }) {
   const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const score = Math.round((Number(plusMeta?.score) || 0) * 100);
   const locationLabel = getRecommendationLocation(profile) || "ללא מיקום";
@@ -115,6 +131,12 @@ function RuumrPlusRecommendationCard({ profile }) {
   return (
     <Link
       to={`${createPageUrl("ProfileView")}?userId=${encodeURIComponent(profile.user_id)}`}
+      onClick={() => trackPlusEvent("plus_recommendation_clicked", "Plus Recommendation Clicked", {
+        target_profile_id: profile.user_id,
+        position,
+        score: plusMeta?.score ?? null,
+        messageable: Boolean(plusMeta?.messageable),
+      })}
       className="group overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       aria-label={`פתח/י את הפרופיל של ${profile.name}`}
     >
@@ -350,6 +372,12 @@ export default function RuumrPlusPage() {
         statusOverride: "active",
         sourceOverride: savedActivation.source ?? "saved",
       });
+      trackPlusEvent("plus_activated", "Plus Activated", {
+        source,
+        from_cache: true,
+        matched_count: restored?.recommendations?.length ?? 0,
+        result_source: savedActivation.source ?? "saved",
+      });
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       return restored;
     }
@@ -401,6 +429,13 @@ export default function RuumrPlusPage() {
         candidateCount: Math.max(0, localProfiles.length - 1),
       });
 
+      trackPlusEvent("plus_activated", "Plus Activated", {
+        source,
+        from_cache: false,
+        matched_count: mergedRecommendations.length,
+        result_source: response?.mode ?? (isRuumrSimulatorMode() ? "simulator" : "live"),
+      });
+
       window.requestAnimationFrame(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -422,6 +457,7 @@ export default function RuumrPlusPage() {
           label: "Plus נעול",
           description: "Ruumr Plus עוד לא פתוח לחשבון הזה.",
         });
+        trackPlusEvent("plus_locked_shown", "Plus Locked Shown", { source });
         return null;
       }
 
@@ -452,6 +488,12 @@ export default function RuumrPlusPage() {
               sourceOverride: "simulator-fallback",
               candidateCount: Math.max(0, localProfiles.length - 1),
             });
+            trackPlusEvent("plus_activated", "Plus Activated", {
+              source,
+              from_cache: false,
+              matched_count: simulatorResponse.matched_count ?? simulatorResponse.recommendations?.length ?? 0,
+              result_source: "simulator-fallback",
+            });
             window.requestAnimationFrame(() => {
               resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
             });
@@ -463,6 +505,11 @@ export default function RuumrPlusPage() {
       }
 
       console.error("Failed to activate Ruumr Plus:", error);
+      trackPlusEvent("plus_request_failed", "Plus Request Failed", {
+        source,
+        reason: error?.message || "unknown",
+        status: error?.status ?? null,
+      });
       setPlusState({
         status: "fallback",
         label: "מצב דמו",
@@ -653,8 +700,8 @@ export default function RuumrPlusPage() {
             </div>
           ) : plusRecommendations.length > 0 ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {plusRecommendations.slice(0, RUUMR_PLUS_RECOMMENDATION_LIMIT).map((profile) => (
-                <RuumrPlusRecommendationCard key={profile.user_id} profile={profile} />
+              {plusRecommendations.slice(0, RUUMR_PLUS_RECOMMENDATION_LIMIT).map((profile, index) => (
+                <RuumrPlusRecommendationCard key={profile.user_id} profile={profile} position={index} />
               ))}
             </div>
           ) : (
