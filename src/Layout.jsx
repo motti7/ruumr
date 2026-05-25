@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
+import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 
@@ -304,6 +305,8 @@ export default function Layout({ children, currentPageName }) {
                         const handleClick = (e) => {
                             if (isPlusItem) {
                                 e.preventDefault();
+                                // Track Plus nav button click
+                                trackMixpanel('Plus Nav Button Clicked', { source: currentPageName });
                                 // Entitled users go straight to Plus (and auto-activate);
                                 // everyone else hits the paywall.
                                 if (isPlusEntitled(currentUser)) {
