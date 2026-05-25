@@ -257,7 +257,7 @@ export default function Layout({ children, currentPageName }) {
 
         <div className={Capacitor.isNativePlatform() ? "" : "sm:hidden"}>
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', backgroundColor: '#E4E4E4' }}>
                 <div className="max-w-md mx-auto flex items-center h-12 relative">
         
         {/* קבוצה ימין */}
@@ -290,12 +290,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(80px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed right-1/2 transform translate-x-1/2 max-w-[360px] w-[calc(100%-32px)] bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl z-50 rounded-2xl" style={{ bottom: 'max(8px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}>
+                <nav className="fixed left-0 right-0 z-50" style={{ bottom: 0, backgroundColor: '#E4E4E4', paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className="flex items-center justify-around py-2">
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path || 
