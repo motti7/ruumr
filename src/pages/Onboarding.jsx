@@ -371,6 +371,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -381,8 +382,7 @@ export default function OnboardingPage() {
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep, step_name: stepName });if (step === 3 && formData.current_status === 'seeking_apartment') {setStep(5); // Skip apartment details
     } else if (step === 5) {setStep(6); // Go to photos
-    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;
-  const prevStep = () => {
+    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;const prevStep = () => {
     if (step === 5 && formData.current_status === 'seeking_apartment') {
       setStep(3);
     } else {
@@ -851,7 +851,7 @@ export default function OnboardingPage() {
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-bold text-gray-800">מחפש/ת דירה</h3>
+                            <h3 className="text-base text-gray-800 font-semibold">מחפש/ת דירה</h3>
                             <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
                         <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
@@ -859,7 +859,7 @@ export default function OnboardingPage() {
 
                     <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base font-bold text-gray-800">יש לי דירה</h3>
+                            <h3 className="text-base text-gray-800 font-semibold">יש לי דירה</h3>
                             <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
                         <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
@@ -868,7 +868,7 @@ export default function OnboardingPage() {
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
                         <h3 className="text-base font-semibold" style={{ color: '#FA3803' }}>איפה?</h3>
-                        <p className="text-xs mb-1" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
+                        <p className="mb-1 text-sm" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
