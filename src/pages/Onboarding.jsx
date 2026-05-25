@@ -316,9 +316,9 @@ export default function OnboardingPage() {
         });
       } catch (e) {
 
+
         // silent fail - tracking is non-critical
-      }};
-    trackStep();
+      }};trackStep();
   }, [step]);
 
   const canProceed = () => {
@@ -971,7 +971,7 @@ export default function OnboardingPage() {
                   { type: 'other', label: 'אחר', icon: null }].
                   map(({ type, label, icon }) =>
                   <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
-                  className={`py-1.5 rounded-full border text-sm font-semibold transition-all flex items-center gap-1 px-3 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
+                  className={`rounded-full border text-sm font-semibold transition-all flex items-center gap-1 px-3 py-3 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
                                     {label}{icon}
                                 </button>
                   )}
