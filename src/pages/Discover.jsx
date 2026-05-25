@@ -420,7 +420,7 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="fixed inset-0 w-full bg-white overflow-hidden">
+    <div className="fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF' }}>
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>
