@@ -391,6 +391,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -401,8 +402,7 @@ export default function OnboardingPage() {
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep, step_name: stepName });if (step === 3 && formData.current_status === 'seeking_apartment') {setStep(5); // Skip apartment details
     } else if (step === 5) {setStep(6); // Go to photos
-    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;const prevStep = () => {if (step === 5 && formData.current_status === 'seeking_apartment') {setStep(3);} else {setStep((s) => Math.max(s - 1, 1));}};const handleFinish = async (shouldVerify = false) => {if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {alert("אנא המתן לסיום העלאת התמונות");return;}const hasBlobPhotos = formData.photos.some((p) => p && p.startsWith('blob:'));const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some((p) => p && p.startsWith('blob:'));if (hasBlobPhotos || hasBlobApartment) {alert("עדיין מעלה תמונות... נסה שוב בעוד רגע");return;
-    }
+    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;const prevStep = () => {if (step === 5 && formData.current_status === 'seeking_apartment') {setStep(3);} else {setStep((s) => Math.max(s - 1, 1));}};const handleFinish = async (shouldVerify = false) => {if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {alert("אנא המתן לסיום העלאת התמונות");return;}const hasBlobPhotos = formData.photos.some((p) => p && p.startsWith('blob:'));const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some((p) => p && p.startsWith('blob:'));if (hasBlobPhotos || hasBlobApartment) {alert("עדיין מעלה תמונות... נסה שוב בעוד רגע");return;}
 
     setIsSubmitting(true);
     try {
@@ -1069,7 +1069,7 @@ export default function OnboardingPage() {
                         </div>
 
                         {/* מה אני מחפש/ת */}
-                        <div className="flex flex-col mx-1">
+                        <div className="flex flex-col">
                             <label className="text-base font-semibold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
                             <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px]" style={{ borderColor: '#B9BFC8' }} />
                         </div>
