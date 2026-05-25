@@ -805,9 +805,9 @@ export default function OnboardingPage() {
                             </>
                 }
                     </div>
-                    <div className="grid grid-cols-2 gap-4 items-end">
-                        <div className="space-y-1 text-right">
-                            <label className="font-bold block text-s" style={{ color: '#FA3803' }}>גיל</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1 text-right">
+                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>גיל</label>
                             <Input
                     type="number"
                     value={formData.age || ''}
@@ -817,13 +817,12 @@ export default function OnboardingPage() {
                     }}
                     className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
-                        <div className="text-right">
+                        <div className="flex flex-col gap-1 text-right">
+                            <label className="text-sm font-bold" style={{ color: '#FA3803' }}>מגדר</label>
                             <CustomSelect
-                    label="מגדר"
                     value={formData.gender}
                     onChange={(v) => setFormField('gender', v)}
                     options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]} />
-                  
                         </div>
                     </div>
 
