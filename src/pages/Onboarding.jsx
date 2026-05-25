@@ -767,7 +767,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center text-base mb-6" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center text-base mb-6 -mt-2" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bod" style={{ color: '#FA3803' }}>שם</label>
