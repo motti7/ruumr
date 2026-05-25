@@ -355,6 +355,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -363,10 +364,9 @@ export default function OnboardingPage() {
         if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}return true;case 5: // Interests + About + Looking For
         return formData.about_me.trim() && formData.looking_for_description.trim();case 6: // Photos
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
-        return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', {
-      step_number: currentStep,
-      step_name: stepName
-    });
+        return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep,
+        step_name: stepName
+      });
 
     if (step === 3 && formData.current_status === 'seeking_apartment') {
       setStep(5); // Skip apartment details
@@ -767,7 +767,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center text-base mb-6 mr-1" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center text-base mb-6" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
