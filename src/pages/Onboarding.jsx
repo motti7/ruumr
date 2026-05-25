@@ -350,6 +350,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -359,7 +360,6 @@ export default function OnboardingPage() {
         return formData.about_me.trim() && formData.looking_for_description.trim();case 6: // Photos
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};
-
   const nextStep = () => {
     const currentStep = step;
     const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;
@@ -767,7 +767,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 relative">
             <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center text-base mb-3 py-1" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+                <p className="text-center text-base mb-3 mt-4" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-sm font-bold" style={{ color: '#FA3803' }}>שם</label>
