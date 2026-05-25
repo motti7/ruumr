@@ -483,7 +483,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-24 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                                className="absolute bottom-32 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                             >
                                 {(() => {
                                     const l = String(profile.social_link).toLowerCase();
@@ -496,7 +496,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                 })()}
                             </a>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-28 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
                                 {profile.is_verified && (
@@ -649,10 +649,10 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 animate={controls}
                 style={{ x, rotate, opacity }}
                 whileTap={{ scale: 1.02 }}
-                className={`absolute w-full h-full max-w-md cursor-grab active:cursor-grabbing z-10`}
+                className={`absolute w-full h-full cursor-grab active:cursor-grabbing z-10`}
             >
                 <div 
-                    className={`relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
+                    className={`relative w-full h-full overflow-hidden bg-black ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
                     <div className="absolute inset-0 bg-black">

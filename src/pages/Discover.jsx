@@ -458,42 +458,46 @@ export default function DiscoverPage() {
 
       <DiscoverFilters filters={filters} onChange={applyFilters} />
 
-      <div className="absolute w-full flex items-start justify-center px-3" style={{ paddingTop: 'calc(56px + env(safe-area-inset-top, 0px))' }}>
-        <div style={{ height: 'calc(100dvh - 56px - 120px - env(safe-area-inset-top, 0px))', width: '100%', maxWidth: '448px', position: 'relative' }}>
-          <AnimatePresence mode="wait">
-            {hasProfiles ? (
-              profiles.slice(currentIndex, currentIndex + 1).map((profile) => {
-                return (
-                  <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
-                    <div className="absolute inset-0 z-10">
-                      <ProfileCard
-                        profile={profile}
-                        onSwipe={handleSwipe}
-                        onSwipeIntent={handleSwipeIntent}
-                        isActive={true}
-                      />
-                    </div>
-                  </ErrorBoundary>
-                );
-              })
-            ) : (
-              <motion.div
-                key="no-profiles"
-                initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center h-full text-center px-8"
-              >
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">זה הכל לעכשיו!</h2>
-                <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
-                <Button onClick={loadData} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+      {/* Card — full screen from header to bottom nav */}
+      <div
+        className="absolute left-0 right-0"
+        style={{
+          top: 'calc(48px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {hasProfiles ? (
+            profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
+              <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
+                <div className="absolute inset-0">
+                  <ProfileCard
+                    profile={profile}
+                    onSwipe={handleSwipe}
+                    onSwipeIntent={handleSwipeIntent}
+                    isActive={true}
+                  />
+                </div>
+              </ErrorBoundary>
+            ))
+          ) : (
+            <motion.div
+              key="no-profiles"
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center h-full text-center px-8"
+            >
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">זה הכל לעכשיו!</h2>
+              <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
+              <Button onClick={loadData} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      
+
+      {/* Action buttons — floating above nav bar */}
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(8px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 72px)' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 72px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}
