@@ -369,6 +369,7 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
@@ -379,8 +380,7 @@ export default function OnboardingPage() {
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep, step_name: stepName });if (step === 3 && formData.current_status === 'seeking_apartment') {setStep(5); // Skip apartment details
     } else if (step === 5) {setStep(6); // Go to photos
-    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;
-  const displayTotal = isHasApartment ? 8 : 7;
+    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;
 
   const prevStep = () => {
     if (step === 5 && formData.current_status === 'seeking_apartment') {
@@ -818,7 +818,7 @@ export default function OnboardingPage() {
                     className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="flex flex-col gap-1 text-right">
-                            <label className="font-bold text-s" style={{ color: '#FA3803' }}>מגדר</label>
+                            <label className="font-semibold text-base" style={{ color: '#FA3803' }}>מגדר</label>
                             <CustomSelect
                     value={formData.gender}
                     onChange={(v) => setFormField('gender', v)}
