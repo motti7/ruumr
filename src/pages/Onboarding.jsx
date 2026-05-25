@@ -337,13 +337,13 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
-        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;
-          return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
+        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
         }
         return true;
       case 5: // Interests + About + Looking For
@@ -1064,7 +1064,7 @@ export default function OnboardingPage() {
                     <div className="flex flex-col gap-6 pt-4">
                         {/* קצת עליי */}
                         <div className="flex flex-col">
-                            <label className="text-xs font-bold block my-1 py-1" style={{ color: '#FA3803' }}>קצת עליי</label>
+                            <label className="text-xs font-bold block my-1" style={{ color: '#FA3803' }}>קצת עליי</label>
                             <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px]" style={{ borderColor: '#B9BFC8' }} />
                         </div>
 
