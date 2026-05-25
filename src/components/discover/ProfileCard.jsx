@@ -447,11 +447,8 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
             if (index === 0) {
                 return (
                     <>
-                        {/* Right column: age tag + info button */}
+                        {/* Right column: info button + tags */}
                         <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-2">
-                            <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                גיל: {profile.age}
-                            </div>
                             {profile.team_target && (
                                 <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Users className="w-3 h-3" />
@@ -501,7 +498,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-20 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
-                                <h2 className="text-4xl font-bold text-white">{profile.name}</h2>
+                                <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
                                 {profile.is_verified && (
                                     <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
                                         <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
@@ -655,7 +652,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 className={`absolute w-full h-full max-w-md cursor-grab active:cursor-grabbing z-10`}
             >
                 <div 
-                    className={`relative w-full h-full overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
+                    className={`relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
                     <div className="absolute inset-0 bg-black">
