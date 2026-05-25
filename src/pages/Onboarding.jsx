@@ -770,7 +770,7 @@ export default function OnboardingPage() {
                 <p className="text-center text-base mb-6 -mt-2" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        <label className="font-semibold text-base" style={{ color: '#FA3803' }}>שם</label>
+                        <label className="text-sm font-bod" style={{ color: '#FA3803' }}>שם</label>
                         {isAppleUser && appleDisplayName ?
                 // Apple Sign-In returned a valid name — show the input with
                 // the Apple-provided value locked in (readOnly + no onChange).
@@ -807,7 +807,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1 text-right">
-                            <label className="font-bold text-s" style={{ color: '#FA3803' }}>גיל</label>
+                            <label className="font-bold text-base" style={{ color: '#FA3803' }}>גיל</label>
                             <Input
                     type="number"
                     value={formData.age || ''}
