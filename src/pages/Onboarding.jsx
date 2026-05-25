@@ -338,13 +338,13 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
         return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
         return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
-        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;
-        }
+        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}
         return true;
       case 5: // Interests + About + Looking For
         return formData.about_me.trim() && formData.looking_for_description.trim();
@@ -919,7 +919,7 @@ export default function OnboardingPage() {
                 <div className="space-y-3 text-right">
                     {/* אני מחפש/ת */}
                     <div>
-                        <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>אני מחפש/ת</label>
+                        <label className="text-sm font-bold block px-1" style={{ color: '#FA3803' }}>אני מחפש/ת</label>
                         <div className="flex bg-gray-100 p-1 rounded-xl">
                             {[{ v: 'male', l: 'שותף' }, { v: 'female', l: 'שותפה' }, { v: 'any', l: 'לא משנה' }].map((opt) =>
                   <button key={opt.v} onClick={() => setFormField('looking_for_gender', opt.v)}
