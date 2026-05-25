@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
@@ -16,6 +16,7 @@ import {
   buildSimulatorRuumrPlusRecommendations,
 } from "@/lib/ruumrPlusSimulator";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import {
   buildRuumrPlusActivationRecord,
   consumeRuumrPlusActivationIntent,
@@ -131,7 +132,7 @@ function RuumrPlusRecommendationCard({ profile, position }) {
 
   return (
     <Link
-      to={`${createPageUrl("ProfileView")}?userId=${encodeURIComponent(profile.user_id)}`}
+      to={`${createPageUrl("ProfileView")}?userId=${encodeURIComponent(profile.user_id)}&fromPlus=true`}
       onClick={() => trackPlusEvent("plus_recommendation_clicked", "Plus Recommendation Clicked", {
         target_profile_id: profile.user_id,
         position,
@@ -204,6 +205,7 @@ function RuumrPlusRecommendationCard({ profile, position }) {
 
 export default function RuumrPlusPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [localProfiles, setLocalProfiles] = useState([]);
@@ -281,6 +283,13 @@ export default function RuumrPlusPage() {
       const user = await User.me();
       if (cancelledRef.current) return;
 
+      // Route-level entitlement gate: non-subscribers never see the Plus page,
+      // covering deep links and nav-intent in addition to the button handler.
+      if (!isPlusEntitled(user)) {
+        navigate(createPageUrl("RuumrPlusPricing"), { replace: true });
+        return;
+      }
+
       setCurrentUser(user);
       setIsAdmin(user?.role === "admin");
 
@@ -346,7 +355,7 @@ export default function RuumrPlusPage() {
         description: "לא הצלחנו לטעון את מצב החשבון כרגע.",
       });
     }
-  }, [applyActivationRecord]);
+  }, [applyActivationRecord, navigate]);
 
   useEffect(() => {
     const cancelledRef = { current: false };

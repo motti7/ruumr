@@ -62,6 +62,8 @@ import Onboarding from './pages/Onboarding';
 import Permissions from './pages/Permissions';
 import Privacy from './pages/Privacy';
 import RuumrPlus from './pages/RuumrPlus';
+import RuumrPlusPricing from './pages/RuumrPlusPricing';
+import RuumrPlusCheckout from './pages/RuumrPlusCheckout';
 import Profile from './pages/Profile';
 import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
@@ -86,6 +88,8 @@ export const PAGES = {
     "Permissions": Permissions,
     "Privacy": Privacy,
     "RuumrPlus": RuumrPlus,
+    "RuumrPlusPricing": RuumrPlusPricing,
+    "RuumrPlusCheckout": RuumrPlusCheckout,
     "Profile": Profile,
     "ProfileView": ProfileView,
     "Settings": Settings,

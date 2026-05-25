@@ -4,7 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 
 vi.mock('@/entities/User', () => ({
-  User: { me: vi.fn().mockResolvedValue({ id: 'u1', full_name: 'Tester', role: 'user' }) },
+  // Entitled user so the route-level gate lets us reach the page; the locked
+  // panel is the entitled-but-service-403 fallback.
+  User: { me: vi.fn().mockResolvedValue({ id: 'u1', full_name: 'Tester', role: 'user', is_ruumr_plus: true }) },
 }));
 vi.mock('@/entities/Profile', () => ({
   Profile: {
@@ -19,7 +21,10 @@ vi.mock('@/api/base44Client', () => ({
   base44: { analytics: { track: vi.fn() } },
 }));
 vi.mock('@/lib/mixpanelTracking', () => ({ trackMixpanel: vi.fn() }));
-vi.mock('@/lib/simulatorMode', () => ({ isRuumrSimulatorMode: () => false }));
+vi.mock('@/lib/simulatorMode', () => ({
+  isRuumrSimulatorMode: () => false,
+  isRuumrSimulatorPlusLocked: () => false,
+}));
 vi.mock('@/components/shared/SmartImage', () => ({ default: () => null }));
 vi.mock('@/lib/interests', () => ({ getInterestLabel: (value) => value }));
 

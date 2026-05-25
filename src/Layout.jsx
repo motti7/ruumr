@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
+import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 
 function FilterHintButton() {
@@ -57,6 +58,7 @@ function isIosLikeBrowserContext() {
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
   const matchesCountRef = useRef(0);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
     try {
@@ -95,6 +97,7 @@ export default function Layout({ children, currentPageName }) {
         const notificationsSupported = typeof Notification !== 'undefined';
         const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
         const user = await UserEntity.me();
+        setCurrentUser(user);
         const browserNotificationsEnabled =
           notificationsSupported &&
           isBrowserWeb &&
@@ -178,13 +181,12 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
-    // RUUMR PLUS NAV ITEM — disabled, re-enable by uncommenting:
-    // { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ];
 
-  const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -302,8 +304,14 @@ export default function Layout({ children, currentPageName }) {
                         const handleClick = (e) => {
                             if (isPlusItem) {
                                 e.preventDefault();
-                                markRuumrPlusActivationIntent({ source: "nav" });
-                                navigate(item.path);
+                                // Entitled users go straight to Plus (and auto-activate);
+                                // everyone else hits the paywall.
+                                if (isPlusEntitled(currentUser)) {
+                                    markRuumrPlusActivationIntent({ source: "nav" });
+                                    navigate(createPageUrl("RuumrPlus"));
+                                } else {
+                                    navigate(createPageUrl("RuumrPlusPricing"));
+                                }
                                 return;
                             }
 

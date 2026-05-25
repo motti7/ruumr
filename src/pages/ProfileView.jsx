@@ -17,6 +17,7 @@ import { getCitiesRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
+import { loadRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -92,7 +93,11 @@ export default function ProfileViewPage() {
   const [showActions, setShowActions] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
-  const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || null;
+  const [plusMatch, setPlusMatch] = useState(null);
+  // Plus match metadata: prefer anything on the profile, else the score/insight
+  // cached from the user's last Ruumr Plus activation for this profile.
+  const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || plusMatch || null;
+  const plusMatchPercent = plusMeta?.score != null ? Math.round((Number(plusMeta.score) || 0) * 100) : null;
   const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
   useEffect(() => {
     loadProfile();
@@ -126,6 +131,18 @@ export default function ProfileViewPage() {
 
       setProfile(profilesResult[0]);
       setUserProfile(myProfilesResult[0] || null);
+
+      // Pull the Plus match score/insight from the cached activation (the score
+      // lives on the recommendation, not the Profile entity).
+      try {
+        const activation = loadRuumrPlusActivation(user.id);
+        const matchRec = activation?.recommendations?.find(
+          (rec) => String(rec.user_id) === String(userId)
+        );
+        setPlusMatch(matchRec?.ruumrPlus || matchRec?.ruumr_plus || null);
+      } catch (_) {
+        setPlusMatch(null);
+      }
 
       // Check for existing match (to allow writing a review)
       try {
@@ -388,7 +405,15 @@ export default function ProfileViewPage() {
       
       <div className="p-4 space-y-4">
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h3 className="text-2xl font-bold">{profile.name}, {profile.age}</h3>
+            {plusMatchPercent != null && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-[--theme-orange] whitespace-nowrap">
+                <Sparkles className="w-4 h-4" />
+                {plusMatchPercent}% התאמה
+              </span>
+            )}
+          </div>
           <div className="flex items-start text-gray-600 mb-3">
             <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
             <div className="flex flex-col">
