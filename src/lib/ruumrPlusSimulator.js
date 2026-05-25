@@ -1,6 +1,7 @@
 import { Profile } from "@/entities/Profile";
 import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
 import { applyTwoStageSwipeFilter } from "@/lib/ruumrPlusDisplayFilter";
+import { isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
 
 /**
  * @typedef {Object} SimulatorRecommendationOptions
@@ -544,7 +545,9 @@ export async function buildSimulatorRuumrPlusRecommendations({
 
   const requestorProfile = requestor || null;
   const safeLimit = Math.max(0, Math.floor(Number(limit) || 0));
-  const accessGranted = Boolean(requestorProfile);
+  // Mirror the production service entitlement gate so the locked UX is testable.
+  const plusLocked = isRuumrSimulatorPlusLocked();
+  const accessGranted = Boolean(requestorProfile) && !plusLocked;
 
   if (!requestorProfile) {
     return {
@@ -564,6 +567,14 @@ export async function buildSimulatorRuumrPlusRecommendations({
       generated_at: new Date().toISOString(),
       cached: false,
     };
+  }
+
+  // Same as the real service: require_plus + no entitlement -> 403, which the
+  // page turns into the locked / upgrade state.
+  if (requirePlus && !accessGranted) {
+    const error = new Error("Ruumr Plus access is required for this request");
+    error.status = 403;
+    throw error;
   }
 
   const candidateProfiles = uniqueProfilesByUserId(

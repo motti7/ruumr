@@ -30,6 +30,7 @@ import SmartImage from "@/components/shared/SmartImage";
 import { getInterestLabel } from "@/lib/interests";
 import {
   Crown,
+  Lock,
   MessageCircle,
   ShieldCheck,
   SlidersHorizontal,
@@ -543,13 +544,16 @@ export default function RuumrPlusPage() {
   }, [activatePlus, currentProfile, currentUser, location.key]);
 
   const activationFresh = activationRecord ? isRuumrPlusActivationFresh(activationRecord) : false;
+  const isLocked = plusState.status === "locked";
   const primaryActionLabel = isActivating
     ? "מפעיל/ה Plus..."
-    : activationRecord && activationFresh
-      ? "הצג/י תוצאות Plus"
-      : activationRecord
-        ? "הפעל/י Plus שוב"
-        : "הפעל/י Plus";
+    : isLocked
+      ? "Plus עדיין לא זמין"
+      : activationRecord && activationFresh
+        ? "הצג/י תוצאות Plus"
+        : activationRecord
+          ? "הפעל/י Plus שוב"
+          : "הפעל/י Plus";
   const resultsHeading = activationRecord
     ? "התוצאות האחרונות שלך ב-Ruumr Plus"
     : "התוצאות שלך ב-Ruumr Plus";
@@ -631,8 +635,8 @@ export default function RuumrPlusPage() {
               <Button
                 type="button"
                 onClick={handlePrimaryAction}
-                disabled={isActivating || !currentUser || !currentProfile}
-                className="flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[--theme-orange] font-bold shadow-lg hover:bg-white/90"
+                disabled={isActivating || isLocked || !currentUser || !currentProfile}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[--theme-orange] font-bold shadow-lg hover:bg-white/90 disabled:opacity-60"
               >
                 {(isActivating || (!currentUser && !currentProfile)) ? (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -668,9 +672,11 @@ export default function RuumrPlusPage() {
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange]">
-                {(plusRecommendationsMeta.matchedCount ?? plusRecommendations.length ?? 0)} התאמות
-              </span>
+              {!isLocked && (
+                <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange]">
+                  {(plusRecommendationsMeta.matchedCount ?? plusRecommendations.length ?? 0)} התאמות
+                </span>
+              )}
               <span className={`rounded-full px-3 py-1 text-xs font-bold ${
                 plusState.status === "active"
                   ? "bg-emerald-50 text-emerald-700"
@@ -697,6 +703,22 @@ export default function RuumrPlusPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : isLocked ? (
+            <div className="mt-4 rounded-[1.75rem] border border-dashed border-orange-200 bg-orange-50/70 p-6 text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[--theme-orange] shadow-sm">
+                <Lock className="w-7 h-7" />
+              </div>
+              <h3 className="text-lg font-black text-gray-900">Ruumr Plus עדיין לא זמין לחשבון שלך</h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                התאמות Plus נפתחות בהדרגה. נעדכן אותך כאן ברגע שהן יהיו זמינות — בינתיים אפשר להמשיך לגלות התאמות במסך הרגיל.
+              </p>
+              <Button
+                asChild
+                className="mt-4 h-11 rounded-full bg-[--theme-orange] font-bold text-white hover:brightness-110"
+              >
+                <Link to={createPageUrl("Discover")}>המשך/י ל-Discover</Link>
+              </Button>
             </div>
           ) : plusRecommendations.length > 0 ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">

@@ -2,6 +2,8 @@ import { Capacitor } from "@capacitor/core";
 
 const SIMULATOR_STORAGE_KEY = 'ruumr_simulator_mode';
 const SIMULATOR_QUERY_PARAM = 'simulator_mode';
+const SIMULATOR_PLUS_LOCKED_STORAGE_KEY = 'ruumr_simulator_plus_locked';
+const SIMULATOR_PLUS_LOCKED_QUERY_PARAM = 'simulator_plus_locked';
 
 const PROFILE_PALETTE = [
   ['#FA3803', '#FF7A45'],
@@ -106,6 +108,30 @@ export function isRuumrSimulatorMode() {
     import.meta.env.VITE_RUUMR_SIMULATOR_MODE === 'true' ||
     window.localStorage.getItem(SIMULATOR_STORAGE_KEY) === 'true' ||
     isRuumrNativeDemoSession()
+  );
+}
+
+// Testing aid: when on, the simulator pretends the user has NO Plus entitlement
+// so the locked / upgrade experience can be exercised locally. No effect in prod.
+export function isRuumrSimulatorPlusLocked() {
+  if (typeof window === 'undefined') {
+    return import.meta.env.VITE_RUUMR_SIMULATOR_PLUS_LOCKED === 'true';
+  }
+
+  try {
+    const queryValue = new URLSearchParams(window.location.search).get(SIMULATOR_PLUS_LOCKED_QUERY_PARAM);
+    if (queryValue === 'true' || queryValue === '1') {
+      window.localStorage.setItem(SIMULATOR_PLUS_LOCKED_STORAGE_KEY, 'true');
+    } else if (queryValue === 'false' || queryValue === '0') {
+      window.localStorage.removeItem(SIMULATOR_PLUS_LOCKED_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore malformed URL state; fall back to stored/env values.
+  }
+
+  return (
+    import.meta.env.VITE_RUUMR_SIMULATOR_PLUS_LOCKED === 'true' ||
+    window.localStorage.getItem(SIMULATOR_PLUS_LOCKED_STORAGE_KEY) === 'true'
   );
 }
 
