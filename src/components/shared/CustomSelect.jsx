@@ -22,7 +22,7 @@ export default function CustomSelect({ label, value, onChange, options }) {
   return (
     <div ref={ref} className="relative">
       {label &&
-      <label className="text-sm font-bold block mb-2" style={{ color: '#FA3803' }}>{label}</label>
+      <label className="text-sm font-bold block mb-2 py-1" style={{ color: '#FA3803' }}>{label}</label>
       }
       <button
         type="button"
