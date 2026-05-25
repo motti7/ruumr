@@ -55,7 +55,7 @@ const Step = ({ children, step, currentStep, title }) =>
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
     
-        {title && <h2 className="text-3xl text-center mt-5 mb-3 py-1" style={{ color: '#FA3803', fontFamily: "'Google Sans', 'Inter', sans-serif", fontWeight: 'bold' }}>{title}</h2>}
+        {title && <h2 className="text-3xl text-center mt-2 mb-3" style={{ color: '#FA3803', fontFamily: "'Google Sans', 'Inter', sans-serif", fontWeight: 'bold' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto custom-scrollbar px-1 py-2">
             {children}
         </div>
