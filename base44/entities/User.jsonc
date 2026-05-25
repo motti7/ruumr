@@ -1,0 +1,77 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
+    "show_in_discovery": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_active_status": {
+      "type": "boolean",
+      "default": true
+    },
+    "enable_notifications": {
+      "type": "boolean",
+      "default": true
+    },
+    "notify_likes": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u05e7\u05d1\u05dc\u05ea \u05d4\u05ea\u05e8\u05d0\u05d5\u05ea \u05e2\u05dc \u05dc\u05d9\u05d9\u05e7\u05d9\u05dd \u05d7\u05d3\u05e9\u05d9\u05dd"
+    },
+    "notify_matches": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u05e7\u05d1\u05dc\u05ea \u05d4\u05ea\u05e8\u05d0\u05d5\u05ea \u05e2\u05dc \u05d4\u05ea\u05d0\u05de\u05d5\u05ea \u05d5\u05d4\u05d5\u05d3\u05e2\u05d5\u05ea \u05d7\u05d3\u05e9\u05d5\u05ea"
+    },
+    "last_likes_notification_count": {
+      "type": "number",
+      "default": 0
+    },
+    "is_ruumr_plus": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has Ruumr Plus access"
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
