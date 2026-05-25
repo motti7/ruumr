@@ -965,9 +965,9 @@ export default function OnboardingPage() {
                         <label className="text-sm font-bold block mb-1.5" style={{ color: '#FA3803' }}>חיית מחמד שמצטרפת?</label>
                         <div className="flex gap-2 flex-wrap">
                             {[
-                                { type: 'none', label: 'אין ✕', icon: null },
-                                { type: 'dog', label: 'כלב', icon: <Dog className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
-                                { type: 'cat', label: 'חתול', icon: <Cat className="w-[1em] h-[1em] stroke-black stroke-[1.5]" style={{ fill: 'none' }} /> },
+                                { type: 'none', label: 'אין', icon: null },
+                                { type: 'dog', label: 'כלב', icon: null },
+                                { type: 'cat', label: 'חתול', icon: null },
                                 { type: 'other', label: 'אחר', icon: null }
                             ].map(({ type, label, icon }) =>
                                 <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
