@@ -462,22 +462,15 @@ export default function DiscoverPage() {
         <div style={{ height: 'calc(100dvh - 56px - 120px - env(safe-area-inset-top, 0px))', width: '100%', maxWidth: '448px', position: 'relative' }}>
           <AnimatePresence mode="wait">
             {hasProfiles ? (
-              profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, index, arr) => {
-                const isTopCard = index === arr.length - 1;
+              profiles.slice(currentIndex, currentIndex + 1).map((profile) => {
                 return (
-                  <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}-${index}`} onSkip={() => handleSwipe('dislike')}>
-                    <div
-                      className={`absolute inset-0 transition-all duration-300 ${
-                        isTopCard
-                          ? 'z-10 scale-100 translate-y-0 opacity-100'
-                          : '-z-10 scale-95 translate-y-8 opacity-80'
-                      }`}
-                    >
+                  <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
+                    <div className="absolute inset-0 z-10">
                       <ProfileCard
                         profile={profile}
                         onSwipe={handleSwipe}
                         onSwipeIntent={handleSwipeIntent}
-                        isActive={isTopCard}
+                        isActive={true}
                       />
                     </div>
                   </ErrorBoundary>

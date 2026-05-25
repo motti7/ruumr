@@ -652,10 +652,10 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                 animate={controls}
                 style={{ x, rotate, opacity }}
                 whileTap={{ scale: 1.02 }}
-                className={`absolute w-full h-full max-w-md px-2 cursor-grab active:cursor-grabbing z-10`}
+                className={`absolute w-full h-full max-w-md cursor-grab active:cursor-grabbing z-10`}
             >
                 <div 
-                    className={`relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
+                    className={`relative w-full h-full overflow-hidden shadow-2xl bg-white ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
                     onClick={handleTap}
                 >
                     <div className="absolute inset-0 bg-black">
