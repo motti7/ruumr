@@ -41,6 +41,20 @@ if (typeof window !== 'undefined') {
 initMixpanel()
 initSafeAreaInsets()
 
+// Track app entry source (mobile native vs web browser)
+;(async () => {
+  try {
+    const { Capacitor } = await import('@capacitor/core');
+    const { trackMixpanel } = await import('@/lib/mixpanelTracking');
+    const { base44 } = await import('@/api/base44Client');
+    const isNative = Capacitor.isNativePlatform();
+    const platform = isNative ? Capacitor.getPlatform() : 'web';
+    const source = isNative ? 'mobile' : 'web';
+    trackMixpanel('App Opened', { source, platform });
+    base44.analytics?.track?.({ eventName: 'app_opened', properties: { source, platform } });
+  } catch (_) {}
+})()
+
 // Capacitor status bar is configured natively via the Android build.
 
 // Register audit tools in development
