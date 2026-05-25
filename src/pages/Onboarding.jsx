@@ -323,10 +323,10 @@ export default function OnboardingPage() {
 
 
 
+
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
-          const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;
-          const hasGender = !!formData.gender;
+          const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;
           const hasVibe = !!formData.vibe_level;
           console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });
           return hasName && hasAge && hasGender && hasVibe;
@@ -1050,7 +1050,7 @@ export default function OnboardingPage() {
                         [...current, interest.id]
                         );
                       }}
-                      className={`px-1 py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 ${
+                      className={`py-0.5 rounded-full text-xs font-medium border border-solid transition-all flex items-center gap-0.5 px- ${
                       selected ?
                       'bg-[#FA3803] text-white border-[#FA3803]' :
                       'bg-white text-black border-[#B9BFC8]'}`
