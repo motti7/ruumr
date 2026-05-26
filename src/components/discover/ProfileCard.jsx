@@ -506,7 +506,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                                     </div>
                 }
                             </div>
-                            <div className="flex items-start text-white/90 text-base mb-3">
+                            <div className="flex items-start text-white/90 text-base mb-3 font-semibold">
                                 <MapPin className="w-5 h-5 ml-1 mt-1 flex-shrink-0" />
                                 <div className="flex flex-col">
                                     {profile.current_status === 'has_apartment' ?
@@ -568,7 +568,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                             </div>
             }
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-36">
-                            <span className="text-white text-xl font-semibold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
+                            <span className="text-white text-xl font-bold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
                         </div>
                     </>);
 
