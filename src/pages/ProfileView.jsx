@@ -591,18 +591,18 @@ export default function ProfileViewPage() {
           <div className="max-w-md mx-auto flex items-center justify-center gap-6">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('dislike')}
-              className="w-16 h-16 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shadow-lg hover:border-gray-400 transition-colors"
-            >
-              <X className="w-8 h-8 text-gray-600" strokeWidth={3} />
-            </motion.button>
-            
-            <motion.button
-              whileTap={{ scale: 0.9 }}
               onClick={() => handleSwipe('like')}
               className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow"
             >
               <Heart className="w-10 h-10 text-white" fill="white" />
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleSwipe('dislike')}
+              className="w-20 h-20 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shadow-lg hover:border-gray-400 transition-colors"
+            >
+              <X className="w-10 h-10 text-gray-600" strokeWidth={3} />
             </motion.button>
           </div>
         </div>

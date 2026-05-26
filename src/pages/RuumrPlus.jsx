@@ -210,19 +210,19 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={(e) => handleSwipeClick(e, "dislike")}
-              aria-label={`דחה את ${profile.name}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-gray-300"
-            >
-              <X className="h-4 w-4" strokeWidth={3} />
-            </button>
-            <button
-              type="button"
               onClick={(e) => handleSwipeClick(e, "like")}
               aria-label={`אהבתי את ${profile.name}`}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white shadow"
             >
               <Heart className="h-4 w-4" fill="white" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleSwipeClick(e, "dislike")}
+              aria-label={`דחה את ${profile.name}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-gray-300"
+            >
+              <X className="h-4 w-4" strokeWidth={3} />
             </button>
           </div>
           <span className="inline-flex items-center gap-1 text-sm font-bold text-[--theme-orange]">
