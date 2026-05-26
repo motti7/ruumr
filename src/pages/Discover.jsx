@@ -497,7 +497,7 @@ export default function DiscoverPage() {
 
       {/* Action buttons — floating above nav bar */}
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 72px)' }}>
+        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}
