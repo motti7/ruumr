@@ -4,6 +4,7 @@ import { ChevronDown, Check } from 'lucide-react';
 export default function CustomSelect({ label, value, onChange, options }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const listRef = useRef(null);
 
   const selected = options.find((o) => o.v === value);
 
@@ -12,11 +13,8 @@ export default function CustomSelect({ label, value, onChange, options }) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
-    // Use touchend (not touchstart) so scroll inside the dropdown isn't interrupted
-    document.addEventListener('touchend', handler);
     return () => {
       document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchend', handler);
     };
   }, []);
 
@@ -40,13 +38,18 @@ export default function CustomSelect({ label, value, onChange, options }) {
 
       {open &&
       <div
-        className="absolute z-50 w-full bg-white rounded-2xl overflow-y-auto"
+        ref={listRef}
+        className="absolute z-50 w-full bg-white rounded-2xl"
         style={{
           top: 'calc(100% + 4px)',
           boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-          maxHeight: '220px'
-        }}>
-        
+          maxHeight: '220px',
+          overflowY: 'scroll',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+        }}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
           {options.map((opt) =>
         <button
           key={opt.v}
