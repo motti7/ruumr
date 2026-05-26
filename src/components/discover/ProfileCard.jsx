@@ -546,28 +546,17 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
                         </div>
-                        {/* Interests scattered: top-left */}
-                        {interests.length > 0 &&
-            <div className="absolute top-12 left-4 z-20 flex flex-col items-start gap-2">
-                                {interests.slice(0, 2).map((interest) =>
-              <span key={interest} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
-                                        {getInterestLabel(interest)}
-                                    </span>
-              )}
-                            </div>
-            }
-                        {/* Interests: bottom-left above gradient */}
-                        {interests.length > 2 &&
-            <div className="absolute bottom-44 left-4 z-20 flex flex-col items-start gap-2">
-                                {interests.slice(2, 4).map((interest) =>
-              <span key={interest} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
-                                        {getInterestLabel(interest)}
-                                    </span>
-              )}
-                            </div>
-            }
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-36">
                             <span className="text-white text-xl font-bold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
+                            {interests.length > 0 &&
+                                <div className="flex flex-row-reverse flex-wrap gap-2 mt-3">
+                                    {interests.slice(0, 4).map((interest) =>
+                                        <span key={interest} className="bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/30">
+                                            {getInterestLabel(interest)}
+                                        </span>
+                                    )}
+                                </div>
+                            }
                         </div>
                     </>);
 
