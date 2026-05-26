@@ -588,9 +588,9 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     } else if (profile.current_status === 'has_apartment') {
       return (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
-                    <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
-                        <Home className="w-5 h-5 ml-2" />
+                    <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold">
                         תמונת הדירה שלי
+                        <Home className="w-5 h-5 mr-2" />
                     </div>
                 </div>);
 
