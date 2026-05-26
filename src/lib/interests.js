@@ -30,6 +30,9 @@ import {
   User as UserIcon,
   UtensilsCrossed,
   Zap,
+  Brush,
+  Coffee,
+  BedDouble,
 } from "lucide-react";
 
 const INTEREST_OPTIONS = [
@@ -54,6 +57,9 @@ const INTEREST_OPTIONS = [
   { id: "movies", label: "סרטים", Icon: Film, color: "bg-red-50 text-red-700 border-red-200" },
   { id: "nightlife", label: "חיי לילה", Icon: PartyPopper, color: "bg-violet-50 text-violet-700 border-violet-200" },
   { id: "fashion", label: "אופנה", Icon: Shirt, color: "bg-rose-50 text-rose-700 border-rose-200" },
+  { id: "clean_home", label: "שהבית מתוקתק", Icon: Brush, color: "bg-sky-50 text-sky-700 border-sky-200" },
+  { id: "morning_coffee", label: "קפה של בוקר", Icon: Coffee, color: "bg-amber-50 text-amber-700 border-amber-200" },
+  { id: "nap_time", label: 'שנ"צ ברזל', Icon: BedDouble, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
 ];
 
 const INTERESTS_BY_ID = new Map(INTEREST_OPTIONS.map((option) => [option.id, option]));
