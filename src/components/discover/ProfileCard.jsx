@@ -567,7 +567,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
               )}
                             </div>
             }
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-3">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-35">
                             <span className="text-white text-xl font-semibold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
                         </div>
                     </>);
