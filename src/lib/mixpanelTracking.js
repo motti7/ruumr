@@ -2,6 +2,23 @@ import mixpanel from 'mixpanel-browser';
 
 const MIXPANEL_TOKEN = (import.meta.env.VITE_MIXPANEL_TOKEN || '').trim();
 
+const EXCLUDED_EMAILS = [
+  'mottishif7@gmail.com',
+  'orlin1133@gmail.com',
+  'sbhtktchr582@gmail.com',
+  'oroscar8642@gmail.com',
+  'eitansolow@gmail.com',
+];
+
+let _currentUserEmail = null;
+
+export const setMixpanelUserEmail = (email) => {
+  _currentUserEmail = email ? email.toLowerCase().trim() : null;
+};
+
+export const isExcludedUser = () =>
+  _currentUserEmail !== null && EXCLUDED_EMAILS.includes(_currentUserEmail);
+
 export const isMixpanelHostAllowed = (hostname = '') => {
   const normalizedHostname = hostname.toLowerCase();
 
@@ -38,7 +55,7 @@ export const initMixpanel = () => {
 };
 
 export const trackMixpanel = (eventName, properties) => {
-  if (!shouldUseMixpanel()) {
+  if (!shouldUseMixpanel() || isExcludedUser()) {
     return false;
   }
 
@@ -53,6 +70,14 @@ export const trackMixpanel = (eventName, properties) => {
 
 export const identifyMixpanelUser = (userId, properties) => {
   if (!userId || !shouldUseMixpanel()) {
+    return false;
+  }
+
+  if (properties?.email) {
+    setMixpanelUserEmail(properties.email);
+  }
+
+  if (isExcludedUser()) {
     return false;
   }
 
