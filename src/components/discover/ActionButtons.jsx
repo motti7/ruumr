@@ -26,18 +26,6 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         <X className="w-8 h-8 pointer-events-none text-gray-800" strokeWidth={2.5} />
       </motion.button>
       
-      {/* Rewind */}
-      <motion.button
-        variants={buttonVariants}
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        onClick={onRewind}
-        className="w-12 h-12 min-w-[44px] min-h-[44px] bg-white/80 rounded-full shadow-md flex items-center justify-center touch-manipulation"
-      >
-        <RotateCcw className="w-5 h-5 pointer-events-none text-yellow-500" strokeWidth={2.5} />
-      </motion.button>
-
       {/* Like */}
       <motion.button
         variants={buttonVariants}
