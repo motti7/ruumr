@@ -490,7 +490,7 @@ export default function ProfilePage() {
       <div className="p-4 space-y-6">
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
                   <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
@@ -511,9 +511,15 @@ export default function ProfilePage() {
                   ) : (
                      <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? 'זכר' : formData.gender === 'female' ? 'נקבה' : 'אחר'}</p>
                   )}
-                </div>
-            </div>
-        </div>
+                  </div>
+                  <div className="text-right">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">הצטרף/ה</label>
+                  <p className="text-sm font-bold text-[--theme-orange]">
+                    {profile.created_date ? new Date(profile.created_date).toLocaleDateString('he-IL', { month: 'short', year: 'numeric' }) : '—'}
+                  </p>
+                  </div>
+                  </div>
+                  </div>
         
         <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
