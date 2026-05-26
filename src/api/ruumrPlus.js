@@ -19,20 +19,29 @@ export const RUUMR_PLUS_RECOMMENDATION_LIMIT = 5;
  */
 
 async function invokeBridge(action, payload = {}) {
-  const response = await base44.functions.invoke(BRIDGE_FUNCTION_NAME, {
+  const raw = await base44.functions.invoke(BRIDGE_FUNCTION_NAME, {
     action,
     ...payload,
   });
 
-  if (response && typeof response === "object" && response.ok === false) {
+  // Different SDK/runtime versions return either the parsed JSON body or a
+  // full axios-style envelope ({ data, status, ... }). Unwrap to the body so
+  // we read the bridge's actual payload, not the envelope.
+  const body =
+    raw && typeof raw === "object" && raw.data && !("ok" in raw) && !("result" in raw)
+      ? raw.data
+      : raw;
+
+  if (body && typeof body === "object" && body.ok === false) {
     const error = /** @type {Error & { payload?: unknown }} */ (
-      new Error(response.error || `Ruumr Plus action ${action} failed`)
+      new Error(body.error || `Ruumr Plus action ${action} failed`)
     );
-    error.payload = response;
+    error.payload = body;
     throw error;
   }
 
-  return response?.result ?? response;
+  // The bridge wraps the service response as { ok, action, result }.
+  return body?.result ?? body;
 }
 
 function uniqueProfilesByUserId(items = []) {

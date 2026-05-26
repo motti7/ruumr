@@ -401,16 +401,17 @@ export default function RuumrPlusPage() {
         userSwipes,
       });
 
-      const visibleUserIds = new Set(localProfiles.map((profile) => String(profile.user_id)));
-      const filteredRecommendations = Array.isArray(response?.recommendations)
-        ? (visibleUserIds.size > 0
-          ? response.recommendations.filter((recommendation) => visibleUserIds.has(String(recommendation.user_id)))
-          : response.recommendations)
+      // Use all recommendations the service returns. mergeRuumrPlusRecommendations
+      // fills profile data from the service payload itself, so we don't need the
+      // candidate to be in the client's locally-loaded list (that filter was
+      // silently dropping valid matches).
+      const serviceRecommendations = Array.isArray(response?.recommendations)
+        ? response.recommendations
         : [];
 
       const mergedRecommendations = mergeRuumrPlusRecommendations({
         localProfiles,
-        recommendations: filteredRecommendations,
+        recommendations: serviceRecommendations,
       });
 
       const activationRecord = buildRuumrPlusActivationRecord({
