@@ -12,10 +12,11 @@ export default function CustomSelect({ label, value, onChange, options }) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
+    // Use touchend (not touchstart) so scroll inside the dropdown isn't interrupted
+    document.addEventListener('touchend', handler);
     return () => {
       document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
+      document.removeEventListener('touchend', handler);
     };
   }, []);
 
