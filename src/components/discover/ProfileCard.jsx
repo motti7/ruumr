@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles } from "lucide-react";
+import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles, ArrowUp } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
@@ -467,14 +467,6 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                     {Math.round((Number(plusMeta.score) || 0) * 100)}%
                                 </div>
                             )}
-                            {/* Info button below tags */}
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1 self-end"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
                         </div>
 
                         {profile.social_link && (
@@ -540,18 +532,11 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
             if (logicalPhotoIndex === 1) {
                 return (
                     <>
-                        {/* Right column: vibe tag + info button */}
+                        {/* Right column: vibe tag */}
                         <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
                                 וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
                             </div>
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation mt-1"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
                         </div>
                         {/* Interests scattered: top-left */}
                         {interests.length > 0 && (
@@ -587,16 +572,7 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
             if (logicalPhotoIndex === 2) {
                 return (
                     <>
-                        {/* Info button on right */}
-<div className="absolute top-12 right-4 z-20">
-                            <button
-                                onClick={handleExpandOpen}
-                                className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-colors active:scale-95 touch-manipulation"
-                                aria-label="פרטים נוספים"
-                            >
-                                <Info className="w-5 h-5 text-[--theme-orange]" />
-                            </button>
-                        </div>
+
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
                             <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
                             <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
@@ -731,6 +707,18 @@ const ProfileCard = /** @type {any} */ (memo(function ProfileCard({ profile, onS
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white"/> : <Volume2 className="w-4 h-4 text-[--theme-orange]"/>}
                              </button>
                         </div>
+                    )}
+
+                    {/* Swipe up hint */}
+                    {isActive && (
+                        <button
+                            onClick={handleExpandOpen}
+                            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 touch-manipulation"
+                            aria-label="פרטים נוספים"
+                        >
+                            <ArrowUp className="w-5 h-5 text-white drop-shadow" strokeWidth={2.5} />
+                            <span className="text-white text-xs font-medium drop-shadow" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>החליקו לפרטים נוספים</span>
+                        </button>
                     )}
 
                     {/* Like / Nope Badges */}
