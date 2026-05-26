@@ -929,6 +929,21 @@ export default function OnboardingPage() {
                         </div>
                     </div>
 
+                    {/* זיקה לדת */}
+                    <div>
+                        <CustomSelect
+                  label="זיקה לדת"
+                  value={formData.religion}
+                  onChange={(v) => setFormField('religion', v)}
+                  options={[
+                  { v: 'secular', l: 'חילוני/ת' },
+                  { v: 'traditional', l: 'מסורתי/ת' },
+                  { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
+                  { v: 'religious', l: 'דתי/ה' },
+                  { v: 'haredi', l: 'חרדי/ת' }]
+                  } />
+                    </div>
+
                     {/* כשרות + שבת */}
                     <div className="grid grid-cols-2 gap-4">
                         <CustomSelect
@@ -943,21 +958,6 @@ export default function OnboardingPage() {
                   onChange={(v) => setFormField('shabbat_preference', v)}
                   options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]} />
                 
-                    </div>
-
-                    {/* זיקה לדת */}
-                    <div>
-                        <CustomSelect
-                  label="זיקה לדת"
-                  value={formData.religion}
-                  onChange={(v) => setFormField('religion', v)}
-                  options={[
-                  { v: 'secular', l: 'חילוני/ת' },
-                  { v: 'traditional', l: 'מסורתי/ת' },
-                  { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
-                  { v: 'religious', l: 'דתי/ה' },
-                  { v: 'haredi', l: 'חרדי/ת' }]
-                  } />
                     </div>
 
                     {/* חיית מחמד */}
