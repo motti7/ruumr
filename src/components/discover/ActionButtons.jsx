@@ -12,7 +12,7 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
   };
 
   return (
-    <div className="flex justify-center items-center z-20 select-none gap-23" dir="ltr">
+    <div className="flex justify-center items-center z-20 select-none gap-20 px-2" dir="ltr">
       {/* Dislike — min 44px touch target */}
       {/* Dislike */}
       <motion.button
