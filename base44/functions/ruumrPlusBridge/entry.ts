@@ -47,6 +47,31 @@ function cleanObject(value: Record<string, unknown>) {
     );
 }
 
+function normalizeCityValues(value: unknown) {
+    const values = Array.isArray(value) ? value.flat(Infinity) : value == null ? [] : [value];
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    for (const entry of values) {
+        const parts = String(entry ?? '')
+            .split(/[,\n\r|]+/g)
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        for (const city of parts) {
+            const key = city.toLowerCase();
+            if (seen.has(key)) {
+                continue;
+            }
+
+            seen.add(key);
+            result.push(city);
+        }
+    }
+
+    return result;
+}
+
 function makeEventId(prefix: string, userId: string) {
     return `${prefix}_${userId}_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
 }
@@ -145,12 +170,17 @@ async function loadCurrentUser(base44: ReturnType<typeof createClientFromRequest
 }
 
 function normalizeProfile(profile: Record<string, unknown>) {
+    const searchCities = normalizeCityValues(profile.search_cities);
+    const locationCities = normalizeCityValues(profile.location);
+    const normalizedSearchCities = normalizeCityValues([...searchCities, ...locationCities]);
+
     return cleanObject({
+        user_id: profile.user_id,
         name: profile.name,
         age: profile.age,
         gender: profile.gender,
-        location: profile.location,
-        search_cities: profile.search_cities,
+        location: normalizedSearchCities[0] ?? profile.location,
+        search_cities: normalizedSearchCities,
         search_area: profile.search_area,
         budget_min: profile.budget_min,
         budget_max: profile.budget_max,

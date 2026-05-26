@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
+import CitySelect from "@/components/shared/CitySelect";
 import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
@@ -16,6 +17,40 @@ import SmartImage from '@/components/shared/SmartImage';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
+
+function normalizeCityValues(value) {
+  const values = Array.isArray(value) ? value.flat(Infinity) : value == null ? [] : [value];
+  const seen = new Set();
+  const result = [];
+
+  values.forEach((entry) => {
+    String(entry ?? "")
+      .split(/[,\n\r|]+/g)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .forEach((city) => {
+        const key = city.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push(city);
+        }
+      });
+  });
+
+  return result;
+}
+
+function normalizeProfileCities(profile = {}) {
+  const searchCities = normalizeCityValues(profile.search_cities);
+  const locationCities = normalizeCityValues(profile.location);
+  const normalizedSearchCities = normalizeCityValues([...searchCities, ...locationCities]);
+
+  return {
+    ...profile,
+    search_cities: normalizedSearchCities,
+    location: normalizedSearchCities[0] || "",
+  };
+}
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(/** @type {any} */ (null));
@@ -43,8 +78,9 @@ export default function ProfilePage() {
           ...userProfiles[0],
           interests: normalizeInterestValues(userProfiles[0].interests),
         });
-        setProfile(mergedProfile);
-        setFormData(mergedProfile);
+        const normalizedProfile = normalizeProfileCities(mergedProfile);
+        setProfile(normalizedProfile);
+        setFormData(normalizedProfile);
       } else {
         window.location.href = createPageUrl('Onboarding');
       }
@@ -78,8 +114,9 @@ export default function ProfilePage() {
 
     try {
       if (profile) {
+        const cityData = normalizeProfileCities(formData);
         const dataToSave = {
-          ...formData,
+          ...cityData,
           interests: normalizeInterestValues(formData.interests),
           social_link: cleanSocial,
         };
@@ -266,6 +303,15 @@ export default function ProfilePage() {
 
   const setFormField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const setSearchCities = (cities) => {
+    const normalizedCities = normalizeCityValues(cities);
+    setFormData(prev => ({
+      ...prev,
+      search_cities: normalizedCities,
+      location: normalizedCities[0] || "",
+    }));
   };
 
   const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
@@ -935,8 +981,12 @@ export default function ProfilePage() {
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">עיר מועדפת (אופציונלי)</label>
-                <Input disabled={!isEditing} value={formData.location} onChange={e => setFormField('location', e.target.value)} placeholder="לדוגמה: תל אביב" className="bg-white border-gray-300 text-right" dir="rtl" />
+                <label className="block text-right text-sm font-bold text-gray-700 mb-1">ערים מועדפות</label>
+                <CitySelect
+                  disabled={!isEditing}
+                  selectedCities={formData.search_cities || []}
+                  onChange={setSearchCities}
+                />
             </div>
         </div>
       </div>

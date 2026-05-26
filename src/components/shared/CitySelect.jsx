@@ -11,21 +11,26 @@ const CITIES = [
 "קצרין", "קריית שמונה", "סח'נין", "נשר", "מעלות-תרשיחא", "אופקים", "שדרות", "גבעת שמואל", "טירה", "טייבה"].
 sort();
 
-export default function CitySelect({ selectedCities = [], onChange }) {
+export default function CitySelect({ selectedCities = [], onChange, disabled = false }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
   const containerRef = useRef(null);
+  const safeSelectedCities = Array.isArray(selectedCities) ? selectedCities : [];
 
   const filtered = query.trim() ?
   CITIES.filter((c) => c.includes(query.trim())) :
   CITIES;
 
   const toggleCity = (city) => {
-    if (selectedCities.includes(city)) {
-      onChange(selectedCities.filter((c) => c !== city));
+    if (disabled) {
+      return;
+    }
+
+    if (safeSelectedCities.includes(city)) {
+      onChange(safeSelectedCities.filter((c) => c !== city));
     } else {
-      onChange([...selectedCities, city]);
+      onChange([...safeSelectedCities, city]);
       setQuery('');
       setOpen(false);
       inputRef.current?.blur();
@@ -48,19 +53,20 @@ export default function CitySelect({ selectedCities = [], onChange }) {
     <div ref={containerRef} className="relative w-full">
       {/* Main input trigger */}
       <div
-        className="w-full min-h-[44px] px-3 rounded-md border border-input bg-white text-sm shadow-sm flex items-center gap-1.5 cursor-text py-2 my-2"
-        onClick={() => {setOpen(true);inputRef.current?.focus();}}>
+        className={`w-full min-h-[44px] px-3 rounded-md border border-input bg-white text-sm shadow-sm flex items-center gap-1.5 py-2 my-2 ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-text'}`}
+        onClick={() => {if (!disabled) {setOpen(true);inputRef.current?.focus();}}}>
         
         {/* Selected city tags */}
-        {selectedCities.length > 0 &&
+        {safeSelectedCities.length > 0 &&
         <div className="flex gap-1.5 flex-nowrap overflow-x-auto flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
-            {selectedCities.map((city) =>
+            {safeSelectedCities.map((city) =>
           <span
             key={city}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-xs font-semibold whitespace-nowrap border border-orange-200 flex-shrink-0"
             style={{ color: '#FA3803' }}>
             
                 {city}
+                {!disabled &&
                 <span
               role="button"
               onMouseDown={(e) => {e.preventDefault();e.stopPropagation();toggleCity(city);}}
@@ -68,6 +74,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
               
                   <X className="h-3 w-3" />
                 </span>
+                }
               </span>
           )}
           </div>
@@ -78,10 +85,11 @@ export default function CitySelect({ selectedCities = [], onChange }) {
           ref={inputRef}
           type="text"
           value={query}
+          disabled={disabled}
           onChange={(e) => {setQuery(e.target.value);setOpen(true);}}
-          onFocus={() => setOpen(true)}
-          placeholder={selectedCities.length === 0 ? 'בחר ערים...' : ''}
-          className="flex-1 min-w-[60px] bg-transparent outline-none border-none text-sm text-right placeholder-gray-400"
+          onFocus={() => {if (!disabled) setOpen(true);}}
+          placeholder={safeSelectedCities.length === 0 ? 'בחר ערים...' : ''}
+          className="flex-1 min-w-[60px] bg-transparent outline-none border-none text-sm text-right placeholder-gray-400 disabled:cursor-not-allowed"
           style={{ boxShadow: 'none' }}
           dir="rtl" />
         
@@ -108,7 +116,7 @@ export default function CitySelect({ selectedCities = [], onChange }) {
           className="flex items-center justify-between px-3 py-2.5 text-sm cursor-pointer hover:bg-orange-50 transition-colors">
           
               <span>{city}</span>
-              {selectedCities.includes(city) && <Check className="h-4 w-4 text-[--theme-orange]" />}
+              {safeSelectedCities.includes(city) && <Check className="h-4 w-4 text-[--theme-orange]" />}
             </div>
         )}
         </div>

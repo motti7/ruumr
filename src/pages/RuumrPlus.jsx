@@ -11,6 +11,7 @@ import {
   activateRuumrPlusRecommendations,
   mergeRuumrPlusRecommendations,
   RUUMR_PLUS_RECOMMENDATION_LIMIT,
+  syncCurrentProfileToRuumrPlus,
 } from "@/api/ruumrPlus";
 import {
   buildSimulatorRuumrPlusRecommendations,
@@ -387,6 +388,12 @@ export default function RuumrPlusPage() {
     }));
 
     try {
+      try {
+        await syncCurrentProfileToRuumrPlus();
+      } catch (syncError) {
+        console.error("Failed to sync current profile before Ruumr Plus activation:", syncError);
+      }
+
       const response = await activateRuumrPlusRecommendations({
         userId: currentUser.id,
         localProfiles,
