@@ -265,7 +265,7 @@ export default function RuumrPlusPage() {
                 : "Ruumr Plus",
       description:
         nextStatus === "active"
-          ? `הופעל לפני פחות מ-24 שעות. אפשר להפעיל שוב בעוד ${formatActivationWindow(remainingMs)}.`
+          ? "Plus פעיל. אפשר להפעיל שוב בכל עת."
           : nextStatus === "saved"
             ? "התוצאות האחרונות נשמרו כאן. אפשר להפעיל שוב עכשיו."
             : nextStatus === "locked"
@@ -376,21 +376,7 @@ export default function RuumrPlusPage() {
       return null;
     }
 
-    const savedActivation = loadRuumrPlusActivation(currentUser.id);
-    if (savedActivation && isRuumrPlusActivationFresh(savedActivation)) {
-      const restored = applyActivationRecord(savedActivation, {
-        statusOverride: "active",
-        sourceOverride: savedActivation.source ?? "saved",
-      });
-      trackPlusEvent("plus_activated", "Plus Activated", {
-        source,
-        from_cache: true,
-        matched_count: restored?.recommendations?.length ?? 0,
-        result_source: savedActivation.source ?? "saved",
-      });
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      return restored;
-    }
+    // No cooldown — always allow re-running Plus
 
     setIsActivating(true);
     setPlusState((prev) => ({
@@ -558,11 +544,9 @@ export default function RuumrPlusPage() {
     ? "מפעיל/ה Plus..."
     : isLocked
       ? "Plus עדיין לא זמין"
-      : activationRecord && activationFresh
-        ? "הצג/י תוצאות Plus"
-        : activationRecord
-          ? "הפעל/י Plus שוב"
-          : "הפעל/י Plus";
+      : activationRecord
+        ? "הפעל/י Plus שוב"
+        : "הפעל/י Plus";
   const resultsHeading = activationRecord
     ? "התוצאות האחרונות שלך ב-Ruumr Plus"
     : "התוצאות שלך ב-Ruumr Plus";
@@ -577,10 +561,7 @@ export default function RuumrPlusPage() {
       return;
     }
 
-    if (activationRecord && activationFresh) {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
+    // Always allow re-running Plus, even if fresh
 
     activatePlus({ source: "hero" }).catch((error) => {
       console.error("Failed to activate Ruumr Plus from the primary action:", error);
