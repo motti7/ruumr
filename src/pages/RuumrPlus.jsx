@@ -18,6 +18,7 @@ import {
 } from "@/lib/ruumrPlusSimulator";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
+import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import {
   buildRuumrPlusActivationRecord,
   consumeRuumrPlusActivationIntent,
@@ -39,6 +40,8 @@ import {
   Sparkles,
   UsersRound,
   ChevronLeft,
+  Heart,
+  X,
 } from "lucide-react";
 
 const featureCards = [
@@ -118,7 +121,8 @@ function trackPlusEvent(eventName, mixpanelName, properties = {}) {
   trackMixpanel(mixpanelName, properties);
 }
 
-function RuumrPlusRecommendationCard({ profile, position }) {
+function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
+  const navigate = useNavigate();
   const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const score = Math.round((Number(plusMeta?.score) || 0) * 100);
   const locationLabel = getRecommendationLocation(profile) || "ללא מיקום";
@@ -131,16 +135,28 @@ function RuumrPlusRecommendationCard({ profile, position }) {
     ...sharedInterests.slice(0, 2).map((interest) => getInterestLabel(interest)),
   ];
 
+  const openProfile = () => {
+    trackPlusEvent("plus_recommendation_clicked", "Plus Recommendation Clicked", {
+      target_profile_id: profile.user_id,
+      position,
+      score: plusMeta?.score ?? null,
+      messageable: Boolean(plusMeta?.messageable),
+    });
+    navigate(`${createPageUrl("ProfileView")}?userId=${encodeURIComponent(profile.user_id)}&fromPlus=true`);
+  };
+
+  const handleSwipeClick = (event, action) => {
+    event.stopPropagation();
+    onSwipe?.(profile.user_id, action);
+  };
+
   return (
-    <Link
-      to={`${createPageUrl("ProfileView")}?userId=${encodeURIComponent(profile.user_id)}&fromPlus=true`}
-      onClick={() => trackPlusEvent("plus_recommendation_clicked", "Plus Recommendation Clicked", {
-        target_profile_id: profile.user_id,
-        position,
-        score: plusMeta?.score ?? null,
-        messageable: Boolean(plusMeta?.messageable),
-      })}
-      className="group overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={openProfile}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProfile(); } }}
+      className="group cursor-pointer overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       aria-label={`פתח/י את הפרופיל של ${profile.name}`}
     >
       <div className="relative aspect-[4/3] bg-gray-100">
@@ -191,16 +207,31 @@ function RuumrPlusRecommendationCard({ profile, position }) {
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-xs font-medium text-gray-500">
-            {plusMeta?.messageable ? "אפשר לכתוב עכשיו" : "נדרש Plus להודעות"}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => handleSwipeClick(e, "dislike")}
+              aria-label={`דחה את ${profile.name}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-gray-300"
+            >
+              <X className="h-4 w-4" strokeWidth={3} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleSwipeClick(e, "like")}
+              aria-label={`אהבתי את ${profile.name}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white shadow"
+            >
+              <Heart className="h-4 w-4" fill="white" />
+            </button>
+          </div>
           <span className="inline-flex items-center gap-1 text-sm font-bold text-[--theme-orange]">
             פתח/י פרופיל
             <ChevronLeft className="w-4 h-4" />
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -588,6 +619,57 @@ export default function RuumrPlusPage() {
     });
   }, [activatePlus, cooldownActive, isLocked, currentProfile, currentUser, isActivating]);
 
+  // Like/reject a Ruumr Plus recommendation from a card. Records the swipe (so
+  // it behaves like Discover and won't resurface), removes the card, and forms
+  // a match on a mutual like.
+  const handleCardSwipe = useCallback(async (swipedUserId, action) => {
+    if (!currentUser || !currentProfile) {
+      return;
+    }
+    const swipedProfile = plusRecommendations.find((p) => String(p.user_id) === String(swipedUserId)) || null;
+    setPlusRecommendations((prev) => prev.filter((p) => String(p.user_id) !== String(swipedUserId)));
+
+    // Persist the removal so the swiped card doesn't reappear on reload.
+    const storedActivation = loadRuumrPlusActivation(currentUser.id);
+    if (storedActivation) {
+      const remaining = (storedActivation.recommendations || []).filter(
+        (p) => String(p.user_id) !== String(swipedUserId)
+      );
+      const updated = saveRuumrPlusActivation(currentUser.id, {
+        ...storedActivation,
+        recommendations: remaining,
+        matched_count: remaining.length,
+      });
+      if (updated) {
+        setActivationRecord(updated);
+      }
+    }
+
+    trackPlusEvent("plus_recommendation_swiped", "Plus Recommendation Swiped", {
+      target_profile_id: swipedUserId,
+      action,
+    });
+    try {
+      await Swipe.create({
+        swiper_id: currentProfile.user_id,
+        swiper_name: currentProfile.name,
+        swiped_id: swipedUserId,
+        swiped_name: swipedProfile?.name,
+        action,
+      });
+      if (action === "like") {
+        await processSwipeMatch({
+          swiperId: currentProfile.user_id,
+          swipedId: swipedUserId,
+          action,
+          origin: window.location.origin,
+        });
+      }
+    } catch (error) {
+      console.error("Ruumr Plus card swipe failed:", error);
+    }
+  }, [currentUser, currentProfile, plusRecommendations]);
+
   const statusStyles = {
     idle: "bg-white/15 text-white border border-white/10",
     saved: "bg-white/15 text-white border border-white/10",
@@ -733,7 +815,7 @@ export default function RuumrPlusPage() {
           ) : plusRecommendations.length > 0 ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {plusRecommendations.slice(0, RUUMR_PLUS_RECOMMENDATION_LIMIT).map((profile, index) => (
-                <RuumrPlusRecommendationCard key={profile.user_id} profile={profile} position={index} />
+                <RuumrPlusRecommendationCard key={profile.user_id} profile={profile} position={index} onSwipe={handleCardSwipe} />
               ))}
             </div>
           ) : (

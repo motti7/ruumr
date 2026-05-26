@@ -153,8 +153,8 @@ export default function ProfileViewPage() {
         if (m1.length > 0 || m2.length > 0) setIsExMatch(true);
       } catch(e) {}
 
-      // Show swipe actions only when coming from likes and not yet swiped
-      if (fromLikes === 'true') {
+      // Show like/reject actions when arriving from Likes or Ruumr Plus, and not yet swiped.
+      if (fromLikes === 'true' || urlParams.get("fromPlus") === 'true') {
         const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
         setShowActions(existingSwipe.length === 0);
       }
@@ -314,7 +314,7 @@ export default function ProfileViewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20" dir="rtl">
+    <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden" dir="rtl">
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>

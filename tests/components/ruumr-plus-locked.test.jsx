@@ -25,6 +25,7 @@ vi.mock('@/lib/simulatorMode', () => ({
   isRuumrSimulatorMode: () => false,
   isRuumrSimulatorPlusLocked: () => false,
 }));
+vi.mock('@/lib/swipeMatchProcessing', () => ({ processSwipeMatch: vi.fn() }));
 vi.mock('@/components/shared/SmartImage', () => ({ default: () => null }));
 vi.mock('@/lib/interests', () => ({ getInterestLabel: (value) => value }));
 
