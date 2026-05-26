@@ -497,7 +497,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
               })()}
                             </a>
             }
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-28 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
                                 {profile.is_verified &&
@@ -559,7 +559,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
             }
                         {/* Interests: bottom-left above gradient */}
                         {interests.length > 2 &&
-            <div className="absolute bottom-32 left-4 z-20 flex flex-col items-start gap-2">
+            <div className="absolute bottom-44 left-4 z-20 flex flex-col items-start gap-2">
                                 {interests.slice(2, 4).map((interest) =>
               <span key={interest} className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/20">
                                         {getInterestLabel(interest)}
@@ -578,7 +578,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
         return (
           <>
 
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
                             <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
                             <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
                         </div>
@@ -587,7 +587,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
       }
     } else if (profile.current_status === 'has_apartment') {
       return (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-14 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
                     <div className="inline-flex items-center bg-[--theme-orange] px-4 py-2 rounded-full text-white font-bold">
                         <Home className="w-5 h-5 ml-2" />
                         תמונת הדירה שלי
