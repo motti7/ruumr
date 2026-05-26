@@ -12,7 +12,7 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
   };
 
   return (
-    <div className="flex justify-center items-center gap-6 z-20 select-none" dir="ltr">
+    <div className="flex justify-center items-center z-20 select-none gap-2" dir="ltr">
       {/* Dislike — min 44px touch target */}
       {/* Dislike */}
       <motion.button
@@ -21,8 +21,8 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onDislike}
-        className="w-16 h-16 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg flex items-center justify-center touch-manipulation"
-      >
+        className="w-16 h-16 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg flex items-center justify-center touch-manipulation">
+        
         <X className="w-8 h-8 pointer-events-none text-gray-800" strokeWidth={2.5} />
       </motion.button>
       
@@ -33,10 +33,10 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onLike}
-        className="w-16 h-16 min-w-[44px] min-h-[44px] bg-red-500 rounded-full shadow-lg flex items-center justify-center touch-manipulation"
-      >
+        className="w-16 h-16 min-w-[44px] min-h-[44px] bg-red-500 rounded-full shadow-lg flex items-center justify-center touch-manipulation">
+        
         <Heart className="w-8 h-8 pointer-events-none text-white" fill="white" />
       </motion.button>
-    </div>
-  );
+    </div>);
+
 }
