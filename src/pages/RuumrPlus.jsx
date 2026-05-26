@@ -250,7 +250,9 @@ export default function RuumrPlusPage() {
 
     const fresh = isRuumrPlusActivationFresh(normalized);
     const remainingMs = getRuumrPlusActivationRemainingMs(normalized);
-    const nextStatus = statusOverride ?? (fresh ? "active" : "saved");
+    const hasRecs = (normalized.recommendations?.length ?? 0) > 0;
+    // Only a fresh run that returned results enters the 24h cooldown ("active").
+    const nextStatus = statusOverride ?? (fresh && hasRecs ? "active" : "saved");
 
     setPlusState({
       status: nextStatus,
@@ -266,7 +268,7 @@ export default function RuumrPlusPage() {
                 : "Ruumr Plus",
       description:
         nextStatus === "active"
-          ? "Plus פעיל. אפשר להפעיל שוב בכל עת."
+          ? `Plus פעיל. אפשר להפעיל שוב בעוד ${formatActivationWindow(remainingMs)}.`
           : nextStatus === "saved"
             ? "התוצאות האחרונות נשמרו כאן. אפשר להפעיל שוב עכשיו."
             : nextStatus === "locked"
@@ -326,7 +328,6 @@ export default function RuumrPlusPage() {
       const savedActivation = loadRuumrPlusActivation(user.id);
       if (savedActivation) {
         applyActivationRecord(savedActivation, {
-          statusOverride: isRuumrPlusActivationFresh(savedActivation) ? "active" : "saved",
           sourceOverride: savedActivation.source ?? "saved",
           candidateCount: Math.max(0, profiles.length - 1),
         });
@@ -377,7 +378,17 @@ export default function RuumrPlusPage() {
       return null;
     }
 
-    // No cooldown — always allow re-running Plus
+    // Cooldown: a fresh run that returned matches locks re-runs for 24h. An
+    // empty past run never locks, so the user can retry to pick up new
+    // candidates.
+    const existing = loadRuumrPlusActivation(currentUser.id);
+    if (existing && isRuumrPlusActivationFresh(existing) && (existing.recommendations?.length ?? 0) > 0) {
+      applyActivationRecord(existing, { sourceOverride: existing.source ?? "saved" });
+      window.requestAnimationFrame(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return existing;
+    }
 
     setIsActivating(true);
     setPlusState((prev) => ({
@@ -428,7 +439,6 @@ export default function RuumrPlusPage() {
 
       const savedActivation = saveRuumrPlusActivation(currentUser.id, activationRecord) || activationRecord;
       applyActivationRecord(savedActivation, {
-        statusOverride: isRuumrPlusActivationFresh(savedActivation) ? "active" : "saved",
         sourceOverride: savedActivation.source ?? response?.mode ?? source,
         candidateCount: Math.max(0, localProfiles.length - 1),
       });
@@ -488,7 +498,6 @@ export default function RuumrPlusPage() {
           if (activationRecord) {
             const savedActivation = saveRuumrPlusActivation(currentUser.id, activationRecord) || activationRecord;
             applyActivationRecord(savedActivation, {
-              statusOverride: "active",
               sourceOverride: "simulator-fallback",
               candidateCount: Math.max(0, localProfiles.length - 1),
             });
@@ -548,13 +557,18 @@ export default function RuumrPlusPage() {
 
   const activationFresh = activationRecord ? isRuumrPlusActivationFresh(activationRecord) : false;
   const isLocked = plusState.status === "locked";
+  // The 24h cooldown only applies when a fresh run actually returned matches.
+  const cooldownActive = activationFresh && plusRecommendations.length > 0;
+  const cooldownRemainingMs = cooldownActive ? getRuumrPlusActivationRemainingMs(activationRecord) : 0;
   const primaryActionLabel = isActivating
     ? "מפעיל/ה Plus..."
     : isLocked
       ? "Plus עדיין לא זמין"
-      : activationRecord
-        ? "הפעל/י Plus שוב"
-        : "הפעל/י Plus";
+      : cooldownActive
+        ? `זמין שוב בעוד ${formatActivationWindow(cooldownRemainingMs)}`
+        : activationRecord
+          ? "הפעל/י Plus שוב"
+          : "הפעל/י Plus";
   const resultsHeading = activationRecord
     ? "התוצאות האחרונות שלך ב-Ruumr Plus"
     : "התוצאות שלך ב-Ruumr Plus";
@@ -565,16 +579,14 @@ export default function RuumrPlusPage() {
     : "כאן תראה/י את ההתאמות שחושבו עבורך, בלי לצאת ממסך Plus.";
 
   const handlePrimaryAction = useCallback(() => {
-    if (isActivating || !currentUser || !currentProfile) {
+    if (isActivating || isLocked || cooldownActive || !currentUser || !currentProfile) {
       return;
     }
-
-    // Always allow re-running Plus, even if fresh
 
     activatePlus({ source: "hero" }).catch((error) => {
       console.error("Failed to activate Ruumr Plus from the primary action:", error);
     });
-  }, [activatePlus, activationFresh, activationRecord, currentProfile, currentUser, isActivating]);
+  }, [activatePlus, cooldownActive, isLocked, currentProfile, currentUser, isActivating]);
 
   const statusStyles = {
     idle: "bg-white/15 text-white border border-white/10",
@@ -633,7 +645,7 @@ export default function RuumrPlusPage() {
               <Button
                 type="button"
                 onClick={handlePrimaryAction}
-                disabled={isActivating || isLocked || !currentUser || !currentProfile}
+                disabled={isActivating || isLocked || cooldownActive || !currentUser || !currentProfile}
                 className="flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[--theme-orange] font-bold shadow-lg hover:bg-white/90 disabled:opacity-60"
               >
                 {(isActivating || (!currentUser && !currentProfile)) ? (
