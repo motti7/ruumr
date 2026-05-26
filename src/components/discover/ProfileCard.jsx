@@ -549,7 +549,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-36">
                             <span className="text-white text-xl font-bold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
                             {interests.length > 0 &&
-                                <div className="flex flex-row-reverse flex-wrap gap-2 mt-3">
+                                <div className="flex flex-wrap gap-2 mt-3">
                                     {interests.slice(0, 4).map((interest) =>
                                         <span key={interest} className="bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/30">
                                             {getInterestLabel(interest)}
