@@ -457,7 +457,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
         return (
           <>
                         {/* Right column: info button + tags */}
-                        <div className="absolute top-[52px] right-4 z-20 flex flex-col items-end gap-2">
+                        <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
                             {profile.team_target &&
               <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
                                     <Users className="w-3 h-3" />
