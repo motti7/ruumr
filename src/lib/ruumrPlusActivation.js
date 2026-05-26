@@ -104,6 +104,10 @@ export function isRuumrPlusActivationFresh(record = null, now = Date.now()) {
     return false;
   }
 
+  if ((normalized.recommendations?.length ?? 0) === 0) {
+    return false;
+  }
+
   return new Date(normalized.expires_at).getTime() > now;
 }
 
