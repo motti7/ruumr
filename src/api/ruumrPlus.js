@@ -191,7 +191,7 @@ export function mergeRuumrPlusRecommendations({ localProfiles = [], recommendati
     localByUserId.set(String(profile.user_id), profile);
   });
 
-  return uniqueProfilesByUserId(recommendations).map((recommendation) => {
+  const merged = uniqueProfilesByUserId(recommendations).map((recommendation) => {
     const recommendationProfile = recommendation.profile || {};
     const localProfile = localByUserId.get(String(recommendation.user_id)) || {};
     const mergedProfile = {
@@ -212,5 +212,22 @@ export function mergeRuumrPlusRecommendations({ localProfiles = [], recommendati
     };
 
     return mergedProfile;
+  });
+
+  // Display is sliced and shown in array order, so guarantee descending match
+  // score here rather than trusting whatever order the service returned.
+  // Null/unknown scores sort last. Ties fall back to the secondary signals.
+  const scoreOf = (profile) => {
+    const value = Number(profile?.ruumrPlus?.score);
+    return Number.isFinite(value) ? value : -Infinity;
+  };
+  const semanticOf = (profile) => {
+    const value = Number(profile?.ruumrPlus?.semantic_similarity);
+    return Number.isFinite(value) ? value : -Infinity;
+  };
+
+  return merged.sort((left, right) => {
+    if (scoreOf(right) !== scoreOf(left)) return scoreOf(right) - scoreOf(left);
+    return semanticOf(right) - semanticOf(left);
   });
 }
