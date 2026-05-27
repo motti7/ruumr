@@ -97,14 +97,12 @@ function formatActivationWindow(milliseconds = 0) {
     return "כעת";
   }
 
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours > 0) {
-    return minutes > 0 ? `${hours} שעות ו-${minutes} דקות` : `${hours} שעות`;
+  // Under an hour: show minutes. Otherwise show whole hours only (no trailing minutes).
+  if (totalMinutes < 60) {
+    return `${totalMinutes} דקות`;
   }
 
-  return `${totalMinutes} דקות`;
+  return `${Math.round(totalMinutes / 60)} שעות`;
 }
 
 // Fire to both analytics sinks (Base44 + Mixpanel) without ever disrupting the
