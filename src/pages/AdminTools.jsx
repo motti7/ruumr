@@ -130,6 +130,7 @@ export default function AdminToolsPage() {
         <div className="flex items-center gap-3 mb-2">
           <Sparkles className="w-6 h-6 text-[--theme-orange]" />
           <h1 className="text-2xl font-black text-gray-900">ניהול Ruumr Plus</h1>
+          <span className="text-sm font-medium text-gray-500">({users.length} משתמשים)</span>
         </div>
         <p className="text-sm text-gray-500 mb-5">
           הפעלה מסנכרנת את הדגל ב-Base44 ואת ההרשאה בשרת Plus בלחיצה אחת.
@@ -222,7 +223,7 @@ export default function AdminToolsPage() {
 
         {filtered.length > 100 && (
           <p className="mt-3 text-center text-xs text-gray-400">
-            מוצגים 100 הראשונים — צמצם/י את החיפוש כדי למצוא משתמש ספציפי.
+            מוצגים 100 מתוך {filtered.length} — כל המשתמשים נטענו; השתמש/י בחיפוש כדי למצוא מישהו ספציפי.
           </p>
         )}
       </div>

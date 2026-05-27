@@ -138,8 +138,8 @@ export async function fetchRuumrPlusEntitlements(options = {}) {
  * directly — Base44 restricts that to project collaborators.
  */
 export async function searchRuumrPlusUsers(options = {}) {
-  const { limit = 2000 } = options;
-  const result = await invokeBridge("admin.users.search", { limit });
+  // No default limit: the bridge paginates the full user set server-side.
+  const result = await invokeBridge("admin.users.search", { limit: options.limit });
   return Array.isArray(result?.users) ? result.users : [];
 }
 
