@@ -6,18 +6,15 @@ import React from 'react';
 // Shared mock fns, hoisted so the vi.mock factories below can close over them.
 const mocks = vi.hoisted(() => ({
   me: vi.fn(),
-  list: vi.fn(),
-  update: vi.fn(),
+  search: vi.fn(),
   grant: vi.fn(),
   revoke: vi.fn(),
   navigate: vi.fn(),
 }));
 
 vi.mock('@/entities/User', () => ({ User: { me: mocks.me } }));
-vi.mock('@/api/base44Client', () => ({
-  base44: { entities: { User: { list: mocks.list, update: mocks.update } } },
-}));
 vi.mock('@/api/ruumrPlus', () => ({
+  searchRuumrPlusUsers: mocks.search,
   grantRuumrPlusEntitlement: mocks.grant,
   revokeRuumrPlusEntitlement: mocks.revoke,
 }));
@@ -31,9 +28,9 @@ let AdminToolsPage;
 beforeEach(async () => {
   vi.clearAllMocks();
   mocks.me.mockResolvedValue({ id: 'admin1', role: 'admin', email: 'admin@ruumr.app' });
-  mocks.update.mockResolvedValue({});
-  mocks.grant.mockResolvedValue({ ok: true });
-  mocks.revoke.mockResolvedValue({ ok: true });
+  mocks.search.mockResolvedValue([]);
+  mocks.grant.mockResolvedValue({ is_ruumr_plus: true });
+  mocks.revoke.mockResolvedValue({ is_ruumr_plus: false });
   vi.resetModules();
   AdminToolsPage = (await import('@/pages/AdminTools')).default;
 });
@@ -54,11 +51,11 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     mocks.me.mockResolvedValue({ id: 'u1', role: 'user' });
     renderPage();
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalled());
-    expect(mocks.list).not.toHaveBeenCalled();
+    expect(mocks.search).not.toHaveBeenCalled();
   });
 
-  it('grants the service entitlement BEFORE flipping the Base44 flag, then shows the Plus badge', async () => {
-    mocks.list.mockResolvedValue([
+  it('grants Plus via the bridge and shows the Plus badge', async () => {
+    mocks.search.mockResolvedValue([
       { id: 'u2', full_name: 'Bob', email: 'bob@x.com', is_ruumr_plus: false },
     ]);
     renderPage();
@@ -66,14 +63,7 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     const grantBtn = await screen.findByRole('button', { name: GRANT });
     fireEvent.click(grantBtn);
 
-    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
-    expect(mocks.grant).toHaveBeenCalledWith({ userId: 'u2' });
-    expect(mocks.update).toHaveBeenCalledWith('u2', { is_ruumr_plus: true });
-
-    // Server grant must run before the local flag is set.
-    expect(mocks.grant.mock.invocationCallOrder[0]).toBeLessThan(
-      mocks.update.mock.invocationCallOrder[0]
-    );
+    await waitFor(() => expect(mocks.grant).toHaveBeenCalledWith({ userId: 'u2' }));
 
     // Row now reflects Plus, and the button flips to revoke.
     const row = (await screen.findByText('Bob')).closest('div').parentElement;
@@ -81,9 +71,9 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     await screen.findByRole('button', { name: REVOKE });
   });
 
-  it('does NOT flip the Base44 flag when the service grant fails', async () => {
+  it('does NOT mark the row as Plus when the grant fails', async () => {
     mocks.grant.mockRejectedValue(new Error('service 500'));
-    mocks.list.mockResolvedValue([
+    mocks.search.mockResolvedValue([
       { id: 'u3', full_name: 'Carol', email: 'carol@x.com', is_ruumr_plus: false },
     ]);
     renderPage();
@@ -91,13 +81,13 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     fireEvent.click(await screen.findByRole('button', { name: GRANT }));
 
     await screen.findByText(/service 500/);
-    expect(mocks.update).not.toHaveBeenCalled();
     // Still grantable — nothing changed.
     expect(screen.getByRole('button', { name: GRANT })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: REVOKE })).toBeNull();
   });
 
-  it('revokes by clearing the Base44 flag first, then the service entitlement', async () => {
-    mocks.list.mockResolvedValue([
+  it('revokes Plus via the bridge', async () => {
+    mocks.search.mockResolvedValue([
       { id: 'u4', full_name: 'Dave', email: 'dave@x.com', is_ruumr_plus: true },
     ]);
     renderPage();
@@ -105,14 +95,12 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     fireEvent.click(await screen.findByRole('button', { name: REVOKE }));
 
     await waitFor(() => expect(mocks.revoke).toHaveBeenCalledWith({ userId: 'u4' }));
-    expect(mocks.update).toHaveBeenCalledWith('u4', { is_ruumr_plus: false });
-    expect(mocks.update.mock.invocationCallOrder[0]).toBeLessThan(
-      mocks.revoke.mock.invocationCallOrder[0]
-    );
+    // Row flips back to grantable.
+    await screen.findByRole('button', { name: GRANT });
   });
 
   it('filters the user list by the search query', async () => {
-    mocks.list.mockResolvedValue([
+    mocks.search.mockResolvedValue([
       { id: 'u5', full_name: 'Erin', email: 'erin@x.com', is_ruumr_plus: false },
       { id: 'u6', full_name: 'Frank', email: 'frank@x.com', is_ruumr_plus: false },
     ]);

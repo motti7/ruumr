@@ -1,17 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@/entities/User";
-import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { grantRuumrPlusEntitlement, revokeRuumrPlusEntitlement } from "@/api/ruumrPlus";
+import {
+  searchRuumrPlusUsers,
+  grantRuumrPlusEntitlement,
+  revokeRuumrPlusEntitlement,
+} from "@/api/ruumrPlus";
 import { Loader2, Search, Sparkles, Check, X } from "lucide-react";
 
-// Admin-only console for managing Ruumr Plus access. A single action keeps the
-// two sources of truth in sync: the Base44 User flag (`is_ruumr_plus`, read by
-// isPlusEntitled on the client) and the entitlement on the Ruumr Plus service
-// (granted via the ruumrPlusBridge admin action). Both must agree, otherwise a
-// user either sees the Plus UI with no server access or vice versa.
+// Admin-only console for managing Ruumr Plus access. Everything routes through
+// the ruumrPlusBridge (service role): a single grant/revoke keeps the two
+// sources of truth in sync — the Base44 User flag (`is_ruumr_plus`, read by
+// isPlusEntitled on the client) and the entitlement on the Ruumr Plus service.
+// The client cannot touch the User entity directly: Base44 restricts listing it
+// to project collaborators, so the bridge does the read and the flag update.
 export default function AdminToolsPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -24,18 +28,32 @@ export default function AdminToolsPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Resolve the viewer first. Only a confirmed non-admin should be
+      // redirected; a failure to LOAD users must surface as an error, not bounce
+      // the admin out (that would hide the real cause).
+      let me;
       try {
-        const me = await User.me();
-        if (me.role !== "admin") {
-          navigate(createPageUrl("Discover"), { replace: true });
-          return;
-        }
-        const all = await base44.entities.User.list("-created_date", 2000);
-        if (cancelled) return;
-        setUsers(Array.isArray(all) ? all : []);
-      } catch {
+        me = await User.me();
+      } catch (error) {
+        console.error("[AdminTools] User.me() failed", error);
         if (!cancelled) navigate(createPageUrl("Discover"), { replace: true });
         return;
+      }
+
+      if (me?.role !== "admin") {
+        if (!cancelled) navigate(createPageUrl("Discover"), { replace: true });
+        return;
+      }
+
+      try {
+        const all = await searchRuumrPlusUsers();
+        if (cancelled) return;
+        setUsers(Array.isArray(all) ? all : []);
+      } catch (error) {
+        console.error("[AdminTools] loading users failed", error);
+        if (!cancelled) {
+          setFeedback({ type: "error", text: `טעינת המשתמשים נכשלה: ${error?.message || "לא ידוע"}` });
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -62,10 +80,9 @@ export default function AdminToolsPage() {
     setPending((prev) => ({ ...prev, [user.id]: "grant" }));
     setFeedback(null);
     try {
-      // Server first: if the service grant fails we must NOT flip the Base44
-      // flag, or the user would see Plus with no recommendations.
+      // The bridge grants the service entitlement and sets is_ruumr_plus in one
+      // call (service entitlement first), so either both succeed or it throws.
       await grantRuumrPlusEntitlement({ userId: user.id });
-      await base44.entities.User.update(user.id, { is_ruumr_plus: true });
       setUserPlus(user.id, true);
       setFeedback({ type: "ok", text: `Plus הופעל עבור ${user.full_name || user.email}` });
     } catch (error) {
@@ -83,11 +100,10 @@ export default function AdminToolsPage() {
     setPending((prev) => ({ ...prev, [user.id]: "revoke" }));
     setFeedback(null);
     try {
-      // Flip the Base44 flag first so the client paywall re-engages even if the
-      // service revoke is slow; then revoke the service entitlement.
-      await base44.entities.User.update(user.id, { is_ruumr_plus: false });
-      setUserPlus(user.id, false);
+      // The bridge clears is_ruumr_plus and revokes the service entitlement in
+      // one call (flag first, so the paywall re-engages immediately).
       await revokeRuumrPlusEntitlement({ userId: user.id });
+      setUserPlus(user.id, false);
       setFeedback({ type: "ok", text: `Plus בוטל עבור ${user.full_name || user.email}` });
     } catch (error) {
       setFeedback({ type: "error", text: `שגיאה בביטול Plus: ${error?.message || "לא ידוע"}` });

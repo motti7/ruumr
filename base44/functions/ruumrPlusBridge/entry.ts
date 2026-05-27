@@ -161,6 +161,32 @@ async function serviceRequest(req: Request, path: string, {
     return json;
 }
 
+// Service-role user listing. The user-context client cannot list the built-in
+// User entity (Base44 restricts that to project collaborators), so admin tools
+// must read it through the service role here.
+async function searchUsers(base44: ReturnType<typeof createClientFromRequest>, body: Record<string, unknown>) {
+    const limit = Math.min(Number(body.limit) || 2000, 5000);
+    const users = await base44.asServiceRole.entities.User.list('-created_date', limit);
+    const list = (Array.isArray(users) ? users : []).map((user: Record<string, unknown>) => ({
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        is_ruumr_plus: Boolean(user.is_ruumr_plus),
+    }));
+    return { users: list };
+}
+
+// Sets the Base44 User.is_ruumr_plus flag via service role (the client cannot
+// reliably update other users). Throws on failure so the caller can surface it.
+async function setUserPlusFlag(base44: ReturnType<typeof createClientFromRequest>, userId: unknown, value: boolean) {
+    const id = String(userId ?? '').trim();
+    if (!id) {
+        throw new Error('user_id is required to set Ruumr Plus access');
+    }
+    await base44.asServiceRole.entities.User.update(id, { is_ruumr_plus: value });
+    return true;
+}
+
 async function loadCurrentUser(base44: ReturnType<typeof createClientFromRequest>) {
     const currentUser = await base44.auth.me();
     if (!currentUser) {
@@ -387,11 +413,18 @@ async function handleAction(base44: ReturnType<typeof createClientFromRequest>, 
                 method: 'GET',
                 requireAuth: true,
             });
-        case 'admin.entitlements.grant':
+        case 'admin.users.search':
             if (currentUser.role !== 'admin') {
                 throw new Error('Admin access required');
             }
-            return serviceRequest(req, '/admin/entitlements/grant', {
+            return searchUsers(base44, body);
+        case 'admin.entitlements.grant': {
+            if (currentUser.role !== 'admin') {
+                throw new Error('Admin access required');
+            }
+            // Server entitlement first: if it fails we throw before touching the
+            // Base44 flag, so the two never drift out of sync.
+            const grantResult = await serviceRequest(req, '/admin/entitlements/grant', {
                 body: cleanObject({
                     user_id: body.user_id,
                     tier: body.tier ?? 'plus',
@@ -401,11 +434,17 @@ async function handleAction(base44: ReturnType<typeof createClientFromRequest>, 
                 }),
                 requireAuth: true,
             });
-        case 'admin.entitlements.revoke':
+            await setUserPlusFlag(base44, body.user_id, true);
+            return { entitlement: grantResult, is_ruumr_plus: true };
+        }
+        case 'admin.entitlements.revoke': {
             if (currentUser.role !== 'admin') {
                 throw new Error('Admin access required');
             }
-            return serviceRequest(req, '/admin/entitlements/revoke', {
+            // Clear the Base44 flag first so the client paywall re-engages even
+            // if the service revoke is slow, then revoke the service entitlement.
+            await setUserPlusFlag(base44, body.user_id, false);
+            const revokeResult = await serviceRequest(req, '/admin/entitlements/revoke', {
                 body: cleanObject({
                     user_id: body.user_id,
                     tier: body.tier ?? 'plus',
@@ -415,6 +454,8 @@ async function handleAction(base44: ReturnType<typeof createClientFromRequest>, 
                 }),
                 requireAuth: true,
             });
+            return { entitlement: revokeResult, is_ruumr_plus: false };
+        }
         case 'admin.reindex':
             if (currentUser.role !== 'admin') {
                 throw new Error('Admin access required');
