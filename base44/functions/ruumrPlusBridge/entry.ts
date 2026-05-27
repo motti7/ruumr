@@ -163,18 +163,36 @@
 
   // Service-role user listing. The user-context client cannot list the built-in
   // User entity (Base44 restricts that to project collaborators), so admin tools
-  // must read it through the service role here.
+  // must read it through the service role here. Paginate through the full set so
+  // every user is returned regardless of count — a single list() call is capped.
   async function searchUsers(base44: ReturnType<typeof createClientFromRequest>, body: Record<string, unknown>) {
-      const limit = Math.min(Number(body.limit) || 2000, 5000);
-      const users = await base44.asServiceRole.entities.User.list('-created_date', limit);
-      const list = (Array.isArray(users) ? users : []).map((user: Record<string, unknown>) => ({
+      const maxUsers = Math.min(Number(body.limit) || 20000, 50000);
+      const pageSize = 500;
+      const collected: Record<string, unknown>[] = [];
+      let skip = 0;
+
+      while (collected.length < maxUsers) {
+          const page = await base44.asServiceRole.entities.User.list('-created_date', pageSize, skip);
+          const batch = Array.isArray(page) ? page : [];
+          collected.push(...batch);
+
+          if (batch.length < pageSize) {
+              break;
+          }
+
+          skip += pageSize;
+      }
+
+      const list = collected.map((user: Record<string, unknown>) => ({
           id: user.id,
           email: user.email,
           full_name: user.full_name,
           is_ruumr_plus: Boolean(user.is_ruumr_plus),
+          disabled: Boolean(user.disabled),
       }));
-      return { users: list };
+      return { users: list, total: list.length };
   }
+
   
   // Sets the Base44 User.is_ruumr_plus flag via service role (the client cannot
   // reliably update other users). Throws on failure so the caller can surface it.
