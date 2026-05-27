@@ -23,6 +23,7 @@ import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
 
 // Lazy-load heavy pages for route-based code splitting
 const GroupTracker = lazy(() => import('./pages/GroupTracker'));
+const AdminTools = lazy(() => import('./pages/AdminTools'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
 
@@ -133,6 +134,7 @@ const AuthenticatedApp = () => {
         <Route path="/GroupTracker" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
+        <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
