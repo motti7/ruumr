@@ -33,6 +33,7 @@ import {
   Brush,
   Coffee,
   BedDouble,
+  Sword,
 } from "lucide-react";
 
 const INTEREST_OPTIONS = [
@@ -57,6 +58,7 @@ const INTEREST_OPTIONS = [
   { id: "fashion", label: "אופנה", Icon: Shirt, color: "bg-rose-50 text-rose-700 border-rose-200" },
   { id: "clean_home", label: "שהבית מתוקתק", Icon: Brush, color: "bg-sky-50 text-sky-700 border-sky-200" },
   { id: "morning_coffee", label: "קפה של בוקר", Icon: Coffee, color: "bg-amber-50 text-amber-700 border-amber-200" },
+  { id: "iron_swords", label: 'שנ"ב ברזל', Icon: Sword, color: "bg-slate-100 text-slate-700 border-slate-300" },
 ];
 
 const INTERESTS_BY_ID = new Map(INTEREST_OPTIONS.map((option) => [option.id, option]));
