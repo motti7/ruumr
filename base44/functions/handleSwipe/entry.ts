@@ -30,25 +30,19 @@ Deno.serve(async (req) => {
 
         const sr = base44.asServiceRole.entities;
 
+        // Use the user-context client for Swipe + Match operations the caller is a
+        // party to. The service-role view of these entities lags behind writes in
+        // this app — freshly created rows are not always visible to asServiceRole
+        // filter(), which silently dropped matches. RLS allows the caller to read
+        // swipes targeting them and to create/read matches they are in, so the
+        // user-context path is both sufficient and consistent.
         const reverseSwipes = await base44.entities.Swipe.filter({
             swiper_id: swiped_id,
             swiped_id: swiper_id,
             action: 'like'
         });
 
-
-         console.log('[handleSwipe] reverseSwipes', {                                                                                                                                             
-                  swiper_id,                                                                                                                                                                           
-                  swiped_id,                                                                                                                                                                           
-                  count: reverseSwipes?.length ?? null,                                                                                                                                                
-                  rows: reverseSwipes,                                                                                                                                                                 
-              });                                                                                                                                                                                      
-                                
-
         if (reverseSwipes && reverseSwipes.length > 0) {
-            // It's a match!
-            
-            // Check if match already exists
             const existingMatches = await base44.entities.Match.filter({
                 $or: [
                     { user1_id: swiper_id, user2_id: swiped_id },
@@ -56,13 +50,11 @@ Deno.serve(async (req) => {
                 ]
             });
 
-
-            // Get profile names
             const [profile1List, profile2List] = await Promise.all([
                 sr.Profile.filter({ user_id: swiper_id }),
                 sr.Profile.filter({ user_id: swiped_id })
             ]);
-            
+
             const p1 = profile1List[0];
             const p2 = profile2List[0];
 
@@ -75,7 +67,6 @@ Deno.serve(async (req) => {
                     user2_name: p2?.name || '',
                     status: 'active'
                 });
-
                 match_id = match.id;
             } else {
                 match_id = existingMatches[0].id;
