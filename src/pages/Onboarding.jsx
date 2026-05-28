@@ -1188,16 +1188,16 @@ export default function OnboardingPage() {
       
       {/* Fixed bottom continue button */}
       {step < 7 &&
-      <div className="fixed bottom-0 left-0 right-0 pb-6 pt-3 bg-white flex justify-end pr-8" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
+      <div className="fixed right-6 flex justify-end" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 48px)' }}>
         <button
           onClick={nextStep}
           disabled={!canProceed() || isSubmitting}
           className="transition-all active:scale-95"
           aria-label="המשך">
           {isSubmitting
-            ? <Loader2 className="w-6 h-6 animate-spin text-[--theme-orange]" />
+            ? <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#FA3803' }} />
             : (
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${canProceed() ? 'bg-[--theme-orange]' : 'bg-gray-200'}`}>
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-lg ${canProceed() ? '' : 'bg-gray-200'}`} style={canProceed() ? { backgroundColor: '#FA3803' } : {}}>
                 <ArrowLeft className={`w-6 h-6 rotate-180 ${canProceed() ? 'text-white' : 'text-gray-400'}`} />
               </div>
             )
