@@ -1032,7 +1032,7 @@ export default function OnboardingPage() {
 
 
 
-            <Step step={5} currentStep={step} title="מה אתם אוהבים?">
+            <Step step={5} currentStep={step} title="תחומי עניין">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center mb-4 -mt-3 text-base" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap justify-center gap-2 overflow-hidden">
@@ -1182,7 +1182,7 @@ export default function OnboardingPage() {
 
         {/* Inline continue button — never overlaps content */}
         {step < 7 &&
-        <div className="flex justify-start pt-6 pb-2">
+        <div className="flex justify-end pt-6 pb-2">
           <button
             onClick={nextStep}
             disabled={!canProceed() || isSubmitting}

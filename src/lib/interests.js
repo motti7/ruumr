@@ -47,7 +47,6 @@ const INTEREST_OPTIONS = [
   { id: "cooking", label: "בישול ואפייה", Icon: ChefHat, color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   { id: "business", label: "עסקים", Icon: Briefcase, color: "bg-blue-50 text-blue-700 border-blue-200" },
   { id: "entrepreneurship", label: "יזמות", Icon: Lightbulb, color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
-  { id: "iron_nap", label: 'שנ"צ ברזל', Icon: BedDouble, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   { id: "plants", label: "צמחייה", Icon: Sprout, color: "bg-lime-50 text-lime-700 border-lime-200" },
   { id: "nature", label: "טיולים בטבע", Icon: Leaf, color: "bg-lime-50 text-lime-700 border-lime-200" },
   { id: "sport", label: "ספורט", Icon: Trophy, color: "bg-green-50 text-green-700 border-green-200" },
