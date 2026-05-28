@@ -1188,7 +1188,7 @@ export default function OnboardingPage() {
       
       {/* Fixed bottom continue button */}
       {step < 7 &&
-      <div className="fixed bottom-10 right-6 z-50">
+      <div className="fixed bottom-0 left-0 right-0 pb-6 pt-3 bg-white flex justify-end pr-8" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
         <button
           onClick={nextStep}
           disabled={!canProceed() || isSubmitting}
