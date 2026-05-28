@@ -388,16 +388,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
 
   const handleDragEnd = useCallback(async (event, info) => {
     const offsetX = info.offset.x;
-    const offsetY = info.offset.y;
     const velocityX = info.velocity.x;
-    const velocityY = info.velocity.y;
-
-    // Swipe up → open profile detail
-    if (offsetY < -80 || velocityY < -500) {
-      controls.start({ y: 0 });
-      setIsExpanded(true);
-      return;
-    }
 
     if (offsetX > 100 || velocityX > 500) {
       onSwipeIntent?.("like");
@@ -408,7 +399,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
       await controls.start({ x: -500, opacity: 0 });
       onSwipe("dislike");
     } else {
-      controls.start({ x: 0 });
+      controls.start({ x: 0, y: 0 });
     }
   }, [controls, onSwipe, onSwipeIntent]);
 
@@ -611,9 +602,9 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
   return (
     <>
             <motion.div
-        drag={isActive ? true : false}
-        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-        dragElastic={{ left: 0.7, right: 0.7, top: 0.4, bottom: 0 }}
+        drag={isActive ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={{ left: 0.7, right: 0.7 }}
         onDragEnd={handleDragEnd}
         animate={controls}
         style={{ x, rotate, opacity }}
