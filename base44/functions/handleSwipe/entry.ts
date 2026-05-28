@@ -30,11 +30,12 @@ Deno.serve(async (req) => {
 
         const sr = base44.asServiceRole.entities;
 
-        const reverseSwipes = await sr.Swipe.filter({
+        const reverseSwipes = await base44.entities.Swipe.filter({
             swiper_id: swiped_id,
             swiped_id: swiper_id,
             action: 'like'
         });
+
 
          console.log('[handleSwipe] reverseSwipes', {                                                                                                                                             
                   swiper_id,                                                                                                                                                                           
