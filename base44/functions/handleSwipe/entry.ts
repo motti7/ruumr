@@ -30,17 +30,6 @@ Deno.serve(async (req) => {
 
         const sr = base44.asServiceRole.entities;
 
-        const currentSwipes = await sr.Swipe.filter({
-            swiper_id,
-            swiped_id,
-            action: 'like'
-        });
-
-        if (!currentSwipes || currentSwipes.length === 0) {
-            return Response.json({ match: false, reason: 'swipe_not_found' });
-        }
-
-        // Check for reverse like
         const reverseSwipes = await sr.Swipe.filter({
             swiper_id: swiped_id,
             swiped_id: swiper_id,
