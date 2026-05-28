@@ -92,6 +92,10 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    // Dismiss keyboard on mobile before saving
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
         alert("אנא המתן לסיום העלאת התמונות");
         return;
@@ -540,14 +544,11 @@ export default function ProfilePage() {
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
                   {isEditing ? (
-                    <Input
-                      type="number"
-                      value={formData.age || ""}
-                      onChange={(e) => setFormField('age', parseInt(e.target.value) || "")}
-                      className="bg-white border-gray-300 text-right h-8 text-base font-bold"
-                      dir="rtl"
-                      min="18"
-                      max="99"
+                    <BottomSheetSelect
+                      value={String(formData.age || "")}
+                      onValueChange={(v) => setFormField('age', parseInt(v))}
+                      label="גיל"
+                      options={Array.from({ length: 82 }, (_, i) => ({ value: String(i + 18), label: String(i + 18) }))}
                     />
                   ) : (
                     <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
