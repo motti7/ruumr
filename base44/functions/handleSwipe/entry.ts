@@ -49,12 +49,13 @@ Deno.serve(async (req) => {
             // It's a match!
             
             // Check if match already exists
-            const existingMatches = await sr.Match.filter({
+            const existingMatches = await base44.entities.Match.filter({
                 $or: [
                     { user1_id: swiper_id, user2_id: swiped_id },
                     { user1_id: swiped_id, user2_id: swiper_id }
                 ]
             });
+
 
             // Get profile names
             const [profile1List, profile2List] = await Promise.all([
@@ -67,13 +68,14 @@ Deno.serve(async (req) => {
 
             let match_id;
             if (existingMatches.length === 0) {
-                const match = await sr.Match.create({
+                const match = await base44.entities.Match.create({
                     user1_id: swiper_id,
                     user2_id: swiped_id,
                     user1_name: p1?.name || '',
                     user2_name: p2?.name || '',
                     status: 'active'
                 });
+
                 match_id = match.id;
             } else {
                 match_id = existingMatches[0].id;
