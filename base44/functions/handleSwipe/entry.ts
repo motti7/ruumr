@@ -36,6 +36,14 @@ Deno.serve(async (req) => {
             action: 'like'
         });
 
+         console.log('[handleSwipe] reverseSwipes', {                                                                                                                                             
+                  swiper_id,                                                                                                                                                                           
+                  swiped_id,                                                                                                                                                                           
+                  count: reverseSwipes?.length ?? null,                                                                                                                                                
+                  rows: reverseSwipes,                                                                                                                                                                 
+              });                                                                                                                                                                                      
+                                
+
         if (reverseSwipes && reverseSwipes.length > 0) {
             // It's a match!
             
