@@ -1182,7 +1182,7 @@ export default function OnboardingPage() {
 
         {/* Action Button */}
         {step < 7 &&
-        <div className="h-20" /> /* spacer so content doesn't hide behind fixed button */
+        <div className="h-28" /> /* spacer so content doesn't hide behind fixed button */
         }
       </div>
       
