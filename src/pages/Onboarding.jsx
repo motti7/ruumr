@@ -1182,7 +1182,7 @@ export default function OnboardingPage() {
 
         {/* Inline continue button — never overlaps content */}
         {step < 7 &&
-        <div className="flex justify-end pt-6 pb-2">
+        <div className="flex justify-start pt-6 pb-2">
           <button
             onClick={nextStep}
             disabled={!canProceed() || isSubmitting}
