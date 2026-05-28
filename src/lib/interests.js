@@ -47,6 +47,7 @@ const INTEREST_OPTIONS = [
   { id: "cooking", label: "בישול ואפייה", Icon: ChefHat, color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   { id: "business", label: "עסקים", Icon: Briefcase, color: "bg-blue-50 text-blue-700 border-blue-200" },
   { id: "entrepreneurship", label: "יזמות", Icon: Lightbulb, color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+  { id: "iron_nap", label: 'שנ"צ ברזל', Icon: BedDouble, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   { id: "plants", label: "צמחייה", Icon: Sprout, color: "bg-lime-50 text-lime-700 border-lime-200" },
   { id: "nature", label: "טיולים בטבע", Icon: Leaf, color: "bg-lime-50 text-lime-700 border-lime-200" },
   { id: "sport", label: "ספורט", Icon: Trophy, color: "bg-green-50 text-green-700 border-green-200" },
@@ -57,7 +58,6 @@ const INTEREST_OPTIONS = [
   { id: "fashion", label: "אופנה", Icon: Shirt, color: "bg-rose-50 text-rose-700 border-rose-200" },
   { id: "clean_home", label: "שהבית מתוקתק", Icon: Brush, color: "bg-sky-50 text-sky-700 border-sky-200" },
   { id: "morning_coffee", label: "קפה של בוקר", Icon: Coffee, color: "bg-amber-50 text-amber-700 border-amber-200" },
-  { id: "iron_nap", label: 'שנ"צ ברזל', Icon: BedDouble, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
 ];
 
 const INTERESTS_BY_ID = new Map(INTEREST_OPTIONS.map((option) => [option.id, option]));
