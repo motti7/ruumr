@@ -745,11 +745,11 @@ export default function OnboardingPage() {
         {step !== 7 &&
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
+                 <div className="w-10" />
+                 
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                  </Button>
-                 
-                 <div className="w-10" />
              </div>
              <div className="flex gap-1.5">
                  {Array.from({ length: 5 }).map((_, i) =>
@@ -757,7 +757,7 @@ export default function OnboardingPage() {
               key={i}
               className="h-2 flex-1 rounded-full"
               style={{
-                backgroundColor: i < Math.round(displayStep / displayTotal * 5) ? '#FA3803' : '#FFE8E2'
+                backgroundColor: i < (5 - Math.round(displayStep / displayTotal * 5)) ? '#FFE8E2' : '#FA3803'
               }} />
 
             )}
