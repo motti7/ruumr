@@ -230,7 +230,17 @@ export default function ProfilePage() {
   
   const triggerFileInput = (index) => {
     if (!isEditing) return;
-    fileInputRef.current.onchange = (e) => handleImageUpload(e, index);
+    fileInputRef.current.onchange = async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      // Upload all selected files starting from the clicked index
+      for (let i = 0; i < files.length; i++) {
+        const slotIndex = index + i;
+        if (slotIndex >= 6) break;
+        await handleImageUpload({ target: { files: [files[i]] } }, slotIndex);
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
     fileInputRef.current.click();
   };
 
@@ -356,7 +366,7 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" multiple />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
       <AnimatePresence>
