@@ -1180,31 +1180,26 @@ export default function OnboardingPage() {
             </Step>
         </div>
 
-        {/* Action Button */}
+        {/* Inline continue button — never overlaps content */}
         {step < 7 &&
-        <div className="h-28" /> /* spacer so content doesn't hide behind fixed button */
+        <div className="flex justify-end pt-6 pb-2">
+          <button
+            onClick={nextStep}
+            disabled={!canProceed() || isSubmitting}
+            className="transition-all active:scale-95"
+            aria-label="המשך">
+            {isSubmitting
+              ? <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#FA3803' }} />
+              : (
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-lg ${canProceed() ? '' : 'bg-gray-200'}`} style={canProceed() ? { backgroundColor: '#FA3803' } : {}}>
+                  <ArrowLeft className={`w-6 h-6 rotate-180 ${canProceed() ? 'text-white' : 'text-gray-400'}`} />
+                </div>
+              )
+            }
+          </button>
+        </div>
         }
       </div>
-      
-      {/* Fixed bottom continue button */}
-      {step < 7 &&
-      <div className="fixed right-6 flex justify-end" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 48px)' }}>
-        <button
-          onClick={nextStep}
-          disabled={!canProceed() || isSubmitting}
-          className="transition-all active:scale-95"
-          aria-label="המשך">
-          {isSubmitting
-            ? <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#FA3803' }} />
-            : (
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-lg ${canProceed() ? '' : 'bg-gray-200'}`} style={canProceed() ? { backgroundColor: '#FA3803' } : {}}>
-                <ArrowLeft className={`w-6 h-6 rotate-180 ${canProceed() ? 'text-white' : 'text-gray-400'}`} />
-              </div>
-            )
-          }
-        </button>
-      </div>
-      }
 
       {authUser?.role === 'admin' &&
       <button
