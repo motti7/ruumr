@@ -49,7 +49,7 @@ const ProfileDetail = ({ profile, onClose }) => {
       
             <button
         onClick={onClose}
-        className="fixed top-20 left-6 z-[300] min-w-[44px] min-h-[44px] flex items-center justify-center"
+        className="fixed top-20 right-6 z-[300] min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="סגור פרטים">
         
                 <X className="text-white w-5 h-5 drop-shadow-lg" strokeWidth={2.5} />
