@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
-import { ArrowRight, ArrowLeft, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
+import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -745,11 +745,11 @@ export default function OnboardingPage() {
         {step !== 7 &&
         <div className="mb-6">
              <div className="flex justify-between items-center mb-2">
-                 <div className="w-10" />
-                 
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
-                     <ArrowLeft className="h-6 w-6" />
+                     <ArrowRight className="h-6 w-6" />
                  </Button>
+                 
+                 <div className="w-10" />
              </div>
              <div className="flex gap-1.5">
                  {Array.from({ length: 5 }).map((_, i) =>
@@ -757,7 +757,7 @@ export default function OnboardingPage() {
               key={i}
               className="h-2 flex-1 rounded-full"
               style={{
-                backgroundColor: i < (5 - Math.round(displayStep / displayTotal * 5)) ? '#FFE8E2' : '#FA3803'
+                backgroundColor: i < Math.round(displayStep / displayTotal * 5) ? '#FA3803' : '#FFE8E2'
               }} />
 
             )}
@@ -1180,26 +1180,23 @@ export default function OnboardingPage() {
             </Step>
         </div>
 
-        {/* Inline continue button — never overlaps content */}
+        {/* Action Button */}
         {step < 7 &&
-        <div className="flex justify-end pt-6 pb-2">
-          <button
-            onClick={nextStep}
-            disabled={!canProceed() || isSubmitting}
-            className="transition-all active:scale-95"
-            aria-label="המשך">
-            {isSubmitting
-              ? <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#FA3803' }} />
-              : (
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-lg ${canProceed() ? '' : 'bg-gray-200'}`} style={canProceed() ? { backgroundColor: '#FA3803' } : {}}>
-                  <ArrowLeft className={`w-6 h-6 rotate-180 ${canProceed() ? 'text-white' : 'text-gray-400'}`} />
-                </div>
-              )
-            }
-          </button>
-        </div>
+        <div className="h-20" /> /* spacer so content doesn't hide behind fixed button */
         }
       </div>
+      
+      {/* Fixed bottom continue button */}
+      {step < 7 &&
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+        <Button
+          onClick={nextStep}
+          className={`w-3/4 max-w-xs h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
+          disabled={!canProceed() || isSubmitting}>
+          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
+        </Button>
+      </div>
+      }
 
       {authUser?.role === 'admin' &&
       <button

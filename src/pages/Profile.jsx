@@ -92,10 +92,6 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    // Dismiss keyboard on mobile before saving
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
     if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
         alert("אנא המתן לסיום העלאת התמונות");
         return;
@@ -189,11 +185,9 @@ export default function ProfilePage() {
             fileUrl = file_url;
         }
         
-        setFormData(prev => {
-            const newPhotos = [...(prev.photos || Array(6).fill(null))];
-            newPhotos[index] = fileUrl;
-            return {...prev, photos: newPhotos};
-        });
+        const newPhotos = [...(formData.photos || Array(6).fill(null))];
+        newPhotos[index] = fileUrl;
+        setFormData(prev => ({...prev, photos: newPhotos}));
     } catch (error) { 
         console.error("Upload failed", error);
         alert(error.message || "העלאת הקובץ נכשלה");
@@ -230,17 +224,7 @@ export default function ProfilePage() {
   
   const triggerFileInput = (index) => {
     if (!isEditing) return;
-    fileInputRef.current.onchange = async (e) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length === 0) return;
-      // Upload all selected files starting from the clicked index
-      for (let i = 0; i < files.length; i++) {
-        const slotIndex = index + i;
-        if (slotIndex >= 6) break;
-        await handleImageUpload({ target: { files: [files[i]] } }, slotIndex);
-      }
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    };
+    fileInputRef.current.onchange = (e) => handleImageUpload(e, index);
     fileInputRef.current.click();
   };
 
@@ -366,7 +350,7 @@ export default function ProfilePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" multiple />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
       <AnimatePresence>
@@ -555,16 +539,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
-                  {isEditing ? (
-                    <BottomSheetSelect
-                      value={String(formData.age || "")}
-                      onValueChange={(v) => setFormField('age', parseInt(v))}
-                      label="גיל"
-                      options={Array.from({ length: 82 }, (_, i) => ({ value: String(i + 18), label: String(i + 18) }))}
-                    />
-                  ) : (
-                    <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
-                  )}
+                  <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
                 </div>
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">מגדר</label>
@@ -829,12 +804,7 @@ export default function ProfilePage() {
                       }}
                     />
                     <style>{`
-                      input:focus, textarea:focus, input:focus-visible, textarea:focus-visible {
-          outline: none !important;
-          box-shadow: none !important;
-          border-color: #FA3803 !important;
-        }
-        input[type="range"]::-webkit-slider-thumb {
+                      input[type="range"]::-webkit-slider-thumb {
                         appearance: none;
                         width: 24px;
                         height: 24px;
