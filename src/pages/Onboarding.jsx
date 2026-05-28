@@ -1032,7 +1032,7 @@ export default function OnboardingPage() {
 
 
 
-            <Step step={5} currentStep={step} title="תחומי עניין">
+            <Step step={5} currentStep={step} title="מה אתם אוהבים?">
                 <div className="flex flex-col h-full text-right">
                     <p className="text-center mb-4 -mt-3 text-base" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
                     <div className="flex flex-wrap justify-center gap-2 overflow-hidden">
