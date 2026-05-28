@@ -816,7 +816,12 @@ export default function ProfilePage() {
                       }}
                     />
                     <style>{`
-                      input[type="range"]::-webkit-slider-thumb {
+                      input:focus, textarea:focus, input:focus-visible, textarea:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border-color: #FA3803 !important;
+        }
+        input[type="range"]::-webkit-slider-thumb {
                         appearance: none;
                         width: 24px;
                         height: 24px;
