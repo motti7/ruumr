@@ -1188,13 +1188,21 @@ export default function OnboardingPage() {
       
       {/* Fixed bottom continue button */}
       {step < 7 &&
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
-        <Button
+      <div className="fixed bottom-0 left-0 right-0 pb-6 pt-3 bg-white flex justify-end pr-8" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
+        <button
           onClick={nextStep}
-          className={`w-3/4 max-w-xs h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
-          disabled={!canProceed() || isSubmitting}>
-          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
-        </Button>
+          disabled={!canProceed() || isSubmitting}
+          className="transition-all active:scale-95"
+          aria-label="המשך">
+          {isSubmitting
+            ? <Loader2 className="w-6 h-6 animate-spin text-[--theme-orange]" />
+            : (
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${canProceed() ? 'bg-[--theme-orange]' : 'bg-gray-200'}`}>
+                <ArrowLeft className={`w-6 h-6 rotate-180 ${canProceed() ? 'text-white' : 'text-gray-400'}`} />
+              </div>
+            )
+          }
+        </button>
       </div>
       }
 
