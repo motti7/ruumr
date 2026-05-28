@@ -57,6 +57,7 @@ const INTEREST_OPTIONS = [
   { id: "fashion", label: "אופנה", Icon: Shirt, color: "bg-rose-50 text-rose-700 border-rose-200" },
   { id: "clean_home", label: "שהבית מתוקתק", Icon: Brush, color: "bg-sky-50 text-sky-700 border-sky-200" },
   { id: "morning_coffee", label: "קפה של בוקר", Icon: Coffee, color: "bg-amber-50 text-amber-700 border-amber-200" },
+  { id: "iron_nap", label: 'שנ"צ ברזל', Icon: BedDouble, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
 ];
 
 const INTERESTS_BY_ID = new Map(INTEREST_OPTIONS.map((option) => [option.id, option]));
