@@ -539,7 +539,19 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-4">
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
-                  <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
+                  {isEditing ? (
+                    <Input
+                      type="number"
+                      value={formData.age || ""}
+                      onChange={(e) => setFormField('age', parseInt(e.target.value) || "")}
+                      className="bg-white border-gray-300 text-right h-8 text-base font-bold"
+                      dir="rtl"
+                      min="18"
+                      max="99"
+                    />
+                  ) : (
+                    <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
+                  )}
                 </div>
                 <div className="text-right">
                   <label className="block text-sm font-medium text-gray-500 mb-1">מגדר</label>
