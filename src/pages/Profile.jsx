@@ -189,9 +189,11 @@ export default function ProfilePage() {
             fileUrl = file_url;
         }
         
-        const newPhotos = [...(formData.photos || Array(6).fill(null))];
-        newPhotos[index] = fileUrl;
-        setFormData(prev => ({...prev, photos: newPhotos}));
+        setFormData(prev => {
+            const newPhotos = [...(prev.photos || Array(6).fill(null))];
+            newPhotos[index] = fileUrl;
+            return {...prev, photos: newPhotos};
+        });
     } catch (error) { 
         console.error("Upload failed", error);
         alert(error.message || "העלאת הקובץ נכשלה");
