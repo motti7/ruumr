@@ -132,6 +132,17 @@ export async function fetchRuumrPlusEntitlements(options = {}) {
   return invokeBridge("admin.entitlements.list", options);
 }
 
+/**
+ * Lists Base44 users (id, email, full_name, is_ruumr_plus) via the bridge's
+ * service role. Required because the client cannot list the User entity
+ * directly — Base44 restricts that to project collaborators.
+ */
+export async function searchRuumrPlusUsers(options = {}) {
+  // No default limit: the bridge paginates the full user set server-side.
+  const result = await invokeBridge("admin.users.search", { limit: options.limit });
+  return Array.isArray(result?.users) ? result.users : [];
+}
+
 export async function grantRuumrPlusEntitlement(options = {}) {
   const {
     userId,
