@@ -29,12 +29,23 @@ function isAndroid() {
   return typeof navigator !== "undefined" && /android/i.test(navigator.userAgent || "");
 }
 
+import { Capacitor } from '@capacitor/core';
+
+function isNativeApp() {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
 export function resolveBottomInset() {
   const envInset = measureEnvInsetBottom();
   if (envInset > 0) return envInset;
-  // env() reported 0: on Android this is the 3-button-nav WebView bug, so we
-  // reserve the standard nav-bar height. Elsewhere a true 0 is correct.
-  return isAndroid() ? FALLBACK_ANDROID_NAV_BAR_PX : 0;
+  // env() reported 0: on Android native WebView this is the 3-button-nav bug,
+  // so we reserve the standard nav-bar height.
+  // In a regular browser (not native app), 0 is correct — no fallback needed.
+  return (isAndroid() && isNativeApp()) ? FALLBACK_ANDROID_NAV_BAR_PX : 0;
 }
 
 function applySafeAreaInsets() {
