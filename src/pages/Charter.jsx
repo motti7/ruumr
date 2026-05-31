@@ -33,13 +33,17 @@ export default function CharterPage() {
       const user = await User.me();
       setCurrentUser(user);
 
-      const matches = await Match.filter({ id: matchId });
-      if (matches.length === 0) {
+      let matchData;
+      try {
+        matchData = await Match.get(matchId);
+      } catch {
         navigate(createPageUrl('Matches'));
         return;
       }
-
-      const matchData = matches[0];
+      if (!matchData) {
+        navigate(createPageUrl('Matches'));
+        return;
+      }
       setMatch(matchData);
 
       const profiles1 = await Profile.filter({ user_id: matchData.user1_id });
