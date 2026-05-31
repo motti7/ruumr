@@ -290,7 +290,7 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: Capacitor.isNativePlatform() ? 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' : 'calc(80px + env(safe-area-inset-bottom, 0px))' } : undefined}>
+            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
                 {children}
             </main>
 
