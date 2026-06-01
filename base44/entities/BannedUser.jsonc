@@ -1,0 +1,25 @@
+{
+  "name": "BannedUser",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email of the banned user"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for banning"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "role": "admin"
+    },
+    "write": {
+      "role": "admin"
+    }
+  }
+}

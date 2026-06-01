@@ -2,10 +2,10 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, MessageCircle, X } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
 import { useState, useEffect, useRef } from "react";
@@ -71,6 +71,9 @@ export default function Layout({ children, currentPageName }) {
   });
   const navigate = useNavigate();
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
+  const [messageToast, setMessageToast] = useState(null);
+  const messageToastTimerRef = useRef(null);
+  const currentUserRef = useRef(null);
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -170,6 +173,56 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('roomi_seen_updated', handler);
   }, []);
 
+  // Subscribe to incoming messages and show in-app toast
+  useEffect(() => {
+    let userIdCache = null;
+
+    const init = async () => {
+      try {
+        const { base44: b44 } = await import('@/api/base44Client');
+        const user = await import('@/entities/User').then(m => m.User.me());
+        userIdCache = user.id;
+        currentUserRef.current = user;
+
+        const unsub = b44.entities.Message.subscribe(async (event) => {
+          if (event.type !== 'create' || !event.data) return;
+          const msg = event.data;
+          // Only show for messages sent TO me
+          if (msg.sender_id === userIdCache) return;
+
+          // Don't show toast if already in the chat for this match
+          const urlParams = new URLSearchParams(window.location.search);
+          const activeChatMatchId = urlParams.get('matchId');
+          if (window.location.pathname.includes('Chat') && activeChatMatchId === msg.match_id) return;
+
+          // Get sender name from profile
+          let senderName = 'הודעה חדשה';
+          let senderPhoto = null;
+          try {
+            const profiles = await b44.entities.Profile.filter({ user_id: msg.sender_id });
+            if (profiles[0]) {
+              senderName = profiles[0].name;
+              senderPhoto = profiles[0].photos?.[0] || null;
+            }
+          } catch {}
+
+          setMessageToast({ senderName, senderPhoto, content: msg.content, matchId: msg.match_id });
+          clearTimeout(messageToastTimerRef.current);
+          messageToastTimerRef.current = setTimeout(() => setMessageToast(null), 4000);
+        });
+
+        return unsub;
+      } catch {}
+    };
+
+    let cleanupFn = null;
+    init().then(fn => { cleanupFn = fn; });
+    return () => {
+      clearTimeout(messageToastTimerRef.current);
+      if (typeof cleanupFn === 'function') cleanupFn();
+    };
+  }, []);
+
   // Stack-based tab history tracking
   useTabHistory();
 
@@ -218,6 +271,48 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+
+        {/* In-app message toast */}
+        <AnimatePresence>
+          {messageToast && (
+            <motion.div
+              key="msg-toast"
+              initial={{ opacity: 0, y: -80 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -80 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              className="fixed top-0 left-0 right-0 z-[99999] flex justify-center pointer-events-none"
+              style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}
+            >
+              <div
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 flex items-center gap-3 px-4 py-3 mx-4 max-w-sm w-full pointer-events-auto cursor-pointer"
+                onClick={() => {
+                  setMessageToast(null);
+                  navigate(createPageUrl('Chat') + `?matchId=${messageToast.matchId}`);
+                }}
+              >
+                {messageToast.senderPhoto ? (
+                  <img src={messageToast.senderPhoto} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt={messageToast.senderName} />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-5 h-5 text-[--theme-orange]" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{messageToast.senderName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{messageToast.content}</p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setMessageToast(null); }}
+                  className="text-gray-400 hover:text-gray-600 flex-shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">

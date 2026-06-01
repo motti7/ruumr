@@ -34,7 +34,7 @@
   ],
   "rls": {
     "create": {
-      "swiper_id": "{{user.id}}"
+      "data.swiper_id": "{{user.id}}"
     },
     "read": {
       "$or": [

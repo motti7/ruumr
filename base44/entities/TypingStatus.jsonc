@@ -14,36 +14,10 @@
     "user_id"
   ],
   "rls": {
-    "create": {
-      "$and": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    },
     "read": true,
-    "update": {
-      "$and": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    },
-    "delete": {
-      "$and": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    }
+    "write": true,
+    "create": true,
+    "update": true,
+    "delete": true
   }
 }
