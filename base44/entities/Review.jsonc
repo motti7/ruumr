@@ -3,24 +3,19 @@
   "type": "object",
   "properties": {
     "reviewer_id": {
-      "type": "string",
-      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05db\u05ea\u05d1 \u05d0\u05ea \u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05ea"
+      "type": "string"
     },
     "reviewed_id": {
-      "type": "string",
-      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e9\u05e7\u05d9\u05d1\u05dc \u05d0\u05ea \u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05ea"
+      "type": "string"
     },
     "rating": {
-      "type": "number",
-      "description": "\u05d3\u05d9\u05e8\u05d5\u05d2 \u05de-1 \u05e2\u05d3 5"
+      "type": "number"
     },
     "text": {
-      "type": "string",
-      "description": "\u05d8\u05e7\u05e1\u05d8 \u05d7\u05d5\u05d5\u05ea \u05d4\u05d3\u05e2\u05ea"
+      "type": "string"
     },
     "reviewer_name": {
-      "type": "string",
-      "description": "\u05e9\u05dd \u05d4\u05db\u05d5\u05ea\u05d1"
+      "type": "string"
     }
   },
   "required": [
@@ -29,18 +24,24 @@
     "rating"
   ],
   "rls": {
-    "read": true,
     "create": {
-      "created_by": "{{user.email}}"
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
     },
+    "read": true,
     "update": {
-      "created_by": "{{user.email}}"
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
     },
     "delete": {
-      "created_by": "{{user.email}}"
-    },
-    "write": {
-      "created_by": "{{user.email}}"
+      "$and": [
+        { "created_by": "{{user.email}}" },
+        { "data.reviewer_id": "{{user.id}}" }
+      ]
     }
   }
 }
