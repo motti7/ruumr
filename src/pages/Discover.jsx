@@ -466,10 +466,10 @@ export default function DiscoverPage() {
           bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
         }}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {hasProfiles ? (
             profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
-              <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
+              <ErrorBoundary key={`${profile.id || profile.user_id}`} onSkip={() => handleSwipe('dislike')}>
                 <div className="absolute inset-0">
                   <ProfileCard
                     profile={profile}

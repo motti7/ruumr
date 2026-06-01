@@ -401,11 +401,11 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
 
     if (offsetX > 100 || velocityX > 500) {
       onSwipeIntent?.("like");
-      await controls.start({ x: 500, opacity: 0 });
+      controls.start({ x: 500, opacity: 0, transition: { duration: 0.2 } });
       onSwipe("like");
     } else if (offsetX < -100 || velocityX < -500) {
       onSwipeIntent?.("dislike");
-      await controls.start({ x: -500, opacity: 0 });
+      controls.start({ x: -500, opacity: 0, transition: { duration: 0.2 } });
       onSwipe("dislike");
     } else {
       controls.start({ x: 0 });
