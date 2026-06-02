@@ -24,8 +24,8 @@
     "test:visual": "npx playwright test --config playwright.visual.config.js"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.30",
-    "@base44/vite-plugin": "^1.0.20",
+    "@base44/sdk": "^0.8.31",
+    "@base44/vite-plugin": "^1.0.21",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/browser": "^8.0.3",
