@@ -25,9 +25,10 @@ const emailHtml = `
           <!-- Intro -->
           <tr>
             <td style="padding:36px 40px 24px;">
-              <h2 style="margin:0 0 12px;font-size:24px;color:#1a1a1a;font-weight:700;">היי! 👋 יש לנו חדשות</h2>
+              <h2 style="margin:0 0 12px;font-size:24px;color:#1a1a1a;font-weight:700;">היי רומרים, יש לנו כמה עדכונים 🎉😊</h2>
               <p style="margin:0;font-size:16px;color:#555;line-height:1.7;">
-                עברו כמה שבועות מהשקת Ruumr, ורצינו לעדכן אתכם בכמה דברים מרגשים שקורים פה 🔥
+                עברו כמה שבועות מהשקת Ruumr, ורצינו לעדכן אתכם בכמה דברים מרגשים שקורים פה 🔥<br/>
+                אגב — אם אתם על מחשב, אפשר להשתמש ב-Ruumr גם <a href="https://app.ruumrapp.com" style="color:#FF5722;text-decoration:none;font-weight:600;">ישירות מהדפדפן</a>!
               </p>
             </td>
           </tr>
@@ -140,7 +141,7 @@ Deno.serve(async (req) => {
     // Send preview only to the provided email (not to all users!)
     await base44.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: '🏠 [טיוטה לאישור] עדכון מ-Ruumr - 150 הורדות, Plus ועוד!',
+      subject: '🎉 היי רומרים, יש לנו כמה עדכונים 😊',
       body: emailHtml,
       content_type: 'text/html',
     });
