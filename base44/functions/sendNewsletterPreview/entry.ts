@@ -42,9 +42,9 @@ const emailHtml = `
                 <tr>
                   <td style="font-size:36px;padding-left:16px;vertical-align:top;">🚀</td>
                   <td>
-                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">150+ הורדות באנדרואיד — ובקרוב גם iOS!</h3>
+                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">150+ הורדות באנדרואיד - ובקרוב גם iOS!</h3>
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
-                      עברנו את ה-150 הורדות באנדרואיד תוך זמן קצר — תודה ענקית לכולכם! 🙏<br/>
+                      עברנו את ה-150 הורדות באנדרואיד תוך זמן קצר - תודה ענקית לכולכם! 🙏<br/>
                       ואם אתם על iPhone — בשורות טובות: <strong>בקרוב אנחנו משיקים גם לאייפון</strong>. נעדכן ברגע שזה קורה!
                     </p>
                   </td>
@@ -63,9 +63,9 @@ const emailHtml = `
                 <tr>
                   <td style="font-size:36px;padding-left:16px;vertical-align:top;">✨</td>
                   <td>
-                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">Ruumr Plus — בקרוב מאוד</h3>
+                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">Ruumr Plus - בקרוב מאוד</h3>
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
-                      אנחנו ממש עוד מעט משיקים את <strong>Ruumr Plus</strong> — חוויית חיפוש שותפים ברמה אחרת לגמרי.<br/>
+                      אנחנו ממש עוד מעט משיקים את <strong>Ruumr Plus</strong> - חוויית חיפוש שותפים ברמה אחרת לגמרי.<br/>
                       AI שמוצא את ההתאמות הטובות ביותר עבורכם, תכונות בלעדיות ועוד. נפרסם פרטים בקרוב 🎉
                     </p>
                   </td>
@@ -84,13 +84,13 @@ const emailHtml = `
                 <tr>
                   <td style="font-size:36px;padding-left:16px;vertical-align:top;">💬</td>
                   <td>
-                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">קבוצת פרימיום בווצאפ — הצטרפו!</h3>
+                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">קבוצת פרימיום בווצאפ - הצטרפו!</h3>
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
                       פותחים קבוצת ווצאפ בלעדית עם <strong>הטבות, עדכונים ראשונים ותכנים בלעדיים</strong> לחברי הקהילה.<br/>
-                      <strong>מבטיחים לא לחפור</strong> 😄 — רק דברים שווים ורלוונטיים.<br/><br/>
+                      <strong>מבטיחים לא לחפור</strong> 😄 - רק דברים שווים ורלוונטיים.<br/><br/>
                       <a href="https://chat.whatsapp.com/LINK_PLACEHOLDER" 
                          style="display:inline-block;background:#25D366;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:50px;font-weight:700;font-size:15px;">
-                        👉 הצטרפו לקבוצה
+                        הצטרפו לקבוצה 👈
                       </a>
                     </p>
                   </td>
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
     // Send preview only to the provided email (not to all users!)
     await base44.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: '🏠 [טיוטה לאישור] עדכון מ-Ruumr — 150 הורדות, Plus ועוד!',
+      subject: '🏠 [טיוטה לאישור] עדכון מ-Ruumr - 150 הורדות, Plus ועוד!',
       body: emailHtml,
       content_type: 'text/html',
     });
