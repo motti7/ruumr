@@ -28,7 +28,7 @@ const emailHtml = `
               <h2 style="margin:0 0 12px;font-size:24px;color:#1a1a1a;font-weight:700;">היי רומרים, יש לנו כמה עדכונים 🎉😊</h2>
               <p style="margin:0;font-size:16px;color:#555;line-height:1.7;">
                 עברו כמה שבועות מהשקת Ruumr, ורצינו לעדכן אתכם בכמה דברים מרגשים שקורים פה 🔥<br/>
-                אגב — אם אתם על מחשב, אפשר להשתמש ב-Ruumr גם <a href="https://app.ruumrapp.com" style="color:#FF5722;text-decoration:none;font-weight:600;">ישירות מהדפדפן</a>!
+                אגב - Ruumr זמין לשימוש גם מהדפדפן, לא רק מהאפליקציה!
               </p>
             </td>
           </tr>
