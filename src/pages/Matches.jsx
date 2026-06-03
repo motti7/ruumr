@@ -57,6 +57,18 @@ export default function MatchesPage() {
     loadMatches();
   }, [loadMatches]);
 
+  // Mark all matches as seen when the Matches page is opened
+  useEffect(() => {
+    if (matches.length > 0) {
+      const allIds = matches.map(m => m.id);
+      const existing = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+      const merged = [...new Set([...existing, ...allIds])];
+      localStorage.setItem('roomi_seen_match_ids', JSON.stringify(merged));
+      setSeenMatchIds(merged);
+      window.dispatchEvent(new Event('roomi_seen_updated'));
+    }
+  }, [matches]);
+
   // Listen for seen updates (e.g. from Charter click)
   useEffect(() => {
     const handler = () => {
