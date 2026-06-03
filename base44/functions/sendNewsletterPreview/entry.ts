@@ -46,7 +46,7 @@ const buildEmailHtml = (includeWhatsapp) => `
                     <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">מעל 1,000 נרשמים - ובקרוב גם iOS!</h3>
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
                       עברנו את ה-1,000 נרשמים תוך זמן קצר - תודה ענקית לכולכם! 🙏<br/>
-                      ואם אתם על iPhone — בשורות טובות: <strong>בקרוב אנחנו משיקים גם לאייפון</strong>. נעדכן ברגע שזה קורה!
+                      ואם אתם על iPhone - בשורות טובות: <strong>בקרוב אנחנו משיקים גם לאייפון</strong>. נעדכן ברגע שזה קורה!
                     </p>
                   </td>
                 </tr>
