@@ -451,8 +451,11 @@ describe('Onboarding — fetchUser error handling (Android WebView fix)', () => 
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(screen.getByPlaceholderText('השם המלא שלך')).toBeTruthy());
-    expect(screen.getByPlaceholderText('השם המלא שלך')).toHaveValue('');
+    // The name is collected as a profile display field ("the name roommates
+    // will see"), not re-requested as Apple identity. No Apple-account loading
+    // text — that framing is what App Review flagged as re-collecting SIWA data.
+    await waitFor(() => expect(screen.getByPlaceholderText('השם שיוצג בפרופיל')).toBeTruthy());
+    expect(screen.getByPlaceholderText('השם שיוצג בפרופיל')).toHaveValue('');
     await waitFor(() => expect(screen.queryByText(/טוען שם מחשבון Apple/)).toBeNull(), {
       timeout: 5000,
     });

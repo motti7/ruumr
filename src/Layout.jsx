@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { useOptionalAuth } from "@/lib/AuthContext";
 
 function FilterHintButton() {
   return (
@@ -70,6 +71,10 @@ export default function Layout({ children, currentPageName }) {
     }
   });
   const navigate = useNavigate();
+  // Authenticated users without a Profile get locked bottom-nav tabs (they can
+  // still reach Settings in the header so account deletion stays accessible).
+  const { hasProfile } = useOptionalAuth();
+  const tabsLocked = hasProfile === false;
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -247,15 +252,14 @@ export default function Layout({ children, currentPageName }) {
                 </div>
             </div>
         )}
-        {!Capacitor.isNativePlatform() && (
-        <div className="hidden sm:flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-center p-4">
-            <div className="w-full max-w-6xl mx-auto bg-white min-h-screen shadow-sm">
-                {children}
-            </div>
-        </div>
-        )}
-
-        <div className={Capacitor.isNativePlatform() ? "" : "sm:hidden"}>
+        {/* App chrome (header + bottom nav) must render at all viewport widths.
+            Previously the mobile chrome was `sm:hidden` and a separate
+            chrome-less block rendered at >=640px, which hid the Settings gear and
+            bottom nav on iPad — the app WebView is not detected as a native
+            Capacitor platform, so it fell into the wide-screen branch. Ruumr is a
+            mobile-first single-column app, so we render the same chrome everywhere
+            (fixes App Store "Settings button not visible on iPad"). */}
+        <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 <div className="max-w-md mx-auto flex items-center h-12 relative">
@@ -303,6 +307,14 @@ export default function Layout({ children, currentPageName }) {
                         const Icon = item.icon;
                         const isPlusItem = item.name === "Plus";
                         const handleClick = (e) => {
+                            if (tabsLocked) {
+                                // No Profile yet: tabs are non-functional. Keep the
+                                // user on Discover, where the "complete profile" CTA lives.
+                                e.preventDefault();
+                                navigate(createPageUrl("Discover"));
+                                return;
+                            }
+
                             if (isPlusItem) {
                                 e.preventDefault();
                                 // Track Plus nav button click
@@ -327,7 +339,7 @@ export default function Layout({ children, currentPageName }) {
                         <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${
+                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${tabsLocked ? 'opacity-40' : ''} ${
                                 isPlusItem
                                     ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
                                         isActive
@@ -352,6 +364,11 @@ export default function Layout({ children, currentPageName }) {
                             {item.badgeCount > 0 && (
                                 <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
                                     {item.badgeCount}
+                                </span>
+                            )}
+                            {tabsLocked && !isPlusItem && (
+                                <span className="absolute -top-1 right-2 w-[14px] h-[14px] bg-gray-400 text-white flex items-center justify-center rounded-full border border-white shadow-sm" aria-hidden="true">
+                                    <Lock className="w-2 h-2" strokeWidth={3} />
                                 </span>
                             )}
                             </motion.div>
