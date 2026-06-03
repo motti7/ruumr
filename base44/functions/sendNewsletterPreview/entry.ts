@@ -160,15 +160,19 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: 'Two preview emails sent to mottishif7@gmail.com' });
     }
 
-    // Send to all users
-    const allUsers = await base44.asServiceRole.entities.User.list();
+    // Send to users in batches using skip/limit
+    const skip = body.skip ?? 0;
+    const batchSize = body.limit ?? 100;
+
+    const allUsers = await base44.asServiceRole.entities.User.list('created_date', 500);
     const allProfiles = await base44.asServiceRole.entities.Profile.list();
     const profileUserIds = new Set(allProfiles.map(p => p.user_id));
 
+    const batch = allUsers.slice(skip, skip + batchSize);
     let sentCount = 0;
     let errorCount = 0;
 
-    for (const u of allUsers) {
+    for (const u of batch) {
       if (!u.email) continue;
       const hasProfile = profileUserIds.has(u.id);
       try {
@@ -185,7 +189,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    return Response.json({ success: true, sent: sentCount, errors: errorCount, total: allUsers.length });
+    return Response.json({
+      success: true,
+      sent: sentCount,
+      errors: errorCount,
+      batch_size: batch.length,
+      skip,
+      total: allUsers.length,
+      next_skip: skip + batchSize < allUsers.length ? skip + batchSize : null,
+    });
   } catch (error) {
     console.error('Error sending newsletter:', error);
     return Response.json({ error: error.message }, { status: 500 });
