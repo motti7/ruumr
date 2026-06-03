@@ -70,6 +70,15 @@ export default function Layout({ children, currentPageName }) {
       return [];
     }
   });
+  const [likesCount, setLikesCount] = useState(0);
+  const [seenLikeIds, setSeenLikeIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('roomi_seen_like_ids');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const navigate = useNavigate();
   // Authenticated users without a Profile get locked bottom-nav tabs (they can
   // still reach Settings in the header so account deletion stays accessible).
@@ -142,6 +151,18 @@ export default function Layout({ children, currentPageName }) {
         matchesCountRef.current = total;
         setMatchesCount(total);
 
+        // Count unseen likes
+        try {
+          const { base44: b44 } = await import('@/api/base44Client');
+          const [likesSwipes, mySwipes] = await Promise.all([
+            b44.entities.Swipe.filter({ swiped_id: user.id, action: 'like' }),
+            b44.entities.Swipe.filter({ swiper_id: user.id }),
+          ]);
+          const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
+          const pendingLikerIds = likesSwipes.map(l => l.swiper_id).filter(id => !alreadySwiped.has(id));
+          setLikesCount(pendingLikerIds.length);
+        } catch {}
+
       } catch (e) {}
     };
 
@@ -175,6 +196,18 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('roomi_seen_updated', handler);
   }, []);
 
+  // Listen for likes seen updates (from LikesYou page)
+  useEffect(() => {
+    const handler = () => {
+      try {
+        const saved = localStorage.getItem('roomi_seen_like_ids');
+        setSeenLikeIds(saved ? JSON.parse(saved) : []);
+      } catch {}
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
   // Stack-based tab history tracking
   useTabHistory();
 
@@ -183,12 +216,13 @@ export default function Layout({ children, currentPageName }) {
 
   // Calculate unseen matches count
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
+  const unseenLikesCount = Math.max(0, likesCount - seenLikeIds.length);
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
     { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp },
+    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ];
 
