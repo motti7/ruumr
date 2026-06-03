@@ -90,7 +90,7 @@ const buildEmailHtml = (includeWhatsapp) => `
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
                       פותחים קבוצת ווצאפ בלעדית עם <strong>הטבות, עדכונים ראשונים ותכנים בלעדיים</strong> לחברי הקהילה.<br/>
                       <strong>מבטיחים לא לחפור</strong> 😄 - רק דברים שווים ורלוונטיים.<br/><br/>
-                      <a href="https://chat.whatsapp.com/LINK_PLACEHOLDER" 
+                      <a href="https://chat.whatsapp.com/KGgcJKBngKIAnHnMz7i9Nb" 
                          style="display:inline-block;background:#25D366;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:50px;font-weight:700;font-size:15px;">
                         הצטרפו לקבוצה 👈
                       </a>
