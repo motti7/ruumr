@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const emailHtml = `
+const buildEmailHtml = (includeWhatsapp) => `
 <!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head>
@@ -36,16 +36,16 @@ const emailHtml = `
           <!-- Divider -->
           <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #f0f0f0;"/></td></tr>
 
-          <!-- News 1: 150 downloads -->
+          <!-- News 1: 1000+ users -->
           <tr>
             <td style="padding:28px 40px 20px;">
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="font-size:36px;padding-left:16px;vertical-align:top;">🚀</td>
                   <td>
-                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">150+ הורדות באנדרואיד - ובקרוב גם iOS!</h3>
+                    <h3 style="margin:0 0 8px;font-size:20px;color:#FF5722;font-weight:700;">מעל 1,000 נרשמים - ובקרוב גם iOS!</h3>
                     <p style="margin:0;font-size:15px;color:#555;line-height:1.7;">
-                      עברנו את ה-150 הורדות באנדרואיד תוך זמן קצר - תודה ענקית לכולכם! 🙏<br/>
+                      עברנו את ה-1,000 נרשמים תוך זמן קצר - תודה ענקית לכולכם! 🙏<br/>
                       ואם אתם על iPhone — בשורות טובות: <strong>בקרוב אנחנו משיקים גם לאייפון</strong>. נעדכן ברגע שזה קורה!
                     </p>
                   </td>
@@ -59,7 +59,7 @@ const emailHtml = `
 
           <!-- News 2: Ruumr Plus -->
           <tr>
-            <td style="padding:28px 40px 20px;">
+            <td style="padding:28px 40px ${includeWhatsapp ? '20px' : '36px'};">
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="font-size:36px;padding-left:16px;vertical-align:top;">✨</td>
@@ -75,6 +75,7 @@ const emailHtml = `
             </td>
           </tr>
 
+          ${includeWhatsapp ? `
           <!-- Divider -->
           <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #f0f0f0;"/></td></tr>
 
@@ -99,6 +100,7 @@ const emailHtml = `
               </table>
             </td>
           </tr>
+          ` : ''}
 
           <!-- CTA -->
           <tr>
@@ -138,15 +140,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Send preview only to the provided email (not to all users!)
+    // Send two preview emails: one without WhatsApp section, one with
     await base44.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: '🎉 היי רומרים, יש לנו כמה עדכונים 😊',
-      body: emailHtml,
+      subject: '[טיוטה - ללא פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
+      body: buildEmailHtml(false),
       content_type: 'text/html',
     });
 
-    return Response.json({ success: true, message: 'Preview email sent to mottishif7@gmail.com' });
+    await base44.integrations.Core.SendEmail({
+      to: 'mottishif7@gmail.com',
+      subject: '[טיוטה - עם פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
+      body: buildEmailHtml(true),
+      content_type: 'text/html',
+    });
+
+    return Response.json({ success: true, message: 'Two preview emails sent to mottishif7@gmail.com' });
   } catch (error) {
     console.error('Error sending preview email:', error);
     return Response.json({ error: error.message }, { status: 500 });
