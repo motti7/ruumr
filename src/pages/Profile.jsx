@@ -82,7 +82,9 @@ export default function ProfilePage() {
         setProfile(normalizedProfile);
         setFormData(normalizedProfile);
       } else {
-        window.location.href = createPageUrl('Onboarding');
+        // No Profile yet: send back to the Discover locked preview (which holds
+        // the "complete profile" CTA) rather than forcing the registration wizard.
+        window.location.href = createPageUrl('Discover');
       }
     } catch (error) { 
       console.error("Error loading profile:", error);

@@ -4,6 +4,7 @@ import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileCard from "../components/discover/ProfileCard";
+import LockedProfilePreview from "../components/discover/LockedProfilePreview";
 import ActionButtons from "../components/discover/ActionButtons";
 import MatchAnimation from "../components/discover/MatchAnimation";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
@@ -19,6 +20,7 @@ import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulato
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import { trackMixpanel } from '@/lib/mixpanelTracking';
+import { useOptionalAuth } from "@/lib/AuthContext";
 
 const sortProfilesByCreatedDateDesc = (records = []) => {
   return [...records].sort((left, right) => {
@@ -37,6 +39,9 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
+  const { setHasProfile } = useOptionalAuth();
+  // Authenticated but no Profile yet → show the locked preview instead of the deck.
+  const [needsProfile, setNeedsProfile] = useState(false);
   // profiles = רשימת הפרופילים שעוד לא נראו (מתקצרת בכל swipe)
   // allProfiles = כל הפרופילים הזמינים (לפני פילטרים), ללא מי שנראה
   const [profiles, setProfiles] = useState([]);
@@ -104,9 +109,15 @@ export default function DiscoverPage() {
       }
 
       if (userProfiles.length === 0) {
-        navigate(createPageUrl('Onboarding'));
+        // No Profile yet: stay on Discover and show the locked preview with a
+        // "complete profile" CTA, rather than forcing the registration wizard.
+        setNeedsProfile(true);
+        setHasProfile(false);
+        setIsLoading(false);
         return;
       }
+      setNeedsProfile(false);
+      setHasProfile(true);
       const currentUserProfile = userProfiles[0];
       setUserProfile(currentUserProfile);
       setCurrentUserId(user.id);
@@ -205,7 +216,7 @@ export default function DiscoverPage() {
       }
     }
     setIsLoading(false);
-  }, [navigate]);
+  }, [navigate, setHasProfile]);
 
   useEffect(() => { loadData(); }, [loadData]);
   
@@ -390,6 +401,22 @@ export default function DiscoverPage() {
         </div>
         <p className="text-gray-600 font-bold text-lg">מחפש שותפים...</p>
         <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
+      </div>
+    );
+  }
+
+  if (needsProfile) {
+    return (
+      <div className="fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+        <div
+          className="absolute left-0 right-0"
+          style={{
+            top: 'calc(48px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+          }}
+        >
+          <LockedProfilePreview onComplete={() => navigate(createPageUrl('Onboarding'))} />
+        </div>
       </div>
     );
   }

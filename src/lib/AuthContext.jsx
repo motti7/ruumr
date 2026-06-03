@@ -8,6 +8,7 @@ import { Capacitor } from '@capacitor/core';
 import { isRuumrNativeDemoSession, isRuumrSimulatorMode } from '@/lib/simulatorMode';
 import { enableSimulatorBackend, getSimulatorBackendState } from '@/lib/simulatorBackend';
 import { resolveAndSyncAppleIdentity } from '@/lib/appleIdentity';
+import { Profile } from '@/entities/Profile';
 import { clearAuthCallbackHints, getStoredAuthCallbackHints } from '@/lib/authCallbackHints';
 import { LAST_USED_AUTH_METHOD_KEY } from '@/lib/clientSessionCleanup';
 import {
@@ -29,6 +30,8 @@ const missingAuthContext = {
   navigateToLogin: () => undefined,
   loginWithProvider: async () => undefined,
   checkAppState: async () => undefined,
+  hasProfile: null,
+  setHasProfile: () => undefined,
 };
 
 const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
@@ -40,10 +43,34 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  // null = unknown/loading, true = has a Ruumr Profile, false = authenticated but no Profile yet.
+  // Drives the locked-preview Discover state and the locked bottom-nav tabs.
+  const [hasProfile, setHasProfile] = useState(null);
 
   useEffect(() => {
     checkAppState();
   }, []);
+
+  // Resolve whether the authenticated user has completed a Profile. Kept in
+  // AuthContext so both Discover (locked preview) and Layout (locked tabs) read
+  // one source of truth. Failure leaves it null (unknown) so we never lock a
+  // user who actually has a profile.
+  const loadHasProfile = async (userId) => {
+    if (!userId) {
+      setHasProfile(null);
+      return;
+    }
+    try {
+      const profiles = await Profile.filter({ user_id: userId });
+      setHasProfile(Array.isArray(profiles) && profiles.length > 0);
+    } catch (_) {
+      const simulatorState = getSimulatorBackendState();
+      const simProfiles = simulatorState?.collections?.Profile?.filter(
+        (profile) => String(profile.user_id) === String(userId)
+      );
+      setHasProfile(simProfiles ? simProfiles.length > 0 : null);
+    }
+  };
 
   const checkAppState = async () => {
     console.log('[ruumr] checkAppState: start, hasToken =', Boolean(appParams.token));
@@ -71,6 +98,7 @@ export const AuthProvider = ({ children }) => {
         });
         setUser(currentUser);
         setIsAuthenticated(true);
+        await loadHasProfile(currentUser?.id);
         setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
         return;
@@ -171,6 +199,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(currentUser);
       setIsAuthenticated(true);
+      await loadHasProfile(currentUser?.id);
 
       if (currentUser?.id) {
         const appleIdentity = appleIdentitySnapshot.appleAuthUser ? appleIdentitySnapshot.appleIdentity : null;
@@ -270,7 +299,9 @@ export const AuthProvider = ({ children }) => {
       logout,
       navigateToLogin,
       loginWithProvider,
-      checkAppState
+      checkAppState,
+      hasProfile,
+      setHasProfile
     }}>
       {children}
     </AuthContext.Provider>

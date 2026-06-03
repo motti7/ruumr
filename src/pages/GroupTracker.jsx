@@ -27,7 +27,7 @@ export default function GroupTrackerPage() {
         setUser(userData);
 
         const profiles = await base44.entities.Profile.filter({ user_id: userData.id });
-        if (profiles.length === 0) { navigate(createPageUrl('Onboarding')); return; }
+        if (profiles.length === 0) { navigate(createPageUrl('Discover')); return; }
         const prof = profiles[0];
         setMyProfile(prof);
         setTargetCount(prof.team_target || 3);

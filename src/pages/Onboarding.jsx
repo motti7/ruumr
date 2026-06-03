@@ -67,7 +67,7 @@ const Step = ({ children, step, currentStep, title }) =>
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user: authUser, isLoadingAuth } = useOptionalAuth();
+  const { user: authUser, isLoadingAuth, setHasProfile } = useOptionalAuth();
   const initialCachedIdentity = authUser?.id ? getCachedAppleIdentity(authUser.id) : null;
   const authHints = appParams.authHints;
   const initialAppleSnapshot = resolveAppleIdentitySnapshot({
@@ -462,6 +462,9 @@ export default function OnboardingPage() {
         });
       }
 
+      // Profile now exists → unlock Discover and the bottom-nav tabs.
+      setHasProfile(true);
+
       try {
         await syncCurrentProfileToRuumrPlus();
       } catch (syncError) {
@@ -497,9 +500,6 @@ export default function OnboardingPage() {
   const setFormField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
-  const appleNameText = appleDisplayName || formData.name.trim();
-  const shouldShowAppleNameLoading = isAppleUser && isResolvingAppleIdentity && !appleNameText;
 
   // Image compression utility
   const compressImage = async (file) => {
@@ -771,6 +771,7 @@ export default function OnboardingPage() {
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
                         <label className="text-base font-semibold" style={{ color: '#FA3803' }}>שם</label>
+                        <p className="text-xs text-gray-400">כך יוצג שמך לשותפים פוטנציאליים בפרופיל</p>
                         {isAppleUser && appleDisplayName ?
                 // Apple Sign-In returned a valid name — show the input with
                 // the Apple-provided value locked in (readOnly + no onChange).
@@ -786,22 +787,17 @@ export default function OnboardingPage() {
                   className="h-11 text-base bg-gray-50 border-gray-200 text-gray-700 cursor-default focus:border-gray-200 focus:ring-0 focus-visible:ring-0" /> :
 
 
-                // Fallback: no name from Apple (user hid it, returning user
-                // with no cached name, or platform did not capture it on first
-                // auth). The user must enter it manually to complete onboarding.
+                // No name was provided by Sign in with Apple (user chose to
+                // hide it, returning user, or the platform did not pass it
+                // through). The user sets their profile display name here as
+                // part of building their Ruumr profile — this is profile data
+                // shown to roommates, not a re-collection of the Apple ID name.
                 <>
                                 <Input
                     value={formData.name}
                     onChange={(e) => setFormField('name', e.target.value)}
-                    placeholder={isAppleUser ? 'השם המלא שלך' : ''}
+                    placeholder="השם שיוצג בפרופיל"
                     className="h-11 bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0 text-base" />
-                  
-                                {isAppleUser && shouldShowAppleNameLoading &&
-                  <div className="flex items-center gap-2 text-gray-500">
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span className="text-sm">טוען שם מחשבון Apple...</span>
-                                    </div>
-                  }
                             </>
                 }
                     </div>
