@@ -140,24 +140,54 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Send two preview emails: one without WhatsApp section, one with
-    await base44.integrations.Core.SendEmail({
-      to: 'mottishif7@gmail.com',
-      subject: '[טיוטה - ללא פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
-      body: buildEmailHtml(false),
-      content_type: 'text/html',
-    });
+    const body = await req.json().catch(() => ({}));
+    const previewOnly = body.preview === true;
 
-    await base44.integrations.Core.SendEmail({
-      to: 'mottishif7@gmail.com',
-      subject: '[טיוטה - עם פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
-      body: buildEmailHtml(true),
-      content_type: 'text/html',
-    });
+    if (previewOnly) {
+      // Send two preview emails to admin only
+      await base44.integrations.Core.SendEmail({
+        to: 'mottishif7@gmail.com',
+        subject: '[טיוטה - ללא פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
+        body: buildEmailHtml(false),
+        content_type: 'text/html',
+      });
+      await base44.integrations.Core.SendEmail({
+        to: 'mottishif7@gmail.com',
+        subject: '[טיוטה - עם פרופיל] 🎉 היי רומרים, יש לנו כמה עדכונים 😊',
+        body: buildEmailHtml(true),
+        content_type: 'text/html',
+      });
+      return Response.json({ success: true, message: 'Two preview emails sent to mottishif7@gmail.com' });
+    }
 
-    return Response.json({ success: true, message: 'Two preview emails sent to mottishif7@gmail.com' });
+    // Send to all users
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const allProfiles = await base44.asServiceRole.entities.Profile.list();
+    const profileUserIds = new Set(allProfiles.map(p => p.user_id));
+
+    let sentCount = 0;
+    let errorCount = 0;
+
+    for (const u of allUsers) {
+      if (!u.email) continue;
+      const hasProfile = profileUserIds.has(u.id);
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: u.email,
+          subject: '🎉 היי רומרים, יש לנו כמה עדכונים 😊',
+          body: buildEmailHtml(hasProfile),
+          content_type: 'text/html',
+        });
+        sentCount++;
+      } catch (e) {
+        console.error(`Failed to send to ${u.email}:`, e.message);
+        errorCount++;
+      }
+    }
+
+    return Response.json({ success: true, sent: sentCount, errors: errorCount, total: allUsers.length });
   } catch (error) {
-    console.error('Error sending preview email:', error);
+    console.error('Error sending newsletter:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
