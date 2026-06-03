@@ -327,17 +327,8 @@ export default function DiscoverPage() {
         }
       }
     } catch (error) { 
-        console.error("Swipe save failed:", error);
-        // Rollback optimistic update on server failure
-        setAllProfiles(prev => {
-          // מחזירים את הפרופיל למקומו המקורי
-          const withProfile = [...prev];
-          withProfile.splice(prevIndex, 0, swipedProfile);
-          return withProfile;
-        });
-        setSeenUserIds(prev => { const next = new Set(prev); next.delete(String(swipedProfile.user_id)); return next; });
-        setCurrentIndex(prevIndex);
-        setLastSwipes(prev => prev.slice(0, -1));
+        // Do NOT rollback — the swipe UI must always advance even if saving fails
+        console.error("Swipe save failed (non-blocking):", error);
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
   

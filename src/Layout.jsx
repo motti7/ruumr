@@ -146,7 +146,7 @@ export default function Layout({ children, currentPageName }) {
     };
 
     checkNotifications();
-    const interval = setInterval(checkNotifications, 10000); // Poll every 10s
+    const interval = setInterval(checkNotifications, 60000); // Poll every 60s
     return () => clearInterval(interval);
   }, [currentPageName]);
 
