@@ -9,6 +9,7 @@ import { createCheckout } from "@/functions/createCheckout";
 export default function RuumrPlusCheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -39,6 +40,23 @@ export default function RuumrPlusCheckoutPage() {
         מסלול Ruumr Plus בעלות {RUUMR_PLUS_PRICE_ILS} ₪ לחודש. לחץ/י להמשך לדף התשלום המאובטח.
       </p>
 
+      {/* Terms checkbox */}
+      <label className="mt-5 flex items-start gap-3 max-w-sm text-right cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={e => setTermsAccepted(e.target.checked)}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[--theme-orange] cursor-pointer"
+        />
+        <span className="text-sm text-gray-600 leading-5">
+          קראתי ואני מאשר/ת את{" "}
+          <Link to={createPageUrl("Terms")} className="font-bold text-[--theme-orange] underline" target="_blank" rel="noopener noreferrer">
+            תקנון השירות
+          </Link>
+          {" "}של Ruumr Plus
+        </span>
+      </label>
+
       {error && (
         <p className="mt-3 text-sm text-red-500">{error}</p>
       )}
@@ -46,7 +64,7 @@ export default function RuumrPlusCheckoutPage() {
       <Button
         type="button"
         onClick={handleCheckout}
-        disabled={loading}
+        disabled={loading || !termsAccepted}
         className="mt-6 h-12 w-full max-w-sm rounded-full bg-[--theme-orange] text-white font-bold shadow-lg hover:brightness-110 disabled:opacity-60"
       >
         {loading ? (
