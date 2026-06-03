@@ -204,8 +204,8 @@ export default function Layout({ children, currentPageName }) {
         setSeenLikeIds(saved ? JSON.parse(saved) : []);
       } catch {}
     };
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
+    window.addEventListener('roomi_likes_seen_updated', handler);
+    return () => window.removeEventListener('roomi_likes_seen_updated', handler);
   }, []);
 
   // Stack-based tab history tracking

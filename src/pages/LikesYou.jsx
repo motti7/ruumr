@@ -54,6 +54,17 @@ export default function LikesYouPage() {
         loadLikes();
     }, []);
 
+    // Mark all current likes as seen when entering the page
+    useEffect(() => {
+        if (!isLoading && profiles.length > 0) {
+            const allIds = profiles.map(p => p.user_id);
+            const newSeen = [...new Set([...seenLikeIds, ...allIds])];
+            setSeenLikeIds(newSeen);
+            localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
+            window.dispatchEvent(new Event('roomi_likes_seen_updated'));
+        }
+    }, [isLoading, profiles]);
+
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await loadLikes();
@@ -131,6 +142,7 @@ export default function LikesYouPage() {
                                         const newSeen = [...new Set([...seenLikeIds, profile.user_id])];
                                         setSeenLikeIds(newSeen);
                                         localStorage.setItem('roomi_seen_like_ids', JSON.stringify(newSeen));
+                                        window.dispatchEvent(new Event('roomi_likes_seen_updated'));
                                         navigate(createPageUrl('ProfileView') + `?userId=${profile.user_id}&fromLikes=true`);
                                     }}
                                 >
