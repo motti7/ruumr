@@ -11,11 +11,16 @@ import OneSignalSetup from '@/components/shared/OneSignalSetup'
 import { detectNativeIOSSimulator } from '@/lib/nativeEnvironment';
 import { base44 } from '@/api/base44Client';
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import NativeAuthLogin from '@/components/NativeAuthLogin';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
@@ -70,18 +75,7 @@ const AuthenticatedApp = () => {
       isAuthenticated,
       authErrorType: authError?.type ?? null,
     });
-    // Redirect to the branded Base44 login page for this app. The app base URL
-    // must stay on app.ruumrapp.com so Base44 includes Ruumr's app_id in OAuth.
-    if (
-      authError?.type === 'auth_required' &&
-      !isNativePlatform &&
-      !isLoadingAuth &&
-      !isLoadingPublicSettings
-    ) {
-      console.log('[ruumr] navigateToLogin: auth_required and loading complete');
-      navigateToLogin();
-    }
-  }, [authError, isLoadingAuth, isLoadingPublicSettings, isAuthenticated, navigateToLogin]);
+  }, [authError, isLoadingAuth, isLoadingPublicSettings, isAuthenticated]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -102,7 +96,8 @@ const AuthenticatedApp = () => {
 
     if (authError.type === 'auth_required') {
       writeBootMarker('authenticated-app-auth-required');
-      return isNativePlatform ? <NativeAuthLogin /> : null;
+      if (isNativePlatform) return <NativeAuthLogin />;
+      // For web: fall through — ProtectedRoute handles the redirect
     }
   }
 
@@ -113,32 +108,42 @@ const AuthenticatedApp = () => {
     <OneSignalSetup userId={user?.id} />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location?.pathname}>
-        <Route path="/" element={
-          <PageTransition>
-            <LayoutWrapper currentPageName={mainPageKey}>
-              {MainPage ? <MainPage /> : null}
-            </LayoutWrapper>
-          </PageTransition>
-        } />
-        {Object.entries(Pages).map(([path, Page]) => (
-          <Route
-            key={path}
-            path={`/${path}`}
-            element={
-              <PageTransition>
-                <LayoutWrapper currentPageName={path}>
-                  <Page />
-                </LayoutWrapper>
-              </PageTransition>
-            }
-          />
-        ))}
-        <Route path="/GroupTracker" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition></Suspense>} />
-        <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
-        <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
-        <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
-        <Route path="/RuumrPlusThankYou" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>} />
-        <Route path="/ManageSubscription" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>} />
+        {/* Public auth routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* All protected routes */}
+        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+          <Route path="/" element={
+            <PageTransition>
+              <LayoutWrapper currentPageName={mainPageKey}>
+                {MainPage ? <MainPage /> : null}
+              </LayoutWrapper>
+            </PageTransition>
+          } />
+          {Object.entries(Pages).map(([path, Page]) => (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={
+                <PageTransition>
+                  <LayoutWrapper currentPageName={path}>
+                    <Page />
+                  </LayoutWrapper>
+                </PageTransition>
+              }
+            />
+          ))}
+          <Route path="/GroupTracker" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/RuumrPlusThankYou" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/ManageSubscription" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>} />
+        </Route>
+
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
