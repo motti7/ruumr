@@ -56,7 +56,14 @@ export default function DiscoverPage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
-  const [seenUserIds, setSeenUserIds] = useState(new Set());
+  const [seenUserIds, setSeenUserIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ruumr_seen_user_ids');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   useEffect(() => {
     try {
       window.localStorage.setItem('ruumr_discover_marker', 'discover-mounted');
@@ -140,6 +147,14 @@ export default function DiscoverPage() {
       }
       const swipedIds = userSwipes.map(s => String(s.swiped_id));
       
+      // Also include locally-seen IDs (catches cases where swipe save failed or app was in background)
+      let localSeenIds = new Set();
+      try {
+        const saved = localStorage.getItem('ruumr_seen_user_ids');
+        if (saved) localSeenIds = new Set(JSON.parse(saved));
+      } catch {}
+      const allSwipedIds = new Set([...swipedIds, ...localSeenIds]);
+      
       let likedMeSwipes = [];
       try {
         likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
@@ -153,7 +168,7 @@ export default function DiscoverPage() {
 
       const availableProfiles = allProfiles.filter(p => {
         // 1. Filter out self and already swiped
-        if (String(p.user_id) === String(user.id) || swipedIds.includes(String(p.user_id))) return false;
+        if (String(p.user_id) === String(user.id) || allSwipedIds.has(String(p.user_id))) return false;
         
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
@@ -191,6 +206,9 @@ export default function DiscoverPage() {
         
         return overlap;
       });
+
+      // Sync seenUserIds state with what was loaded (server swipes + local cache)
+      setSeenUserIds(allSwipedIds);
 
       setAllProfiles(availableProfiles);
       setProfiles(availableProfiles);
@@ -273,7 +291,13 @@ export default function DiscoverPage() {
 
     // הסרת הפרופיל שנראה מ-allProfiles — כך שגם אחרי שינוי פילטרים הוא לא יחזור
     setAllProfiles(prev => prev.filter(p => String(p.user_id) !== String(swipedProfile.user_id)));
-    setSeenUserIds(prev => new Set([...prev, String(swipedProfile.user_id)]));
+    setSeenUserIds(prev => {
+      const updated = new Set([...prev, String(swipedProfile.user_id)]);
+      try {
+        localStorage.setItem('ruumr_seen_user_ids', JSON.stringify([...updated]));
+      } catch {}
+      return updated;
+    });
     setCurrentIndex(prev => prev + 1);
     setLastSwipes(prev => [...prev, optimisticSwipe]);
     setActionFeedback(action);
@@ -507,7 +531,7 @@ export default function DiscoverPage() {
             >
               <h2 className="text-2xl font-bold text-gray-800 mb-3">זה הכל לעכשיו!</h2>
               <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
-              <Button onClick={loadData} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
+              <Button onClick={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
             </motion.div>
           )}
         </AnimatePresence>
