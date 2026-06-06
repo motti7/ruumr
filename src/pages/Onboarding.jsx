@@ -1172,7 +1172,7 @@ export default function OnboardingPage() {
                     </div>
 
                     {/* Section 2: Verification */}
-                    <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                    <div className="w-full p-4">
                         <h3 className="text-xl font-bold mb-1">אמת/י את הפרופיל שלך</h3>
                         <p className="text-gray-500 text-sm">
                             פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
