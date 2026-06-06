@@ -1,16 +1,7 @@
 {
-  "type": "object",
   "name": "User",
-  "title": "User",
+  "type": "object",
   "properties": {
-    "email": {
-      "type": "string",
-      "description": "The email of the user"
-    },
-    "full_name": {
-      "type": "string",
-      "description": "The full name of the user"
-    },
     "role": {
       "type": "string",
       "enum": [
@@ -51,16 +42,12 @@
       "description": "Whether the user has Ruumr Plus access"
     }
   },
-  "required": [
-    "email",
-    "full_name"
-  ],
+  "required": [],
   "rls": {
-    "create": true,
     "read": {
       "$or": [
         {
-          "id": "{{user.id}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -72,7 +59,7 @@
     "update": {
       "$or": [
         {
-          "id": "{{user.id}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {

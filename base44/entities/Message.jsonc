@@ -26,12 +26,12 @@
   ],
   "rls": {
     "create": {
-      "data.sender_id": "{{user.id}}"
+      "created_by": "{{user.email}}"
     },
     "read": {
       "$or": [
         {
-          "data.sender_id": "{{user.id}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -41,10 +41,10 @@
       ]
     },
     "update": {
-      "data.sender_id": "{{user.id}}"
+      "created_by": "{{user.email}}"
     },
     "delete": {
-      "data.sender_id": "{{user.id}}"
+      "created_by": "{{user.email}}"
     }
   }
 }
