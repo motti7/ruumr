@@ -11,6 +11,17 @@ const safeDelete = async (entity, id) => {
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
+
+        // Only allow admin users or platform automations (no user context)
+        try {
+            const user = await base44.auth.me();
+            if (user && user.role !== 'admin') {
+                return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+            }
+        } catch {
+            // No user context = called by platform automation, allow
+        }
+
         const sr = base44.asServiceRole.entities;
 
         // Fetch all profiles and all users

@@ -173,6 +173,17 @@ Deno.serve(async (req) => {
         }
 
         const base44 = createClientFromRequest(req);
+
+        // Only allow admin users or platform automations (no user context)
+        try {
+            const user = await base44.auth.me();
+            if (user && user.role !== 'admin') {
+                return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+            }
+        } catch {
+            // No user context = called by platform automation, allow
+        }
+
         const rawProfiles = await loadAllProfiles(base44);
 
         // Safety guard: never send a destructive replace_existing snapshot if we
