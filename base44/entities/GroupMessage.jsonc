@@ -36,7 +36,9 @@
     "read": {
       "$or": [
         {
-          "data.sender_id": "{{user.id}}"
+          "data.group_id": {
+            "$regex": "(^|_){{user.id}}(_|$)"
+          }
         },
         {
           "user_condition": {
