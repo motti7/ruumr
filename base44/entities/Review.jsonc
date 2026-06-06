@@ -25,23 +25,14 @@
   ],
   "rls": {
     "create": {
-      "$and": [
-        { "created_by": "{{user.email}}" },
-        { "data.reviewer_id": "{{user.id}}" }
-      ]
+      "created_by_id": "{{user.id}}"
     },
     "read": true,
     "update": {
-      "$and": [
-        { "created_by": "{{user.email}}" },
-        { "data.reviewer_id": "{{user.id}}" }
-      ]
+      "created_by_id": "{{user.id}}"
     },
     "delete": {
-      "$and": [
-        { "created_by": "{{user.email}}" },
-        { "data.reviewer_id": "{{user.id}}" }
-      ]
+      "created_by_id": "{{user.id}}"
     }
   }
 }

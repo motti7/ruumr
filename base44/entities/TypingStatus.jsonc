@@ -15,35 +15,28 @@
   ],
   "rls": {
     "create": {
-      "$and": [
+      "created_by_id": "{{user.id}}",
+      "data.user_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
         {
           "data.user_id": "{{user.id}}"
         },
         {
-          "created_by": "{{user.email}}"
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
-    "read": true,
     "update": {
-      "$and": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "created_by_id": "{{user.id}}",
+      "data.user_id": "{{user.id}}"
     },
     "delete": {
-      "$and": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "created_by_id": "{{user.id}}",
+      "data.user_id": "{{user.id}}"
     }
   }
 }
