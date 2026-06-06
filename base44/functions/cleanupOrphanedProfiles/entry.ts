@@ -3,9 +3,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Scheduled cleanup: finds Profile records whose user_id no longer has a
 // matching User in the system, and cascades deletion of all related data.
 // Runs periodically to catch users deleted directly via the admin dashboard.
+// Processes up to MAX_PER_RUN orphans per execution to avoid rate limits.
+
+const MAX_PER_RUN = 3;
+const DELAY_MS = 300;
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const safeDelete = async (entity, id) => {
     try { await entity.delete(id); } catch (_) {}
+    await sleep(DELAY_MS);
 };
 
 Deno.serve(async (req) => {
@@ -40,10 +47,11 @@ Deno.serve(async (req) => {
             return Response.json({ success: true, cleaned: 0 });
         }
 
-        console.log(`🔍 Found ${orphanedProfiles.length} orphaned profile(s). Cleaning up...`);
+        console.log(`🔍 Found ${orphanedProfiles.length} orphaned profile(s). Processing up to ${MAX_PER_RUN} this run...`);
 
+        const batch = orphanedProfiles.slice(0, MAX_PER_RUN);
         let cleaned = 0;
-        for (const profile of orphanedProfiles) {
+        for (const profile of batch) {
             const userId = profile.user_id;
 
             // Delete the profile itself
@@ -85,7 +93,7 @@ Deno.serve(async (req) => {
             cleaned++;
         }
 
-        return Response.json({ success: true, cleaned, total_profiles: allProfiles.length });
+        return Response.json({ success: true, cleaned, remaining: orphanedProfiles.length - cleaned, total_profiles: allProfiles.length });
     } catch (error) {
         console.error('❌ cleanupOrphanedProfiles error:', error);
         return Response.json({ error: error.message }, { status: 500 });
