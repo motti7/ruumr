@@ -1159,7 +1159,7 @@ export default function OnboardingPage() {
                                 {wantsRuumrPromotion && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                             </div>
                             <span className="text-sm text-gray-600 leading-snug">
-                                אני מעוניין/ת בפרסום של הפרופיל שלי ברשתות החברתיות של רומר - לצורך מציאת שותף.ה 😎
+                                רוצה למצוא שותף מהר יותר? סמן/י כאן כדי שנעלה את הפרופיל שלך לסטורי באינסטגרם של Ruumr! 🚀
                             </span>
                         </button>
                     </div>
