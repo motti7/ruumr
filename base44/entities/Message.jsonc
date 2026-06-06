@@ -34,7 +34,11 @@
           "data.sender_id": "{{user.id}}"
         },
         {
-          "data.recipient_id": "{{user.id}}"
+          "data.match_id": {
+            "$in": [
+              "{{Match.id}}"
+            ]
+          }
         },
         {
           "user_condition": {

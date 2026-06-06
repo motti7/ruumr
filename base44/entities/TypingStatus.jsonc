@@ -23,7 +23,16 @@
           "data.user_id": "{{user.id}}"
         },
         {
-          "data.match_id": "{{user.id}}"
+          "data.match_id": {
+            "$in": [
+              "{{Match.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
