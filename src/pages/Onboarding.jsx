@@ -98,6 +98,7 @@ export default function OnboardingPage() {
   const [isResolvingAppleIdentity, setIsResolvingAppleIdentity] = useState(
     initialIsAppleUser && !initialAppleSnapshot.displayName
   );
+  const [wantsRuumrPromotion, setWantsRuumrPromotion] = useState(false);
 
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
@@ -1117,17 +1118,17 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={7} currentStep={step} title="">
-                <div className="flex flex-col items-center justify-between h-full text-center py-6">
-                    {/* Title with inline orange checkmark */}
+                <div className="flex flex-col h-full text-center py-4 gap-4">
+                    {/* Title */}
                     <div className="flex items-center justify-center gap-2">
                         <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
                         <CheckCircle className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
                     </div>
 
-                    {/* Social Media Link Section — moved above verification */}
-                    <div className="w-full">
-                        <div className="flex items-center gap-2 mb-2" dir="rtl">
-                            <span className="text-gray-700 text-base font-semibold my-2">קישור לרשת חברתית</span>
+                    {/* Section 1: Social Media Link */}
+                    <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100" dir="rtl">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-gray-800 text-base font-bold">קישור לרשת חברתית</span>
                             <span className="text-sm text-gray-400">(אופציונלי)</span>
                             <div className="flex items-center gap-1.5 mr-auto">
                                 <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
@@ -1142,33 +1143,53 @@ export default function OnboardingPage() {
                             </div>
                         </div>
                         <Input
-                  value={formData.social_link}
-                  onChange={(e) => setFormField('social_link', e.target.value)}
-                  placeholder="הדבק קישור כאן"
-                  className="h-8 text-sm bg-gray-50 border-gray-200 w-full my-3 py-3"
-                  dir="rtl" />
-                
+                            value={formData.social_link}
+                            onChange={(e) => setFormField('social_link', e.target.value)}
+                            placeholder="הדבק קישור כאן"
+                            className="h-10 text-sm bg-white border-gray-200 w-full"
+                            dir="rtl"
+                        />
+                        {/* Promotion checkbox */}
+                        <button
+                            type="button"
+                            onClick={() => setWantsRuumrPromotion(prev => !prev)}
+                            className="flex items-start gap-2 mt-3 text-right w-full"
+                        >
+                            <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${wantsRuumrPromotion ? 'bg-[#FA3803] border-[#FA3803]' : 'border-gray-300 bg-white'}`}>
+                                {wantsRuumrPromotion && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                            <span className="text-sm text-gray-600 leading-snug">
+                                אני מעוניין/ת בפרסום של הפרופיל שלי ברשתות החברתיות של רומר - לצורך מציאת שותף.ה 😎
+                            </span>
+                        </button>
                     </div>
 
-                    {/* Verification section */}
-                    <div>
-                        <h3 className="text-2xl font-bold mb-2 py-1">אמת/י את הפרופיל שלך</h3>
-                        <p className="text-gray-500 max-w-xs mx-auto">
+                    {/* Divider */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px bg-gray-200" />
+                        <span className="text-xs text-gray-400 font-medium">אימות פרופיל</span>
+                        <div className="flex-1 h-px bg-gray-200" />
+                    </div>
+
+                    {/* Section 2: Verification */}
+                    <div className="w-full bg-orange-50 rounded-2xl p-4 border border-orange-100">
+                        <h3 className="text-xl font-bold mb-1">אמת/י את הפרופיל שלך</h3>
+                        <p className="text-gray-500 text-sm">
                             פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
                         </p>
                     </div>
 
-                    <div className="w-full space-y-3">
+                    <div className="w-full space-y-3 mt-auto">
                         <Button
-                  onClick={() => handleFinish(true)}
-                  disabled={isSubmitting}
-                  className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                            onClick={() => handleFinish(true)}
+                            disabled={isSubmitting}
+                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
                             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
                         </Button>
                         <button
-                  onClick={() => !isSubmitting && handleFinish(false)}
-                  disabled={isSubmitting}
-                  className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
+                            onClick={() => !isSubmitting && handleFinish(false)}
+                            disabled={isSubmitting}
+                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
                             אולי אחר כך
                         </button>
                     </div>
