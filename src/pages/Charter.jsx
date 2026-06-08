@@ -25,17 +25,12 @@ export default function CharterPage() {
         const id = new URLSearchParams(location.search).get("matchId");
         if (!id) throw new Error("match_id_required");
         const user = await User.me();
-        const matches = [
-          ...(await Match.filter({ user1_id: user.id })),
-          ...(await Match.filter({ user2_id: user.id })),
-        ];
-        if (!matches.some((match) => String(match.id) === String(id))) throw new Error("match_not_found");
-        // Check directly via entity — no backend function call that can fail
+        // Check directly via entity whether questionnaire is already complete
         const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
         const REQUIRED_QUESTIONS = ['q_smoking','q_partners','q_pets','q_cleaning_strictness','q_shopping','q_dishes','q_ac','q_hosting'];
         const completedPref = prefs.find(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
         
-        // If questionnaire already complete → skip Charter, go straight to chat
+        // If questionnaire already complete → go straight to chat
         if (completedPref) {
           navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(id)}`, { replace: true });
           return;
@@ -45,7 +40,13 @@ export default function CharterPage() {
         setIsEditing(true);
       } catch (error) {
         console.error("Charter page load failed:", error);
-        navigate(createPageUrl("Matches"), { replace: true });
+        // On error still try to go to chat rather than sending back to Matches
+        const id = new URLSearchParams(location.search).get("matchId");
+        if (id) {
+          navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(id)}`, { replace: true });
+        } else {
+          navigate(createPageUrl("Matches"), { replace: true });
+        }
       } finally {
         setIsLoading(false);
       }
