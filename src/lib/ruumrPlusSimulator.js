@@ -1,6 +1,7 @@
 import { Profile } from "@/entities/Profile";
 import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
 import { applyTwoStageSwipeFilter } from "@/lib/ruumrPlusDisplayFilter";
+import { calculateCharterCompatibility, isCharterComplete } from "@/lib/charterCompletion";
 import { isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
 
 /**
@@ -12,6 +13,7 @@ import { isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
  * @property {boolean} [refresh]
  * @property {any[] | null} [localProfiles]
  * @property {any | null} [currentProfile]
+ * @property {any[]} [userSwipes]
  */
 
 const NEUTRAL_VALUES = new Set([
@@ -464,7 +466,16 @@ function evaluateCandidate(requestor, candidate) {
   ]);
 
   const semanticSimilarity = textSimilarity;
-  const totalScore = (structuredScore * 0.66) + (semanticSimilarity * 0.34);
+  const baseScore = (structuredScore * 0.66) + (semanticSimilarity * 0.34);
+  const requestorQuestionnaire = requestor.ruumr_plus_questionnaire?.answers;
+  const candidateQuestionnaire = candidate.ruumr_plus_questionnaire?.answers;
+  const questionnaireCompatibility =
+    isCharterComplete(requestorQuestionnaire) && isCharterComplete(candidateQuestionnaire)
+      ? calculateCharterCompatibility(requestorQuestionnaire, candidateQuestionnaire)
+      : null;
+  const totalScore = questionnaireCompatibility?.score != null
+    ? (baseScore * 0.8) + ((questionnaireCompatibility.score / 100) * 0.2)
+    : baseScore;
 
   const reasons = {
     shared_cities: sharedCities,
@@ -496,7 +507,11 @@ function evaluateCandidate(requestor, candidate) {
       household: Number(householdSimilarity.toFixed(4)),
       status: Number(statusScore.toFixed(4)),
       text: Number(semanticSimilarity.toFixed(4)),
+      questionnaire: questionnaireCompatibility?.score != null
+        ? Number((questionnaireCompatibility.score / 100).toFixed(4))
+        : null,
     },
+    questionnaire_compatibility: questionnaireCompatibility,
     profile: candidate,
     messageable: true,
   };

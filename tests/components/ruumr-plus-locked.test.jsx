@@ -20,6 +20,23 @@ vi.mock('@/entities/all', () => ({
 vi.mock('@/api/base44Client', () => ({
   base44: { analytics: { track: vi.fn() } },
 }));
+vi.mock('@/api/questionnairePreferences', () => ({
+  resolveCurrentQuestionnairePreference: vi.fn().mockResolvedValue({
+    complete: true,
+    preference: {
+      answers: {
+        q_smoking: 'a',
+        q_partners: 'a',
+        q_pets: 'a',
+        q_cleaning_strictness: 'a',
+        q_shopping: 'a',
+        q_dishes: 'a',
+        q_ac: 'a',
+        q_hosting: 'a',
+      },
+    },
+  }),
+}));
 vi.mock('@/lib/mixpanelTracking', () => ({ trackMixpanel: vi.fn() }));
 vi.mock('@/lib/simulatorMode', () => ({
   isRuumrSimulatorMode: () => false,
@@ -34,6 +51,7 @@ vi.mock('@/api/ruumrPlus', () => ({
   activateRuumrPlusRecommendations: vi.fn().mockRejectedValue(lockedError),
   mergeRuumrPlusRecommendations: vi.fn().mockReturnValue([]),
   RUUMR_PLUS_RECOMMENDATION_LIMIT: 5,
+  syncCurrentProfileToRuumrPlus: vi.fn().mockResolvedValue({ ok: true }),
 }));
 vi.mock('@/lib/ruumrPlusSimulator', () => ({
   buildSimulatorRuumrPlusRecommendations: vi.fn(),

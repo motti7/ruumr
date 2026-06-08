@@ -3,16 +3,17 @@ import { Match, Profile, Message } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Send, Loader2, Clock, CheckCheck } from "lucide-react";
+import { Send, Loader2, CheckCheck } from "lucide-react";
 import BackButton from "@/components/shared/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CharterResults from "../components/charter/CharterResults";
+import RoomiCharter from "../components/charter/RoomiCharter";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
-import { isCharterComplete } from "@/lib/charterCompletion";
+import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -22,7 +23,10 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [showWaitingBanner, setShowWaitingBanner] = useState(false);
+  const [questionnairePreference, setQuestionnairePreference] = useState(null);
+  const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
+  const [isEditingQuestionnaire, setIsEditingQuestionnaire] = useState(false);
+  const [questionnaireRefreshKey, setQuestionnaireRefreshKey] = useState(0);
   const [otherIsTyping, setOtherIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -80,14 +84,16 @@ export default function ChatPage() {
 
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
 
-      const [profiles, theirAnswers, matchMessages] = await Promise.all([
+      const [profiles, questionnaireResult, matchMessages] = await Promise.all([
         Profile.filter({ user_id: otherUserId }),
-        base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId }),
+        resolveCurrentQuestionnairePreference(),
         Message.filter({ match_id: matchId }, "created_date"),
       ]);
 
       if (profiles.length > 0) setOtherProfile(profiles[0]);
-      setShowWaitingBanner(!isCharterComplete(theirAnswers));
+      setQuestionnairePreference(questionnaireResult.preference);
+      setQuestionnaireComplete(Boolean(questionnaireResult.complete));
+      setIsEditingQuestionnaire(!questionnaireResult.complete);
       setMessages(matchMessages);
 
       // Mark unread messages as read
@@ -116,15 +122,6 @@ export default function ChatPage() {
         }
       });
 
-      // Subscribe to CharterAnswer changes — only update the waiting banner
-      const unsubCharter = base44.entities.CharterAnswer.subscribe((event) => {
-        if (event.data?.match_id === matchId && event.data?.user_id === otherUserId) {
-          base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId })
-            .then(answers => setShowWaitingBanner(!isCharterComplete(answers)))
-            .catch(() => {});
-        }
-      });
-
       // Subscribe to typing status
       const unsubTyping = base44.entities.TypingStatus.subscribe((event) => {
         if (event.data?.match_id === matchId && event.data?.user_id !== userRef.current?.id) {
@@ -137,7 +134,7 @@ export default function ChatPage() {
       });
 
       setIsLoading(false);
-      return () => { unsubMsg(); unsubCharter(); unsubTyping(); };
+      return () => { unsubMsg(); unsubTyping(); };
     } catch (error) {
       console.error("Error loading chat:", error);
       setIsLoading(false);
@@ -258,21 +255,6 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Waiting banner - shown at top before messages */}
-      {showWaitingBanner && (
-       <motion.div
-         initial={{ opacity: 0, y: -20 }}
-         animate={{ opacity: 1, y: 0 }}
-         className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-6 text-center shadow-lg mx-4 my-3"
-       >
-         <Clock className="w-12 h-12 text-white mx-auto mb-3" />
-         <h3 className="text-xl font-bold text-white mb-2">ממתינים ל{otherProfile.name}</h3>
-         <p className="text-white/90 text-sm">
-           {otherProfile.name} עדיין לא מילא/ה את השאלון המשותף.<br />נשלח לו/ה תזכורת!
-         </p>
-       </motion.div>
-      )}
-
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto">
       <VirtualizedMessageList
@@ -305,11 +287,14 @@ export default function ChatPage() {
       />
       </div>
 
-      {!showWaitingBanner && (
-       <div className="mx-4 mb-4">
-         <CharterResults matchId={match.id} />
-       </div>
-      )}
+      <div className="mx-4 mb-4">
+        <CharterResults
+          matchId={match.id}
+          compact
+          refreshKey={questionnaireRefreshKey}
+          onEdit={() => setIsEditingQuestionnaire(true)}
+        />
+      </div>
 
       {/* Input */}
       <div className="bg-white border-t border-gray-200 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
@@ -323,13 +308,33 @@ export default function ChatPage() {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || !questionnaireComplete}
             className="gradient-orange text-white rounded-full w-12 h-12 p-0 flex items-center justify-center"
           >
             <Send className="w-5 h-5" />
           </Button>
         </div>
       </div>
+      {isEditingQuestionnaire && (
+        <RoomiCharter
+          matchId={match.id}
+          mode="match"
+          initialAnswers={questionnairePreference?.answers}
+          onClose={() => {
+            if (questionnaireComplete) {
+              setIsEditingQuestionnaire(false);
+            } else {
+              navigate(createPageUrl("Matches"));
+            }
+          }}
+          onComplete={(preference) => {
+            setQuestionnairePreference(preference);
+            setQuestionnaireComplete(true);
+            setIsEditingQuestionnaire(false);
+            setQuestionnaireRefreshKey((value) => value + 1);
+          }}
+        />
+      )}
     </div>
   );
 }

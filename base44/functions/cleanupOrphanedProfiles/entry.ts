@@ -82,6 +82,9 @@ Deno.serve(async (req) => {
             const charterAnswers = await sr.CharterAnswer.filter({ user_id: userId });
             for (const ca of charterAnswers) await safeDelete(sr.CharterAnswer, ca.id);
 
+            const questionnairePreferences = await sr.QuestionnairePreference.filter({ user_id: userId });
+            for (const preference of questionnairePreferences) await safeDelete(sr.QuestionnairePreference, preference.id);
+
             // Delete Reviews
             const reviewsAsReviewer = await sr.Review.filter({ reviewer_id: userId });
             for (const r of reviewsAsReviewer) await safeDelete(sr.Review, r.id);

@@ -30,6 +30,8 @@ import {
   normalizeRuumrPlusActivation,
 } from "@/lib/ruumrPlusActivation";
 import SmartImage from "@/components/shared/SmartImage";
+import RoomiCharter from "@/components/charter/RoomiCharter";
+import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
 import { getInterestLabel } from "@/lib/interests";
 import {
   Crown,
@@ -244,6 +246,9 @@ export default function RuumrPlusPage() {
   const resultsRef = useRef(null);
   const activationIntentRef = useRef(null);
   const [isActivating, setIsActivating] = useState(false);
+  const [questionnairePreference, setQuestionnairePreference] = useState(null);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [pendingActivationSource, setPendingActivationSource] = useState(null);
   const [activationRecord, setActivationRecord] = useState(null);
   const [plusRecommendations, setPlusRecommendations] = useState([]);
   const [plusRecommendationsMeta, setPlusRecommendationsMeta] = useState({
@@ -402,7 +407,11 @@ export default function RuumrPlusPage() {
     };
   }, [loadAndRestoreActivation]);
 
-  const activatePlus = useCallback(async ({ source = "page" } = {}) => {
+  const activatePlus = useCallback(async ({
+    source = "page",
+    questionnaireChecked = false,
+    profileSynced = false,
+  } = {}) => {
     if (isActivating || !currentUser || !currentProfile) {
       return null;
     }
@@ -419,6 +428,26 @@ export default function RuumrPlusPage() {
       return existing;
     }
 
+    if (!questionnaireChecked) {
+      try {
+        const resolved = await resolveCurrentQuestionnairePreference();
+        setQuestionnairePreference(resolved.preference);
+        if (!resolved.complete) {
+          setPendingActivationSource(source);
+          setShowQuestionnaire(true);
+          return null;
+        }
+      } catch (error) {
+        console.error("Failed to resolve Plus questionnaire:", error);
+        setPlusState({
+          status: "fallback",
+          label: "לא הצלחנו לבדוק את השאלון",
+          description: "נסו שוב כדי להמשיך להפעלת Plus.",
+        });
+        return null;
+      }
+    }
+
     setIsActivating(true);
     setPlusState((prev) => ({
       ...prev,
@@ -428,10 +457,8 @@ export default function RuumrPlusPage() {
     }));
 
     try {
-      try {
+      if (!profileSynced) {
         await syncCurrentProfileToRuumrPlus();
-      } catch (syncError) {
-        console.error("Failed to sync current profile before Ruumr Plus activation:", syncError);
       }
 
       const response = await activateRuumrPlusRecommendations({
@@ -562,6 +589,22 @@ export default function RuumrPlusPage() {
       setIsActivating(false);
     }
   }, [applyActivationRecord, currentProfile, currentUser, isActivating, localProfiles, userSwipes]);
+
+  const handleQuestionnaireComplete = useCallback((preference) => {
+    const source = pendingActivationSource;
+    setQuestionnairePreference(preference);
+    setShowQuestionnaire(false);
+    setPendingActivationSource(null);
+    if (source) {
+      activatePlus({
+        source,
+        questionnaireChecked: true,
+        profileSynced: true,
+      }).catch((error) => {
+        console.error("Failed to resume Plus activation:", error);
+      });
+    }
+  }, [activatePlus, pendingActivationSource]);
 
   useEffect(() => {
     if (!currentUser || !currentProfile) {
@@ -739,11 +782,21 @@ export default function RuumrPlusPage() {
                 <span>{primaryActionLabel}</span>
               </Button>
               <Button
-                asChild
                 variant="outline"
+                type="button"
+                onClick={async () => {
+                  try {
+                    const resolved = await resolveCurrentQuestionnairePreference();
+                    setQuestionnairePreference(resolved.preference);
+                    setPendingActivationSource(null);
+                    setShowQuestionnaire(true);
+                  } catch (error) {
+                    console.error("Failed to open Plus questionnaire editor:", error);
+                  }
+                }}
                 className="h-12 rounded-full border-white/25 bg-white/10 text-white font-bold hover:bg-white/15"
               >
-                <Link to={createPageUrl("Profile")}>ערוך/י פרופיל</Link>
+                ערוך/י העדפות התאמה
               </Button>
 
             </div>
@@ -912,6 +965,18 @@ export default function RuumrPlusPage() {
 
 
       </div>
+      {showQuestionnaire && (
+        <RoomiCharter
+          mode="plus"
+          initialAnswers={questionnairePreference?.answers}
+          requirePlusSync
+          onClose={() => {
+            setShowQuestionnaire(false);
+            setPendingActivationSource(null);
+          }}
+          onComplete={handleQuestionnaireComplete}
+        />
+      )}
     </div>
   );
 }

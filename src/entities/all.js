@@ -9,3 +9,4 @@ export { Review } from "./Review";
 export { CharterAnswer } from "./CharterAnswer";
 export { GroupMessage } from "./GroupMessage";
 export { TypingStatus } from "./TypingStatus";
+export { QuestionnairePreference } from "./QuestionnairePreference";

@@ -66,6 +66,38 @@ function normalizeCityValues(value: unknown) {
     return result;
 }
 
+const QUESTIONNAIRE_IDS = [
+    'q_smoking',
+    'q_partners',
+    'q_pets',
+    'q_cleaning_strictness',
+    'q_shopping',
+    'q_dishes',
+    'q_ac',
+    'q_hosting',
+];
+
+function normalizeQuestionnairePreference(record: Record<string, unknown> | null | undefined) {
+    if (!record || typeof record !== 'object') return undefined;
+    const rawAnswers = record.answers && typeof record.answers === 'object'
+        ? record.answers as Record<string, unknown>
+        : {};
+    const answers: Record<string, string> = {};
+    for (const questionId of QUESTIONNAIRE_IDS) {
+        if (rawAnswers[questionId] === 'a' || rawAnswers[questionId] === 'b') {
+            answers[questionId] = String(rawAnswers[questionId]);
+        }
+    }
+    if (!QUESTIONNAIRE_IDS.every((questionId) => answers[questionId])) return undefined;
+    return cleanObject({
+        version: Number(record.version) || 1,
+        completed_at: record.completed_at,
+        source: record.source,
+        source_match_id: record.source_match_id,
+        answers,
+    });
+}
+
 function makeEventId(prefix: string) {
     return `${prefix}_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
 }
@@ -89,7 +121,7 @@ async function signBody(rawBody: string, secret: string | null) {
 
 // Kept in sync with ruumrPlusBridge.normalizeProfile so the reconciliation
 // snapshot carries the same shape as live profile upserts.
-function normalizeProfile(profile: Record<string, unknown>) {
+function normalizeProfile(profile: Record<string, unknown>, questionnairePreference?: Record<string, unknown> | null) {
     const searchCities = normalizeCityValues(profile.search_cities);
     const locationCities = normalizeCityValues(profile.location);
     const normalizedSearchCities = normalizeCityValues([...searchCities, ...locationCities]);
@@ -140,6 +172,7 @@ function normalizeProfile(profile: Record<string, unknown>) {
         location_lng: profile.location_lng,
         location_radius_km: profile.location_radius_km,
         video_url: profile.video_url,
+        ruumr_plus_questionnaire: normalizeQuestionnairePreference(questionnairePreference),
     });
 }
 
@@ -160,6 +193,25 @@ async function loadAllProfiles(base44: ReturnType<typeof createClientFromRequest
     }
 
     return profiles;
+}
+
+async function loadQuestionnairePreferences(base44: ReturnType<typeof createClientFromRequest>) {
+    const sr = base44.asServiceRole.entities;
+    const preferencesByUserId = new Map<string, Record<string, unknown>>();
+    let skip = 0;
+    while (true) {
+        const page = await sr.QuestionnairePreference.list('-completed_at', PAGE_SIZE, skip);
+        const batch = Array.isArray(page) ? page : [];
+        for (const preference of batch) {
+            const userId = String((preference as Record<string, unknown>).user_id || '');
+            if (userId && !preferencesByUserId.has(userId)) {
+                preferencesByUserId.set(userId, preference as Record<string, unknown>);
+            }
+        }
+        if (batch.length < PAGE_SIZE) break;
+        skip += PAGE_SIZE;
+    }
+    return preferencesByUserId;
 }
 
 Deno.serve(async (req) => {
@@ -184,7 +236,10 @@ Deno.serve(async (req) => {
             // No user context = called by platform automation, allow
         }
 
-        const rawProfiles = await loadAllProfiles(base44);
+        const [rawProfiles, preferencesByUserId] = await Promise.all([
+            loadAllProfiles(base44),
+            loadQuestionnairePreferences(base44),
+        ]);
 
         // Safety guard: never send a destructive replace_existing snapshot if we
         // failed to read any profiles. An empty snapshot with replace_existing
@@ -199,7 +254,9 @@ Deno.serve(async (req) => {
             });
         }
 
-        const normalizedProfiles = rawProfiles.map((profile) => normalizeProfile(profile));
+        const normalizedProfiles = rawProfiles.map((profile) =>
+            normalizeProfile(profile, preferencesByUserId.get(String(profile.user_id)))
+        );
         const now = new Date().toISOString();
         const eventId = makeEventId('evt_profile_reconcile');
 

@@ -3,7 +3,6 @@ import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
-import { isCharterComplete } from '@/lib/charterCompletion';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -29,26 +28,8 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
 
   const handleCharterClick = useCallback(async (e) => {
     e.stopPropagation();
-    try {
-      const [{ base44 }, { User }] = await Promise.all([
-        import('@/api/base44Client'),
-        import('@/entities/User')
-      ]);
-      const user = await User.me();
-      const myAnswers = await base44.entities.CharterAnswer.filter({
-        match_id: matchId,
-        user_id: user.id
-      });
-      if (isCharterComplete(myAnswers)) {
-        onClickChat();
-        return;
-      }
-      onClickCharter();
-    } catch (error) {
-      console.error('Charter check error:', error);
-      onClickCharter();
-    }
-  }, [matchId, onClickChat, onClickCharter]);
+    onClickCharter();
+  }, [onClickCharter]);
 
   return (
     <motion.div

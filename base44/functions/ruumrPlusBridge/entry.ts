@@ -72,6 +72,38 @@
       return result;
   }
 
+  const QUESTIONNAIRE_IDS = [
+      'q_smoking',
+      'q_partners',
+      'q_pets',
+      'q_cleaning_strictness',
+      'q_shopping',
+      'q_dishes',
+      'q_ac',
+      'q_hosting',
+  ];
+
+  function normalizeQuestionnairePreference(record: Record<string, unknown> | null | undefined) {
+      if (!record || typeof record !== 'object') return undefined;
+      const rawAnswers = record.answers && typeof record.answers === 'object'
+          ? record.answers as Record<string, unknown>
+          : {};
+      const answers: Record<string, string> = {};
+      for (const questionId of QUESTIONNAIRE_IDS) {
+          if (rawAnswers[questionId] === 'a' || rawAnswers[questionId] === 'b') {
+              answers[questionId] = String(rawAnswers[questionId]);
+          }
+      }
+      if (!QUESTIONNAIRE_IDS.every((questionId) => answers[questionId])) return undefined;
+      return cleanObject({
+          version: Number(record.version) || 1,
+          completed_at: record.completed_at,
+          source: record.source,
+          source_match_id: record.source_match_id,
+          answers,
+      });
+  }
+
   function makeEventId(prefix: string, userId: string) {
       return `${prefix}_${userId}_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
   }
@@ -213,7 +245,7 @@
       return currentUser;
   }
 
-  function normalizeProfile(profile: Record<string, unknown>) {
+  function normalizeProfile(profile: Record<string, unknown>, questionnairePreference?: Record<string, unknown> | null) {
       const searchCities = normalizeCityValues(profile.search_cities);
       const locationCities = normalizeCityValues(profile.location);
       const normalizedSearchCities = normalizeCityValues([...searchCities, ...locationCities]);
@@ -264,6 +296,7 @@
           location_lng: profile.location_lng,
           location_radius_km: profile.location_radius_km,
           video_url: profile.video_url,
+          ruumr_plus_questionnaire: normalizeQuestionnairePreference(questionnairePreference),
       });
   }
 
@@ -279,7 +312,10 @@
           };
       }
 
-      const profile = normalizeProfile(profiles[0]);
+      const preferences = await sr.QuestionnairePreference.filter({ user_id: currentUser.id });
+      const preference = (Array.isArray(preferences) ? preferences : [])
+          .sort((left, right) => Date.parse(String(right.completed_at || right.updated_date || '')) - Date.parse(String(left.completed_at || left.updated_date || '')))[0];
+      const profile = normalizeProfile(profiles[0], preference);
       const payload = cleanObject({
           event_id: makeEventId('evt_profile_upsert', String(currentUser.id)),
           event_type: 'profile.upsert',
@@ -319,12 +355,26 @@
       const sr = base44.asServiceRole.entities;
       const pageSize = Math.min(500, DEFAULT_LIMIT);
       const normalizedProfiles: Record<string, unknown>[] = [];
+      const preferencesByUserId = new Map<string, Record<string, unknown>>();
+      let preferenceSkip = 0;
+      while (true) {
+          const page = await sr.QuestionnairePreference.list('-completed_at', pageSize, preferenceSkip);
+          const batch = Array.isArray(page) ? page : [];
+          for (const preference of batch) {
+              const userId = String((preference as Record<string, unknown>).user_id || '');
+              if (userId && !preferencesByUserId.has(userId)) preferencesByUserId.set(userId, preference as Record<string, unknown>);
+          }
+          if (batch.length < pageSize) break;
+          preferenceSkip += pageSize;
+      }
       let skip = 0;
 
       while (true) {
           const page = await sr.Profile.list('-created_date', pageSize, skip);
           const batch = Array.isArray(page) ? page : [];
-          normalizedProfiles.push(...batch.map((profile: Record<string, unknown>) => normalizeProfile(profile)));
+          normalizedProfiles.push(...batch.map((profile: Record<string, unknown>) =>
+              normalizeProfile(profile, preferencesByUserId.get(String(profile.user_id)))
+          ));
 
           if (batch.length < pageSize) {
               break;

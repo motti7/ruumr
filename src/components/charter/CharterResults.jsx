@@ -1,213 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
-import { isCharterComplete } from '@/lib/charterCompletion';
+import React, { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Clock, Loader2, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { fetchQuestionnaireMatchSummary } from "@/api/questionnairePreferences";
+import { CHARTER_QUESTIONS } from "@/lib/charterCompletion";
 
-const CHARTER_DATA = {
-  "levels": [
-    {
-      "id": "level_1",
-      "name": "🚩 הקווים האדומים",
-      "questions": [
-        { "id": "q_smoking", "title": "עישון בדירה", "emoji": "🚬", "option_a": "בכיף, חופשי בסלון", "option_b": "איכס! רק בחוץ/במרפסת", "compromise": "מעשנים רק במרפסת (עם דלת סגורה!)" },
-        { "id": "q_partners", "title": "בני/בנות זוג", "emoji": "😍", "option_a": "בית פתוח - שיישנו פה חופשי", "option_b": "מוגזם - גג פעמיים בשבוע", "compromise": "עד 3 לילות בשבוע. מעבר לזה? משתתפים בחשבונות." },
-        { "id": "q_pets", "title": "בעלי חיים", "emoji": "🐶", "option_a": "מת על חיות, תביאו הכל", "option_b": "אלרגי / לא מתחבר", "compromise": "אין פשרה (זה Dealbreaker). חייבים להסכים מראש." }
-      ]
-    },
-    {
-      "id": "level_2",
-      "name": "🧹 ניקיון וסדר",
-      "questions": [
-        { "id": "q_cleaning_strictness", "title": "עד כמה מקפידים?", "emoji": "🧹", "option_a": "בית מרקחת: חייב להיות מצוחצח תמיד", "option_b": "חיים פה: מנקים כשרואים לכלוך", "compromise": "מנקים יסודי פעם בשבוע, בשאר הזמן שומרים על סביר." },
-        { "id": "q_shopping", "title": "קניות לבית (נייר טואלט/שמן)", "emoji": "🛒", "option_a": "שותפות מלאה: קונים הכל יחד ומתחלקים", "option_b": "הפרדה: כל אחד קונה לעצמו", "compromise": "קופה קטנה משותפת לדברים בסיסיים, אוכל כל אחד בנפרד." }
-      ]
-    },
-    {
-      "id": "level_3",
-      "name": "🍕 החיים עצמם",
-      "questions": [
-        { "id": "q_dishes", "title": "כלים בכיור", "emoji": "🍽️", "option_a": "שוטפים מיד אחרי האוכל!", "option_b": "זורמים... שוטפים כשמצטבר", "compromise": "חוק ה-24 שעות: הכיור חייב להיות ריק לפני שינה." },
-        { "id": "q_ac", "title": "מלחמות המזגן", "emoji": "❄️", "option_a": "מקפיא! 18 מעלות", "option_b": "חסכוני/נעים - 24 מעלות", "compromise": "23 מעלות ביום, בלילה כל אחד בחדר שלו מחליט." },
-        { "id": "q_hosting", "title": "חברים ומסיבות", "emoji": "🎉", "option_a": "תמיד שמח, הבית פתוח", "option_b": "צריך שקט, לתאם מראש", "compromise": "מותר לארח בכיף, אבל אחרי 23:00 שקט בסלון." }
-      ]
-    }
-  ]
-};
-
-function CompatibilityRing({ percent }) {
-  const radius = 28;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
-  return (
-    <div className="relative w-20 h-20 flex items-center justify-center">
-      <svg className="absolute inset-0 -rotate-90" width="80" height="80">
-        <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="7" />
-        <motion.circle
-          cx="40" cy="40" r={radius}
-          fill="none"
-          stroke="white"
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        />
-      </svg>
-      <span className="text-xl font-black text-white drop-shadow">{percent}%</span>
-    </div>
-  );
-}
-
-export default function CharterResults({ matchId }) {
-  const [results, setResults] = useState(null);
+export default function CharterResults({ matchId, onEdit, refreshKey = 0, compact = false }) {
+  const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const loadResults = async () => {
-      try {
-        const allAnswers = await base44.entities.CharterAnswer.filter({ match_id: matchId });
-
-        if (allAnswers.length === 0) {
-          setResults(null);
-          setIsLoading(false);
-          return;
-        }
-
-        const user1Answers = {};
-        const user2Answers = {};
-        let user1Id = null;
-        let user2Id = null;
-
-        allAnswers.forEach(answer => {
-          if (!user1Id) user1Id = answer.user_id;
-          if (answer.user_id === user1Id) {
-            user1Answers[answer.question_id] = answer.answer;
-          } else {
-            if (!user2Id) user2Id = answer.user_id;
-            user2Answers[answer.question_id] = answer.answer;
-          }
-        });
-
-        const allQuestions = CHARTER_DATA.levels.flatMap(l => l.questions);
-        const user1Complete = isCharterComplete(user1Answers);
-        const user2Complete = isCharterComplete(user2Answers);
-
-        if (!user1Complete || !user2Complete) {
-          setResults({ waiting: true });
-          setIsLoading(false);
-          return;
-        }
-
-        const agreements = [];
-        const disagreements = [];
-
-        allQuestions.forEach(q => {
-          const u1 = user1Answers[q.id];
-          const u2 = user2Answers[q.id];
-          if (u1 === u2) {
-            agreements.push({ ...q, answer: u1 === 'a' ? q.option_a : q.option_b });
-          } else {
-            disagreements.push(q);
-          }
-        });
-
-        const compatibilityPercent = Math.round((agreements.length / allQuestions.length) * 100);
-        setResults({ waiting: false, agreements, disagreements, compatibilityPercent });
-      } catch (error) {
-        console.error("Error loading charter results:", error);
-      }
+  const loadSummary = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      setSummary(await fetchQuestionnaireMatchSummary(matchId));
+    } catch (error) {
+      console.error("Questionnaire match summary failed:", error);
+      setSummary(null);
+    } finally {
       setIsLoading(false);
-    };
-
-    loadResults();
+    }
   }, [matchId]);
 
-  if (isLoading || !results || results.waiting) return null;
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary, refreshKey]);
 
-  const { compatibilityPercent, agreements, disagreements } = results;
+  if (isLoading) {
+    return <div className="flex justify-center p-6"><Loader2 className="h-6 w-6 animate-spin text-[--theme-orange]" /></div>;
+  }
 
-  const vibe =
-    compatibilityPercent >= 80 ? { label: "התאמה מושלמת! 🔥", color: "from-[#FF5722] to-[#E64A19]" } :
-    compatibilityPercent >= 60 ? { label: "כמעט מושלם 👌", color: "from-[#FF5722] to-[#E64A19]" } :
-    { label: "יש על מה לדבר 💬", color: "from-[#FF5722] to-[#E64A19]" };
+  if (!summary?.current_user_complete) {
+    return (
+      <div className="rounded-3xl border border-orange-100 bg-orange-50 p-5 text-center">
+        <h3 className="font-black text-gray-900">מלאו פעם אחת את שאלון ההעדפות</h3>
+        <p className="mt-2 text-sm text-gray-600">התשובות ישמשו גם להתאמות Plus וגם לכל ההתאמות שלך.</p>
+        <Button onClick={onEdit} className="mt-4 rounded-full bg-[--theme-orange] text-white">התחל/י שאלון</Button>
+      </div>
+    );
+  }
+
+  if (!summary.other_user_complete || !summary.compatibility) {
+    return (
+      <div className="rounded-3xl border border-orange-100 bg-white p-5 text-center shadow-sm">
+        <Clock className="mx-auto h-9 w-9 text-[--theme-orange]" />
+        <h3 className="mt-2 font-black text-gray-900">ממתינים לתשובות מההתאמה שלך</h3>
+        <p className="mt-2 text-sm text-gray-500">התשובות שלך כבר שמורות ואין צורך למלא שוב.</p>
+        <Button onClick={onEdit} variant="outline" className="mt-4 rounded-full">
+          <Pencil className="ml-2 h-4 w-4" />
+          ערוך/י את התשובות שלי
+        </Button>
+      </div>
+    );
+  }
+
+  const compatibility = summary.compatibility;
+  const agreements = CHARTER_QUESTIONS.filter((question) => compatibility.agreements.includes(question.id));
+  const disagreements = CHARTER_QUESTIONS.filter((question) => compatibility.disagreements.includes(question.id));
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex justify-start mb-4"
-    >
-      <div className="max-w-[88%] rounded-3xl overflow-hidden shadow-lg border border-gray-100 bg-white">
-
-        {/* Header gradient */}
-        <div className={`bg-gradient-to-l ${vibe.color} px-4 py-3 flex items-center justify-between`}>
-          <div>
-            <p className="text-white/80 text-[10px] font-semibold uppercase tracking-wide">שאלון משותף</p>
-            <p className="text-white font-black text-base leading-tight">{vibe.label}</p>
-          </div>
-          <CompatibilityRing percent={compatibilityPercent} />
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <div className="flex items-center justify-between bg-gradient-to-l from-[#FA3803] to-[#ff8a45] px-5 py-4 text-white">
+        <div>
+          <p className="text-xs font-bold text-white/75">התאמת שאלון</p>
+          <p className="text-xl font-black">{compatibility.score}% התאמה</p>
         </div>
-
-        {/* Agreements */}
-        {agreements.length > 0 && (
-          <div className="px-4 pt-3 pb-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">מסכימים ✅</p>
-            <div className="space-y-1.5">
-              {agreements.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.07 }}
-                  className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2"
-                >
-                  <span className="text-base">{item.emoji}</span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-gray-800 truncate">{item.title}</p>
-                    <p className="text-[10px] text-gray-500 truncate">{item.answer}</p>
-                  </div>
-                  <span className="mr-auto text-green-500 text-xs">✓</span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Disagreements */}
-        {disagreements.length > 0 && (
-          <div className="px-4 pt-2 pb-3">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">נושאים לשיחה 💬</p>
-            <div className="space-y-1.5">
-              {disagreements.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (agreements.length + i) * 0.07 }}
-                  className="bg-orange-50 rounded-xl px-3 py-2"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-base">{item.emoji}</span>
-                    <p className="text-xs font-bold text-gray-800">{item.title}</p>
-                  </div>
-                  <p className="text-[10px] text-orange-700 mr-7">
-                    💡 {item.compromise}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="border-t border-gray-100 px-4 py-2 text-center">
-          <p className="text-[10px] text-gray-400">
-            {agreements.length} הסכמות · {disagreements.length} נושאים לשיחה
-          </p>
-        </div>
+        <Button onClick={onEdit} variant="outline" className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20">
+          <Pencil className="ml-2 h-4 w-4" />
+          עריכה
+        </Button>
       </div>
+      {!compact && (
+        <div className="space-y-4 p-4">
+          {agreements.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-black text-emerald-700">מסכימים</p>
+              <div className="flex flex-wrap gap-2">
+                {agreements.map((question) => <span key={question.id} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">{question.emoji} {question.title}</span>)}
+              </div>
+            </div>
+          )}
+          {disagreements.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-black text-orange-700">נושאים לשיחה</p>
+              <div className="space-y-2">
+                {disagreements.map((question) => (
+                  <div key={question.id} className="rounded-2xl bg-orange-50 p-3">
+                    <p className="text-sm font-bold text-gray-800">{question.emoji} {question.title}</p>
+                    <p className="mt-1 text-xs text-orange-700">{question.compromise}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }

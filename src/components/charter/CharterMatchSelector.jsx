@@ -3,26 +3,19 @@ import { motion } from 'framer-motion';
 import { X, Puzzle } from 'lucide-react';
 import { Match, Profile } from '@/entities/all';
 import { User } from '@/entities/User';
-import RoomiCharter from './RoomiCharter';
 import SmartImage from '@/components/shared/SmartImage';
-import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { isCharterComplete } from '@/lib/charterCompletion';
 
 export default function CharterMatchSelector({ onClose }) {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const loadMatches = async () => {
       try {
         const userData = await User.me();
-        setUser(userData);
-
         const userMatches = await Match.filter({ user1_id: userData.id, status: 'active' });
         const userMatches2 = await Match.filter({ user2_id: userData.id, status: 'active' });
         const allMatches = [...userMatches, ...userMatches2];
@@ -49,20 +42,6 @@ export default function CharterMatchSelector({ onClose }) {
     };
     loadMatches();
   }, []);
-
-  if (selectedMatch) {
-    const myProfile = { name: user?.full_name || 'אני' };
-    const theirProfile = selectedMatch.profile;
-    
-    return (
-      <RoomiCharter
-        matchId={selectedMatch.id}
-        user1Name={myProfile.name}
-        user2Name={theirProfile.name}
-        onClose={() => setSelectedMatch(null)}
-      />
-    );
-  }
 
   return (
     <motion.div
@@ -116,20 +95,9 @@ export default function CharterMatchSelector({ onClose }) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  onClick={async () => {
-                    // אם המשתמש כבר מילא את כל השאלון — עבור ישירות לצ'אט
-                    try {
-                      const answers = await base44.entities.CharterAnswer.filter({
-                        match_id: match.id,
-                        user_id: user.id
-                      });
-                      if (isCharterComplete(answers)) {
-                        onClose();
-                        navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
-                        return;
-                      }
-                    } catch (e) {}
-                    setSelectedMatch(match);
+                  onClick={() => {
+                    onClose();
+                    navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                   }}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-shadow active:scale-95"
                 >

@@ -669,6 +669,7 @@ function createDemoState() {
     Message: [message1, message2],
     GroupMessage: [groupMessage1, groupMessage2],
     CharterAnswer: [...charterAnswersCurrent, ...charterAnswersMaya],
+    QuestionnairePreference: [],
     Review: [review],
     PageView: [],
     TypingStatus: [],

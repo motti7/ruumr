@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Puzzle, CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
-import { getCharterAnsweredCount } from "@/lib/charterCompletion";
+import { ArrowRight, Puzzle, CheckCircle2, Clock, Users } from "lucide-react";
+import { fetchQuestionnaireMatchSummary } from "@/api/questionnairePreferences";
 
 const CHARTER_QUESTIONS = [
   { id: "q_smoking", title: "עישון בדירה", emoji: "🚬", option_a: "בכיף, חופשי בסלון", option_b: "רק בחוץ/במרפסת", compromise: "מעשנים רק במרפסת (עם דלת סגורה!)" },
@@ -40,83 +40,6 @@ function CompatibilityRing({ percent, size = 80 }) {
   );
 }
 
-function BreakdownPanel({ myMap, theirMap, memberName }) {
-  const [open, setOpen] = useState(false);
-
-  const agrees = [];
-  const disagrees = [];
-
-  CHARTER_QUESTIONS.forEach(q => {
-    const mine = myMap[q.id];
-    const theirs = theirMap[q.id];
-    if (!mine || !theirs) return;
-    if (mine === theirs) {
-      agrees.push(q);
-    } else {
-      disagrees.push(q);
-    }
-  });
-
-  return (
-    <div className="mt-3 border-t border-gray-100 pt-3">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between text-xs font-bold text-gray-500 hover:text-gray-700"
-      >
-        <span>פירוט הסכמות / חוסר הסכמות</span>
-        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-3 space-y-2">
-              {agrees.length > 0 && (
-                <div>
-                  <p className="text-[11px] font-bold text-green-600 mb-1.5">✅ מסכימים ({agrees.length})</p>
-                  <div className="space-y-1">
-                    {agrees.map(q => (
-                      <div key={q.id} className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2">
-                        <span className="text-base">{q.emoji}</span>
-                        <span className="text-xs font-medium text-gray-700">{q.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {disagrees.length > 0 && (
-                <div>
-                  <p className="text-[11px] font-bold text-red-500 mb-1.5">❌ לא מסכימים ({disagrees.length})</p>
-                  <div className="space-y-2">
-                    {disagrees.map(q => (
-                      <div key={q.id} className="bg-red-50 rounded-xl px-3 py-2">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{q.emoji}</span>
-                          <span className="text-xs font-bold text-gray-700">{q.title}</span>
-                        </div>
-                        <div className="flex gap-2 text-[10px] text-gray-500 mb-1">
-                          <span className="bg-[--theme-orange]/10 text-[--theme-orange] px-2 py-0.5 rounded-full font-medium">אני: {myMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
-                          <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{memberName}: {theirMap[q.id] === 'a' ? q.option_a : q.option_b}</span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 font-medium">💡 פשרה: {q.compromise}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 export default function GroupCompatibilityPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -147,38 +70,15 @@ export default function GroupCompatibilityPage() {
           const matchId = member.match_id;
           if (!matchId) return;
 
-          const [myAnswers, allAnswers] = await Promise.all([
-            base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: userData.id }),
-            base44.entities.CharterAnswer.filter({ match_id: matchId })
-          ]);
-
-          const theirAnswers = allAnswers.filter(a => a.user_id !== userData.id);
-
-          const myMap = {};
-          myAnswers.forEach(a => { myMap[a.question_id] = a.answer; });
-
-          const theirMap = {};
-          theirAnswers.forEach(a => { theirMap[a.question_id] = a.answer; });
-
-          const myCount = getCharterAnsweredCount(myMap);
-          const theirCount = getCharterAnsweredCount(theirMap);
-
-          let matches = 0;
-          let compared = 0;
-          CHARTER_QUESTIONS.forEach(q => {
-            if (myMap[q.id] && theirMap[q.id]) {
-              compared++;
-              if (myMap[q.id] === theirMap[q.id]) matches++;
-            }
-          });
+          const summary = await fetchQuestionnaireMatchSummary(matchId);
 
           compatibilityMap[matchId] = {
-            myAnswered: myCount,
-            theirAnswered: theirCount,
-            percent: compared > 0 ? Math.round((matches / compared) * 100) : null,
-            compared,
-            myMap,
-            theirMap,
+            myAnswered: summary.current_user_complete ? 8 : 0,
+            theirAnswered: summary.other_user_complete ? 8 : 0,
+            percent: summary.compatibility?.score ?? null,
+            compared: summary.compatibility?.compared_count ?? 0,
+            myMap: {},
+            theirMap: {},
           };
         }));
 
@@ -370,14 +270,6 @@ export default function GroupCompatibilityPage() {
                 </div>
               </div>
 
-              {/* Breakdown – only show when both filled */}
-              {bothDone && compat?.myMap && compat?.theirMap && (
-                <BreakdownPanel
-                  myMap={compat.myMap}
-                  theirMap={compat.theirMap}
-                  memberName={member.name?.split(' ')[0]}
-                />
-              )}
             </motion.div>
           );
         })}

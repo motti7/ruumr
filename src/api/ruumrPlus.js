@@ -2,6 +2,7 @@ import { base44 } from "@/api/base44Client";
 import { Profile } from "@/entities/Profile";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { buildSimulatorRuumrPlusRecommendations } from "@/lib/ruumrPlusSimulator";
+import { normalizeCharterAnswers } from "@/lib/charterCompletion";
 
 const BRIDGE_FUNCTION_NAME = "ruumrPlusBridge";
 export const RUUMR_PLUS_RECOMMENDATION_LIMIT = 5;
@@ -16,6 +17,7 @@ export const RUUMR_PLUS_RECOMMENDATION_LIMIT = 5;
  * @property {any | null} [currentProfile]
  * @property {any} [requestId]
  * @property {any} [request_id]
+ * @property {any[]} [userSwipes]
  */
 
 async function invokeBridge(action, payload = {}) {
@@ -63,6 +65,34 @@ function uniqueProfilesByUserId(items = []) {
 }
 
 export async function syncCurrentProfileToRuumrPlus(options = {}) {
+  if (isRuumrSimulatorMode()) {
+    const currentUser = await base44.auth.me();
+    const userId = options.userId ?? currentUser.id;
+    const [profiles, preferences] = await Promise.all([
+      Profile.filter({ user_id: userId }),
+      base44.entities.QuestionnairePreference.filter({ user_id: userId }, "-completed_at"),
+    ]);
+    const preference = preferences[0];
+    return {
+      ok: true,
+      stored: Boolean(profiles[0]),
+      profile_found: Boolean(profiles[0]),
+      profile_payload: profiles[0]
+        ? {
+            ...profiles[0],
+            ruumr_plus_questionnaire: preference
+              ? {
+                  version: Number(preference.version) || 1,
+                  completed_at: preference.completed_at,
+                  source: preference.source,
+                  source_match_id: preference.source_match_id ?? undefined,
+                  answers: normalizeCharterAnswers(preference.answers),
+                }
+              : undefined,
+          }
+        : null,
+    };
+  }
   return invokeBridge("profile.sync_current", options);
 }
 
@@ -89,6 +119,29 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
   } = options;
 
   if (isRuumrSimulatorMode()) {
+    const preferences = await base44.entities.QuestionnairePreference.list("-completed_at", 500);
+    const preferencesByUserId = new Map();
+    preferences.forEach((preference) => {
+      const key = String(preference.user_id ?? "");
+      if (!key || preferencesByUserId.has(key)) return;
+      preferencesByUserId.set(key, preference);
+    });
+    const attachQuestionnaire = (profile) => {
+      if (!profile) return profile;
+      const preference = preferencesByUserId.get(String(profile.user_id));
+      return preference
+        ? {
+            ...profile,
+            ruumr_plus_questionnaire: {
+              version: Number(preference.version) || 1,
+              completed_at: preference.completed_at,
+              source: preference.source,
+              source_match_id: preference.source_match_id ?? undefined,
+              answers: normalizeCharterAnswers(preference.answers),
+            },
+          }
+        : profile;
+    };
     // Simulator runs entirely client-side, so it needs the swipe list to mirror
     // the swipe filtering the bridge applies server-side in production.
     return buildSimulatorRuumrPlusRecommendations({
@@ -96,8 +149,8 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
       limit,
       requestId: options.requestId ?? options.request_id ?? null,
       requirePlus,
-      localProfiles,
-      currentProfile,
+      localProfiles: Array.isArray(localProfiles) ? localProfiles.map(attachQuestionnaire) : localProfiles,
+      currentProfile: attachQuestionnaire(currentProfile),
       userSwipes,
     });
   }
