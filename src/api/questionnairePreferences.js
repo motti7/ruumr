@@ -114,11 +114,26 @@ export async function saveQuestionnairePreference({
   sourceMatchId = null,
   completedAt = null,
 }) {
-  if (isRuumrSimulatorMode()) {
-    return simulatorSave({ answers, source, sourceMatchId, completedAt });
-  }
-  // Save directly via entity — no backend function call that can fail
-  return simulatorSave({ answers, source, sourceMatchId, completedAt });
+  const user = await User.me();
+  const normalized = normalizeCharterAnswers(answers);
+
+  const data = {
+    user_id: user.id,
+    version: 1,
+    completed_at: completedAt || new Date().toISOString(),
+    source,
+    answers: normalized,
+    ...(sourceMatchId ? { source_match_id: sourceMatchId } : {}),
+  };
+
+  const existing = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
+  const wasComplete = Boolean(existing[0] && isCharterComplete(existing[0].answers));
+
+  const saved = existing[0]
+    ? await base44.entities.QuestionnairePreference.update(existing[0].id, data)
+    : await base44.entities.QuestionnairePreference.create(data);
+
+  return { complete: true, preference: saved, imported: false, was_complete: wasComplete };
 }
 
 export async function fetchQuestionnaireMatchSummary(matchId) {
