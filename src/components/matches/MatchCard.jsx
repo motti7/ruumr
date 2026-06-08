@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
+const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened, unreadCount = 0 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
@@ -54,7 +54,14 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-900 text-lg mb-1" id={`match-name-${matchId}`}>{match.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-bold text-gray-900 text-lg" id={`match-name-${matchId}`}>{match.name}</h3>
+            {unreadCount > 0 && (
+              <span className="min-w-[20px] h-5 bg-yellow-400 text-white text-[11px] font-bold flex items-center justify-center rounded-full px-1 shadow-sm">
+                {unreadCount}
+              </span>
+            )}
+          </div>
           <div className="flex items-center text-gray-500 text-sm mb-2">
             <MapPin className="w-3 h-3 ml-1" aria-hidden="true" />
             <span id={`match-location-${matchId}`}>{match.location}</span>

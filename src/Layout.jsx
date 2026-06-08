@@ -71,6 +71,7 @@ export default function Layout({ children, currentPageName }) {
     }
   });
   const [likesCount, setLikesCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [seenLikeIds, setSeenLikeIds] = useState(() => {
     try {
       const saved = localStorage.getItem('roomi_seen_like_ids');
@@ -154,13 +155,17 @@ export default function Layout({ children, currentPageName }) {
         // Count unseen likes
         try {
           const { base44: b44 } = await import('@/api/base44Client');
-          const [likesSwipes, mySwipes] = await Promise.all([
+          const [likesSwipes, mySwipes, allMessages] = await Promise.all([
             b44.entities.Swipe.filter({ swiped_id: user.id, action: 'like' }),
             b44.entities.Swipe.filter({ swiper_id: user.id }),
+            b44.entities.Message.filter({ is_read: false }),
           ]);
           const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
           const pendingLikerIds = likesSwipes.map(l => l.swiper_id).filter(id => !alreadySwiped.has(id));
           setLikesCount(pendingLikerIds.length);
+          // Count unread messages sent by others (not by me)
+          const unread = allMessages.filter(m => m.sender_id !== user.id).length;
+          setUnreadMessagesCount(unread);
         } catch {}
 
       } catch (e) {}
@@ -208,6 +213,13 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('roomi_likes_seen_updated', handler);
   }, []);
 
+  // Clear unread messages badge when entering Chat page
+  useEffect(() => {
+    if (currentPageName === 'Chat') {
+      setUnreadMessagesCount(0);
+    }
+  }, [currentPageName]);
+
   // Stack-based tab history tracking
   useTabHistory();
 
@@ -220,7 +232,7 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount },
+    { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
     { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
@@ -340,6 +352,7 @@ export default function Layout({ children, currentPageName }) {
                             (item.name === "גלה" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
                         const isPlusItem = item.name === "Plus";
+                        const hasMessageBadge = (item.messageBadge || 0) > 0;
                         const handleClick = (e) => {
                             if (tabsLocked) {
                                 // No Profile yet: tabs are non-functional. Keep the
@@ -398,6 +411,11 @@ export default function Layout({ children, currentPageName }) {
                             {item.badgeCount > 0 && (
                                 <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
                                     {item.badgeCount}
+                                </span>
+                            )}
+                            {hasMessageBadge && (
+                                <span className="absolute -top-1 left-3 min-w-[16px] h-[16px] bg-yellow-400 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">
+                                    {item.messageBadge}
                                 </span>
                             )}
                             {tabsLocked && !isPlusItem && (

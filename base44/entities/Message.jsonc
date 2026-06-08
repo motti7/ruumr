@@ -49,8 +49,23 @@
       ]
     },
     "update": {
-      "created_by_id": "{{user.id}}",
-      "data.sender_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.sender_id": "{{user.id}}"
+        },
+        {
+          "data.match_id": {
+            "$in": [
+              "{{base44.entities.Match.filter({'$or': [{'data.user1_id': '{{user.id}}'}, {'data.user2_id': '{{user.id}}'}]}).id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
       "created_by_id": "{{user.id}}",

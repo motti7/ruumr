@@ -35,12 +35,17 @@ export default function MatchesPage() {
       const matchesWithProfiles = await Promise.all(
         allMatches.map(async (match) => {
           const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
-          const profiles = await Profile.filter({ user_id: otherUserId });
+          const [profiles, allMessages] = await Promise.all([
+            Profile.filter({ user_id: otherUserId }),
+            base44.entities.Message.filter({ match_id: match.id }),
+          ]);
+          const unreadCount = allMessages.filter(m => m.sender_id !== userData.id && !m.is_read).length;
 
           return {
             ...match,
             profile: profiles[0] || null,
-            isOnline: false
+            isOnline: false,
+            unreadCount,
           };
         })
       );
@@ -198,6 +203,7 @@ export default function MatchesPage() {
                 match={match.profile}
                 isOnline={match.isOnline}
                 matchId={match.id}
+                unreadCount={match.unreadCount || 0}
                 onClickProfile={() => {
                   if (match.profile && match.profile.user_id) {
                     navigate(createPageUrl('ProfileView') + `?userId=${match.profile.user_id}`);
