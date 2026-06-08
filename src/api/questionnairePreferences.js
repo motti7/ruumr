@@ -117,13 +117,8 @@ export async function saveQuestionnairePreference({
   if (isRuumrSimulatorMode()) {
     return simulatorSave({ answers, source, sourceMatchId, completedAt });
   }
-  return unwrap(await base44.functions.invoke("questionnairePreferences", {
-    action: "save_current",
-    answers,
-    source,
-    source_match_id: sourceMatchId,
-    completed_at: completedAt,
-  }));
+  // Save directly via entity — no backend function call that can fail
+  return simulatorSave({ answers, source, sourceMatchId, completedAt });
 }
 
 export async function fetchQuestionnaireMatchSummary(matchId) {
