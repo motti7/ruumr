@@ -3,6 +3,7 @@ import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
+import { isCharterComplete } from '@/lib/charterCompletion';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened }) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -38,7 +39,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
         match_id: matchId,
         user_id: user.id
       });
-      if (myAnswers && myAnswers.length >= 8) {
+      if (isCharterComplete(myAnswers)) {
         onClickChat();
         return;
       }

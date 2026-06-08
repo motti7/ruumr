@@ -1,7 +1,7 @@
 const ACTIVATION_STORAGE_PREFIX = "ruumr_plus_activation";
 const PENDING_INTENT_STORAGE_KEY = "ruumr_plus_pending_activation";
 
-export const RUUMR_PLUS_ACTIVATION_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const RUUMR_PLUS_ACTIVATION_WINDOW_MS = 72 * 60 * 60 * 1000;
 
 function getStorage() {
   if (typeof window === "undefined") {
@@ -71,7 +71,7 @@ export function normalizeRuumrPlusActivation(record = null) {
     return null;
   }
 
-  const expiresAt = toIso(record.expires_at ?? record.expiresAt) ?? addWindow(activatedAt);
+  const expiresAt = addWindow(activatedAt);
   const recommendations = Array.isArray(record.recommendations) ? record.recommendations : [];
   const matchedCount = Number(
     record.matched_count ??

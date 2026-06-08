@@ -280,7 +280,7 @@ export default function RuumrPlusPage() {
     const fresh = isRuumrPlusActivationFresh(normalized);
     const remainingMs = getRuumrPlusActivationRemainingMs(normalized);
     const hasRecs = (normalized.recommendations?.length ?? 0) > 0;
-    // Only a fresh run that returned results enters the 24h cooldown ("active").
+    // Only a fresh run that returned results enters the 72h cooldown ("active").
     const nextStatus = statusOverride ?? (fresh && hasRecs ? "active" : "saved");
 
     setPlusState({
@@ -304,7 +304,7 @@ export default function RuumrPlusPage() {
               ? "Ruumr Plus עוד לא פתוח לחשבון הזה."
               : nextStatus === "fallback"
                 ? "לא הצלחנו לטעון את מצב החשבון כרגע."
-                : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-24 שעות.",
+                : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-72 שעות.",
     });
 
     return normalized;
@@ -374,7 +374,7 @@ export default function RuumrPlusPage() {
       setPlusState({
         status: "idle",
         label: "Ruumr Plus מוכן",
-        description: "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-24 שעות.",
+        description: "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-72 שעות.",
       });
     } catch (error) {
       if (cancelledRef.current) return;
@@ -407,7 +407,7 @@ export default function RuumrPlusPage() {
       return null;
     }
 
-    // Cooldown: a fresh run that returned matches locks re-runs for 24h. An
+    // Cooldown: a fresh run that returned matches locks re-runs for 72h. An
     // empty past run never locks, so the user can retry to pick up new
     // candidates.
     const existing = loadRuumrPlusActivation(currentUser.id);
@@ -586,7 +586,7 @@ export default function RuumrPlusPage() {
 
   const activationFresh = activationRecord ? isRuumrPlusActivationFresh(activationRecord) : false;
   const isLocked = plusState.status === "locked";
-  // The 24h cooldown only applies when a fresh run actually returned matches.
+  // The 72h cooldown only applies when a fresh run actually returned matches.
   const cooldownActive = activationFresh && plusRecommendations.length > 0;
   const cooldownRemainingMs = cooldownActive ? getRuumrPlusActivationRemainingMs(activationRecord) : 0;
   const primaryActionLabel = isActivating
@@ -603,7 +603,7 @@ export default function RuumrPlusPage() {
     : "התוצאות שלך ב-Ruumr Plus";
   const resultsSubheading = activationRecord
     ? activationFresh
-      ? "התוצאות השמורות שלך מופיעות כאן. אפשר להפעיל שוב בעוד 24 שעות."
+      ? "התוצאות השמורות שלך מופיעות כאן. אפשר להפעיל שוב בעוד 72 שעות."
       : "התוצאות השמורות שלך מופיעות כאן. אפשר להפעיל שוב עכשיו."
     : "כאן תראה/י את ההתאמות שחושבו עבורך, בלי לצאת ממסך Plus.";
 
@@ -701,7 +701,7 @@ export default function RuumrPlusPage() {
             </h1>
 
             <p className="mt-3 max-w-md text-sm leading-6 text-white/90">
-              לחיצה על Plus מפעילה עד 5 התאמות חכמות, שומרת אותן כאן למשך 24 שעות,
+              לחיצה על Plus מפעילה עד 5 התאמות חכמות, שומרת אותן כאן למשך 72 שעות,
               ומאפשרת לחזור אליהן בלי לעבור למסך הסווייפ הרגיל.
             </p>
 
@@ -824,7 +824,7 @@ export default function RuumrPlusPage() {
               <p className="mt-2 text-sm leading-6 text-gray-600">
                 {activationRecord
                   ? "אפשר להפעיל את Ruumr Plus שוב כדי לרענן את ההתאמות השמורות."
-                  : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן למשך 24 שעות."}
+                  : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן למשך 72 שעות."}
               </p>
               <Button
                 type="button"

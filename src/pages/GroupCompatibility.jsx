@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowRight, Puzzle, CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { getCharterAnsweredCount } from "@/lib/charterCompletion";
 
 const CHARTER_QUESTIONS = [
   { id: "q_smoking", title: "עישון בדירה", emoji: "🚬", option_a: "בכיף, חופשי בסלון", option_b: "רק בחוץ/במרפסת", compromise: "מעשנים רק במרפסת (עם דלת סגורה!)" },
@@ -159,8 +160,8 @@ export default function GroupCompatibilityPage() {
           const theirMap = {};
           theirAnswers.forEach(a => { theirMap[a.question_id] = a.answer; });
 
-          const myCount = Object.keys(myMap).length;
-          const theirCount = Object.keys(theirMap).length;
+          const myCount = getCharterAnsweredCount(myMap);
+          const theirCount = getCharterAnsweredCount(theirMap);
 
           let matches = 0;
           let compared = 0;

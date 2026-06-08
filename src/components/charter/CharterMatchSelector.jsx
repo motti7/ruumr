@@ -8,8 +8,7 @@ import SmartImage from '@/components/shared/SmartImage';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-
-const TOTAL_CHARTER_QUESTIONS = 8; // סה"כ שאלות בשאלון
+import { isCharterComplete } from '@/lib/charterCompletion';
 
 export default function CharterMatchSelector({ onClose }) {
   const navigate = useNavigate();
@@ -124,7 +123,7 @@ export default function CharterMatchSelector({ onClose }) {
                         match_id: match.id,
                         user_id: user.id
                       });
-                      if (answers.length >= TOTAL_CHARTER_QUESTIONS) {
+                      if (isCharterComplete(answers)) {
                         onClose();
                         navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                         return;

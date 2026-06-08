@@ -7,6 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
+import { getCharterAnsweredCount, isCharterComplete } from '@/lib/charterCompletion';
 
 const CHARTER_DATA = {
   "game_title": "Roomi Vibe Check",
@@ -100,6 +101,7 @@ const CHARTER_DATA = {
 export default function RoomiCharter({ matchId, user1Name, user2Name, onClose }) {
   const navigate = useNavigate();
   const navTimerRef = React.useRef(null);
+  const submittedQuestionIdsRef = React.useRef(new Set());
   const [currentUserId, setCurrentUserId] = useState(null);
   const [myAnswers, setMyAnswers] = useState({});
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
@@ -130,11 +132,12 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         allAnswers.forEach(answer => {
           mine[answer.question_id] = answer.answer;
         });
+        submittedQuestionIdsRef.current = new Set(allAnswers.map(answer => answer.question_id));
 
         setMyAnswers(mine);
 
         // בדיקה אם כבר סיימתי — עובר ישירות לצ'אט בלי להציג את השאלון מחדש
-        if (Object.keys(mine).length >= allQuestions.length) {
+        if (isCharterComplete(allAnswers)) {
           setIsLoading(false);
           navigate(createPageUrl('Chat') + `?matchId=${matchId}`);
           return;
@@ -165,6 +168,9 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
     if (!currentQuestion || !currentUserId) return;
 
     const qId = currentQuestion.id;
+    if (submittedQuestionIdsRef.current.has(qId)) return;
+
+    submittedQuestionIdsRef.current.add(qId);
     setDirection(option === 'a' ? -1 : 1);
     
     try {
@@ -215,6 +221,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
         })();
       }
     } catch (error) {
+      submittedQuestionIdsRef.current.delete(qId);
       console.error("Error saving answer:", error);
       alert("שגיאה בשמירת התשובה");
     }
@@ -234,7 +241,7 @@ export default function RoomiCharter({ matchId, user1Name, user2Name, onClose })
 
   if (!currentQuestion) return null;
 
-  const totalAnswered = Object.keys(myAnswers).length;
+  const totalAnswered = getCharterAnsweredCount(myAnswers);
   const progress = (totalAnswered / allQuestions.length) * 100;
 
   return (

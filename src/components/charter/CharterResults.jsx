@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import { isCharterComplete } from '@/lib/charterCompletion';
 
 const CHARTER_DATA = {
   "levels": [
@@ -89,8 +90,8 @@ export default function CharterResults({ matchId }) {
         });
 
         const allQuestions = CHARTER_DATA.levels.flatMap(l => l.questions);
-        const user1Complete = Object.keys(user1Answers).length === allQuestions.length;
-        const user2Complete = Object.keys(user2Answers).length === allQuestions.length;
+        const user1Complete = isCharterComplete(user1Answers);
+        const user2Complete = isCharterComplete(user2Answers);
 
         if (!user1Complete || !user2Complete) {
           setResults({ waiting: true });

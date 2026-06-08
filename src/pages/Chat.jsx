@@ -12,6 +12,7 @@ import CharterResults from "../components/charter/CharterResults";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
+import { isCharterComplete } from "@/lib/charterCompletion";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ export default function ChatPage() {
       ]);
 
       if (profiles.length > 0) setOtherProfile(profiles[0]);
-      setShowWaitingBanner(theirAnswers.length < 8);
+      setShowWaitingBanner(!isCharterComplete(theirAnswers));
       setMessages(matchMessages);
 
       // Mark unread messages as read
@@ -119,7 +120,7 @@ export default function ChatPage() {
       const unsubCharter = base44.entities.CharterAnswer.subscribe((event) => {
         if (event.data?.match_id === matchId && event.data?.user_id === otherUserId) {
           base44.entities.CharterAnswer.filter({ match_id: matchId, user_id: otherUserId })
-            .then(answers => setShowWaitingBanner(answers.length < 8))
+            .then(answers => setShowWaitingBanner(!isCharterComplete(answers)))
             .catch(() => {});
         }
       });
