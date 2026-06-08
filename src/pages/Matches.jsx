@@ -208,14 +208,23 @@ export default function MatchesPage() {
                   navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
                 }}
                 isOpened={seenMatchIds.includes(match.id)}
-                onClickCharter={() => {
-                  // Mark match as seen (removes from unseen count badge)
-                  const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
-                  if (!seenIds.includes(match.id)) {
-                    localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
-                    window.dispatchEvent(new Event('roomi_seen_updated'));
-                  }
-                  navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                onClickCharter={async () => {
+                 // Mark match as seen (removes from unseen count badge)
+                 const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+                 if (!seenIds.includes(match.id)) {
+                   localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
+                   window.dispatchEvent(new Event('roomi_seen_updated'));
+                 }
+                 // If questionnaire already completed → go straight to chat
+                 try {
+                   const { resolveCurrentQuestionnairePreference } = await import('@/api/questionnairePreferences');
+                   const resolved = await resolveCurrentQuestionnairePreference();
+                   if (resolved.complete) {
+                     navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                     return;
+                   }
+                 } catch {}
+                 navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                 }}
                 onDelete={handleDeleteMatch} />
               
