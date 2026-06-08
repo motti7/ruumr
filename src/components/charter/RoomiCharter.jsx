@@ -48,11 +48,23 @@ export default function RoomiCharter({
       const match = matches.find((item) => String(item.id) === String(matchId));
       if (!match) return;
       const partnerId = String(match.user1_id) === String(user.id) ? match.user2_id : match.user1_id;
+
+      // Get current user's profile name for the email
+      const myProfiles = await base44.entities.Profile.filter({ user_id: user.id });
+      const myName = myProfiles[0]?.name || user.full_name || 'ההתאמה שלך';
+
+      // Send push notification
       await base44.functions.invoke("sendPushNotification", {
         user_id: partnerId,
         title: "השאלון מחכה לך!",
-        message: "ההתאמה שלך כבר מילאה את שאלון הדירה - עכשיו התור שלך.",
+        message: `${myName} כבר מילא/ה את שאלון הדירה - עכשיו התור שלך.`,
         data: { type: "charter", match_id: matchId },
+      });
+
+      // Send email reminder
+      await base44.functions.invoke("sendQuestionnaireReminderEmail", {
+        user_id: partnerId,
+        partner_name: myName,
       });
     } catch (notificationError) {
       console.info("Questionnaire notification skipped", notificationError);

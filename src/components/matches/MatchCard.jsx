@@ -36,7 +36,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
       whileTap={{ scale: 0.93 }}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
-      onClick={handleProfileClick}
+      onClick={() => onClickChat()}
       className="bg-white rounded-2xl shadow-md border border-gray-100 cursor-pointer overflow-hidden hover:shadow-xl"
       role="article"
       aria-label={`התאמה: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}

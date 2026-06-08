@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // Triggered by entity automation on Swipe create
 // Checks if swiped user has accumulated 2+ new "like" swipes, and if so sends email
@@ -30,11 +30,13 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: `total likes=${totalLikes}, not a multiple of 2` });
     }
 
-    // Get swiped user's email
-    const users = await base44.asServiceRole.entities.User.filter({ id: swipedId });
-    const user = users[0];
+    // Get swiped user's email - list all and find by id
+    const allUsers = await base44.asServiceRole.entities.User.filter({ email: { $exists: true } }, null, 1000);
+    const user = allUsers.find(u => u.id === swipedId);
+
     if (!user?.email) {
-      return Response.json({ skipped: true, reason: 'user not found' });
+      console.warn(`No email found for user ${swipedId}`);
+      return Response.json({ skipped: true, reason: 'user not found or no email' });
     }
 
     // Call the email function
