@@ -8,12 +8,9 @@ import BackButton from "@/components/shared/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import CharterResults from "../components/charter/CharterResults";
-import RoomiCharter from "../components/charter/RoomiCharter";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
-import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -23,8 +20,6 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [questionnairePreference, setQuestionnairePreference] = useState(null);
-  const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
   const [isEditingQuestionnaire, setIsEditingQuestionnaire] = useState(false);
   const [questionnaireRefreshKey, setQuestionnaireRefreshKey] = useState(0);
   const [otherIsTyping, setOtherIsTyping] = useState(false);
@@ -84,16 +79,12 @@ export default function ChatPage() {
 
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
 
-      const [profiles, questionnaireResult, matchMessages] = await Promise.all([
+      const [profiles, matchMessages] = await Promise.all([
         Profile.filter({ user_id: otherUserId }),
-        resolveCurrentQuestionnairePreference(),
         Message.filter({ match_id: matchId }, "created_date"),
       ]);
 
       if (profiles.length > 0) setOtherProfile(profiles[0]);
-      setQuestionnairePreference(questionnaireResult.preference);
-      setQuestionnaireComplete(Boolean(questionnaireResult.complete));
-      setIsEditingQuestionnaire(!questionnaireResult.complete);
       setMessages(matchMessages);
 
       // Mark unread messages as read
@@ -225,7 +216,15 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir="rtl">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
-        <BackButton className="text-gray-600" />
+        <button
+          onClick={() => navigate(createPageUrl("Matches"), { replace: true })}
+          className="text-gray-600 p-2 -mr-1"
+          aria-label="חזור"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
         <div className="flex items-center gap-3 flex-1">
           <img
             src={otherProfile.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop"}
@@ -285,14 +284,7 @@ export default function ChatPage() {
            );
          }}
         />
-        <div className="px-4 pb-4">
-          <CharterResults
-            matchId={match.id}
-            compact
-            refreshKey={questionnaireRefreshKey}
-            onEdit={() => setIsEditingQuestionnaire(true)}
-          />
-        </div>
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -315,26 +307,7 @@ export default function ChatPage() {
           </Button>
         </div>
       </div>
-      {isEditingQuestionnaire && (
-        <RoomiCharter
-          matchId={match.id}
-          mode="match"
-          initialAnswers={questionnairePreference?.answers}
-          onClose={() => {
-            if (questionnaireComplete) {
-              setIsEditingQuestionnaire(false);
-            } else {
-              navigate(createPageUrl("Matches"));
-            }
-          }}
-          onComplete={(preference) => {
-            setQuestionnairePreference(preference);
-            setQuestionnaireComplete(true);
-            setIsEditingQuestionnaire(false);
-            setQuestionnaireRefreshKey((value) => value + 1);
-          }}
-        />
-      )}
+
     </div>
   );
 }
