@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Match, Profile } from "@/entities/all";
 import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
@@ -209,22 +210,20 @@ export default function MatchesPage() {
                 }}
                 isOpened={seenMatchIds.includes(match.id)}
                 onClickCharter={async () => {
-                 // Mark match as seen (removes from unseen count badge)
+                 // Mark match as seen
                  const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
                  if (!seenIds.includes(match.id)) {
                    localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
                    window.dispatchEvent(new Event('roomi_seen_updated'));
                  }
-                 // If questionnaire already completed → go straight to chat
-                 try {
-                   const { resolveCurrentQuestionnairePreference } = await import('@/api/questionnairePreferences');
-                   const resolved = await resolveCurrentQuestionnairePreference();
-                   if (resolved.complete) {
-                     navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
-                     return;
-                   }
-                 } catch {}
-                 navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                 // Check directly if questionnaire is already completed
+                 const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
+                 const completed = prefs.length > 0 && prefs[0].answers && Object.keys(prefs[0].answers).length >= 8;
+                 if (completed) {
+                   navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                 } else {
+                   navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                 }
                 }}
                 onDelete={handleDeleteMatch} />
               
