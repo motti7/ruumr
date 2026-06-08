@@ -210,20 +210,21 @@ export default function MatchesPage() {
                 }}
                 isOpened={seenMatchIds.includes(match.id)}
                 onClickCharter={async () => {
-                 // Mark match as seen
-                 const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
-                 if (!seenIds.includes(match.id)) {
-                   localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
-                   window.dispatchEvent(new Event('roomi_seen_updated'));
-                 }
-                 // Check directly if questionnaire is already completed
-                 const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
-                 const completed = prefs.length > 0 && prefs[0].answers && Object.keys(prefs[0].answers).length >= 8;
-                 if (completed) {
-                   navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
-                 } else {
-                   navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
-                 }
+                // Mark match as seen
+                const seenIds = JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');
+                if (!seenIds.includes(match.id)) {
+                  localStorage.setItem('roomi_seen_match_ids', JSON.stringify([...seenIds, match.id]));
+                  window.dispatchEvent(new Event('roomi_seen_updated'));
+                }
+                // Check if questionnaire is fully completed (all 8 required questions answered)
+                const REQUIRED_QUESTIONS = ['q_smoking','q_partners','q_pets','q_cleaning_strictness','q_shopping','q_dishes','q_ac','q_hosting'];
+                const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
+                const completed = prefs.some(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
+                if (completed) {
+                  navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                } else {
+                  navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
+                }
                 }}
                 onDelete={handleDeleteMatch} />
               
