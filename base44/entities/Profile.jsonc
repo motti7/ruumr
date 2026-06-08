@@ -181,7 +181,21 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
-    "read": true,
+    "read": {
+      "$or": [
+        {
+          "data.is_visible": true
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "created_by_id": "{{user.id}}"
     },
