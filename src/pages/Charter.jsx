@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/shared/BackButton";
 import RoomiCharter from "@/components/charter/RoomiCharter";
 import CharterResults from "@/components/charter/CharterResults";
-import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
+import { base44 } from "@/api/base44Client";
 
 export default function CharterPage() {
   const navigate = useNavigate();
@@ -30,14 +30,18 @@ export default function CharterPage() {
           ...(await Match.filter({ user2_id: user.id })),
         ];
         if (!matches.some((match) => String(match.id) === String(id))) throw new Error("match_not_found");
-        const resolved = await resolveCurrentQuestionnairePreference();
+        // Check directly via entity — no backend function call that can fail
+        const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
+        const REQUIRED_QUESTIONS = ['q_smoking','q_partners','q_pets','q_cleaning_strictness','q_shopping','q_dishes','q_ac','q_hosting'];
+        const completedPref = prefs.find(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
+        
         // If questionnaire already complete → skip Charter, go straight to chat
-        if (resolved.complete) {
+        if (completedPref) {
           navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(id)}`, { replace: true });
           return;
         }
         setMatchId(id);
-        setPreference(resolved.preference);
+        setPreference(null);
         setIsEditing(true);
       } catch (error) {
         console.error("Charter page load failed:", error);
