@@ -53,6 +53,7 @@ export default function DiscoverPage() {
   const [lastSwipes, setLastSwipes] = useState([]);
   const [matchData, setMatchData] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
+  const [swipeSaveError, setSwipeSaveError] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
@@ -300,6 +301,7 @@ export default function DiscoverPage() {
     });
     setCurrentIndex(prev => prev + 1);
     setLastSwipes(prev => [...prev, optimisticSwipe]);
+    setSwipeSaveError(null);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
 
@@ -350,9 +352,25 @@ export default function DiscoverPage() {
           console.error("Failed to process swipe match:", matchError);
         }
       }
-    } catch (error) { 
-        // Do NOT rollback — the swipe UI must always advance even if saving fails
-        console.error("Swipe save failed (non-blocking):", error);
+    } catch (error) {
+        console.error("Swipe save failed:", error);
+        setCurrentIndex(prevIndex);
+        setLastSwipes(prev => prev.slice(0, -1));
+        setAllProfiles(prev => {
+          if (prev.some((candidate) => String(candidate.user_id) === String(swipedProfile.user_id))) {
+            return prev;
+          }
+          return sortProfilesByCreatedDateDesc([...prev, swipedProfile]);
+        });
+        setSeenUserIds(prev => {
+          const updated = new Set(prev);
+          updated.delete(String(swipedProfile.user_id));
+          try {
+            localStorage.setItem('ruumr_seen_user_ids', JSON.stringify([...updated]));
+          } catch {}
+          return updated;
+        });
+        setSwipeSaveError("לא הצלחנו לשמור את הבחירה. הפרופיל הוחזר כדי שאפשר יהיה לנסות שוב.");
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
   
@@ -463,6 +481,15 @@ export default function DiscoverPage() {
 
   return (
     <div className="fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+      {swipeSaveError && (
+        <div
+          className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
+          role="alert"
+        >
+          {swipeSaveError}
+        </div>
+      )}
+
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>

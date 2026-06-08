@@ -668,10 +668,12 @@ export default function RuumrPlusPage() {
       return;
     }
     const swipedProfile = plusRecommendations.find((p) => String(p.user_id) === String(swipedUserId)) || null;
+    const previousRecommendations = plusRecommendations;
+    const previousActivation = loadRuumrPlusActivation(currentUser.id);
     setPlusRecommendations((prev) => prev.filter((p) => String(p.user_id) !== String(swipedUserId)));
 
     // Persist the removal so the swiped card doesn't reappear on reload.
-    const storedActivation = loadRuumrPlusActivation(currentUser.id);
+    const storedActivation = previousActivation;
     if (storedActivation) {
       const remaining = (storedActivation.recommendations || []).filter(
         (p) => String(p.user_id) !== String(swipedUserId)
@@ -708,6 +710,13 @@ export default function RuumrPlusPage() {
       }
     } catch (error) {
       console.error("Ruumr Plus card swipe failed:", error);
+      setPlusRecommendations(previousRecommendations);
+      if (previousActivation) {
+        const restored = saveRuumrPlusActivation(currentUser.id, previousActivation);
+        if (restored) {
+          setActivationRecord(restored);
+        }
+      }
     }
   }, [currentUser, currentProfile, plusRecommendations]);
 
