@@ -24,14 +24,15 @@ Deno.serve(async (req) => {
     });
 
     const totalLikes = allLikes.length;
+    console.log(`User ${swipedId} has ${totalLikes} total likes`);
 
-    // Fire at exactly 2, 4, 6, 8... (every 2 likes)
+    // Fire at 2, 4, 6, 8... (every 2 likes)
     if (totalLikes % 2 !== 0) {
       return Response.json({ skipped: true, reason: `total likes=${totalLikes}, not a multiple of 2` });
     }
 
-    // Get swiped user's email - list all and find by id
-    const allUsers = await base44.asServiceRole.entities.User.filter({ email: { $exists: true } }, null, 1000);
+    // Get swiped user's email - list all users and find by id
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
     const user = allUsers.find(u => u.id === swipedId);
 
     if (!user?.email) {
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
       swiped_id: swipedId,
       swiped_email: user.email,
       swiped_name: user.full_name,
-      likes_count: 2,
+      likes_count: totalLikes,
     });
 
     console.log(`✅ Triggered likes email for ${user.email} (total likes: ${totalLikes})`);

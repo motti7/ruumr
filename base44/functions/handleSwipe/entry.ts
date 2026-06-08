@@ -94,10 +94,11 @@ Deno.serve(async (req) => {
 
                 if (user1?.email) {
                     try {
-                        await base44.asServiceRole.integrations.Core.SendEmail({
-                            to: user1.email,
-                            subject: `🎉 יש לך התאמה חדשה ב-Ruumr!`,
-                            body: `שלום ${p1?.name || ''}!<br><br>מזל טוב! יש לך התאמה חדשה עם <strong>${p2?.name || 'מישהו'}</strong> ב-Ruumr 🏠<br><br>היכנס/י לאפליקציה ותתחילו לשוחח!<br><br>צוות Ruumr`
+                        await base44.asServiceRole.functions.invoke('sendMatchNotificationEmail', {
+                            user_id: swiper_id,
+                            user_email: user1.email,
+                            user_name: p1?.name || user1.full_name,
+                            match_user_name: p2?.name || 'מישהו',
                         });
                         console.log(`✅ Match email sent to ${user1.email}`);
                     } catch (e) {
@@ -120,10 +121,11 @@ Deno.serve(async (req) => {
 
                 if (user2?.email) {
                     try {
-                        await base44.asServiceRole.integrations.Core.SendEmail({
-                            to: user2.email,
-                            subject: `🎉 יש לך התאמה חדשה ב-Ruumr!`,
-                            body: `שלום ${p2?.name || ''}!<br><br>מזל טוב! יש לך התאמה חדשה עם <strong>${p1?.name || 'מישהו'}</strong> ב-Ruumr 🏠<br><br>היכנס/י לאפליקציה ותתחילו לשוחח!<br><br>צוות Ruumr`
+                        await base44.asServiceRole.functions.invoke('sendMatchNotificationEmail', {
+                            user_id: swiped_id,
+                            user_email: user2.email,
+                            user_name: p2?.name || user2.full_name,
+                            match_user_name: p1?.name || 'מישהו',
                         });
                         console.log(`✅ Match email sent to ${user2.email}`);
                     } catch (e) {
@@ -168,10 +170,11 @@ Deno.serve(async (req) => {
                         // Send email for likes too
                         if (swipedUser?.email) {
                             try {
-                                await base44.asServiceRole.integrations.Core.SendEmail({
-                                    to: swipedUser.email,
-                                    subject: `🔥 ${newLikesSinceLastNotification} אנשים אהבו אותך ב-Ruumr!`,
-                                    body: `שלום!<br><br>🔥 <strong>${newLikesSinceLastNotification} אנשים</strong> אהבו את הפרופיל שלך לאחרונה ב-Ruumr!<br><br>היכנס/י לאפליקציה לראות מי אוהב אותך 👀<br><br>צוות Ruumr`
+                                await base44.asServiceRole.functions.invoke('sendLikesNotificationEmail', {
+                                    swiped_id: swiped_id,
+                                    swiped_email: swipedUser.email,
+                                    swiped_name: swipedUser.full_name,
+                                    likes_count: newLikesSinceLastNotification,
                                 });
                                 console.log(`✅ Likes email sent to ${swipedUser.email}`);
                             } catch (e) {

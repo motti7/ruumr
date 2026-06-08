@@ -9,23 +9,20 @@ Deno.serve(async (req) => {
 
     const match = payload.data;
     if (!match || !match.user1_id || !match.user2_id) {
-      console.log('Skipping: invalid match data', payload);
+      console.log('Skipping: invalid match data', JSON.stringify(payload));
       return Response.json({ skipped: true, reason: 'invalid match data' });
     }
 
     const { user1_id, user2_id, user1_name, user2_name } = match;
 
-    // Fetch all users and find the matching ones
-    // Note: User.filter({id}) doesn't work — must list and find by id
-    const [allUsers1, allUsers2] = await Promise.all([
-      base44.asServiceRole.entities.User.filter({ email: { $exists: true } }, null, 1000),
-      Promise.resolve([]), // will reuse allUsers1
-    ]);
+    // Fetch users by listing all (User.filter by id doesn't work due to RLS)
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
+    console.log(`Total users fetched: ${allUsers.length}`);
 
-    const user1 = allUsers1.find(u => u.id === user1_id);
-    const user2 = allUsers1.find(u => u.id === user2_id);
+    const user1 = allUsers.find(u => u.id === user1_id);
+    const user2 = allUsers.find(u => u.id === user2_id);
 
-    console.log(`Match created: user1=${user1_id} (${user1?.email}), user2=${user2_id} (${user2?.email})`);
+    console.log(`Match: user1=${user1_id} email=${user1?.email}, user2=${user2_id} email=${user2?.email}`);
 
     const promises = [];
 
