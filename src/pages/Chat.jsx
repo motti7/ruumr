@@ -255,45 +255,45 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages + Charter Results */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-      <VirtualizedMessageList
-       messages={messages}
-       containerHeight="100%"
-       otherIsTyping={otherIsTyping}
-       renderMessage={(msg, idx) => {
-         const isMyMessage = msg.sender_id === user.id;
-         const isLastMyMsg = idx === lastMyMsgIndex;
-         return (
-           <div key={msg.id || idx} className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}>
-             <div
-               className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${
-                 isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
-               }`}
-             >
-               <p className="text-sm leading-relaxed">{msg.content}</p>
-             </div>
-             {isMyMessage && isLastMyMsg && (
-               <div className="flex items-center gap-1 mt-0.5 px-1">
-                 <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
-                 <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
-                   {msg.is_read ? 'נקרא' : 'נשלח'}
-                 </span>
+        <VirtualizedMessageList
+         messages={messages}
+         containerHeight="100%"
+         otherIsTyping={otherIsTyping}
+         renderMessage={(msg, idx) => {
+           const isMyMessage = msg.sender_id === user.id;
+           const isLastMyMsg = idx === lastMyMsgIndex;
+           return (
+             <div key={msg.id || idx} className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}>
+               <div
+                 className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${
+                   isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
+                 }`}
+               >
+                 <p className="text-sm leading-relaxed">{msg.content}</p>
                </div>
-             )}
-           </div>
-         );
-       }}
-      />
-      </div>
-
-      <div className="mx-4 mb-4">
-        <CharterResults
-          matchId={match.id}
-          compact
-          refreshKey={questionnaireRefreshKey}
-          onEdit={() => setIsEditingQuestionnaire(true)}
+               {isMyMessage && isLastMyMsg && (
+                 <div className="flex items-center gap-1 mt-0.5 px-1">
+                   <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
+                   <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
+                     {msg.is_read ? 'נקרא' : 'נשלח'}
+                   </span>
+                 </div>
+               )}
+             </div>
+           );
+         }}
         />
+        <div className="px-4 pb-4">
+          <CharterResults
+            matchId={match.id}
+            compact
+            refreshKey={questionnaireRefreshKey}
+            onEdit={() => setIsEditingQuestionnaire(true)}
+          />
+        </div>
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -308,7 +308,7 @@ export default function ChatPage() {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim() || !questionnaireComplete}
+            disabled={!newMessage.trim()}
             className="gradient-orange text-white rounded-full w-12 h-12 p-0 flex items-center justify-center"
           >
             <Send className="w-5 h-5" />

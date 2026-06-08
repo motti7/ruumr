@@ -120,13 +120,14 @@ export default function RoomiCharter({
         type="button"
         onClick={onClose}
         disabled={isSaving}
-        className="absolute left-4 top-4 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/10 backdrop-blur-md"
+        className="absolute left-4 top-14 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/10 backdrop-blur-md"
         aria-label="סגור"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}
       >
         <X className="h-6 w-6 text-white" />
       </button>
 
-      <div className="absolute left-4 right-4 top-5 h-2 overflow-hidden rounded-full bg-white/20">
+      <div className="absolute left-4 right-4 h-2 overflow-hidden rounded-full bg-white/20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
         <motion.div className="h-full bg-white" animate={{ width: `${progress}%` }} />
       </div>
 
