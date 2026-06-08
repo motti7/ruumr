@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
                     console.log(`💕 Likes check for ${swiped_id}: Total=${totalLikes}, LastNotified=${lastNotificationCount}, New=${newLikesSinceLastNotification}`);
                     
                     // Send notification every 3 new likes (respect notify_likes setting)
-                    if (newLikesSinceLastNotification >= 3 && swipedUser?.notify_likes !== false) {
+                    if (newLikesSinceLastNotification >= 2 && swipedUser?.notify_likes !== false) {
                         try {
                             await base44.functions.invoke('sendPushNotification', {
                                 user_id: swiped_id,
