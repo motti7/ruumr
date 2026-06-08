@@ -31,9 +31,14 @@ export default function CharterPage() {
         ];
         if (!matches.some((match) => String(match.id) === String(id))) throw new Error("match_not_found");
         const resolved = await resolveCurrentQuestionnairePreference();
+        // If questionnaire already complete → skip Charter, go straight to chat
+        if (resolved.complete) {
+          navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(id)}`, { replace: true });
+          return;
+        }
         setMatchId(id);
         setPreference(resolved.preference);
-        setIsEditing(!resolved.complete);
+        setIsEditing(true);
       } catch (error) {
         console.error("Charter page load failed:", error);
         navigate(createPageUrl("Matches"), { replace: true });
