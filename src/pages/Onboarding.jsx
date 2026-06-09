@@ -437,7 +437,8 @@ export default function OnboardingPage() {
         song_preview_url: formData.song_preview_url || null,
         song_name: formData.song_name || null,
         song_artist: formData.song_artist || null,
-        song_image: formData.song_image || null
+        song_image: formData.song_image || null,
+        allow_instagram_promotion: wantsRuumrPromotion,
       };
 
       // If user already has a profile (e.g. navigated back), update instead of create
