@@ -70,6 +70,7 @@ export default function Layout({ children, currentPageName }) {
     }
   });
   const [likesCount, setLikesCount] = useState(0);
+  const [pendingLikerUserIds, setPendingLikerUserIds] = useState([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [seenLikeIds, setSeenLikeIds] = useState(() => {
     try {
@@ -152,6 +153,7 @@ export default function Layout({ children, currentPageName }) {
             .map(l => l.swiper_id)
             .filter(id => !alreadySwiped.has(id) && visibleUserIds.has(id));
           setLikesCount(pendingLikerIds.length);
+          setPendingLikerUserIds(pendingLikerIds);
 
           // Count unread messages only from matches where the other user still has a visible profile
           const [matches1, matches2] = await Promise.all([
@@ -244,7 +246,8 @@ export default function Layout({ children, currentPageName }) {
 
   // Calculate unseen matches count
   const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
-  const unseenLikesCount = Math.max(0, likesCount - seenLikeIds.length);
+  const seenSet = new Set(seenLikeIds);
+  const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
