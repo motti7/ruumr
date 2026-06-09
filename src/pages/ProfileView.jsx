@@ -165,58 +165,44 @@ export default function ProfileViewPage() {
   };
   
   const handleSwipe = async (action) => {
-    if (!currentUser || !userProfile || !profile) return;
+    if (!currentUser || !profile) return;
     
+    setShowActions(false);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
 
+    const swiperId = currentUser.id;
+    const swipedId = profile.user_id;
+
     try {
-      // Create swipe
-      const swipeData = {
-        swiper_id: userProfile.user_id,
-        swiper_name: userProfile.name,
-        swiped_id: profile.user_id,
+      // Create swipe record
+      await Swipe.create({
+        swiper_id: swiperId,
+        swiper_name: userProfile?.name || currentUser.full_name,
+        swiped_id: swipedId,
         swiped_name: profile.name,
         action
-      };
-      
-      await Swipe.create(swipeData);
-      console.log("✅ Swipe saved successfully:", swipeData);
-      base44.analytics.track({
-        eventName: 'profile_swiped',
-        properties: {
-          direction: action === 'like' ? 'right' : 'left',
-          target_profile_id: profile.user_id,
-        },
       });
-      trackMixpanel('Swipe', {
-        direction: action === 'like' ? 'right' : 'left',
-        target_profile_id: profile.user_id,
-      });
+
+      base44.analytics.track({ eventName: 'profile_swiped', properties: { direction: action === 'like' ? 'right' : 'left', target_profile_id: swipedId } });
+      trackMixpanel('Swipe', { direction: action === 'like' ? 'right' : 'left', target_profile_id: swipedId });
 
       // Check for match if liked
       let didMatch = false;
       if (action === 'like') {
         try {
           const matchResult = await processSwipeMatch({
-            swiperId: userProfile.user_id,
-            swipedId: profile.user_id,
+            swiperId,
+            swipedId,
             action,
             origin: window.location.origin,
           });
 
           if (matchResult?.match) {
             didMatch = true;
-            base44.analytics.track({
-              eventName: 'match_created',
-              properties: {
-                matched_with_id: profile.user_id,
-              },
-            });
-            trackMixpanel('Match Created', {
-              matched_with_id: profile.user_id,
-            });
-            setMatchData({ profile1: userProfile, profile2: profile });
+            base44.analytics.track({ eventName: 'match_created', properties: { matched_with_id: swipedId } });
+            trackMixpanel('Match Created', { matched_with_id: swipedId });
+            setMatchData({ profile1: userProfile || { name: currentUser.full_name }, profile2: profile });
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);
@@ -228,7 +214,8 @@ export default function ProfileViewPage() {
       }, didMatch ? 4000 : 1000);
       
     } catch (error) { 
-      console.error("❌ Swipe save failed:", error); 
+      console.error("❌ Swipe save failed:", error);
+      setShowActions(true);
       alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
     }
   };
