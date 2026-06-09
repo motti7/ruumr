@@ -4,7 +4,6 @@ import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
-import { Match } from "@/entities/Match";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -133,38 +132,55 @@ export default function Layout({ children, currentPageName }) {
           permission: notificationsSupported ? Notification.permission : 'unsupported',
         });
         await checkBanned(user);
-        const matches = await Match.filter({ user1_id: user.id }); 
-        const matches2 = await Match.filter({ user2_id: user.id });
-        const allMatches = [...matches, ...matches2];
-        const total = allMatches.length;
+        // matchesCount is now updated inside the likes/messages block below
+        // (after filtering for visible profiles). We only keep the desktop notification here.
         const previousTotal = matchesCountRef.current;
 
-        if (browserNotificationsEnabled && total > previousTotal && previousTotal !== 0) {
-          // New match detected!
-          if (Notification.permission === 'granted') {
-            new Notification('ruumr', {
-              body: 'יש לך התאמה חדשה! - ruumr',
-              icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
-            });
-          }
-        }
-
-        matchesCountRef.current = total;
-        setMatchesCount(total);
-
-        // Count unseen likes
+        // Count unseen likes and unread messages — only count users with real visible profiles
         try {
           const { base44: b44 } = await import('@/api/base44Client');
-          const [likesSwipes, mySwipes, allMessages] = await Promise.all([
+          const [likesSwipes, mySwipes, allMessages, allProfiles] = await Promise.all([
             b44.entities.Swipe.filter({ swiped_id: user.id, action: 'like' }),
             b44.entities.Swipe.filter({ swiper_id: user.id }),
             b44.entities.Message.filter({ is_read: false }),
+            b44.entities.Profile.list('-created_date', 500),
           ]);
+          // Only count likes from users who still have a visible profile
+          const visibleUserIds = new Set(allProfiles.filter(p => p.is_visible !== false).map(p => p.user_id));
           const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
-          const pendingLikerIds = likesSwipes.map(l => l.swiper_id).filter(id => !alreadySwiped.has(id));
+          const pendingLikerIds = likesSwipes
+            .map(l => l.swiper_id)
+            .filter(id => !alreadySwiped.has(id) && visibleUserIds.has(id));
           setLikesCount(pendingLikerIds.length);
-          // Count unread messages sent by others (not by me)
-          const unread = allMessages.filter(m => m.sender_id !== user.id).length;
+
+          // Count unread messages only from matches where the other user still has a visible profile
+          const [matches1, matches2] = await Promise.all([
+            b44.entities.Match.filter({ user1_id: user.id, status: 'active' }),
+            b44.entities.Match.filter({ user2_id: user.id, status: 'active' }),
+          ]);
+          const allMatches = [...matches1, ...matches2];
+          // Only keep matches where the other user has a visible profile
+          const validMatchIds = new Set(
+            allMatches
+              .filter(m => {
+                const otherId = m.user1_id === user.id ? m.user2_id : m.user1_id;
+                return visibleUserIds.has(otherId);
+              })
+              .map(m => m.id)
+          );
+          // Update real match count (for the matches badge) + desktop notification
+          const validMatchCount = validMatchIds.size;
+          if (browserNotificationsEnabled && validMatchCount > previousTotal && previousTotal !== 0) {
+            if (Notification.permission === 'granted') {
+              new Notification('ruumr', {
+                body: 'יש לך התאמה חדשה! - ruumr',
+                icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
+              });
+            }
+          }
+          matchesCountRef.current = validMatchCount;
+          setMatchesCount(validMatchCount);
+          const unread = allMessages.filter(m => m.sender_id !== user.id && validMatchIds.has(m.match_id)).length;
           setUnreadMessagesCount(unread);
         } catch {}
 
