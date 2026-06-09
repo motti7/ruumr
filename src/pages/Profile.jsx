@@ -129,7 +129,7 @@ export default function ProfilePage() {
       }
       await loadProfile();
       setIsEditing(false);
-      toast({ title: "הפרופיל נשמר בהצלחה ✓" });
+      toast({ title: "הפרופיל נשמר בהצלחה ✓", duration: 3000 });
     } catch (error) {
       console.error("Error saving profile:", error);
       toast({ title: "שגיאה בשמירת הפרופיל. אנא נסה שוב.", variant: "destructive" });
