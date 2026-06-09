@@ -113,6 +113,24 @@ export default function ChatPage() {
         }
       });
 
+      // Polling fallback — in case subscription misses messages due to RLS
+      const pollInterval = setInterval(async () => {
+        try {
+          const latest = await Message.filter({ match_id: matchId }, "created_date");
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newOnes = latest.filter(m => !existingIds.has(m.id));
+            if (newOnes.length === 0) return prev;
+            newOnes.forEach(m => {
+              if (m.sender_id !== userRef.current?.id && !m.is_read) {
+                Message.update(m.id, { is_read: true }).catch(() => {});
+              }
+            });
+            return [...prev, ...newOnes];
+          });
+        } catch {}
+      }, 5000);
+
       // Subscribe to typing status
       const unsubTyping = base44.entities.TypingStatus.subscribe((event) => {
         if (event.data?.match_id === matchId && event.data?.user_id !== userRef.current?.id) {
@@ -125,7 +143,7 @@ export default function ChatPage() {
       });
 
       setIsLoading(false);
-      return () => { unsubMsg(); unsubTyping(); };
+      return () => { unsubMsg(); unsubTyping(); clearInterval(pollInterval); };
     } catch (error) {
       console.error("Error loading chat:", error);
       setIsLoading(false);
