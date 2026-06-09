@@ -182,12 +182,19 @@ export default function ChatPage() {
     setNewMessage("");
 
     try {
-      await messageMutation.mutateAsync({
+      const sentMsg = await messageMutation.mutateAsync({
         match_id: match.id,
         sender_id: user.id,
         content: messageContent,
         is_read: false,
       });
+      // Add to local state immediately in case subscription is delayed
+      if (sentMsg) {
+        setMessages(prev => {
+          if (prev.find(m => m.id === sentMsg.id)) return prev;
+          return [...prev, sentMsg];
+        });
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }

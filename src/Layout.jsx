@@ -59,6 +59,7 @@ function isIosLikeBrowserContext() {
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
+  const [validMatchIdsList, setValidMatchIdsList] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const matchesCountRef = useRef(0);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
@@ -182,6 +183,7 @@ export default function Layout({ children, currentPageName }) {
           }
           matchesCountRef.current = validMatchCount;
           setMatchesCount(validMatchCount);
+          setValidMatchIdsList([...validMatchIds]);
           const unread = allMessages.filter(m => m.sender_id !== user.id && validMatchIds.has(m.match_id)).length;
           setUnreadMessagesCount(unread);
         } catch {}
@@ -190,8 +192,22 @@ export default function Layout({ children, currentPageName }) {
     };
 
     checkNotifications();
-    const interval = setInterval(checkNotifications, 60000); // Poll every 60s
-    return () => clearInterval(interval);
+    const interval = setInterval(checkNotifications, 30000); // Poll every 30s
+
+    // Real-time subscription to Match entity — immediately re-check when a new match is created
+    let unsubMatch = null;
+    import('@/api/base44Client').then(({ base44: b44 }) => {
+      unsubMatch = b44.entities.Match.subscribe((event) => {
+        if (event.type === 'create') {
+          checkNotifications();
+        }
+      });
+    }).catch(() => {});
+
+    return () => {
+      clearInterval(interval);
+      if (unsubMatch) unsubMatch();
+    };
   }, [currentPageName]);
 
   // Mark match as seen when viewing Chat page
@@ -244,8 +260,9 @@ export default function Layout({ children, currentPageName }) {
   // Android hardware back button support
   useAndroidBackButton();
 
-  // Calculate unseen matches count
-  const unseenMatchesCount = Math.max(0, matchesCount - seenMatchIds.length);
+  // Calculate unseen matches count — only count valid matches not yet seen
+  const seenMatchSet = new Set(seenMatchIds);
+  const unseenMatchesCount = validMatchIdsList.filter(id => !seenMatchSet.has(id)).length;
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
