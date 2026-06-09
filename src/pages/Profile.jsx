@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
 import CitySelect from "@/components/shared/CitySelect";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical, CheckCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -53,8 +54,10 @@ function normalizeProfileCities(profile = {}) {
 }
 
 export default function ProfilePage() {
+  const { toast } = useToast();
   const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState(/** @type {any} */ ({}));
   const [isLoading, setIsLoading] = useState(true);
   const [selectedApartmentPhoto, setSelectedApartmentPhoto] = useState(null);
@@ -95,34 +98,28 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
-        alert("אנא המתן לסיום העלאת התמונות");
+        toast({ title: "אנא המתן לסיום העלאת התמונות", variant: "destructive" });
         return;
     }
 
-    // Clean social link
-    let cleanSocial = formData.social_link || "";
-    // If user entered full URL, keep it. If they entered "instagram.com/user", ensure protocol. 
-    // If they just entered "user", we might want to leave it or assume instagram? 
-    // For now, just ensure it doesn't have double protocols if they copy-pasted.
-    
-    // Check for blob URLs
     const hasBlobPhotos = formData.photos.some(p => p && p.startsWith('blob:'));
     const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
-    
     if (hasBlobPhotos || hasBlobApartment) {
-        alert("חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.");
+        toast({ title: "חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.", variant: "destructive" });
         return;
     }
 
+    setIsSaving(true);
     try {
       if (profile) {
         const cityData = normalizeProfileCities(formData);
         const dataToSave = {
           ...cityData,
           interests: normalizeInterestValues(formData.interests),
-          social_link: cleanSocial,
+          social_link: formData.social_link || "",
+          photos: (formData.photos || []).filter(p => p),
         };
-        if(!dataToSave.budget_min) dataToSave.budget_min = 0;
+        if (!dataToSave.budget_min) dataToSave.budget_min = 0;
         await ProfileEntity.update(profile.id, dataToSave);
       }
       try {
@@ -132,7 +129,13 @@ export default function ProfilePage() {
       }
       await loadProfile();
       setIsEditing(false);
-    } catch (error) { console.error("Error saving profile:", error); }
+      toast({ title: "הפרופיל נשמר בהצלחה ✓" });
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast({ title: "שגיאה בשמירת הפרופיל. אנא נסה שוב.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Image compression + HEIF/HEIC conversion utility
@@ -386,10 +389,11 @@ export default function ProfilePage() {
                   } else {
                       handleSave();
                   }
-              }} 
+              }}
+              disabled={isSaving}
               className="rounded-full gradient-orange text-white shadow-lg"
           >
-              {isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
+              {isSaving ? <><Loader2 className="w-4 h-4 ml-2 animate-spin"/> שומר...</> : isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
           </Button>
         </div>
 
