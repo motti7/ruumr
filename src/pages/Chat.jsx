@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
+import { buildMessagePayload } from "@/lib/messagePayload";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -200,12 +201,9 @@ export default function ChatPage() {
     setNewMessage("");
 
     try {
-      const sentMsg = await messageMutation.mutateAsync({
-        match_id: match.id,
-        sender_id: user.id,
-        content: messageContent,
-        is_read: false,
-      });
+      const sentMsg = await messageMutation.mutateAsync(
+        buildMessagePayload(match, user, messageContent)
+      );
       // Add to local state immediately in case subscription is delayed
       if (sentMsg) {
         setMessages(prev => {
