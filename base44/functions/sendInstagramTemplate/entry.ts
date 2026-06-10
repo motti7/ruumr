@@ -125,24 +125,31 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    const photoUrl = 'https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/mp/public/68c919adff6ac6fafb51bed6/3898da58e_IMG_3306.jpeg';
+    // Support explicit payload OR trigger from automation (entity event)
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    
+    // If called from automation, body.data contains the profile record
+    const profileData = body.data || body;
+    
+    const name = profileData.name;
+    const age = profileData.age;
+    const location = profileData.location;
+    const about_me = profileData.about_me;
+    const looking_for_description = profileData.looking_for_description;
+    const budget_max = profileData.budget_max;
+    const search_cities = profileData.search_cities;
+    const looking_for_gender = profileData.looking_for_gender;
+    const photoUrl = (profileData.photos && profileData.photos[0]) || '';
 
     const html = buildHtml({
-      name: 'שני',
-      age: 21,
-      location: 'פתח תקווה',
-      about_me: 'בת 21, רוב הזמן בעבודה, מסודרת וחברותית',
-      looking_for_description: 'מחפשת בית עם אווירה נעימה, שותפים זורמים ומכבדים שיהיה כיף לגור ביחד',
-      budget_max: 3000,
-      search_cities: ['פתח תקווה', 'הוד השרון', 'ראש העין'],
-      looking_for_gender: 'any',
-      photoUrl,
+      name, age, location, about_me, looking_for_description,
+      budget_max, search_cities, looking_for_gender, photoUrl,
     });
 
-    console.log('📧 Sending email to mottishif7@gmail.com...');
+    console.log(`📧 Sending email for profile: ${name}`);
     const emailResult = await base44.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: 'טמפלייט אינסטגרם - שני ruumr',
+      subject: `טמפלייט אינסטגרם - ${name} ruumr`,
       body: html,
     });
     console.log('✅ Email result:', JSON.stringify(emailResult));
