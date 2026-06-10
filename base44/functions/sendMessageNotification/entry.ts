@@ -37,6 +37,28 @@ Deno.serve(async (req) => {
         const match = matches[0];
         const receiver_id = match.user1_id === sender_id ? match.user2_id : match.user1_id;
 
+        // Denormalize the match participants onto the message so the Message
+        // read/update RLS can authorize the counterparty via a direct field
+        // equality check instead of the unreliable Match subquery. This is a
+        // server-side backstop: the frontend also stamps these on send, but
+        // doing it here guarantees every message is stamped regardless of which
+        // client (or bundle version) created it.
+        if (message.id && match.user1_id && match.user2_id) {
+            const needsStamp =
+                message.user1_id !== match.user1_id ||
+                message.user2_id !== match.user2_id;
+            if (needsStamp) {
+                try {
+                    await base44.asServiceRole.entities.Message.update(message.id, {
+                        user1_id: match.user1_id,
+                        user2_id: match.user2_id,
+                    });
+                } catch (e) {
+                    console.error(`❌ Failed to stamp participants on message ${message.id}:`, e);
+                }
+            }
+        }
+
         // Get sender profile for name
         const senderProfiles = await base44.asServiceRole.entities.Profile.filter({ user_id: sender_id });
         const senderName = senderProfiles[0]?.name || 'מישהו';
