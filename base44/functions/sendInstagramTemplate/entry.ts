@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
 
     console.log(`📧 Sending email for profile: ${name}`);
     const emailResult = await base44.integrations.Core.SendEmail({
-      to: 'mottishif7@gmail.com',
+      to: 'oroscar8642@gmail.com',
       subject: `טמפלייט אינסטגרם - ${name} ruumr`,
       body: html,
     });
