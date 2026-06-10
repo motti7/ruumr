@@ -15,10 +15,12 @@ function buildHtml({ name, age, location, about_me, looking_for_description, bud
 
 🏠 מחפש/ת שותף/ה לדירה באזור: ${cities}
 💰 תקציב: עד ${budget_max ? budget_max.toLocaleString() : '?'}₪
-💬 "${looking_for_description || ''}"
 
 📖 קצת עליי:
 "${about_me || ''}"
+
+🔍 מה אני מחפש/ת:
+"${looking_for_description || ''}"
 
 ${thinkingText}
 הורד/י את ruumr עכשיו 👇
@@ -129,8 +131,8 @@ Deno.serve(async (req) => {
       name: 'שני',
       age: 21,
       location: 'פתח תקווה',
-      about_me: 'מחפשת בית עם אווירה נעימה, שותפים זורמים ומכבדים שיהיה כיף לגור ביחד',
-      looking_for_description: 'שותפה זורמת, אחראית, ושמחפשת אנשים חיוביים לחיות איתם',
+      about_me: 'בת 21, רוב הזמן בעבודה, מסודרת וחברותית',
+      looking_for_description: 'מחפשת בית עם אווירה נעימה, שותפים זורמים ומכבדים שיהיה כיף לגור ביחד',
       budget_max: 3000,
       search_cities: ['פתח תקווה', 'הוד השרון', 'ראש העין'],
       looking_for_gender: 'any',
