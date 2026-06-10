@@ -37,25 +37,36 @@ Deno.serve(async (req) => {
         const match = matches[0];
         const receiver_id = match.user1_id === sender_id ? match.user2_id : match.user1_id;
 
-        // Denormalize the match participants onto the message so the Message
+        // Denormalize the match participants onto the messages so the Message
         // read/update RLS can authorize the counterparty via a direct field
         // equality check instead of the unreliable Match subquery. This is a
-        // server-side backstop: the frontend also stamps these on send, but
-        // doing it here guarantees every message is stamped regardless of which
+        // server-side backstop so every message is stamped regardless of which
         // client (or bundle version) created it.
-        if (message.id && match.user1_id && match.user2_id) {
-            const needsStamp =
-                message.user1_id !== match.user1_id ||
-                message.user2_id !== match.user2_id;
-            if (needsStamp) {
-                try {
-                    await base44.asServiceRole.entities.Message.update(message.id, {
-                        user1_id: match.user1_id,
-                        user2_id: match.user2_id,
-                    });
-                } catch (e) {
-                    console.error(`❌ Failed to stamp participants on message ${message.id}:`, e);
+        //
+        // The entity-automation payload does NOT reliably include the new
+        // message's id (cf. onMatchCreated's `match.id || 'new'`), so we can't
+        // target a single record. Instead we stamp every message in this match
+        // that is missing or has stale participant ids. Idempotent and scoped
+        // to one match, so the cost stays small.
+        if (match.user1_id && match.user2_id) {
+            try {
+                const matchMessages = await base44.asServiceRole.entities.Message.filter({ match_id });
+                const stale = matchMessages.filter(
+                    m => m.user1_id !== match.user1_id || m.user2_id !== match.user2_id
+                );
+                await Promise.all(
+                    stale.map(m =>
+                        base44.asServiceRole.entities.Message.update(m.id, {
+                            user1_id: match.user1_id,
+                            user2_id: match.user2_id,
+                        })
+                    )
+                );
+                if (stale.length > 0) {
+                    console.log(`🩹 Stamped participants on ${stale.length} message(s) in match ${match_id}`);
                 }
+            } catch (e) {
+                console.error(`❌ Failed to stamp participants for match ${match_id}:`, e);
             }
         }
 
