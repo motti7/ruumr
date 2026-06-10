@@ -43,12 +43,11 @@ Deno.serve(async (req) => {
         });
 
         if (reverseSwipes && reverseSwipes.length > 0) {
-            const existingMatches = await base44.entities.Match.filter({
-                $or: [
-                    { user1_id: swiper_id, user2_id: swiped_id },
-                    { user1_id: swiped_id, user2_id: swiper_id }
-                ]
-            });
+            const [existingMatches1, existingMatches2] = await Promise.all([
+                base44.entities.Match.filter({ user1_id: swiper_id, user2_id: swiped_id }),
+                base44.entities.Match.filter({ user1_id: swiped_id, user2_id: swiper_id }),
+            ]);
+            const existingMatches = [...existingMatches1, ...existingMatches2];
 
             const [profile1List, profile2List] = await Promise.all([
                 sr.Profile.filter({ user_id: swiper_id }),
