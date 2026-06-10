@@ -15,7 +15,7 @@ function buildHtml({ name, age, location, about_me, looking_for_description, bud
 
 🏠 מחפש/ת שותף/ה לדירה באזור: ${cities}
 💰 תקציב: עד ${budget_max ? budget_max.toLocaleString() : '?'}₪
-💬 "${looking_for_description || about_me || ''}"
+💬 "${looking_for_description || ''}"
 
 📖 קצת עליי:
 "${about_me || ''}"
@@ -79,12 +79,13 @@ ${thinkingText}
       color: #333; line-height: 1.7; direction: rtl; text-align: right;
       background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee;
     }
-    .copy-btn {
-      display: inline-block; margin-top: 12px; background: #FF5722; color: white;
-      border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;
-      font-size: 14px; font-weight: 600;
+    #caption-textarea {
+      width: 100%; box-sizing: border-box; height: 220px;
+      font-family: Arial, sans-serif; font-size: 14px; color: #333;
+      line-height: 1.7; direction: rtl; text-align: right;
+      background: #f9f9f9; padding: 12px; border-radius: 8px;
+      border: 1px solid #eee; resize: none; margin-top: 8px;
     }
-    .copy-btn:hover { background: #e64a19; }
   </style>
 </head>
 <body>
@@ -109,13 +110,9 @@ ${thinkingText}
   </div>
 
   <div class="caption-box">
-    <h3>📝 קפטשן מוכן להעתקה:</h3>
-    <div id="caption-text">${captionText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-    <button class="copy-btn" onclick="
-      var el = document.getElementById('caption-text');
-      var text = el.innerText;
-      navigator.clipboard.writeText(text).then(function(){ document.querySelector('.copy-btn').innerText = '✓ הועתק!'; });
-    ">📋 העתק קפטשן</button>
+  <h3>📝 קפטשן — סמן הכל והעתק (Ctrl+A / Cmd+A):</h3>
+  <textarea id="caption-textarea" readonly onclick="this.select()">${captionText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+  <div style="font-size:12px;color:#888;margin-top:6px;text-align:center;">לחץ על הטקסט ← Ctrl+A ← Ctrl+C</div>
   </div>
 </div>
 </body>
