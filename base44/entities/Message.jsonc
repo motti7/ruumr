@@ -17,6 +17,14 @@
     "is_read": {
       "type": "boolean",
       "default": false
+    },
+    "user1_id": {
+      "type": "string",
+      "description": "Denormalized match participant (user1) so RLS reads don't need a Match subquery."
+    },
+    "user2_id": {
+      "type": "string",
+      "description": "Denormalized match participant (user2) so RLS reads don't need a Match subquery."
     }
   },
   "required": [
@@ -33,6 +41,12 @@
       "$or": [
         {
           "data.sender_id": "{{user.id}}"
+        },
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
         },
         {
           "data.match_id": {
@@ -52,6 +66,12 @@
       "$or": [
         {
           "data.sender_id": "{{user.id}}"
+        },
+        {
+          "data.user1_id": "{{user.id}}"
+        },
+        {
+          "data.user2_id": "{{user.id}}"
         },
         {
           "data.match_id": {
