@@ -27,7 +27,7 @@ ${thinkingText}
 
 🔗 www.ruumrapp.com | הלינק בביו
 
-#שותפים #דירת_שותפים #${(location||'').replace(/ /g,'_')} #ruumrapp #שותפות #דירה`;
+#שותפים #דירת_שותפים #${(location||'').replace(/ /g,'_')} ${(search_cities||[]).map(c=>'#'+c.replace(/ /g,'_')).join(' ')} #ruumrapp #שותפות #דירה`;
 
   return `
 <!DOCTYPE html>
