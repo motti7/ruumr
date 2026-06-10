@@ -3,10 +3,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Admin only' }, { status: 403 });
-    }
 
     const photoUrl = 'https://base44.app/api/apps/68c919adff6ac6fafb51bed6/files/mp/public/68c919adff6ac6fafb51bed6/3898da58e_IMG_3306.jpeg';
 
@@ -186,13 +182,15 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-    await base44.integrations.Core.SendEmail({
+    console.log('📧 Sending email to mottishif7@gmail.com...');
+    const emailResult = await base44.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: '📸 טמפלייט אינסטגרם מוכן - שני | ruumr',
+      subject: 'טמפלייט אינסטגרם - שני ruumr',
       body: html,
     });
+    console.log('✅ Email result:', JSON.stringify(emailResult));
 
-    return Response.json({ success: true, message: 'מייל נשלח!' });
+    return Response.json({ success: true, message: 'מייל נשלח!', emailResult });
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
