@@ -438,6 +438,89 @@
           require_plus: body.require_plus !== false,
       });
   }
+
+  function resolveRecommendationUserId(
+      currentUser: Record<string, unknown>,
+      requestedUserId: unknown,
+  ) {
+      return currentUser.role === 'admin' && requestedUserId
+          ? requestedUserId
+          : currentUser.id;
+  }
+
+  function shouldRepairCurrentUserEntitlement(
+      error: unknown,
+      currentUser: Record<string, unknown>,
+      recommendationUserId: unknown,
+  ) {
+      const status = Number((error as Error & { status?: number } | null)?.status);
+      return (
+          status === 403 &&
+          currentUser.is_ruumr_plus === true &&
+          String(recommendationUserId) === String(currentUser.id)
+      );
+  }
+
+  async function requestRecommendationsWithEntitlementRepair<T>({
+      requestRecommendations,
+      grantEntitlement,
+      currentUser,
+      recommendationUserId,
+      onRepair,
+  }: {
+      requestRecommendations: () => Promise<T>;
+      grantEntitlement: () => Promise<unknown>;
+      currentUser: Record<string, unknown>;
+      recommendationUserId: unknown;
+      onRepair?: () => void;
+  }) {
+      try {
+          return await requestRecommendations();
+      } catch (error) {
+          if (!shouldRepairCurrentUserEntitlement(error, currentUser, recommendationUserId)) {
+              throw error;
+          }
+
+          onRepair?.();
+          await grantEntitlement();
+          return requestRecommendations();
+      }
+  }
+
+  function hasEmptyProfileIndex(
+      recommendationResult: unknown,
+      statsResult: unknown,
+  ) {
+      const recommendation = recommendationResult && typeof recommendationResult === 'object'
+          ? recommendationResult as Record<string, unknown>
+          : {};
+      const stats = statsResult && typeof statsResult === 'object'
+          ? statsResult as Record<string, unknown>
+          : {};
+      const snapshot = stats.snapshot && typeof stats.snapshot === 'object'
+          ? stats.snapshot as Record<string, unknown>
+          : {};
+
+      return (
+          Number(recommendation.candidate_count) === 0 &&
+          Number(snapshot.profile_count) <= 1
+      );
+  }
+
+  async function grantCurrentUserServiceEntitlement(
+      req: Request,
+      currentUser: Record<string, unknown>,
+  ) {
+      return serviceRequest(req, '/admin/entitlements/grant', {
+          body: cleanObject({
+              user_id: currentUser.id,
+              tier: 'plus',
+              granted_by: 'base44_entitlement_repair',
+              notes: 'Repaired from Base44 User.is_ruumr_plus during activation',
+          }),
+          requireAuth: true,
+      });
+  }
   
   async function handleAction(base44: ReturnType<typeof createClientFromRequest>, req: Request, currentUser: Record<string, unknown>, action: string, body: Record<string, unknown>) {
       switch (action) {
@@ -451,16 +534,51 @@
               }
               return snapshotAllProfiles(base44, currentUser, req);
           case 'recommendations': {
-              const recommendationUserId = body.user_id || currentUser.id;
+              // Non-admin callers may only request their own recommendations.
+              const recommendationUserId = resolveRecommendationUserId(currentUser, body.user_id);
               const swipeExclusions = await loadSwipeExclusions(base44, recommendationUserId);
+              const recommendationBody = {
+                  ...normalizeRecommendationBody({
+                      ...body,
+                      user_id: recommendationUserId,
+                  }),
+                  exclude_user_ids: swipeExclusions.exclude_user_ids,
+                  liked_user_ids: swipeExclusions.liked_user_ids,
+              };
+
+              const recommendationResult = await requestRecommendationsWithEntitlementRepair({
+                  requestRecommendations: () => serviceRequest(req, '/recommendations', {
+                      body: recommendationBody,
+                      requireAuth: true,
+                  }),
+                  grantEntitlement: () => grantCurrentUserServiceEntitlement(req, currentUser),
+                  currentUser,
+                  recommendationUserId,
+                  onRepair: () => console.warn(
+                      `[${FUNCTION_NAME}] Repairing missing Plus service entitlement for ${currentUser.id}`
+                  ),
+              });
+
+              if (Number((recommendationResult as Record<string, unknown>)?.candidate_count) !== 0) {
+                  return recommendationResult;
+              }
+
+              const statsResult = await serviceRequest(req, '/admin/stats', {
+                  method: 'GET',
+                  requireAuth: true,
+              });
+              if (!hasEmptyProfileIndex(recommendationResult, statsResult)) {
+                  return recommendationResult;
+              }
+
+              console.warn(
+                  `[${FUNCTION_NAME}] Rebuilding empty Plus profile index before retrying recommendations`
+              );
+              await snapshotAllProfiles(base44, currentUser, req);
               return serviceRequest(req, '/recommendations', {
                   body: {
-                      ...normalizeRecommendationBody({
-                          ...body,
-                          user_id: recommendationUserId,
-                      }),
-                      exclude_user_ids: swipeExclusions.exclude_user_ids,
-                      liked_user_ids: swipeExclusions.liked_user_ids,
+                      ...recommendationBody,
+                      refresh: true,
                   },
                   requireAuth: true,
               });

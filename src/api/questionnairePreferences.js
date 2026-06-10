@@ -36,7 +36,7 @@ function preferencePayload(record) {
   };
 }
 
-async function simulatorResolveCurrent() {
+async function resolveCurrentFromEntities() {
   const user = await User.me();
   const existing = await base44.entities.QuestionnairePreference.filter({ user_id: user.id }, "-completed_at");
   if (existing[0] && isCharterComplete(existing[0].answers)) {
@@ -103,8 +103,14 @@ async function simulatorMatchSummary(matchId) {
 }
 
 export async function resolveCurrentQuestionnairePreference() {
-  if (isRuumrSimulatorMode()) return simulatorResolveCurrent();
-  return unwrap(await base44.functions.invoke("questionnairePreferences", { action: "resolve_current" }));
+  if (isRuumrSimulatorMode()) return resolveCurrentFromEntities();
+
+  try {
+    return unwrap(await base44.functions.invoke("questionnairePreferences", { action: "resolve_current" }));
+  } catch (error) {
+    console.warn("Questionnaire function unavailable; resolving from user-owned entities.", error);
+    return resolveCurrentFromEntities();
+  }
 }
 
 /** @param {SaveQuestionnairePreferenceOptions} options */
@@ -116,6 +122,7 @@ export async function saveQuestionnairePreference({
 }) {
   const user = await User.me();
   const normalized = normalizeCharterAnswers(answers);
+  if (!isCharterComplete(normalized)) throw new Error("questionnaire_incomplete");
 
   const data = {
     user_id: user.id,

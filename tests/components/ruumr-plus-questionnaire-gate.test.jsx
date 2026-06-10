@@ -82,4 +82,23 @@ describe("Ruumr Plus questionnaire gate", () => {
     fireEvent.click(screen.getByRole("button", { name: "Finish questionnaire" }));
     await waitFor(() => expect(mocks.activate).toHaveBeenCalledTimes(1));
   });
+
+  it("fails closed and requires the questionnaire when the completion check errors", async () => {
+    mocks.resolve.mockRejectedValueOnce(new Error("questionnaire function unavailable"));
+
+    render(
+      <MemoryRouter initialEntries={["/RuumrPlus"]}>
+        <RuumrPlusPage />
+      </MemoryRouter>
+    );
+
+    const activateButton = await screen.findByRole("button", { name: /הפעל\/י Plus/ });
+    fireEvent.click(activateButton);
+
+    expect(await screen.findByRole("button", { name: "Finish questionnaire" })).toBeTruthy();
+    expect(mocks.activate).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Finish questionnaire" }));
+    await waitFor(() => expect(mocks.activate).toHaveBeenCalledTimes(1));
+  });
 });

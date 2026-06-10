@@ -439,10 +439,13 @@ export default function RuumrPlusPage() {
         }
       } catch (error) {
         console.error("Failed to resolve Plus questionnaire:", error);
+        setQuestionnairePreference(null);
+        setPendingActivationSource(source);
+        setShowQuestionnaire(true);
         setPlusState({
-          status: "fallback",
-          label: "לא הצלחנו לבדוק את השאלון",
-          description: "נסו שוב כדי להמשיך להפעלת Plus.",
+          status: "idle",
+          label: "נדרש שאלון התאמה",
+          description: "כדי להפעיל Plus צריך להשלים קודם את שאלון ההעדפות.",
         });
         return null;
       }
