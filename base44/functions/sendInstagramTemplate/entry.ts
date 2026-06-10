@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       age: 21,
       location: 'פתח תקווה',
       about_me: 'מחפשת בית עם אווירה נעימה, שותפים זורמים ומכבדים שיהיה כיף לגור ביחד',
-      looking_for_description: 'מחפשת בית עם אווירה נעימה, שותפים זורמים ומכבדים שיהיה כיף לגור ביחד',
+      looking_for_description: 'שותפה זורמת, אחראית, ושמחפשת אנשים חיוביים לחיות איתם',
       budget_max: 3000,
       search_cities: ['פתח תקווה', 'הוד השרון', 'ראש העין'],
       looking_for_gender: 'any',
