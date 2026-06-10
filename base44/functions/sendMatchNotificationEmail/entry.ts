@@ -109,6 +109,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Check user notification preferences
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const receiverUser = allUsers.find(u => u.id === user_id);
+    if (receiverUser?.notify_matches === false) {
+      console.log(`🔕 User ${user_id} has disabled match notifications, skipping email`);
+      return Response.json({ success: true, skipped: true });
+    }
+
     // Fetch profile to get gender
     const profiles = await base44.asServiceRole.entities.Profile.filter({ user_id });
     const profile = profiles[0];

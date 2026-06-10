@@ -63,8 +63,8 @@ Deno.serve(async (req) => {
             console.error(`❌ Failed to send push notification:`, e);
         }
 
-        // Send email notification
-        if (receiverUser?.email) {
+        // Send email notification (respect notify_matches setting)
+        if (receiverUser?.email && receiverUser?.notify_matches !== false) {
             try {
                 await base44.asServiceRole.integrations.Core.SendEmail({
                     to: receiverUser.email,
