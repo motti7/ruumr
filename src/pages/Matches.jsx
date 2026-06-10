@@ -63,6 +63,16 @@ export default function MatchesPage() {
     loadMatches();
   }, [loadMatches]);
 
+  // Real-time subscription: reload when a new match is created
+  useEffect(() => {
+    const unsub = base44.entities.Match.subscribe((event) => {
+      if (event.type === 'create') {
+        loadMatches();
+      }
+    });
+    return () => unsub();
+  }, [loadMatches]);
+
   // Mark all matches as seen when the Matches page is opened
   useEffect(() => {
     if (matches.length > 0) {
