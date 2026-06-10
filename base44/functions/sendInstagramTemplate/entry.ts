@@ -8,7 +8,7 @@ function getThinkingText(lookingForGender) {
   return 'חושב/ת שאתם יכולים להסתדר טוב ביחד? 🤝';
 }
 
-function buildHtml({ name, age, location, about_me, looking_for_description, budget_max, search_cities, looking_for_gender, photoUrl }) {
+function buildHtml({ name, age, location, about_me, looking_for_description, budget_max, search_cities, looking_for_gender, social_link, photoUrl }) {
   const cities = (search_cities || []).join(', ') || location || '';
   const thinkingText = getThinkingText(looking_for_gender);
   const captionText = `✨ הכירו את ${name}, ${age}, מ${location}!
@@ -111,6 +111,11 @@ ${thinkingText}
     </div>
   </div>
 
+  ${social_link ? `<div class="caption-box" style="margin-bottom:16px;">
+    <h3>🔗 רשת חברתית:</h3>
+    <a href="${social_link}" target="_blank" style="color:#FF5722;font-size:15px;word-break:break-all;">${social_link}</a>
+  </div>` : ''}
+
   <div class="caption-box">
   <h3>📝 קפטשן — סמן הכל והעתק (Ctrl+A / Cmd+A):</h3>
   <textarea id="caption-textarea" readonly onclick="this.select()">${captionText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
@@ -139,11 +144,12 @@ Deno.serve(async (req) => {
     const budget_max = profileData.budget_max;
     const search_cities = profileData.search_cities;
     const looking_for_gender = profileData.looking_for_gender;
+    const social_link = profileData.social_link || '';
     const photoUrl = (profileData.photos && profileData.photos[0]) || '';
 
     const html = buildHtml({
       name, age, location, about_me, looking_for_description,
-      budget_max, search_cities, looking_for_gender, photoUrl,
+      budget_max, search_cities, looking_for_gender, social_link, photoUrl,
     });
 
     console.log(`📧 Sending email for profile: ${name}`);
