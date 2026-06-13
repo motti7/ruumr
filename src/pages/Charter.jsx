@@ -24,25 +24,10 @@ export default function CharterPage() {
       try {
         const id = new URLSearchParams(location.search).get("matchId");
         if (!id) { navigate(createPageUrl("Matches"), { replace: true }); return; }
-
-        setMatchId(id);
-
-        // Check if user already completed the questionnaire
-        const userData = await User.me();
-        const REQUIRED_QUESTIONS = ['q_smoking','q_partners','q_pets','q_cleaning_strictness','q_shopping','q_dishes','q_ac','q_hosting'];
-        const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: userData.id });
-        const hasCompleted = prefs.some(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
-
-        if (hasCompleted) {
-          // Already filled questionnaire → show results directly
-          const completedPref = prefs.find(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
-          setPreference(completedPref);
-        }
-        // If not completed → the page will show RoomiCharter to fill the questionnaire
+        // Always redirect straight to chat — questionnaire banner is removed
+        navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(id)}`, { replace: true });
       } catch (error) {
         navigate(createPageUrl("Matches"), { replace: true });
-      } finally {
-        setIsLoading(false);
       }
     };
     load();
@@ -61,39 +46,30 @@ export default function CharterPage() {
           <p className="text-sm text-gray-500">התשובות נשמרות ומשמשות בכל ההתאמות שלך.</p>
         </div>
       </div>
-      {matchId && !preference && (
-        <RoomiCharter
-          matchId={matchId}
-          mode="match"
-          onClose={() => navigate(createPageUrl("Matches"))}
-          onComplete={(savedPreference) => {
-            setPreference(savedPreference);
-            setRefreshKey((value) => value + 1);
-          }}
-        />
-      )}
-      {matchId && preference && (
+      {matchId && (
         <>
           <CharterResults
             matchId={matchId}
             refreshKey={refreshKey}
             onEdit={() => setIsEditing(true)}
           />
-          <Button
-            type="button"
-            onClick={() => navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(matchId)}`)}
-            className="mt-4 h-12 w-full rounded-full bg-[--theme-orange] font-bold text-white"
-          >
-            המשך/י לצ'אט
-          </Button>
+          {preference && (
+            <Button
+              type="button"
+              onClick={() => navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(matchId)}`)}
+              className="mt-4 h-12 w-full rounded-full bg-[--theme-orange] font-bold text-white"
+            >
+              המשך/י לצ'אט
+            </Button>
+          )}
         </>
       )}
-      {isEditing && preference && (
+      {isEditing && (
         <RoomiCharter
           matchId={matchId}
           mode="match"
           initialAnswers={preference?.answers}
-          onClose={() => setIsEditing(false)}
+          onClose={() => preference ? setIsEditing(false) : navigate(createPageUrl("Matches"))}
           onComplete={(savedPreference) => {
             setPreference(savedPreference);
             setIsEditing(false);
