@@ -33,10 +33,33 @@ Deno.serve(async (req) => {
             console.error('⚠️ Failed to sync profile deletion to Ruumr Plus:', syncError);
         }
 
-        // 1. Profile
-        const profiles = await sr.Profile.filter({ user_id: userId });
-        for (const p of profiles) await safeDelete(sr.Profile, p.id);
-        console.log(`  ✓ Profiles deleted: ${profiles.length}`);
+        // 1. Profile — CRITICAL: must be fully deleted, no silent failures
+        let profiles = await sr.Profile.filter({ user_id: userId });
+        console.log(`  🔍 Found ${profiles.length} profile(s) for user ${userId}: ${JSON.stringify(profiles.map(p => p.id))}`);
+        for (const p of profiles) {
+            try {
+                await sr.Profile.delete(p.id);
+                console.log(`  ✅ Profile ${p.id} deleted successfully`);
+            } catch (e) {
+                console.error(`  ❌ FAILED to delete profile ${p.id}:`, e?.message);
+                // Retry once
+                try {
+                    await sleep(200);
+                    await sr.Profile.delete(p.id);
+                    console.log(`  ✅ Profile ${p.id} deleted on retry`);
+                } catch (e2) {
+                    console.error(`  ❌ RETRY also failed for profile ${p.id}:`, e2?.message);
+                    return Response.json({ error: `Failed to delete profile after retry: ${e2?.message}` }, { status: 500 });
+                }
+            }
+        }
+        // VERIFY deletion
+        const remainingProfiles = await sr.Profile.filter({ user_id: userId });
+        if (remainingProfiles.length > 0) {
+            console.error(`  ❌ VERIFICATION FAILED: ${remainingProfiles.length} profile(s) still exist after deletion! IDs: ${JSON.stringify(remainingProfiles.map(p => p.id))}`);
+            return Response.json({ error: `Profile deletion verification failed: ${remainingProfiles.length} profiles remain` }, { status: 500 });
+        }
+        console.log(`  ✓ All ${profiles.length} profile(s) verified deleted`);
 
         // 2. Swipes (both directions)
         const [swipesAsSwiper, swipesAsSwiped] = await Promise.all([
