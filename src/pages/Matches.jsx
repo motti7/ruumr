@@ -51,10 +51,15 @@ export default function MatchesPage() {
         return;
       }
 
-      // Batch-fetch all relevant profiles in one call instead of N individual fetches
-      const allProfiles = await Profile.list('-created_date', 500);
+      // Fetch only the profiles of matched users (avoid 500-record limit of list())
+      const otherUserIds = [...new Set(allMatches.map(m => m.user1_id === userData.id ? m.user2_id : m.user1_id))];
       const profileMap = {};
-      allProfiles.forEach(p => { profileMap[p.user_id] = p; });
+      await Promise.all(otherUserIds.map(async (uid) => {
+        try {
+          const profiles = await Profile.filter({ user_id: uid });
+          if (profiles.length > 0) profileMap[uid] = profiles[0];
+        } catch {}
+      }));
 
       // Fetch messages per match with individual error resilience
       const matchesWithProfiles = await Promise.all(
