@@ -1119,80 +1119,86 @@ export default function OnboardingPage() {
             </Step>
 
             <Step step={7} currentStep={step} title="">
-                <div className="flex flex-col h-full text-center py-4 gap-4">
-                    {/* Title */}
-                    <div className="flex items-center justify-center gap-2">
-                        <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
-                        <CheckCircle className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
-                    </div>
-
-                    {/* Section 1: Social Media Link */}
-                    <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100" dir="rtl">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="text-gray-800 text-base font-bold">קישור לרשת חברתית</span>
-                            <span className="text-sm text-gray-400">(אופציונלי)</span>
-                            <div className="flex items-center gap-1.5 mr-auto">
-                                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
-                                    <Instagram className="w-3.5 h-3.5 text-white" />
-                                </div>
-                                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
-                                    <Facebook className="w-3.5 h-3.5 text-white" />
-                                </div>
-                                <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center">
-                                    <SiTiktok className="w-3 h-3 text-white" />
-                                </div>
-                            </div>
+                <div className="flex flex-col h-full text-center py-4">
+                    {/* TOP SECTION: Profile Ready */}
+                    <div className="flex flex-col gap-4 flex-shrink-0">
+                        <div className="flex items-center justify-center gap-2">
+                            <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
+                            <CheckCircle className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
                         </div>
-                        <Input
-                            value={formData.social_link}
-                            onChange={(e) => setFormField('social_link', e.target.value)}
-                            placeholder="הדבק קישור כאן"
-                            className="h-10 text-sm bg-white border-gray-200 w-full"
-                            dir="rtl"
-                        />
-                        {/* Promotion checkbox */}
-                        <button
-                            type="button"
-                            onClick={() => setWantsRuumrPromotion(prev => !prev)}
-                            className="flex items-start gap-2 mt-3 text-right w-full"
-                        >
-                            <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${wantsRuumrPromotion ? 'bg-[#FA3803] border-[#FA3803]' : 'border-gray-300 bg-white'}`}>
-                                {wantsRuumrPromotion && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+
+                        {/* Social Media Link */}
+                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100" dir="rtl">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-gray-800 text-base font-bold">קישור לרשת חברתית</span>
+                                <span className="text-sm text-gray-400">(אופציונלי)</span>
+                                <div className="flex items-center gap-1.5 mr-auto">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
+                                        <Instagram className="w-3.5 h-3.5 text-white" />
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+                                        <Facebook className="w-3.5 h-3.5 text-white" />
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center">
+                                        <SiTiktok className="w-3 h-3 text-white" />
+                                    </div>
+                                </div>
                             </div>
-                            <span className="text-sm text-gray-600 leading-snug">
-                                רוצה למצוא שותף מהר יותר? סמן/י כאן כדי שנעלה את הפרופיל שלך לסטורי באינסטגרם של Ruumr! 🚀
-                            </span>
-                        </button>
+                            <Input
+                                value={formData.social_link}
+                                onChange={(e) => setFormField('social_link', e.target.value)}
+                                placeholder="הדבק קישור כאן"
+                                className="h-10 text-sm bg-white border-gray-200 w-full"
+                                dir="rtl"
+                            />
+                            {/* Promotion checkbox */}
+                            <button
+                                type="button"
+                                onClick={() => setWantsRuumrPromotion(prev => !prev)}
+                                className="flex items-start gap-2 mt-3 text-right w-full"
+                            >
+                                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${wantsRuumrPromotion ? 'bg-[#FA3803] border-[#FA3803]' : 'border-gray-300 bg-white'}`}>
+                                    {wantsRuumrPromotion && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                                </div>
+                                <span className="text-sm text-gray-600 leading-snug">
+                                    רוצה למצוא שותף מהר יותר? סמן/י כאן כדי שנעלה את הפרופיל שלך לסטורי באינסטגרם של Ruumr! 🚀
+                                </span>
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Divider */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs text-gray-400 font-medium">אימות פרופיל</span>
-                        <div className="flex-1 h-px bg-gray-200" />
-                    </div>
+                    {/* BOTTOM SECTION: Verification - pushed to bottom, visually distinct */}
+                    <div className="mt-auto w-full border-t border-gray-200 pt-4">
+                        {/* Divider label */}
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="flex-1 h-px bg-gray-200" />
+                            <span className="text-xs text-gray-400 font-medium">אימות פרופיל</span>
+                            <div className="flex-1 h-px bg-gray-200" />
+                        </div>
 
-                    {/* Section 2: Verification */}
-                    <div className="w-full p-4">
-                        <h3 className="text-xl font-bold mb-1">אמת/י את הפרופיל שלך</h3>
-                        <p className="text-gray-500 text-sm">
-                            פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
-                        </p>
-                    </div>
+                        {/* Verification text */}
+                        <div className="w-full mb-4">
+                            <h3 className="text-xl font-bold mb-1">אמת/י את הפרופיל שלך</h3>
+                            <p className="text-gray-500 text-sm px-2">
+                                פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
+                            </p>
+                        </div>
 
-                    <div className="w-full space-y-3 mt-auto">
-                        <Button
-                            onClick={() => handleFinish(true)}
-                            disabled={isSubmitting}
-                            className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
-                        </Button>
-                        <button
-                            onClick={() => !isSubmitting && handleFinish(false)}
-                            disabled={isSubmitting}
-                            className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
-                            אולי אחר כך
-                        </button>
+                        {/* Action buttons */}
+                        <div className="w-full space-y-3">
+                            <Button
+                                onClick={() => handleFinish(true)}
+                                disabled={isSubmitting}
+                                className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
+                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
+                            </Button>
+                            <button
+                                onClick={() => !isSubmitting && handleFinish(false)}
+                                disabled={isSubmitting}
+                                className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
+                                אולי אחר כך
+                            </button>
+                        </div>
                     </div>
                 </div>
             </Step>
