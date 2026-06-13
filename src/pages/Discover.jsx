@@ -347,6 +347,8 @@ export default function DiscoverPage() {
               matched_with_id: swipedProfile.user_id,
             });
             setMatchData({ profile1: userProfile, profile2: swipedProfile });
+            // Notify Layout to update match badge immediately
+            window.dispatchEvent(new Event('ruumrMatchCreated'));
           }
         } catch (matchError) {
           console.error("Failed to process swipe match:", matchError);

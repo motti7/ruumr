@@ -203,6 +203,8 @@ export default function ProfileViewPage() {
             base44.analytics.track({ eventName: 'match_created', properties: { matched_with_id: swipedId } });
             trackMixpanel('Match Created', { matched_with_id: swipedId });
             setMatchData({ profile1: userProfile || { name: currentUser.full_name }, profile2: profile });
+            // Notify Layout to update match badge immediately
+            window.dispatchEvent(new Event('ruumrMatchCreated'));
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);

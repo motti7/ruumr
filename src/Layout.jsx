@@ -204,9 +204,16 @@ export default function Layout({ children, currentPageName }) {
       });
     }).catch(() => {});
 
+    // Backup: listen for custom match-created event from Discover/ProfileView pages
+    const handleRuumrMatchCreated = () => {
+      checkNotifications();
+    };
+    window.addEventListener('ruumrMatchCreated', handleRuumrMatchCreated);
+
     return () => {
       clearInterval(interval);
       if (unsubMatch) unsubMatch();
+      window.removeEventListener('ruumrMatchCreated', handleRuumrMatchCreated);
     };
   }, [currentPageName]);
 
