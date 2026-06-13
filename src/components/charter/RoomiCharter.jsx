@@ -139,8 +139,8 @@ export default function RoomiCharter({
         <X className="h-6 w-6 text-white" />
       </button>
 
-      <div className="absolute left-4 right-4 h-2 overflow-hidden rounded-full bg-white/20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
-        <motion.div className="h-full bg-white" animate={{ width: `${progress}%` }} />
+      <div className="absolute left-4 right-4 h-2 overflow-hidden rounded-full bg-white/10" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
+        <motion.div className="h-full rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.5)]" animate={{ width: `${progress}%` }} />
       </div>
 
       <div className="absolute inset-x-0 bottom-20 top-16 flex items-center justify-center px-4">
@@ -167,11 +167,11 @@ export default function RoomiCharter({
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleAnswer(value)}
                     disabled={isSaving}
-                    className={`w-full rounded-2xl px-4 py-7 text-right text-base font-bold text-white shadow-lg ${
+                    className={`w-full rounded-2xl border-0 px-4 py-7 text-right text-base font-bold text-white shadow-lg outline-none ${
                       value === "a"
                         ? "bg-gradient-to-r from-orange-500 to-red-600"
                         : "bg-gradient-to-r from-blue-500 to-purple-600"
-                    } ${answers[currentQuestion.id] === value ? "ring-4 ring-white/70" : ""}`}
+                    } ${answers[currentQuestion.id] === value ? "ring-2 ring-white/30" : ""}`}
                   >
                     {value === "a" ? currentQuestion.option_a : currentQuestion.option_b}
                   </motion.button>
