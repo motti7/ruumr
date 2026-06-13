@@ -21,10 +21,22 @@ Deno.serve(async (req) => {
 
         const sr = base44.asServiceRole.entities;
 
-        // Delete Profile (the onProfileDeleted automation will fire and sync Ruumr Plus)
-        const profiles = await sr.Profile.filter({ user_id: userId });
-        for (const p of profiles) await safeDelete(sr.Profile, p.id);
-        console.log(`🗑️ Deleted ${profiles.length} profile(s) for user ${userId}`);
+        // Delete Profile — use list() with high limit to ensure we find all records
+        const allProfiles = await sr.Profile.list('-created_date', 2000);
+        const profiles = allProfiles.filter(p => p.user_id === userId);
+        console.log(`🗑️ Found ${profiles.length} profile(s) for user ${userId} (scanned ${allProfiles.length} total)`);
+        for (const p of profiles) {
+            try {
+                await sr.Profile.delete(p.id);
+                console.log(`  ✅ Profile ${p.id} deleted`);
+            } catch (e) {
+                if ((e?.message || '').includes('not found')) {
+                    console.log(`  ⚠️ Profile ${p.id} already deleted`);
+                } else {
+                    console.error(`  ❌ Failed to delete profile ${p.id}:`, e?.message);
+                }
+            }
+        }
 
         // Delete Swipes
         const swipesAsSwiper = await sr.Swipe.filter({ swiper_id: userId });

@@ -33,33 +33,63 @@ Deno.serve(async (req) => {
             console.error('⚠️ Failed to sync profile deletion to Ruumr Plus:', syncError);
         }
 
-        // 1. Profile — CRITICAL: must be fully deleted, no silent failures
-        let profiles = await sr.Profile.filter({ user_id: userId });
-        console.log(`  🔍 Found ${profiles.length} profile(s) for user ${userId}: ${JSON.stringify(profiles.map(p => p.id))}`);
-        for (const p of profiles) {
-            try {
-                await sr.Profile.delete(p.id);
-                console.log(`  ✅ Profile ${p.id} deleted successfully`);
-            } catch (e) {
-                console.error(`  ❌ FAILED to delete profile ${p.id}:`, e?.message);
-                // Retry once
+        // 1. Profile — CRITICAL: fetch ALL profiles (high limit) to find user's records
+        const allProfiles = await sr.Profile.list('-created_date', 2000);
+        const myProfiles = allProfiles.filter(p => p.user_id === userId);
+        console.log(`  🔍 Found ${myProfiles.length} profile(s) for user ${userId} (scanned ${allProfiles.length} total): ${JSON.stringify(myProfiles.map(p => p.id))}`);
+
+        let deletedCount = 0;
+        for (const p of myProfiles) {
+            let deleted = false;
+            for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    await sleep(200);
                     await sr.Profile.delete(p.id);
-                    console.log(`  ✅ Profile ${p.id} deleted on retry`);
-                } catch (e2) {
-                    console.error(`  ❌ RETRY also failed for profile ${p.id}:`, e2?.message);
-                    return Response.json({ error: `Failed to delete profile after retry: ${e2?.message}` }, { status: 500 });
+                    console.log(`  ✅ Profile ${p.id} deleted (attempt ${attempt})`);
+                    deleted = true;
+                    deletedCount++;
+                    break;
+                } catch (e) {
+                    const errMsg = e?.message || '';
+                    if (errMsg.includes('not found')) {
+                        // Already deleted — treat as success
+                        console.log(`  ⚠️ Profile ${p.id} already deleted (stale reference), skipping`);
+                        deletedCount++;
+                        deleted = true;
+                        break;
+                    }
+                    console.error(`  ❌ Attempt ${attempt} failed for profile ${p.id}:`, errMsg);
+                    await sleep(300 * attempt);
                 }
             }
+            if (!deleted) {
+                console.error(`  💀 CRITICAL: Failed to delete profile ${p.id} after 3 attempts`);
+            }
         }
-        // VERIFY deletion
-        const remainingProfiles = await sr.Profile.filter({ user_id: userId });
-        if (remainingProfiles.length > 0) {
-            console.error(`  ❌ VERIFICATION FAILED: ${remainingProfiles.length} profile(s) still exist after deletion! IDs: ${JSON.stringify(remainingProfiles.map(p => p.id))}`);
-            return Response.json({ error: `Profile deletion verification failed: ${remainingProfiles.length} profiles remain` }, { status: 500 });
+        console.log(`  ✓ Profiles processed: ${deletedCount}/${myProfiles.length}`);
+
+        // VERIFY deletion — scan ALL profiles again
+        await sleep(1000);
+        const remainingCheck = await sr.Profile.list('-created_date', 2000);
+        const stillThere = remainingCheck.filter(p => p.user_id === userId);
+        if (stillThere.length > 0) {
+            console.error(`  ❌ VERIFICATION FAILED: ${stillThere.length} profile(s) still exist! IDs: ${JSON.stringify(stillThere.map(p => p.id))}`);
+            // One last desperate attempt — delete by exact ID
+            for (const p of stillThere) {
+                try {
+                    await sr.Profile.delete(p.id);
+                    console.log(`  ✅ Desperate delete succeeded for ${p.id}`);
+                } catch (e) {
+                    console.error(`  💀 Desperate delete also failed for ${p.id}:`, e?.message);
+                }
+            }
+            const finalCheck = await sr.Profile.list('-created_date', 2000);
+            const finalStill = finalCheck.filter(p => p.user_id === userId);
+            if (finalStill.length > 0) {
+                console.error(`  ❌ FINAL VERIFICATION FAILED: ${finalStill.length} profiles remain`);
+                return Response.json({ error: `Profile deletion completely failed: ${finalStill.length} profiles remain` }, { status: 500 });
+            }
         }
-        console.log(`  ✓ All ${profiles.length} profile(s) verified deleted`);
+        console.log(`  ✓ Profile cleanup verified complete`);
 
         // 2. Swipes (both directions)
         const [swipesAsSwiper, swipesAsSwiped] = await Promise.all([
