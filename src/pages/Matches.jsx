@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Match, Profile } from "@/entities/all";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Puzzle, AlertCircle } from "lucide-react";
@@ -12,16 +12,29 @@ import PullToRefresh from "@/components/shared/PullToRefresh";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const retryRef = useRef(0);
+  const retryTimerRef = useRef(null);
+  const mountedRef = useRef(true);
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
     try {return JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');} catch {return [];}
   });
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
   const loadMatches = useCallback(async () => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -32,18 +45,32 @@ export default function MatchesPage() {
       const userMatches2 = await Match.filter({ user2_id: userData.id, status: 'active' });
       const allMatches = [...userMatches, ...userMatches2];
 
+      if (allMatches.length === 0) {
+        setMatches([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Batch-fetch all relevant profiles in one call instead of N individual fetches
+      const allProfiles = await Profile.list('-created_date', 500);
+      const profileMap = {};
+      allProfiles.forEach(p => { profileMap[p.user_id] = p; });
+
+      // Fetch messages per match with individual error resilience
       const matchesWithProfiles = await Promise.all(
         allMatches.map(async (match) => {
           const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
-          const [profiles, allMessages] = await Promise.all([
-            Profile.filter({ user_id: otherUserId }),
-            base44.entities.Message.filter({ match_id: match.id }),
-          ]);
-          const unreadCount = allMessages.filter(m => m.sender_id !== userData.id && !m.is_read).length;
+          let unreadCount = 0;
+          try {
+            const allMessages = await base44.entities.Message.filter({ match_id: match.id });
+            unreadCount = allMessages.filter(m => m.sender_id !== userData.id && !m.is_read).length;
+          } catch (e) {
+            console.warn('Failed to load messages for match', match.id, e);
+          }
 
           return {
             ...match,
-            profile: profiles[0] || null,
+            profile: profileMap[otherUserId] || null,
             isOnline: false,
             unreadCount,
           };
@@ -51,17 +78,36 @@ export default function MatchesPage() {
       );
 
       setMatches(matchesWithProfiles.filter((m) => m.profile));
+      retryRef.current = 0; // Reset retry on success
     } catch (error) {
       console.error("Error loading matches:", error);
-      setError("שגיאה בטעינת ההתאמות. אנא נסה שוב.");
-      setMatches([]);
+      // Auto-retry up to 3 times with increasing delay
+      if (retryRef.current < 3 && mountedRef.current) {
+        const delay = (retryRef.current + 1) * 1500;
+        console.log(`Retrying matches load in ${delay}ms (attempt ${retryRef.current + 1}/3)...`);
+        retryTimerRef.current = setTimeout(() => {
+          retryRef.current += 1;
+          loadMatches();
+        }, delay);
+      } else {
+        setError("שגיאה בטעינת ההתאמות. אנא נסה שוב.");
+        setMatches([]);
+        setIsLoading(false);
+      }
+      return; // Don't set isLoaded false yet, retrying
     }
     setIsLoading(false);
   }, []);
 
+  // Load matches on mount AND when location changes (back/forward navigation)
   useEffect(() => {
+    retryRef.current = 0;
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
     loadMatches();
-  }, [loadMatches]);
+  }, [location.key, loadMatches]);
 
   // Real-time subscription: reload when a new match is created
   useEffect(() => {
