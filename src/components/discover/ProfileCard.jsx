@@ -324,15 +324,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     if (!document.hidden && audio.paused) {
-      audio.volume = 0;
-      audio.play().then(() => {
-        let vol = 0;
-        const interval = setInterval(() => {
-          vol += 0.05;
-          audio.volume = Math.min(vol, 0.8);
-          if (vol >= 0.8) clearInterval(interval);
-        }, 200);
-      }).catch(() => setIsMuted(true));
+      fadeInAudio(audio);
     }
 
     return () => {
@@ -342,10 +334,28 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     };
   }, [isActive, profile.song_preview_url]);
 
+  const fadeInAudio = useCallback((audio) => {
+    if (!audio) return;
+    audio.volume = 0;
+    audio.play().then(() => {
+      let vol = 0;
+      const interval = setInterval(() => {
+        vol += 0.03;
+        audio.volume = Math.min(vol, 0.75);
+        if (vol >= 0.75) clearInterval(interval);
+      }, 250);
+    }).catch(() => setIsMuted(true));
+  }, []);
+
   useEffect(() => {
     if (!audioRef.current || !isActive) return;
-    audioRef.current.volume = isMuted ? 0 : 0.8;
-  }, [isMuted, isActive]);
+    // When unmuting, fade in smoothly instead of hard-setting volume
+    if (!isMuted && audioRef.current.paused) {
+      fadeInAudio(audioRef.current);
+    } else if (isMuted) {
+      audioRef.current.volume = 0;
+    }
+  }, [isMuted, isActive, fadeInAudio]);
 
   // Motion values for drag animation
   const x = useMotionValue(0);
@@ -600,9 +610,9 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
       if (audioRef.current) {
         if (next) {
           audioRef.current.pause();
-        } else {
-          audioRef.current.play().catch(() => {});
+          audioRef.current.volume = 0;
         }
+        // unmute → second useEffect handles fade-in
       }
       return next;
     });
