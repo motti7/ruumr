@@ -17,10 +17,12 @@ export async function processSwipeMatch({ swiperId, swipedId, action, origin }) 
     return { match: reverseSwipes?.length > 0 };
   }
 
-  return base44.functions.invoke('handleSwipe', {
+  const result = await base44.functions.invoke('handleSwipe', {
     swiper_id: swiperId,
     swiped_id: swipedId,
     action,
     origin,
   });
+
+  return result?.data || result;
 }
