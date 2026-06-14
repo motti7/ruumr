@@ -20,12 +20,11 @@ Deno.serve(async (req) => {
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const weekAgoISO = oneWeekAgo.toISOString();
 
-    // Fetch all relevant data
-    // asServiceRole.list() for Swipe was broken — use filter({}) instead.
+    // Fetch all relevant data via asServiceRole (admin can now read Swipe via RLS)
     const [allUsers, allProfiles, allSwipes, allMatches, allMessages] = await Promise.all([
       base44.asServiceRole.entities.User.list('-created_date', 500),
       base44.asServiceRole.entities.Profile.list('-created_date', 500),
-      base44.asServiceRole.entities.Swipe.filter({}, '-created_date', 10000),
+      base44.asServiceRole.entities.Swipe.list('-created_date', 10000),
       base44.asServiceRole.entities.Match.list('-created_date', 500),
       base44.asServiceRole.entities.Message.list('-created_date', 500),
     ]);
