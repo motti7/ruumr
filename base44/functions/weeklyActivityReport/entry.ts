@@ -21,13 +21,24 @@ Deno.serve(async (req) => {
     const weekAgoISO = oneWeekAgo.toISOString();
 
     // Fetch all relevant data
-    const [allUsers, allProfiles, allSwipes, allMatches, allMessages] = await Promise.all([
+    // asServiceRole is used for User/Profile/Match/Message but is broken for Swipe.
+    // Use user-scoped call for Swipe, then also try asServiceRole as a fallback.
+    const [allUsers, allProfiles, allSwipesUser, allMatches, allMessages] = await Promise.all([
       base44.asServiceRole.entities.User.list('-created_date', 500),
       base44.asServiceRole.entities.Profile.list('-created_date', 500),
-      base44.asServiceRole.entities.Swipe.list('-created_date', 500),
+      base44.entities.Swipe.list('-created_date', 2000),
       base44.asServiceRole.entities.Match.list('-created_date', 500),
       base44.asServiceRole.entities.Message.list('-created_date', 500),
     ]);
+
+    let allSwipes = allSwipesUser;
+    // Fallback: try asServiceRole if user-scoped returned nothing
+    if (allSwipes.length === 0) {
+      try {
+        const svcSwipes = await base44.asServiceRole.entities.Swipe.list('-created_date', 2000);
+        if (svcSwipes.length > 0) allSwipes = svcSwipes;
+      } catch (_) { /* ignore */ }
+    }
 
     // Filter to last 7 days
     const newUsers = allUsers.filter(u => u.created_date && new Date(u.created_date) >= oneWeekAgo && u.role !== 'admin');
@@ -36,8 +47,8 @@ Deno.serve(async (req) => {
     const newMatches = allMatches.filter(m => m.created_date && new Date(m.created_date) >= oneWeekAgo);
     const newMessages = allMessages.filter(m => m.created_date && new Date(m.created_date) >= oneWeekAgo);
 
-    const likes = newSwipes.filter(s => s.action === 'like' || (s.data && s.data.action === 'like'));
-    const dislikes = newSwipes.filter(s => s.action === 'dislike' || (s.data && s.data.action === 'dislike'));
+    const likes = newSwipes.filter(s => s.action === 'like');
+    const dislikes = newSwipes.filter(s => s.action === 'dislike');
 
     const fromDate = oneWeekAgo.toLocaleDateString('he-IL');
     const toDate = new Date().toLocaleDateString('he-IL');
