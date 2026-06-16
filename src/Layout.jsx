@@ -412,11 +412,11 @@ export default function Layout({ children, currentPageName }) {
                                 // Entitled users go straight to Plus (and auto-activate);
                                 // everyone else hits the paywall.
                                 if (isPlusEntitled(currentUser)) {
-                                    markRuumrPlusActivationIntent({ source: "nav" });
-                                    navigate(createPageUrl("RuumrPlus"));
-                                } else {
-                                    navigate(createPageUrl("RuumrPlusPricing"));
-                                }
+                                            markRuumrPlusActivationIntent({ source: "nav" });
+                                            navigate(createPageUrl("RuumrPlus"));
+                                        } else {
+                                            navigate(createPageUrl("RuumrPlusComingSoon"));
+                                        }
                                 return;
                             }
 
