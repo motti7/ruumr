@@ -212,7 +212,30 @@ export default function DiscoverPage() {
       setSeenUserIds(allSwipedIds);
 
       setAllProfiles(availableProfiles);
-      setProfiles(availableProfiles);
+      // החלה מחדש של פילטרים פעילים
+      let displayProfiles = availableProfiles;
+      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all')) {
+        displayProfiles = availableProfiles.filter(p => {
+          if (filters.cities.length > 0) {
+            const profileCities = [];
+            if (Array.isArray(p.search_cities) && p.search_cities.length > 0) profileCities.push(...p.search_cities);
+            if (p.location && typeof p.location === 'string' && p.location.trim()) profileCities.push(p.location.trim());
+            if (!filters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)))) return false;
+          }
+          if (p.budget_max && p.budget_max > filters.maxBudget) return false;
+          if (p.age && (p.age < filters.minAge || p.age > filters.maxAge)) return false;
+          if (filters.kosher && filters.kosher !== 'all') {
+            if (filters.kosher === 'for_or_flow' && p.kosher_preference === 'against') return false;
+            if (filters.kosher === 'against' && p.kosher_preference !== 'against') return false;
+          }
+          if (filters.shabbat && filters.shabbat !== 'all') {
+            if (filters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
+            if (filters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
+          }
+          return true;
+        });
+      }
+      setProfiles(displayProfiles);
       try {
         window.localStorage.setItem('ruumr_discover_marker', `discover-ready:${availableProfiles.length}`);
       } catch {
@@ -383,13 +406,20 @@ export default function DiscoverPage() {
     }
   };
 
-  const applyFilters = (newFilters) => {
+  const applyFilters = (newFiltersArg) => {
+    const newFilters = newFiltersArg || filters;
     setFilters(newFilters);
-    // allProfiles כבר לא מכיל את מי שנראה — פשוט מפלטרים ממנו
     setAllProfiles(currentAll => {
       const filtered = currentAll.filter(p => {
         if (newFilters.cities.length > 0) {
-          const profileCities = p.search_cities || (p.location ? [p.location] : []);
+          // איחוד search_cities ו-location למערך אחד — לא דורסים אחד את השני
+          const profileCities = [];
+          if (Array.isArray(p.search_cities) && p.search_cities.length > 0) {
+            profileCities.push(...p.search_cities);
+          }
+          if (p.location && typeof p.location === 'string' && p.location.trim()) {
+            profileCities.push(p.location.trim());
+          }
           const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
           if (!match) return false;
         }
