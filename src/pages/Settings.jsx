@@ -81,7 +81,7 @@ export default function SettingsPage() {
       <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">הגדרות</h1>
+        <h1 className="text-3xl font-bold text-gray-800">⚙️ הגדרות</h1>
       </div>
 
       <div className="space-y-4">
