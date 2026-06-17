@@ -3,7 +3,7 @@ import { User } from "@/entities/User";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Shield, HelpCircle, Lock, Trash2, Heart, LogOut, Sparkles } from "lucide-react";
+import { ChevronLeft, Bell, Shield, HelpCircle, Lock, Trash2, Heart, LogOut } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import DeleteAccountModal from "../components/settings/DeleteAccountModal";
@@ -105,7 +105,6 @@ export default function SettingsPage() {
               <p className="font-bold text-lg mb-2 text-gray-800">חשבון</p>
               <div className="divide-y divide-gray-100">
                 <SettingsItem icon={<Lock className="w-5 h-5 text-gray-500"/>} title="ניהול הרשאות" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Permissions")} />
-                <SettingsItem icon={<Sparkles className="w-5 h-5 text-[--theme-orange]"/>} title="ניהול מנוי Plus" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("ManageSubscription")} />
               </div>
           </div>
 
