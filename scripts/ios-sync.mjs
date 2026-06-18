@@ -71,7 +71,7 @@ const iosCordovaOneSignalPluginDir = path.join(
 const oneSignalSimulatorGuardMarker =
   'Simulator intercepted notification permission request';
 const androidBundleId = 'com.ruumr.app.android';
-const iosBundleId = 'com.ruumr.app';
+const iosBundleId = 'com.base68c919adff6ac6fafb51bed6.app';
 
 const env = {
   ...process.env,
