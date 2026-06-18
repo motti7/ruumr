@@ -543,6 +543,7 @@ function createDemoState() {
     user1_name: currentUser.full_name,
     user2_name: maya.name,
     status: "active",
+    match_type: "mutual",
     created_date: daysAgoIso(1),
     updated_date: daysAgoIso(1),
   };
@@ -880,10 +881,29 @@ function createCollectionApi(state, collectionName) {
             user1_name: leftUser?.full_name || leftUser?.name || record.swiper_id,
             user2_name: rightUser?.full_name || rightUser?.name || record.swiped_id,
             status: "active",
+            match_type: "mutual",
             created_date: nowIso(),
             updated_date: nowIso(),
           };
-          state.collections.Match = upsertByPair(state.collections.Match || [], matchRecord, "user1_id", "user2_id");
+          const existingMatch = (state.collections.Match || []).find((item) => {
+            const sameDirection =
+              String(item.user1_id) === String(record.swiper_id) &&
+              String(item.user2_id) === String(record.swiped_id);
+            const reverseDirection =
+              String(item.user1_id) === String(record.swiped_id) &&
+              String(item.user2_id) === String(record.swiper_id);
+            return sameDirection || reverseDirection;
+          });
+          if (existingMatch) {
+            const idx = state.collections.Match.findIndex((item) => String(item.id) === String(existingMatch.id));
+            state.collections.Match[idx] = {
+              ...existingMatch,
+              match_type: "mutual",
+              updated_date: nowIso(),
+            };
+          } else {
+            state.collections.Match = upsertByPair(state.collections.Match || [], matchRecord, "user1_id", "user2_id");
+          }
         }
       }
 

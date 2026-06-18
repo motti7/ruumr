@@ -9,8 +9,10 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Register() {
+  const { loginWithProvider } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,6 +20,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [providerPending, setProviderPending] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,12 +69,18 @@ export default function Register() {
     }
   };
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
-  };
-
-  const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/");
+  // Routes through AuthContext: on web this is a full-page Base44 OAuth redirect;
+  // on native it opens the provider in the system browser and returns via deep link.
+  const handleProvider = async (provider) => {
+    setError("");
+    setProviderPending(provider);
+    try {
+      await loginWithProvider(provider);
+    } catch (err) {
+      setError(err?.message || "Sign-in failed. Please try again.");
+    } finally {
+      setProviderPending(null);
+    }
   };
 
   if (showOtp) {
@@ -145,18 +154,28 @@ export default function Register() {
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"
-        onClick={handleGoogle}
+        onClick={() => handleProvider("google")}
+        disabled={Boolean(providerPending)}
       >
-        <GoogleIcon className="w-5 h-5 mr-2" />
+        {providerPending === "google" ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : (
+          <GoogleIcon className="w-5 h-5 mr-2" />
+        )}
         Continue with Google
       </Button>
 
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleApple}
+        onClick={() => handleProvider("apple")}
+        disabled={Boolean(providerPending)}
       >
-        <Apple className="w-5 h-5 mr-2" />
+        {providerPending === "apple" ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : (
+          <Apple className="w-5 h-5 mr-2" />
+        )}
         Continue with Apple
       </Button>
 

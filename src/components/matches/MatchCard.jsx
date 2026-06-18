@@ -1,10 +1,10 @@
 // @ts-nocheck
 import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Puzzle, Trash2, X, Check } from "lucide-react";
+import { MapPin, Puzzle, Trash2, X, Check, Sparkles } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
-const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, onDelete, isOpened, unreadCount = 0 }) {
+const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
@@ -39,7 +39,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
       onClick={() => onClickProfile()}
       className="bg-white rounded-2xl shadow-md border border-gray-100 cursor-pointer overflow-hidden hover:shadow-xl"
       role="article"
-      aria-label={`התאמה: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
+      aria-label={`${matchType === "ruumr_plus" ? "התאמת Ruumr Plus" : "התאמה הדדית"}: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
     >
       <div className="flex items-center p-4" dir="rtl">
         <div className="relative ml-4">
@@ -66,6 +66,12 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
             <MapPin className="w-3 h-3 ml-1" aria-hidden="true" />
             <span id={`match-location-${matchId}`}>{match.location}</span>
           </div>
+          {matchType === "ruumr_plus" && (
+            <div className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-[--theme-orange] mb-2">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>התאמת Ruumr Plus</span>
+            </div>
+          )}
           <div className="flex items-center text-gray-500 text-sm">
             <span id={`match-budget-${matchId}`}>תקציב: ₪{match.budget_max?.toLocaleString()}</span>
           </div>

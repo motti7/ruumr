@@ -259,6 +259,7 @@ export default function MatchesPage() {
                 match={match.profile}
                 isOnline={match.isOnline}
                 matchId={match.id}
+                matchType={match.match_type || "mutual"}
                 unreadCount={match.unreadCount || 0}
                 onClickProfile={() => {
                   if (match.profile && match.profile.user_id) {

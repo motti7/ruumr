@@ -14,7 +14,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import NativeAuthLogin from '@/components/NativeAuthLogin';
+import AuthCallback from '@/pages/AuthCallback';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -97,8 +97,9 @@ const AuthenticatedApp = () => {
 
     if (authError.type === 'auth_required') {
       writeBootMarker('authenticated-app-auth-required');
-      if (isNativePlatform) return <NativeAuthLogin />;
-      // For web: fall through — ProtectedRoute handles the redirect
+      // Both web and native fall through to the shared Login/Register routes;
+      // ProtectedRoute redirects unauthenticated users to /login. Native social
+      // login goes through the system browser via AuthContext.loginWithProvider.
     }
   }
 
@@ -112,6 +113,7 @@ const AuthenticatedApp = () => {
         {/* Public auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 

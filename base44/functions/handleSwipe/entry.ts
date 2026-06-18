@@ -58,17 +58,25 @@ Deno.serve(async (req) => {
             const p2 = profile2List[0];
 
             let match_id;
+            let match_type = 'mutual';
             if (existingMatches.length === 0) {
                 const match = await base44.entities.Match.create({
                     user1_id: swiper_id,
                     user2_id: swiped_id,
                     user1_name: p1?.name || '',
                     user2_name: p2?.name || '',
-                    status: 'active'
+                    status: 'active',
+                    match_type: 'mutual'
                 });
                 match_id = match.id;
             } else {
-                match_id = existingMatches[0].id;
+                const existingMatch = existingMatches[0];
+                match_id = existingMatch.id;
+                if (existingMatch.match_type === 'ruumr_plus') {
+                    await base44.entities.Match.update(existingMatch.id, {
+                        match_type: 'mutual',
+                    });
+                }
             }
 
             // Get user emails for email notifications
@@ -133,7 +141,7 @@ Deno.serve(async (req) => {
                 }
             }
 
-            return Response.json({ match: true, match_id });
+            return Response.json({ match: true, match_id, match_type });
         } else {
             // No match, but check if we should send likes notification
             try {

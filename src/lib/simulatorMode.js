@@ -140,6 +140,14 @@ export function isRuumrNativeDemoSession() {
     return false;
   }
 
+  // Demo mode must be an EXPLICIT opt-in (set only on demo/dev builds). A real
+  // App Store / production native build must never treat "no token" as a demo
+  // session — otherwise a fresh install boots into the mock backend and the
+  // reviewer sees fake data. No token = logged out, not demo.
+  if (import.meta.env.VITE_RUUMR_NATIVE_DEMO !== 'true') {
+    return false;
+  }
+
   if (!Capacitor.isNativePlatform()) {
     return false;
   }

@@ -507,6 +507,155 @@
       );
   }
 
+  function statusError(message: string, status: number) {
+      const error = new Error(message);
+      (error as Error & { status?: number }).status = status;
+      return error;
+  }
+
+  function recommendationIncludesTarget(recommendationResult: unknown, targetUserId: unknown) {
+      const result = recommendationResult && typeof recommendationResult === 'object'
+          ? recommendationResult as Record<string, unknown>
+          : {};
+      const recommendations = Array.isArray(result.recommendations) ? result.recommendations : [];
+      const targetId = String(targetUserId ?? '').trim();
+
+      return recommendations.some((item) => {
+          const recommendation = item && typeof item === 'object'
+              ? item as Record<string, unknown>
+              : {};
+          const profile = recommendation.profile && typeof recommendation.profile === 'object'
+              ? recommendation.profile as Record<string, unknown>
+              : {};
+          return String(recommendation.user_id ?? profile.user_id ?? '').trim() === targetId;
+      });
+  }
+
+  function resolvePlusMatchType(hasReverseLike: boolean) {
+      return hasReverseLike ? 'mutual' : 'ruumr_plus';
+  }
+
+  async function createMatchFromRecommendation(
+      base44: ReturnType<typeof createClientFromRequest>,
+      currentUser: Record<string, unknown>,
+      req: Request,
+      body: Record<string, unknown>,
+  ) {
+      const swiperId = String(currentUser.id ?? '').trim();
+      const targetUserId = String(body.target_user_id ?? '').trim();
+      if (!targetUserId) {
+          throw statusError('target_user_id is required', 400);
+      }
+      if (targetUserId === swiperId) {
+          throw statusError('Cannot match with your own profile', 400);
+      }
+
+      // Verify the target against the same authoritative, cached five-profile
+      // recommendation set used by activation. This must happen before writing
+      // the swipe because swipes are part of the recommendation cache key.
+      const swipeExclusions = await loadSwipeExclusions(base44, swiperId);
+      const recommendationBody = {
+          ...normalizeRecommendationBody({
+              user_id: swiperId,
+              limit: 5,
+              refresh: false,
+              require_plus: true,
+          }),
+          exclude_user_ids: swipeExclusions.exclude_user_ids,
+          liked_user_ids: swipeExclusions.liked_user_ids,
+      };
+      const recommendationResult = await requestRecommendationsWithEntitlementRepair({
+          requestRecommendations: () => serviceRequest(req, '/recommendations', {
+              body: recommendationBody,
+              requireAuth: true,
+          }),
+          grantEntitlement: () => grantCurrentUserServiceEntitlement(req, currentUser),
+          currentUser,
+          recommendationUserId: swiperId,
+      });
+
+      if (!recommendationIncludesTarget(recommendationResult, targetUserId)) {
+          throw statusError('The selected profile is not in the current Ruumr Plus recommendations', 403);
+      }
+
+      const entities = base44.entities;
+      const sr = base44.asServiceRole.entities;
+      const [currentProfiles, targetProfiles, reverseLikes, directMatches, reverseMatches, existingSwipes] =
+          await Promise.all([
+              sr.Profile.filter({ user_id: swiperId }),
+              sr.Profile.filter({ user_id: targetUserId }),
+              entities.Swipe.filter({ swiper_id: targetUserId, swiped_id: swiperId, action: 'like' }),
+              entities.Match.filter({ user1_id: swiperId, user2_id: targetUserId }),
+              entities.Match.filter({ user1_id: targetUserId, user2_id: swiperId }),
+              entities.Swipe.filter({ swiper_id: swiperId, swiped_id: targetUserId }),
+          ]);
+
+      const currentProfile = currentProfiles?.[0];
+      const targetProfile = targetProfiles?.[0];
+      if (!targetProfile) {
+          throw statusError('The selected profile no longer exists', 404);
+      }
+
+      const existingSwipe = existingSwipes?.[0];
+      let createdSwipeId: string | null = null;
+      const previousSwipeAction = existingSwipe?.action;
+      try {
+          if (existingSwipe) {
+              if (existingSwipe.action !== 'like') {
+                  await entities.Swipe.update(existingSwipe.id, { action: 'like' });
+              }
+          } else {
+              const swipe = await entities.Swipe.create({
+                  swiper_id: swiperId,
+                  swiper_name: currentProfile?.name || currentUser.full_name || '',
+                  swiped_id: targetUserId,
+                  swiped_name: targetProfile.name || '',
+                  action: 'like',
+              });
+              createdSwipeId = String(swipe.id);
+          }
+
+          const existingMatch = [...(directMatches || []), ...(reverseMatches || [])][0];
+          const hasReverseLike = Array.isArray(reverseLikes) && reverseLikes.length > 0;
+          const matchType = resolvePlusMatchType(hasReverseLike);
+
+          if (existingMatch) {
+              if (hasReverseLike && existingMatch.match_type === 'ruumr_plus') {
+                  await entities.Match.update(existingMatch.id, {
+                      match_type: 'mutual',
+                  });
+              }
+              return {
+                  match: true,
+                  match_id: existingMatch.id,
+                  match_type: hasReverseLike ? 'mutual' : existingMatch.match_type || 'mutual',
+              };
+          }
+
+          const match = await entities.Match.create({
+              user1_id: swiperId,
+              user2_id: targetUserId,
+              user1_name: currentProfile?.name || currentUser.full_name || '',
+              user2_name: targetProfile.name || '',
+              status: 'active',
+              match_type: matchType,
+              ...(hasReverseLike ? {} : { plus_initiator_id: swiperId }),
+          });
+          return { match: true, match_id: match.id, match_type: matchType };
+      } catch (error) {
+          try {
+              if (createdSwipeId) {
+                  await entities.Swipe.delete(createdSwipeId);
+              } else if (existingSwipe && previousSwipeAction && previousSwipeAction !== 'like') {
+                  await entities.Swipe.update(existingSwipe.id, { action: previousSwipeAction });
+              }
+          } catch (rollbackError) {
+              console.error(`[${FUNCTION_NAME}] Failed to roll back Plus swipe`, rollbackError);
+          }
+          throw error;
+      }
+  }
+
   async function grantCurrentUserServiceEntitlement(
       req: Request,
       currentUser: Record<string, unknown>,
@@ -583,6 +732,8 @@
                   requireAuth: true,
               });
           }
+          case 'match.create_from_recommendation':
+              return createMatchFromRecommendation(base44, currentUser, req, body);
           case 'admin.stats':
               if (currentUser.role !== 'admin') {
                   throw new Error('Admin access required');

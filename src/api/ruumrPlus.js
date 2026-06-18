@@ -1,5 +1,5 @@
 import { base44 } from "@/api/base44Client";
-import { Profile } from "@/entities/Profile";
+import { Match, Profile, Swipe } from "@/entities/all";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { buildSimulatorRuumrPlusRecommendations } from "@/lib/ruumrPlusSimulator";
 import { normalizeCharterAnswers } from "@/lib/charterCompletion";
@@ -175,6 +175,74 @@ export async function activateRuumrPlusRecommendations(options = {}) {
     refresh: false,
     requirePlus: true,
   });
+}
+
+/**
+ * @param {{ targetUserId?: string }} [options]
+ */
+export async function createRuumrPlusMatch({ targetUserId } = {}) {
+  if (!targetUserId) {
+    throw new Error("targetUserId is required");
+  }
+
+  if (!isRuumrSimulatorMode()) {
+    return invokeBridge("match.create_from_recommendation", {
+      target_user_id: targetUserId,
+    });
+  }
+
+  const currentUser = await base44.auth.me();
+  const swiperId = currentUser.id;
+  const [currentProfiles, targetProfiles, reverseLikes, directMatches, reverseMatches, existingSwipes] =
+    await Promise.all([
+      Profile.filter({ user_id: swiperId }),
+      Profile.filter({ user_id: targetUserId }),
+      Swipe.filter({ swiper_id: targetUserId, swiped_id: swiperId, action: "like" }),
+      Match.filter({ user1_id: swiperId, user2_id: targetUserId }),
+      Match.filter({ user1_id: targetUserId, user2_id: swiperId }),
+      Swipe.filter({ swiper_id: swiperId, swiped_id: targetUserId }),
+    ]);
+
+  if (existingSwipes[0]) {
+    await Swipe.update(existingSwipes[0].id, { action: "like" });
+  } else {
+    await Swipe.create({
+      swiper_id: swiperId,
+      swiper_name: currentProfiles[0]?.name || currentUser.full_name,
+      swiped_id: targetUserId,
+      swiped_name: targetProfiles[0]?.name,
+      action: "like",
+    });
+  }
+
+  const existingMatch = [...directMatches, ...reverseMatches][0];
+  const isMutual = reverseLikes.length > 0;
+  const matchType = isMutual ? "mutual" : "ruumr_plus";
+
+  if (existingMatch) {
+    if (isMutual && existingMatch.match_type === "ruumr_plus") {
+      await Match.update(existingMatch.id, {
+        match_type: "mutual",
+      });
+    }
+    return {
+      match: true,
+      match_id: existingMatch.id,
+      match_type: isMutual ? "mutual" : existingMatch.match_type || "mutual",
+    };
+  }
+
+  const match = await Match.create({
+    user1_id: swiperId,
+    user2_id: targetUserId,
+    user1_name: currentProfiles[0]?.name || currentUser.full_name || "",
+    user2_name: targetProfiles[0]?.name || "",
+    status: "active",
+    match_type: matchType,
+    ...(isMutual ? {} : { plus_initiator_id: swiperId }),
+  });
+
+  return { match: true, match_id: match.id, match_type: matchType };
 }
 
 export async function fetchRuumrPlusStats(options = {}) {

@@ -55,4 +55,54 @@ describe('simulatorBackend', () => {
     expect(filteredMatches).toHaveLength(1);
     expect(profiles[0]?.name).toBe('מאיה לוי');
   });
+
+  it('upgrades a one-sided Plus match when the other user likes back', async () => {
+    const base44 = {
+      auth: {},
+      entities: {},
+      analytics: { cleanup: vi.fn(), track: vi.fn() },
+      appLogs: { logUserInApp: vi.fn() },
+    };
+    enableSimulatorBackend(base44);
+    const state = window.__ruumrSimulatorState;
+    const currentId = state.currentUser.id;
+    const seededOneSidedLike = state.collections.Swipe.find(
+      (swipe) => swipe.swiper_id === currentId && swipe.action === 'like' &&
+        !state.collections.Swipe.some(
+          (candidate) =>
+            candidate.swiper_id === swipe.swiped_id &&
+            candidate.swiped_id === currentId &&
+            candidate.action === 'like'
+        )
+    );
+    const targetId = seededOneSidedLike.swiped_id;
+
+    await base44.entities.Match.create({
+      user1_id: currentId,
+      user2_id: targetId,
+      status: 'active',
+      match_type: 'ruumr_plus',
+      plus_initiator_id: currentId,
+    });
+    await base44.entities.Swipe.create({
+      swiper_id: targetId,
+      swiped_id: currentId,
+      action: 'like',
+    });
+
+    const direct = await base44.entities.Match.filter({
+      user1_id: currentId,
+      user2_id: targetId,
+    });
+    const reverse = await base44.entities.Match.filter({
+      user1_id: targetId,
+      user2_id: currentId,
+    });
+
+    expect([...direct, ...reverse]).toHaveLength(1);
+    expect([...direct, ...reverse][0]).toMatchObject({
+      match_type: 'mutual',
+      plus_initiator_id: currentId,
+    });
+  });
 });

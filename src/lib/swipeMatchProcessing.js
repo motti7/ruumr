@@ -1,10 +1,15 @@
 import { base44 } from '@/api/base44Client';
 import { Swipe } from '@/entities/Swipe';
 import { isRuumrSimulatorMode } from '@/lib/simulatorMode';
+import { createRuumrPlusMatch } from '@/api/ruumrPlus';
 
-export async function processSwipeMatch({ swiperId, swipedId, action, origin }) {
+export async function processSwipeMatch({ swiperId, swipedId, action, origin, source = 'discover' }) {
   if (action !== 'like') {
     return { match: false };
+  }
+
+  if (source === 'ruumr_plus') {
+    return createRuumrPlusMatch({ targetUserId: swipedId });
   }
 
   if (isRuumrSimulatorMode()) {

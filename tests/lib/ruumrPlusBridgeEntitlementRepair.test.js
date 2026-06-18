@@ -18,6 +18,8 @@ const functionNames = new Set([
   "shouldRepairCurrentUserEntitlement",
   "requestRecommendationsWithEntitlementRepair",
   "hasEmptyProfileIndex",
+  "recommendationIncludesTarget",
+  "resolvePlusMatchType",
 ]);
 const declarations = sourceFile.statements.filter(
   (statement) =>
@@ -41,6 +43,8 @@ globalThis.entitlementRepair = {
   shouldRepairCurrentUserEntitlement,
   requestRecommendationsWithEntitlementRepair,
   hasEmptyProfileIndex,
+  recommendationIncludesTarget,
+  resolvePlusMatchType,
 };`,
   {
     compilerOptions: {
@@ -58,6 +62,8 @@ const {
   resolveRecommendationUserId,
   shouldRepairCurrentUserEntitlement,
   hasEmptyProfileIndex,
+  recommendationIncludesTarget,
+  resolvePlusMatchType,
 } = context.entitlementRepair;
 
 function statusError(status, message = "request failed") {
@@ -202,5 +208,25 @@ describe("Ruumr Plus bridge entitlement repair", () => {
       { candidate_count: 4 },
       { snapshot: { profile_count: 1 } }
     )).toBe(false);
+  });
+
+  it("recognizes recommendation targets in both supported service shapes", () => {
+    expect(recommendationIncludesTarget(
+      { recommendations: [{ user_id: "user-2" }] },
+      "user-2"
+    )).toBe(true);
+    expect(recommendationIncludesTarget(
+      { recommendations: [{ profile: { user_id: "user-3" } }] },
+      "user-3"
+    )).toBe(true);
+    expect(recommendationIncludesTarget(
+      { recommendations: [{ user_id: "user-4" }] },
+      "user-5"
+    )).toBe(false);
+  });
+
+  it("creates one-sided Plus matches unless a reverse like already exists", () => {
+    expect(resolvePlusMatchType(false)).toBe("ruumr_plus");
+    expect(resolvePlusMatchType(true)).toBe("mutual");
   });
 });

@@ -4,11 +4,32 @@ import { Capacitor } from '@capacitor/core';
 import { appParams } from '@/lib/app-params';
 import { captureAuthCallbackHints, persistAuthCallbackHints } from '@/lib/authCallbackHints';
 
-export const NATIVE_AUTH_CALLBACK_URL = 'com.ruumr.app.android://auth/callback';
+// Base44 only accepts a real HTTPS domain as the OAuth `from_url`; a custom URL
+// scheme is rejected at the callback step with "Domain is not valid". So
+// provider login always returns to this valid-domain web route. The /auth/callback
+// page then bridges the token into the native app via the platform custom scheme
+// below — a redirect Base44 never sees, so it never hits domain validation.
+export const WEB_AUTH_CALLBACK_PATH = '/auth/callback';
+export const WEB_AUTH_CALLBACK_URL = `https://app.ruumrapp.com${WEB_AUTH_CALLBACK_PATH}`;
 
-const nativeAuthScheme = 'com.ruumr.app.android:';
+const IOS_AUTH_SCHEME = 'com.ruumr.app';
+const ANDROID_AUTH_SCHEME = 'com.ruumr.app.android';
 const nativeAuthHost = 'auth';
 const nativeAuthPath = '/callback';
+
+// The custom scheme the native app registers and listens for. iOS and the
+// (future) native Android build use distinct schemes.
+export function getNativeAuthScheme() {
+  const platform = typeof Capacitor.getPlatform === 'function' ? Capacitor.getPlatform() : '';
+  return platform === 'ios' ? IOS_AUTH_SCHEME : ANDROID_AUTH_SCHEME;
+}
+
+export function getNativeAuthCallbackUrl(scheme = getNativeAuthScheme()) {
+  return `${scheme}://${nativeAuthHost}${nativeAuthPath}`;
+}
+
+// Back-compat alias resolving to the active platform's custom-scheme callback.
+export const NATIVE_AUTH_CALLBACK_URL = getNativeAuthCallbackUrl();
 
 export function isNativeAuthAvailable() {
   return typeof window !== 'undefined' && Capacitor.isNativePlatform();
@@ -17,8 +38,9 @@ export function isNativeAuthAvailable() {
 export function isNativeAuthCallbackUrl(rawUrl) {
   try {
     const url = new URL(rawUrl);
+    const scheme = `${getNativeAuthScheme()}:`;
     return (
-      url.protocol === nativeAuthScheme &&
+      url.protocol === scheme &&
       url.hostname === nativeAuthHost &&
       url.pathname === nativeAuthPath
     );
@@ -27,10 +49,11 @@ export function isNativeAuthCallbackUrl(rawUrl) {
   }
 }
 
-export function buildNativeProviderLoginUrl(provider, callbackUrl = NATIVE_AUTH_CALLBACK_URL) {
+export function buildNativeProviderLoginUrl(provider, callbackUrl = WEB_AUTH_CALLBACK_URL) {
   const providerPath = provider === 'google' ? '' : `/${provider}`;
-  // Always use the Base44 app base URL for the auth endpoint so OAuth redirects work correctly.
-  // The from_url must be the native deep-link so the OS reopens the app after login.
+  // Always use the Base44 app base URL for the auth endpoint so OAuth redirects
+  // work correctly. The from_url is the valid-domain web callback so Base44
+  // accepts it; the web page then bridges into the app via the custom scheme.
   const loginUrl = new URL(`/api/apps/auth${providerPath}/login`, appParams.appBaseUrl);
   loginUrl.searchParams.set('app_id', appParams.appId);
   loginUrl.searchParams.set('from_url', callbackUrl);

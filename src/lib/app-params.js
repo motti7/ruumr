@@ -19,11 +19,26 @@ const DEFAULT_BASE44_SERVER_URL = import.meta.env.VITE_BASE44_BACKEND_URL || 'ht
 // app is served from the custom domain. Using the live origin keeps auth
 // same-origin (and in-app) on both; an explicit env var still wins for local
 // dev, and the hardcoded value is only a non-browser/SSR fallback.
-const DEFAULT_BASE44_APP_BASE_URL =
-	import.meta.env.VITE_BASE44_APP_BASE_URL ||
-	(typeof window !== 'undefined' && window.location?.origin
-		? window.location.origin
-		: 'https://app.ruumrapp.com');
+//
+// In the Capacitor native shell the origin is `capacitor://localhost` (a
+// non-HTTP scheme). Building auth URLs against that yields an invalid endpoint
+// AND an invalid `from_url` (Base44 rejects non-HTTPS domains with "Domain is
+// not valid"). So whenever the live origin is not http(s), fall back to the
+// production custom domain, which Base44 accepts as a valid auth origin.
+const resolveAppBaseUrl = () => {
+	if (import.meta.env.VITE_BASE44_APP_BASE_URL) {
+		return import.meta.env.VITE_BASE44_APP_BASE_URL;
+	}
+	if (
+		typeof window !== 'undefined' &&
+		window.location?.origin &&
+		/^https?:$/.test(window.location.protocol || '')
+	) {
+		return window.location.origin;
+	}
+	return 'https://app.ruumrapp.com';
+};
+const DEFAULT_BASE44_APP_BASE_URL = resolveAppBaseUrl();
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();

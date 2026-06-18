@@ -16,6 +16,7 @@ import {
   openNativeProviderLogin,
   registerNativeAuthCallbackHandler,
 } from '@/lib/nativeAuth';
+import { isWebAuthSessionAvailable, signInWithWebAuthSession } from '@/lib/webAuthSession';
 
 const AuthContext = createContext(null);
 
@@ -226,15 +227,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Shared token handler for both native return paths: the ASWebAuthenticationSession
+  // result (iOS) and the appUrlOpen deep link (Android / fallback).
+  const handleNativeAuthToken = async (accessToken) => {
+    base44.auth.setToken(accessToken);
+    setAuthError(null);
+    setIsLoadingPublicSettings(false);
+    await checkUserAuth();
+  };
+
   useEffect(() => {
-    return registerNativeAuthCallbackHandler({
-      onToken: async (accessToken) => {
-        base44.auth.setToken(accessToken);
-        setAuthError(null);
-        setIsLoadingPublicSettings(false);
-        await checkUserAuth();
-      },
-    });
+    return registerNativeAuthCallbackHandler({ onToken: handleNativeAuthToken });
   }, []);
 
   const logout = async (shouldRedirect = true) => {
@@ -266,6 +269,12 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithProvider = async (provider) => {
     if (isNativeAuthAvailable()) {
+      // iOS: ASWebAuthenticationSession returns the callback (with token) directly,
+      // prompt-free. Android / iOS without the native plugin: system browser + deep link.
+      if (isWebAuthSessionAvailable()) {
+        await signInWithWebAuthSession(provider, { onToken: handleNativeAuthToken });
+        return;
+      }
       await openNativeProviderLogin(provider);
       return;
     }

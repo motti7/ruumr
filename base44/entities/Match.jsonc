@@ -25,6 +25,19 @@
         "blocked"
       ],
       "default": "active"
+    },
+    "match_type": {
+      "type": "string",
+      "enum": [
+        "mutual",
+        "ruumr_plus"
+      ],
+      "default": "mutual",
+      "description": "How the match was created. Legacy records without this field are treated as mutual."
+    },
+    "plus_initiator_id": {
+      "type": "string",
+      "description": "The user who originally created the match from a Ruumr Plus recommendation."
     }
   },
   "required": [

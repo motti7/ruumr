@@ -8,12 +8,15 @@ import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { Apple } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
+  const { loginWithProvider } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [providerPending, setProviderPending] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,12 +32,18 @@ export default function Login() {
     }
   };
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
-  };
-
-  const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/");
+  // Routes through AuthContext: on web this is a full-page Base44 OAuth redirect;
+  // on native it opens the provider in the system browser and returns via deep link.
+  const handleProvider = async (provider) => {
+    setError("");
+    setProviderPending(provider);
+    try {
+      await loginWithProvider(provider);
+    } catch (err) {
+      setError(err?.message || "Sign-in failed. Please try again.");
+    } finally {
+      setProviderPending(null);
+    }
   };
 
   return (
@@ -54,18 +63,28 @@ export default function Login() {
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"
-        onClick={handleGoogle}
+        onClick={() => handleProvider("google")}
+        disabled={Boolean(providerPending)}
       >
-        <GoogleIcon className="w-5 h-5 mr-2" />
+        {providerPending === "google" ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : (
+          <GoogleIcon className="w-5 h-5 mr-2" />
+        )}
         Continue with Google
       </Button>
 
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleApple}
+        onClick={() => handleProvider("apple")}
+        disabled={Boolean(providerPending)}
       >
-        <Apple className="w-5 h-5 mr-2" />
+        {providerPending === "apple" ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : (
+          <Apple className="w-5 h-5 mr-2" />
+        )}
         Continue with Apple
       </Button>
 

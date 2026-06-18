@@ -663,9 +663,8 @@ export default function RuumrPlusPage() {
     });
   }, [activatePlus, cooldownActive, isLocked, currentProfile, currentUser, isActivating]);
 
-  // Like/reject a Ruumr Plus recommendation from a card. Records the swipe (so
-  // it behaves like Discover and won't resurface), removes the card, and forms
-  // a match on a mutual like.
+  // A Plus like is verified and converted into a match by the bridge. A reject
+  // remains a regular swipe so the profile does not resurface.
   const handleCardSwipe = useCallback(async (swipedUserId, action) => {
     if (!currentUser || !currentProfile) {
       return;
@@ -696,19 +695,21 @@ export default function RuumrPlusPage() {
       action,
     });
     try {
-      await Swipe.create({
-        swiper_id: currentProfile.user_id,
-        swiper_name: currentProfile.name,
-        swiped_id: swipedUserId,
-        swiped_name: swipedProfile?.name,
-        action,
-      });
       if (action === "like") {
         await processSwipeMatch({
           swiperId: currentProfile.user_id,
           swipedId: swipedUserId,
           action,
           origin: window.location.origin,
+          source: "ruumr_plus",
+        });
+      } else {
+        await Swipe.create({
+          swiper_id: currentProfile.user_id,
+          swiper_name: currentProfile.name,
+          swiped_id: swipedUserId,
+          swiped_name: swipedProfile?.name,
+          action,
         });
       }
     } catch (error) {

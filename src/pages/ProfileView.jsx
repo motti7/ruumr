@@ -94,6 +94,10 @@ export default function ProfileViewPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
   const [plusMatch, setPlusMatch] = useState(null);
+  // Whether this profile should be liked through the Ruumr Plus match flow.
+  // Derived from the fromPlus=true param OR the cached Plus recommendations, so
+  // the AI-match flow survives even if the query param is dropped in navigation.
+  const [isPlusRec, setIsPlusRec] = useState(false);
   // Plus match metadata: prefer anything on the profile, else the score/insight
   // cached from the user's last Ruumr Plus activation for this profile.
   const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || plusMatch || null;
@@ -133,16 +137,25 @@ export default function ProfileViewPage() {
       setUserProfile(myProfilesResult[0] || null);
 
       // Pull the Plus match score/insight from the cached activation (the score
-      // lives on the recommendation, not the Profile entity).
+      // lives on the recommendation, not the Profile entity). Also record
+      // whether this profile is one of the user's Plus recommendations, so the
+      // AI-match flow does not depend solely on the fromPlus=true query param.
+      let inPlusCache = false;
       try {
         const activation = loadRuumrPlusActivation(user.id);
         const matchRec = activation?.recommendations?.find(
           (rec) => String(rec.user_id) === String(userId)
         );
+        inPlusCache = Boolean(matchRec);
         setPlusMatch(matchRec?.ruumrPlus || matchRec?.ruumr_plus || null);
       } catch (_) {
         setPlusMatch(null);
       }
+
+      // Carry the Plus context through reliably: the URL param is the primary
+      // signal, the cached recommendation is the fallback when it is missing.
+      const isPlusRecommendation = urlParams.get("fromPlus") === 'true' || inPlusCache;
+      setIsPlusRec(isPlusRecommendation);
 
       // Check for existing match (to allow writing a review)
       try {
@@ -154,7 +167,7 @@ export default function ProfileViewPage() {
       } catch(e) {}
 
       // Show like/reject actions when arriving from Likes or Ruumr Plus, and not yet swiped.
-      if (fromLikes === 'true' || urlParams.get("fromPlus") === 'true') {
+      if (fromLikes === 'true' || isPlusRecommendation) {
         const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
         setShowActions(existingSwipe.length === 0);
       }
@@ -173,16 +186,18 @@ export default function ProfileViewPage() {
 
     const swiperId = currentUser.id;
     const swipedId = profile.user_id;
+    const isPlusRecommendation = isPlusRec || new URLSearchParams(location.search).get("fromPlus") === "true";
 
     try {
-      // Create swipe record
-      await Swipe.create({
-        swiper_id: swiperId,
-        swiper_name: userProfile?.name || currentUser.full_name,
-        swiped_id: swipedId,
-        swiped_name: profile.name,
-        action
-      });
+      if (action !== "like" || !isPlusRecommendation) {
+        await Swipe.create({
+          swiper_id: swiperId,
+          swiper_name: userProfile?.name || currentUser.full_name,
+          swiped_id: swipedId,
+          swiped_name: profile.name,
+          action
+        });
+      }
 
       base44.analytics.track({ eventName: 'profile_swiped', properties: { direction: action === 'like' ? 'right' : 'left', target_profile_id: swipedId } });
       trackMixpanel('Swipe', { direction: action === 'like' ? 'right' : 'left', target_profile_id: swipedId });
@@ -196,6 +211,7 @@ export default function ProfileViewPage() {
             swipedId,
             action,
             origin: window.location.origin,
+            source: isPlusRecommendation ? "ruumr_plus" : "discover",
           });
 
           if (matchResult?.match) {
@@ -208,6 +224,9 @@ export default function ProfileViewPage() {
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);
+          if (isPlusRecommendation) {
+            throw matchError;
+          }
         }
       }
       
