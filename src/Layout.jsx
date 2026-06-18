@@ -15,6 +15,7 @@ import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
+import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 
 function FilterHintButton() {
   return (
@@ -115,6 +116,20 @@ export default function Layout({ children, currentPageName }) {
         const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
         const user = await UserEntity.me();
         setCurrentUser(user);
+
+        // Auto-grant Ruumr Plus for BGU students
+        try {
+          const email = String(user.email || '').trim().toLowerCase();
+          if (email.endsWith('@post.bgu.ac.il') && !user.is_ruumr_plus) {
+            ensureBguPlusEntitlement({}).then(() => {
+              // Refresh user data so is_ruumr_plus updates in context
+              UserEntity.me().then((fresh) => {
+                if (fresh) setCurrentUser(fresh);
+              }).catch(() => {});
+            }).catch(() => {});
+          }
+        } catch {}
+
         const browserNotificationsEnabled =
           notificationsSupported &&
           isBrowserWeb &&

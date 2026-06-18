@@ -18,6 +18,7 @@ import {
 } from "@/lib/ruumrPlusSimulator";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
+import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import {
   buildRuumrPlusActivationRecord,
@@ -320,14 +321,24 @@ export default function RuumrPlusPage() {
       const user = await User.me();
       if (cancelledRef.current) return;
 
+      // Auto-grant Ruumr Plus for BGU students before the entitlement gate
+      let entitledUser = user;
+      try {
+        const email = String(user.email || '').trim().toLowerCase();
+        if (email.endsWith('@post.bgu.ac.il') && !user.is_ruumr_plus) {
+          await ensureBguPlusEntitlement({});
+          entitledUser = await User.me();
+        }
+      } catch {}
+
       // Route-level entitlement gate: non-subscribers never see the Plus page,
       // covering deep links and nav-intent in addition to the button handler.
-      if (!isPlusEntitled(user)) {
+      if (!isPlusEntitled(entitledUser)) {
         navigate(createPageUrl("RuumrPlusPricing"), { replace: true });
         return;
       }
 
-      setCurrentUser(user);
+      setCurrentUser(entitledUser);
       setIsAdmin(user?.role === "admin");
 
       const [userProfilesResult, allProfilesResult, swipesResult] = await Promise.allSettled([
