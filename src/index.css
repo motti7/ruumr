@@ -205,9 +205,12 @@ input[type="radio"] {
 }
 
 /* ── Global 44px minimum tap target ────────────────────────────────────── */
-/* Applies a pseudo-element overlay so we don't break visual layout */
+/* A centered pseudo-element guarantees every button has at least a 44x44px
+   clickable area, even when the icon/label inside is small. pointer-events is
+   AUTO so the extended area is genuinely tappable (clicks on the ::after are
+   treated as clicks on the host button). Inline text links (<a>) are excluded
+   on purpose so the 44px overlay never covers surrounding text. */
 button,
-a,
 [role="button"],
 [role="option"],
 [role="menuitem"],
@@ -216,7 +219,6 @@ a,
 }
 
 button::after,
-a::after,
 [role="button"]::after,
 [role="option"]::after,
 [role="menuitem"]::after,
@@ -227,7 +229,13 @@ a::after,
   min-width: 44px;
   min-height: 44px;
   transform: translate(-50%, -50%);
-  pointer-events: none; /* visual only, real element is still clickable */
+  pointer-events: auto;
+}
+
+/* Opt-out: elements that must NOT have an expanded invisible hit area
+   (e.g. tightly-packed controls or full-area drag surfaces). */
+.no-tap-expand::after {
+  display: none !important;
 }
 
 /* ── Global Focus Styles for WCAG 2.1 Accessibility ───────────────────────── */
