@@ -103,6 +103,15 @@ async function initializeNativeOneSignal() {
 
         if (window.__ruumrOneSignalInitialized) return OneSignal;
 
+        // Guard: calling OneSignal.initialize() with a missing/undefined app id
+        // crashes natively ([NSNull UTF8String] -> unrecognized selector -> SIGABRT)
+        // on a real device. VITE_ONESIGNAL_APP_ID is injected at build time; if it
+        // isn't set, skip native init (push disabled) rather than crash on launch.
+        if (!ONESIGNAL_APP_ID) {
+            console.warn('[OneSignal] VITE_ONESIGNAL_APP_ID is not set — skipping native init (push notifications disabled).');
+            return null;
+        }
+
         console.info('[OneSignal] Initializing native with App ID:', ONESIGNAL_APP_ID);
 
         try {
