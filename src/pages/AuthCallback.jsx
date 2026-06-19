@@ -30,7 +30,21 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('access_token');
+    // app-params.js (loaded via base44Client) reads `access_token` with
+    // removeFromUrl=true and stashes it in localStorage BEFORE this effect runs,
+    // so the query string is usually already cleared by now. Recover the token
+    // from storage so the native bridge still receives it.
+    let token = params.get('access_token');
+    if (!token) {
+      try {
+        token =
+          window.localStorage.getItem('base44_access_token') ||
+          window.localStorage.getItem('token') ||
+          '';
+      } catch (_) {
+        // localStorage unavailable; token stays empty
+      }
+    }
 
     if (!token) {
       window.location.replace('/login');
@@ -39,6 +53,10 @@ export default function AuthCallback() {
 
     const nativeScheme = nativeSchemeFromUserAgent();
     if (nativeScheme) {
+      // Ensure the token is on the bridge URL even if app-params already stripped it.
+      if (!params.get('access_token')) {
+        params.set('access_token', token);
+      }
       const bridgeUrl = `${nativeScheme}://auth/callback?${params.toString()}`;
       window.location.replace(bridgeUrl);
       // If the app doesn't intercept the scheme (not installed / handoff blocked),
