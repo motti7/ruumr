@@ -41,6 +41,8 @@
 	<string>Ruumr uses the camera so you can take photos and videos for your profile and home listing.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Ruumr uses the microphone when you record a video for your profile or home listing.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ruumr can use your location to show roommates and listings near you.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Ruumr accesses your photo library so you can add photos and videos to your profile and home listing.</string>
 	<key>UIBackgroundModes</key>
