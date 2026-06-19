@@ -46,6 +46,28 @@ describe('AuthCallback bridge', () => {
     expect(mockSetToken).not.toHaveBeenCalled();
   });
 
+  it('bridges the token to the iOS custom scheme from the explicit native platform marker', () => {
+    setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/130');
+    const replace = setLocation('?access_token=abc123&native_platform=ios');
+
+    render(<AuthCallback />);
+
+    expect(replace).toHaveBeenCalledTimes(1);
+    expect(replace.mock.calls[0][0]).toContain('com.ruumr.app://auth/callback?');
+    expect(mockSetToken).not.toHaveBeenCalled();
+  });
+
+  it('bridges iPadOS desktop-style Safari user agents to the iOS custom scheme', () => {
+    setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1');
+    const replace = setLocation('?access_token=abc123&provider=apple');
+
+    render(<AuthCallback />);
+
+    expect(replace).toHaveBeenCalledTimes(1);
+    expect(replace.mock.calls[0][0]).toContain('com.ruumr.app://auth/callback?');
+    expect(mockSetToken).not.toHaveBeenCalled();
+  });
+
   it('completes the session in-page on web (no native user agent)', () => {
     setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/130');
     const replace = setLocation('?access_token=webtoken');

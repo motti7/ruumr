@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,16 @@ import { Apple } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
-  const { loginWithProvider } = useAuth();
+  const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [providerPending, setProviderPending] = useState(null);
+
+  if (!isLoadingAuth && !isLoadingPublicSettings && isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

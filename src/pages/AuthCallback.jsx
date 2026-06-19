@@ -4,6 +4,7 @@ import { captureAuthCallbackHints, persistAuthCallbackHints } from '@/lib/authCa
 
 const IOS_AUTH_SCHEME = 'com.ruumr.app';
 const ANDROID_AUTH_SCHEME = 'com.ruumr.app.android';
+const NATIVE_PLATFORM_PARAM = 'native_platform';
 
 // This page is the OAuth landing target (`from_url=https://app.ruumrapp.com/auth/callback`).
 // During NATIVE login it loads inside the system browser (SFSafariViewController),
@@ -11,12 +12,30 @@ const ANDROID_AUTH_SCHEME = 'com.ruumr.app.android';
 // cannot be used. We detect the native target by user agent and bridge the token
 // into the app via its registered custom scheme (a redirect Base44 never sees, so
 // it bypasses the "Domain is not valid" check). On web/PWA we complete in-page.
+function nativeSchemeFromSearchParams(params) {
+  const nativePlatform = params.get(NATIVE_PLATFORM_PARAM);
+  if (nativePlatform === 'ios') {
+    return IOS_AUTH_SCHEME;
+  }
+  if (nativePlatform === 'android') {
+    return ANDROID_AUTH_SCHEME;
+  }
+  return null;
+}
+
 function nativeSchemeFromUserAgent() {
   if (typeof navigator === 'undefined') {
     return null;
   }
   const ua = navigator.userAgent || '';
-  if (/iPad|iPhone|iPod/.test(ua)) {
+  const platform = navigator.platform || '';
+  const maxTouchPoints = Number(navigator.maxTouchPoints || 0);
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua);
+  const isIPadDesktopUA =
+    (/Macintosh/.test(ua) && /Mobile/.test(ua)) ||
+    (platform === 'MacIntel' && maxTouchPoints > 1);
+
+  if (isIOSDevice || isIPadDesktopUA) {
     return IOS_AUTH_SCHEME;
   }
   if (/Android/.test(ua)) {
@@ -51,7 +70,7 @@ export default function AuthCallback() {
       return;
     }
 
-    const nativeScheme = nativeSchemeFromUserAgent();
+    const nativeScheme = nativeSchemeFromSearchParams(params) || nativeSchemeFromUserAgent();
     if (nativeScheme) {
       // Ensure the token is on the bridge URL even if app-params already stripped it.
       if (!params.get('access_token')) {

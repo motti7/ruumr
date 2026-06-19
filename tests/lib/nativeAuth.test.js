@@ -47,19 +47,25 @@ describe('native auth helpers', () => {
     // from_url. The native flow must always use the valid https callback domain.
     expect(nativeAuth.WEB_AUTH_CALLBACK_URL).toBe('https://app.ruumrapp.com/auth/callback');
     expect(nativeAuth.WEB_AUTH_CALLBACK_URL.startsWith('https://')).toBe(true);
+    expect(nativeAuth.getWebAuthCallbackUrl()).toBe(
+      'https://app.ruumrapp.com/auth/callback?native_platform=ios'
+    );
   });
 
-  it('opens Google OAuth with the valid-domain from_url', async () => {
+  it('opens Google OAuth with the valid-domain native from_url', async () => {
     await nativeAuth.openNativeProviderLogin('google');
 
     expect(mockBrowserOpen).toHaveBeenCalledTimes(1);
     const [{ url }] = mockBrowserOpen.mock.calls[0];
     const loginUrl = new URL(url);
+    const fromUrl = new URL(loginUrl.searchParams.get('from_url'));
 
     expect(loginUrl.origin).toBe('https://app.ruumrapp.com');
     expect(loginUrl.pathname).toBe('/api/apps/auth/login');
     expect(loginUrl.searchParams.get('app_id')).toBe('68c919adff6ac6fafb51bed6');
-    expect(loginUrl.searchParams.get('from_url')).toBe(nativeAuth.WEB_AUTH_CALLBACK_URL);
+    expect(fromUrl.origin).toBe('https://app.ruumrapp.com');
+    expect(fromUrl.pathname).toBe('/auth/callback');
+    expect(fromUrl.searchParams.get('native_platform')).toBe('ios');
   });
 
   it('opens Apple OAuth with the valid-domain from_url', async () => {
@@ -67,9 +73,12 @@ describe('native auth helpers', () => {
 
     const [{ url }] = mockBrowserOpen.mock.calls[0];
     const loginUrl = new URL(url);
+    const fromUrl = new URL(loginUrl.searchParams.get('from_url'));
 
     expect(loginUrl.pathname).toBe('/api/apps/auth/apple/login');
-    expect(loginUrl.searchParams.get('from_url')).toBe(nativeAuth.WEB_AUTH_CALLBACK_URL);
+    expect(fromUrl.origin).toBe('https://app.ruumrapp.com');
+    expect(fromUrl.pathname).toBe('/auth/callback');
+    expect(fromUrl.searchParams.get('native_platform')).toBe('ios');
   });
 
   it('selects the iOS custom scheme on iOS', () => {
@@ -82,6 +91,9 @@ describe('native auth helpers', () => {
     await loadModule();
     expect(nativeAuth.getNativeAuthScheme()).toBe('com.ruumr.app.android');
     expect(nativeAuth.getNativeAuthCallbackUrl()).toBe('com.ruumr.app.android://auth/callback');
+    expect(nativeAuth.getWebAuthCallbackUrl()).toBe(
+      'https://app.ruumrapp.com/auth/callback?native_platform=android'
+    );
   });
 
   it('handles the iOS custom-scheme callback token and persists auth hints', async () => {

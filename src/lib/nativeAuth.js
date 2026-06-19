@@ -11,6 +11,7 @@ import { captureAuthCallbackHints, persistAuthCallbackHints } from '@/lib/authCa
 // below — a redirect Base44 never sees, so it never hits domain validation.
 export const WEB_AUTH_CALLBACK_PATH = '/auth/callback';
 export const WEB_AUTH_CALLBACK_URL = `https://app.ruumrapp.com${WEB_AUTH_CALLBACK_PATH}`;
+const NATIVE_PLATFORM_PARAM = 'native_platform';
 
 const IOS_AUTH_SCHEME = 'com.ruumr.app';
 const ANDROID_AUTH_SCHEME = 'com.ruumr.app.android';
@@ -24,6 +25,14 @@ export function getNativeAuthScheme() {
   return platform === 'ios' ? IOS_AUTH_SCHEME : ANDROID_AUTH_SCHEME;
 }
 
+export function getNativeAuthPlatform() {
+  const platform = typeof Capacitor.getPlatform === 'function' ? Capacitor.getPlatform() : '';
+  if (platform === 'ios' || platform === 'android') {
+    return platform;
+  }
+  return null;
+}
+
 export function getNativeAuthCallbackUrl(scheme = getNativeAuthScheme()) {
   return `${scheme}://${nativeAuthHost}${nativeAuthPath}`;
 }
@@ -33,6 +42,14 @@ export const NATIVE_AUTH_CALLBACK_URL = getNativeAuthCallbackUrl();
 
 export function isNativeAuthAvailable() {
   return typeof window !== 'undefined' && Capacitor.isNativePlatform();
+}
+
+export function getWebAuthCallbackUrl(platform = getNativeAuthPlatform()) {
+  const callbackUrl = new URL(WEB_AUTH_CALLBACK_URL);
+  if (platform) {
+    callbackUrl.searchParams.set(NATIVE_PLATFORM_PARAM, platform);
+  }
+  return callbackUrl.toString();
 }
 
 export function isNativeAuthCallbackUrl(rawUrl) {
@@ -49,7 +66,7 @@ export function isNativeAuthCallbackUrl(rawUrl) {
   }
 }
 
-export function buildNativeProviderLoginUrl(provider, callbackUrl = WEB_AUTH_CALLBACK_URL) {
+export function buildNativeProviderLoginUrl(provider, callbackUrl = getWebAuthCallbackUrl()) {
   const providerPath = provider === 'google' ? '' : `/${provider}`;
   // Always use the Base44 app base URL for the auth endpoint so OAuth redirects
   // work correctly. The from_url is the valid-domain web callback so Base44

@@ -36,6 +36,7 @@ const missingAuthContext = {
 };
 
 const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+const authRoutePaths = new Set(['/login', '/register', '/auth/callback']);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -234,6 +235,9 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null);
     setIsLoadingPublicSettings(false);
     await checkUserAuth();
+    if (authRoutePaths.has(window.location.pathname)) {
+      window.location.replace('/');
+    }
   };
 
   useEffect(() => {
@@ -272,7 +276,10 @@ export const AuthProvider = ({ children }) => {
       // iOS: ASWebAuthenticationSession returns the callback (with token) directly,
       // prompt-free. Android / iOS without the native plugin: system browser + deep link.
       if (isWebAuthSessionAvailable()) {
-        await signInWithWebAuthSession(provider, { onToken: handleNativeAuthToken });
+        const result = await signInWithWebAuthSession(provider, { onToken: handleNativeAuthToken });
+        if (result?.handled && authRoutePaths.has(window.location.pathname)) {
+          window.location.replace('/');
+        }
         return;
       }
       await openNativeProviderLogin(provider);
