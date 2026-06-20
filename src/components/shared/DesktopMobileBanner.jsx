@@ -30,10 +30,10 @@ export default function DesktopMobileBanner() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="bg-gradient-to-r from-[--theme-orange] to-[--theme-orange-dark]"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className="overflow-hidden bg-gradient-to-r from-[--theme-orange] to-[--theme-orange-dark]"
         >
           <div className="max-w-md mx-auto flex items-center gap-3 px-4 py-3">
             <Smartphone className="w-5 h-5 text-white flex-shrink-0" />
