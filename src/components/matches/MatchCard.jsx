@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Puzzle, Trash2, X, Check, Sparkles } from "lucide-react";
+import { MapPin, Puzzle, Trash2, X, Check, Sparkles, MessageCircle } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
@@ -56,11 +56,6 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-bold text-gray-900 text-lg" id={`match-name-${matchId}`}>{match.name}</h3>
-            {unreadCount > 0 && (
-              <span className="min-w-[20px] h-5 bg-yellow-400 text-white text-[11px] font-bold flex items-center justify-center rounded-full px-1 shadow-sm">
-                {unreadCount}
-              </span>
-            )}
           </div>
           <div className="flex items-center text-gray-500 text-sm mb-2">
             <MapPin className="w-3 h-3 ml-1" aria-hidden="true" />
@@ -117,21 +112,36 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
               </motion.button>
             )}
           </AnimatePresence>
-          <div className="relative">
-            <motion.div
-              whileTap={{ scale: 0.85 }}
-              onClick={handleCharterClick}
-              className="text-white bg-[--theme-orange] dark:bg-orange-500 p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center"
-              role="button"
-              tabIndex={0}
-              aria-label="compatibility checker"
-            >
-              <Puzzle className="w-5 h-5" />
-            </motion.div>
-            {!isOpened && (
+
+          {/* כפתור צ'אט ישיר */}
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={(e) => { e.stopPropagation(); onClickChat(); }}
+            className="relative text-white bg-[--theme-orange] p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="שלח הודעה"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-yellow-400 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white px-0.5">
+                {unreadCount}
+              </span>
+            )}
+            {!isOpened && unreadCount === 0 && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
             )}
-          </div>
+          </motion.button>
+
+          {/* כפתור פאזל - תאימות */}
+          <motion.div
+            whileTap={{ scale: 0.85 }}
+            onClick={handleCharterClick}
+            className="text-[--theme-orange] bg-orange-50 border border-orange-200 p-3 rounded-full hover:bg-orange-100 transition-all shadow-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
+            role="button"
+            tabIndex={0}
+            aria-label="בדיקת תאימות"
+          >
+            <Puzzle className="w-5 h-5" />
+          </motion.div>
         </div>
       </div>
     </motion.div>
