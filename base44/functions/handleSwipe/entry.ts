@@ -152,8 +152,8 @@ Deno.serve(async (req) => {
                 
                 const totalLikes = allLikesForSwipedUser.length;
                 
-                const allUsers = await sr.User.list();
-                const swipedUser = allUsers.find(u => u.id === swiped_id);
+                const swipedUsers = await sr.User.filter({ id: swiped_id });
+                const swipedUser = swipedUsers[0];
                 
                 if (swipedUser) {
                     const lastNotificationCount = swipedUser.last_likes_notification_count || 0;
