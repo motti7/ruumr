@@ -4,7 +4,6 @@ import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
-import DesktopMobileBanner from "./components/shared/DesktopMobileBanner";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -399,7 +398,6 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <DesktopMobileBanner />
             <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
                 {children}
             </main>
