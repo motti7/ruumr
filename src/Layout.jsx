@@ -427,13 +427,13 @@ export default function Layout({ children, currentPageName }) {
                                 // Track Plus nav button click
                                 trackMixpanel('Plus Nav Button Clicked', { source: currentPageName });
                                 // Entitled users go straight to Plus (and auto-activate);
-                                // everyone else hits the paywall.
+                                // everyone else sees the coming-soon screen.
                                 if (isPlusEntitled(currentUser)) {
-                                            markRuumrPlusActivationIntent({ source: "nav" });
-                                            navigate(createPageUrl("RuumrPlus"));
-                                        } else {
-                                            navigate(createPageUrl("RuumrPlusComingSoon"));
-                                        }
+                                    markRuumrPlusActivationIntent({ source: "nav" });
+                                    navigate(createPageUrl("RuumrPlus"));
+                                } else {
+                                    navigate(createPageUrl("RuumrPlusComingSoon"));
+                                }
                                 return;
                             }
 

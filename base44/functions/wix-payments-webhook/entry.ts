@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
 
             await base44.asServiceRole.entities.User.update(targetUser.id, {
                 is_ruumr_plus: true,
+                ruumr_plus_source: "wix_paid",
                 ruumr_plus_subscription_id: subscriptionId,
             });
 
@@ -108,11 +109,17 @@ Deno.serve(async (req) => {
             const targetUser = allUsers.find(u => u.email === record.user_email);
 
             if (targetUser) {
-                await base44.asServiceRole.entities.User.update(targetUser.id, {
-                    is_ruumr_plus: false,
-                    ruumr_plus_subscription_id: null,
-                });
-                console.log(`🔒 Ruumr Plus revoked from user ${targetUser.id}`);
+                const source = String(targetUser.ruumr_plus_source || '').trim();
+                if (!source || source === "wix_paid") {
+                    await base44.asServiceRole.entities.User.update(targetUser.id, {
+                        is_ruumr_plus: false,
+                        ruumr_plus_source: "none",
+                        ruumr_plus_subscription_id: null,
+                    });
+                    console.log(`🔒 Ruumr Plus revoked from user ${targetUser.id}`);
+                } else {
+                    console.log(`ℹ️ Skipped Wix revocation for user ${targetUser.id}; current source is ${source}`);
+                }
             }
         }
 

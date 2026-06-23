@@ -36,9 +36,13 @@ Deno.serve(async (req) => {
                 if (email.endsWith(BGU_EMAIL_DOMAIN)) {
                     bguStudents++;
                     const currentFlag = Boolean(u.is_ruumr_plus);
-                    if (currentFlag !== isGrant) {
+                    const currentSource = String(u.ruumr_plus_source || '').trim();
+                    if (currentFlag !== isGrant || (isGrant && currentSource !== 'bgu_free')) {
                         try {
-                            await sr.User.update(u.id, { is_ruumr_plus: isGrant });
+                            await sr.User.update(u.id, {
+                                is_ruumr_plus: isGrant,
+                                ruumr_plus_source: isGrant ? 'bgu_free' : 'none',
+                            });
                             updated++;
                         } catch (err) {
                             console.error(`Failed to update user ${u.id}:`, err.message);

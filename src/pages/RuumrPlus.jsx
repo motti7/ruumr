@@ -18,6 +18,7 @@ import {
 } from "@/lib/ruumrPlusSimulator";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
+import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import {
@@ -334,7 +335,7 @@ export default function RuumrPlusPage() {
       // Route-level entitlement gate: non-subscribers never see the Plus page,
       // covering deep links and nav-intent in addition to the button handler.
       if (!isPlusEntitled(entitledUser)) {
-        navigate(createPageUrl("RuumrPlusPricing"), { replace: true });
+        navigate(createPageUrl(isNativeIOSApp() ? "RuumrPlusComingSoon" : "RuumrPlusPricing"), { replace: true });
         return;
       }
 

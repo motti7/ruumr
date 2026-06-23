@@ -271,6 +271,7 @@ export async function grantRuumrPlusEntitlement(options = {}) {
     grantedBy = null,
     expiresAt = null,
     notes = null,
+    entitlementSource = "admin_grant",
   } = options;
 
   return invokeBridge("admin.entitlements.grant", {
@@ -279,6 +280,7 @@ export async function grantRuumrPlusEntitlement(options = {}) {
     granted_by: grantedBy,
     expires_at: expiresAt,
     notes,
+    entitlement_source: entitlementSource,
   });
 }
 

@@ -215,27 +215,38 @@
           skip += pageSize;
       }
 
-      const list = collected.map((user: Record<string, unknown>) => ({
-          id: user.id,
-          email: user.email,
-          full_name: user.full_name,
-          is_ruumr_plus: Boolean(user.is_ruumr_plus),
-          disabled: Boolean(user.disabled),
-      }));
+	      const list = collected.map((user: Record<string, unknown>) => ({
+	          id: user.id,
+	          email: user.email,
+	          full_name: user.full_name,
+	          is_ruumr_plus: Boolean(user.is_ruumr_plus),
+	          ruumr_plus_source: user.ruumr_plus_source ?? null,
+	          ruumr_plus_subscription_id: user.ruumr_plus_subscription_id ?? null,
+	          disabled: Boolean(user.disabled),
+	      }));
       return { users: list, total: list.length };
   }
 
   
   // Sets the Base44 User.is_ruumr_plus flag via service role (the client cannot
   // reliably update other users). Throws on failure so the caller can surface it.
-  async function setUserPlusFlag(base44: ReturnType<typeof createClientFromRequest>, userId: unknown, value: boolean) {
-      const id = String(userId ?? '').trim();
-      if (!id) {
-          throw new Error('user_id is required to set Ruumr Plus access');
-      }
-      await base44.asServiceRole.entities.User.update(id, { is_ruumr_plus: value });
-      return true;
-  }
+	  async function setUserPlusFlag(
+	      base44: ReturnType<typeof createClientFromRequest>,
+	      userId: unknown,
+	      value: boolean,
+	      source: string = 'admin_grant'
+	  ) {
+	      const id = String(userId ?? '').trim();
+	      if (!id) {
+	          throw new Error('user_id is required to set Ruumr Plus access');
+	      }
+	      await base44.asServiceRole.entities.User.update(id, {
+	          is_ruumr_plus: value,
+	          ruumr_plus_source: value ? source : 'none',
+	          ...(value ? {} : { ruumr_plus_subscription_id: null }),
+	      });
+	      return true;
+	  }
 
   async function loadCurrentUser(base44: ReturnType<typeof createClientFromRequest>) {
       const currentUser = await base44.auth.me();
@@ -771,8 +782,9 @@
                   }),
                   requireAuth: true,
               });
-              await setUserPlusFlag(base44, body.user_id, true);
-              return { entitlement: grantResult, is_ruumr_plus: true };
+	              const entitlementSource = String(body.entitlement_source || 'admin_grant');
+	              await setUserPlusFlag(base44, body.user_id, true, entitlementSource);
+	              return { entitlement: grantResult, is_ruumr_plus: true, ruumr_plus_source: entitlementSource };
           }
           case 'admin.entitlements.revoke': {
               if (currentUser.role !== 'admin') {
@@ -780,7 +792,7 @@
               }
               // Clear the Base44 flag first so the client paywall re-engages even
               // if the service revoke is slow, then revoke the service entitlement.
-              await setUserPlusFlag(base44, body.user_id, false);
+	              await setUserPlusFlag(base44, body.user_id, false);
               const revokeResult = await serviceRequest(req, '/admin/entitlements/revoke', {
                   body: cleanObject({
                       user_id: body.user_id,
@@ -791,7 +803,7 @@
                   }),
                   requireAuth: true,
               });
-              return { entitlement: revokeResult, is_ruumr_plus: false };
+	              return { entitlement: revokeResult, is_ruumr_plus: false, ruumr_plus_source: 'none' };
           }
           case 'admin.reindex':
               if (currentUser.role !== 'admin') {

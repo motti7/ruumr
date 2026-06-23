@@ -21,8 +21,14 @@ Deno.serve(async (req) => {
             });
         }
 
-        // Already has Plus – nothing to do
+        // Already has Plus – mark BGU/free source when possible so native iOS can
+        // distinguish free access from web/Wix-paid access.
         if (user.is_ruumr_plus) {
+            if (user.ruumr_plus_source !== 'bgu_free') {
+                await base44.asServiceRole.entities.User.update(user.id, {
+                    ruumr_plus_source: 'bgu_free',
+                });
+            }
             return Response.json({ 
                 ok: true, 
                 is_bgu_student: true,
@@ -32,7 +38,10 @@ Deno.serve(async (req) => {
         }
 
         // Grant Ruumr Plus via service role
-        await base44.asServiceRole.entities.User.update(user.id, { is_ruumr_plus: true });
+        await base44.asServiceRole.entities.User.update(user.id, {
+            is_ruumr_plus: true,
+            ruumr_plus_source: 'bgu_free',
+        });
 
         console.log(`✅ Granted free Ruumr Plus to BGU student: ${email} (${user.id})`);
 

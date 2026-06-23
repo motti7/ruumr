@@ -8,7 +8,7 @@ import { Capacitor } from '@capacitor/core';
 
 import NavigationTracker from '@/lib/NavigationTracker'
 import OneSignalSetup from '@/components/shared/OneSignalSetup'
-import { detectNativeIOSSimulator } from '@/lib/nativeEnvironment';
+import { detectNativeIOSSimulator, isNativeIOSApp } from '@/lib/nativeEnvironment';
 import { base44 } from '@/api/base44Client';
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
@@ -42,6 +42,23 @@ const PageLoader = () => (
       <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">טוען...</span>
     </div>
   </div>
+);
+
+const NATIVE_IOS_PLUS_DISABLED_ROUTES = new Set([
+  'RuumrPlusPricing',
+  'RuumrPlusCheckout',
+  'RuumrPlusThankYou',
+  'ManageSubscription',
+]);
+
+const NativeIOSPlusUnavailableRedirect = ({ children }) => (
+  isNativeIOSApp() ? <Navigate to="/RuumrPlusComingSoon" replace /> : children
+);
+
+const wrapNativeIOSPlusGuard = (currentPageName, element) => (
+  NATIVE_IOS_PLUS_DISABLED_ROUTES.has(currentPageName)
+    ? <NativeIOSPlusUnavailableRedirect>{element}</NativeIOSPlusUnavailableRedirect>
+    : element
 );
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -130,13 +147,13 @@ const AuthenticatedApp = () => {
             <Route
               key={path}
               path={`/${path}`}
-              element={
+              element={wrapNativeIOSPlusGuard(path,
                 <PageTransition>
                   <LayoutWrapper currentPageName={path}>
                     <Page />
                   </LayoutWrapper>
                 </PageTransition>
-              }
+              )}
             />
           ))}
           <Route path="/GroupTracker" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupTracker"><GroupTracker /></LayoutWrapper></PageTransition></Suspense>} />
@@ -144,8 +161,8 @@ const AuthenticatedApp = () => {
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
-          <Route path="/RuumrPlusThankYou" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>} />
-          <Route path="/ManageSubscription" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPlusGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
+          <Route path="/ManageSubscription" element={wrapNativeIOSPlusGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

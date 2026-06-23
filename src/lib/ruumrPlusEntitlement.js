@@ -1,4 +1,23 @@
 import { isRuumrSimulatorMode, isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
+import { isNativeIOSApp } from "@/lib/nativeEnvironment";
+
+const NATIVE_IOS_ALLOWED_PLUS_SOURCES = new Set([
+  "admin_grant",
+  "bgu_free",
+  "apple_iap",
+]);
+
+export function isNativeIOSPlusEntitled(user) {
+  if (!isNativeIOSApp() || !user?.is_ruumr_plus) {
+    return false;
+  }
+
+  if (user?.role === "admin") {
+    return true;
+  }
+
+  return NATIVE_IOS_ALLOWED_PLUS_SOURCES.has(String(user?.ruumr_plus_source || "").toLowerCase());
+}
 
 /**
  * Canonical client-side Ruumr Plus entitlement check.
@@ -15,6 +34,10 @@ import { isRuumrSimulatorMode, isRuumrSimulatorPlusLocked } from "@/lib/simulato
  * @returns {boolean}
  */
 export function isPlusEntitled(user) {
+  if (isNativeIOSApp()) {
+    return isNativeIOSPlusEntitled(user);
+  }
+
   if (isRuumrSimulatorMode()) {
     return !isRuumrSimulatorPlusLocked();
   }

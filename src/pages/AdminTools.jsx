@@ -10,6 +10,12 @@ import {
 } from "@/api/ruumrPlus";
 import { Loader2, Search, Sparkles, Check, X } from "lucide-react";
 
+const IOS_PLUS_ALLOWED_SOURCES = new Set(["admin_grant", "bgu_free", "apple_iap"]);
+
+function getPlusSource(user) {
+  return String(user?.ruumr_plus_source || "").trim().toLowerCase();
+}
+
 // Admin-only console for managing Ruumr Plus access. Everything routes through
 // the ruumrPlusBridge (service role): a single grant/revoke keeps the two
 // sources of truth in sync — the Base44 User flag (`is_ruumr_plus`, read by
@@ -72,8 +78,10 @@ export default function AdminToolsPage() {
     });
   }, [users, query]);
 
-  const setUserPlus = (userId, value) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_ruumr_plus: value } : u)));
+  const setUserPlus = (userId, value, source = value ? "admin_grant" : "none") => {
+    setUsers((prev) => prev.map((u) => (
+      u.id === userId ? { ...u, is_ruumr_plus: value, ruumr_plus_source: source } : u
+    )));
   };
 
   const handleGrant = async (user) => {
@@ -83,8 +91,13 @@ export default function AdminToolsPage() {
       // The bridge grants the service entitlement and sets is_ruumr_plus in one
       // call (service entitlement first), so either both succeed or it throws.
       await grantRuumrPlusEntitlement({ userId: user.id });
-      setUserPlus(user.id, true);
-      setFeedback({ type: "ok", text: `Plus הופעל עבור ${user.full_name || user.email}` });
+      setUserPlus(user.id, true, "admin_grant");
+      setFeedback({
+        type: "ok",
+        text: user.is_ruumr_plus
+          ? `גישה ל-Plus באפליקציית iOS הופעלה עבור ${user.full_name || user.email}`
+          : `Plus הופעל עבור ${user.full_name || user.email}`,
+      });
     } catch (error) {
       setFeedback({ type: "error", text: `שגיאה בהפעלת Plus: ${error?.message || "לא ידוע"}` });
     } finally {
@@ -103,7 +116,7 @@ export default function AdminToolsPage() {
       // The bridge clears is_ruumr_plus and revokes the service entitlement in
       // one call (flag first, so the paywall re-engages immediately).
       await revokeRuumrPlusEntitlement({ userId: user.id });
-      setUserPlus(user.id, false);
+      setUserPlus(user.id, false, "none");
       setFeedback({ type: "ok", text: `Plus בוטל עבור ${user.full_name || user.email}` });
     } catch (error) {
       setFeedback({ type: "error", text: `שגיאה בביטול Plus: ${error?.message || "לא ידוע"}` });
@@ -166,6 +179,9 @@ export default function AdminToolsPage() {
             filtered.slice(0, 100).map((user) => {
               const busy = pending[user.id];
               const isPlus = Boolean(user.is_ruumr_plus);
+              const source = getPlusSource(user);
+              const hasIOSPlusAccess = isPlus && IOS_PLUS_ALLOWED_SOURCES.has(source);
+              const canEnableIOSAccess = isPlus && !hasIOSPlusAccess;
               return (
                 <div key={user.id} className="flex items-center gap-3 px-4 py-3">
                   <div className="min-w-0 flex-1">
@@ -177,27 +193,51 @@ export default function AdminToolsPage() {
                           Plus
                         </span>
                       )}
+                      {hasIOSPlusAccess && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                          iOS פעיל
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-gray-500 truncate">{user.email || user.id}</div>
                   </div>
 
                   {isPlus ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={Boolean(busy)}
-                      onClick={() => handleRevoke(user)}
-                      className="h-9 rounded-full px-4 text-sm font-bold border-gray-300 text-gray-700"
-                    >
-                      {busy === "revoke" ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          <X className="w-4 h-4 ml-1" />
-                          בטל Plus
-                        </>
+                    <div className="flex items-center gap-2">
+                      {canEnableIOSAccess && (
+                        <Button
+                          type="button"
+                          disabled={Boolean(busy)}
+                          onClick={() => handleGrant(user)}
+                          className="h-9 rounded-full px-4 text-sm font-bold bg-[--theme-orange] text-white hover:brightness-110"
+                        >
+                          {busy === "grant" ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 ml-1" />
+                              אפשר iOS
+                            </>
+                          )}
+                        </Button>
                       )}
-                    </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={Boolean(busy)}
+                        onClick={() => handleRevoke(user)}
+                        className="h-9 rounded-full px-4 text-sm font-bold border-gray-300 text-gray-700"
+                      >
+                        {busy === "revoke" ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            <X className="w-4 h-4 ml-1" />
+                            בטל Plus
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   ) : (
                     <Button
                       type="button"

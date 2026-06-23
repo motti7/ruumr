@@ -45,6 +45,7 @@ function renderPage() {
 
 const GRANT = /הפעל Plus/;
 const REVOKE = /בטל Plus/;
+const ENABLE_IOS = /אפשר iOS/;
 
 describe('AdminTools — Ruumr Plus grant/revoke', () => {
   it('redirects non-admins to Discover and never lists users', async () => {
@@ -97,6 +98,18 @@ describe('AdminTools — Ruumr Plus grant/revoke', () => {
     await waitFor(() => expect(mocks.revoke).toHaveBeenCalledWith({ userId: 'u4' }));
     // Row flips back to grantable.
     await screen.findByRole('button', { name: GRANT });
+  });
+
+  it('lets admins convert an existing web-paid Plus user into an iOS-allowed admin grant', async () => {
+    mocks.search.mockResolvedValue([
+      { id: 'u7', full_name: 'Wendy', email: 'wendy@x.com', is_ruumr_plus: true, ruumr_plus_source: 'wix_paid' },
+    ]);
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: ENABLE_IOS }));
+
+    await waitFor(() => expect(mocks.grant).toHaveBeenCalledWith({ userId: 'u7' }));
+    expect(await screen.findByText('iOS פעיל')).toBeTruthy();
   });
 
   it('filters the user list by the search query', async () => {

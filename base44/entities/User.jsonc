@@ -49,6 +49,17 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the user has Ruumr Plus access"
+    },
+    "ruumr_plus_source": {
+      "type": "string",
+      "enum": [
+        "none",
+        "admin_grant",
+        "bgu_free",
+        "wix_paid",
+        "apple_iap"
+      ],
+      "description": "How Ruumr Plus was granted. Native iOS only unlocks free/admin/IAP sources."
     }
   },
   "required": [
