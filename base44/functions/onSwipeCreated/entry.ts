@@ -31,25 +31,29 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: `total likes=${totalLikes}, not a multiple of 2` });
     }
 
-    // Get swiped user's email - list all users and find by id
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
-    const user = allUsers.find(u => u.id === swipedId);
+    // Get swiped user's email - use filter by id for accuracy
+    const users = await base44.asServiceRole.entities.User.filter({ id: swipedId });
+    const user = users[0];
 
     if (!user?.email) {
       console.warn(`No email found for user ${swipedId}`);
       return Response.json({ skipped: true, reason: 'user not found or no email' });
     }
 
-    // Call the email function
+    if (user.notify_likes === false) {
+      return Response.json({ skipped: true, reason: 'user disabled likes notifications' });
+    }
+
+    // Always send "2 new likes" — this fires every 2nd like
     await base44.asServiceRole.functions.invoke('sendLikesNotificationEmail', {
       swiped_id: swipedId,
       swiped_email: user.email,
       swiped_name: user.full_name,
-      likes_count: totalLikes,
+      likes_count: 2,
     });
 
-    console.log(`✅ Triggered likes email for ${user.email} (total likes: ${totalLikes})`);
-    return Response.json({ success: true, totalLikes });
+    console.log(`✅ Triggered likes email for ${user.email} (total likes: ${totalLikes}, reported: 2)`);
+    return Response.json({ success: true, totalLikes, reported: 2 });
   } catch (error) {
     console.error('❌ onSwipeCreated error:', error);
     return Response.json({ error: error.message }, { status: 500 });

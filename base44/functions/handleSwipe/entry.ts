@@ -142,64 +142,6 @@ Deno.serve(async (req) => {
             }
 
             return Response.json({ match: true, match_id, match_type });
-        } else {
-            // No match, but check if we should send likes notification
-            try {
-                const allLikesForSwipedUser = await sr.Swipe.filter({
-                    swiped_id: swiped_id,
-                    action: 'like'
-                });
-                
-                const totalLikes = allLikesForSwipedUser.length;
-                
-                const swipedUsers = await sr.User.filter({ id: swiped_id });
-                const swipedUser = swipedUsers[0];
-                
-                if (swipedUser) {
-                    const lastNotificationCount = swipedUser.last_likes_notification_count || 0;
-                    const newLikesSinceLastNotification = totalLikes - lastNotificationCount;
-                    
-                    console.log(`💕 Likes check for ${swiped_id}: Total=${totalLikes}, LastNotified=${lastNotificationCount}, New=${newLikesSinceLastNotification}`);
-                    
-                    // Send notification every 3 new likes (respect notify_likes setting)
-                    if (newLikesSinceLastNotification >= 2 && swipedUser?.notify_likes !== false) {
-                        try {
-                            await base44.functions.invoke('sendPushNotification', {
-                                user_id: swiped_id,
-                                title: "🔥 הופה, התעניינו בך!",
-                                message: `${newLikesSinceLastNotification} אנשים אהבו את הפרופיל שלך לאחרונה!`,
-                                data: { type: 'likes', count: newLikesSinceLastNotification }
-                            });
-                        } catch (e) {
-                            console.error(`❌ Failed to send likes push:`, e);
-                        }
-
-                        // Send email for likes too
-                        if (swipedUser?.email) {
-                            try {
-                                await base44.asServiceRole.functions.invoke('sendLikesNotificationEmail', {
-                                    swiped_id: swiped_id,
-                                    swiped_email: swipedUser.email,
-                                    swiped_name: swipedUser.full_name,
-                                    likes_count: newLikesSinceLastNotification,
-                                });
-                                console.log(`✅ Likes email sent to ${swipedUser.email}`);
-                            } catch (e) {
-                                console.error(`❌ Failed to send likes email:`, e);
-                            }
-                        }
-
-                        // Update the notification counter
-                        await sr.User.update(swipedUser.id, {
-                            last_likes_notification_count: totalLikes
-                        });
-                        
-                        console.log(`✅ Likes notification sent to user ${swiped_id}`);
-                    }
-                }
-            } catch (notificationError) {
-                console.error("❌ Failed to check likes notification:", notificationError);
-            }
         }
 
         return Response.json({ match: false });
