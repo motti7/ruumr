@@ -55,8 +55,11 @@ async function ensureMatch(sr, uc, selfId, a, b, profA, profB) {
     });
 }
 
-// Rewrite every member's match-based team_members so they all share one roster.
-// Pending invite entries on each profile are preserved.
+// Additively heal one-sided team membership: ensure every pair in the roster is
+// linked in BOTH directions by ADDING missing links only. Never overwrites or
+// drops existing entries — a member may have teammates the caller doesn't know
+// about, and a full rewrite would silently delete them. Reconcile is a healing
+// pass, not the source of truth for removals (removeTeamMember owns that).
 async function writeRoster(sr, uc, selfId, memberIds) {
     const ids = [...new Set(memberIds.map(String))];
     const profiles = {};
@@ -65,19 +68,38 @@ async function writeRoster(sr, uc, selfId, memberIds) {
     for (const id of ids) {
         const prof = profiles[id];
         if (!prof) continue;
-        const matchEntries = [];
+
+        // Start from this member's existing roster and only append what's missing.
+        const members = Array.isArray(prof.team_members) ? [...prof.team_members] : [];
+
+        // Which user_ids this member already links to (skip pending placeholders).
+        const linked = new Set();
+        for (const entry of members) {
+            if (entry?.pending) continue;
+            const uid = await resolveMemberUserId(sr, id, entry);
+            if (uid) linked.add(String(uid));
+        }
+
+        let changed = false;
         for (const other of ids) {
-            if (other === id) continue;
+            if (other === id || linked.has(String(other))) continue;
             const oProf = profiles[other];
             const match = await ensureMatch(sr, uc, selfId, id, other, prof, oProf);
-            matchEntries.push({
+            members.push({
                 user_id: other,
                 match_id: match.id,
                 name: oProf?.name || '',
                 photo: oProf?.photos?.[0] || null,
             });
+            linked.add(String(other));
+            changed = true;
         }
-        await sr.Profile.update(prof.id, { team_members: [...pendingEntries(prof), ...matchEntries] });
+
+        // Only write when we actually added a link — keeps reconcile a true no-op
+        // when the roster is already consistent.
+        if (changed) {
+            await sr.Profile.update(prof.id, { team_members: members });
+        }
     }
 }
 
