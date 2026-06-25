@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
-import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, removeTeamMember } from "@/api/teamInvites";
+import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, removeTeamMember, reconcileMyTeam } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
@@ -63,9 +63,15 @@ export default function GroupTrackerPage() {
     } catch (e) { console.error(e); }
   }, [navigate]);
 
+  const reconciledRef = useRef(false);
   useEffect(() => {
     (async () => {
       setIsLoading(true);
+      // Heal legacy one-sided team membership so the roster is symmetric (once per visit).
+      if (!reconciledRef.current) {
+        reconciledRef.current = true;
+        try { await reconcileMyTeam(); } catch (e) { console.error(e); }
+      }
       await loadData();
       setIsLoading(false);
     })();

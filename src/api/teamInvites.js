@@ -61,6 +61,12 @@ export async function addTeamMember(targetUserId) {
   return unwrap(raw);
 }
 
+/** Re-sync the caller's team so membership is symmetric (heals legacy one-sided entries). */
+export async function reconcileMyTeam() {
+  const raw = await base44.functions.invoke("reconcileMyTeam", {});
+  return unwrap(raw);
+}
+
 /** Remove someone from the shared team — or yourself (leave). Syncs all members. */
 export async function removeTeamMember(targetUserId) {
   const raw = await base44.functions.invoke("removeTeamMember", { target_user_id: targetUserId });
