@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
+import { createTeamInvite, claimTeamInvites } from "@/api/teamInvites";
+import InviteByEmail from "@/components/team/InviteByEmail";
 import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
@@ -90,6 +92,7 @@ export default function OnboardingPage() {
   ))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState([]);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const [isAppleUser, setIsAppleUser] = useState(initialIsAppleUser);
   const [appleDisplayName, setAppleDisplayName] = useState(
@@ -466,6 +469,13 @@ export default function OnboardingPage() {
 
       // Profile now exists → unlock Discover and the bottom-nav tabs.
       setHasProfile(true);
+
+      // Send any team invites the user added on the final step (profile exists now).
+      for (const inv of pendingInvites) {
+        try { await createTeamInvite(inv); } catch (inviteErr) { console.error("Team invite failed:", inviteErr); }
+      }
+      // Link invites others may have sent to this user's email before they signed up.
+      try { await claimTeamInvites(); } catch (claimErr) { console.error("Claim team invites failed:", claimErr); }
 
       try {
         await syncCurrentProfileToRuumrPlus();
@@ -1164,6 +1174,34 @@ export default function OnboardingPage() {
                                     רוצה למצוא שותף מהר יותר? סמן/י כאן כדי שנעלה את הפרופיל שלך לסטורי באינסטגרם של Ruumr! 🚀
                                 </span>
                             </button>
+                        </div>
+
+                        {/* Invite a friend already on your team (optional) */}
+                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-3" dir="rtl">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-gray-800 text-base font-bold">כבר יש לך חבר/ה לצוות?</span>
+                                <span className="text-sm text-gray-400">(אופציונלי)</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-3">
+                                הזמן/י אותם במייל. אם הם כבר ב-Ruumr נבקש אישור, ואם לא — נשלח להם הזמנה.
+                            </p>
+                            {pendingInvites.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {pendingInvites.map((inv, i) => (
+                                        <div key={`${inv.email}-${i}`} className="flex items-center gap-1.5 bg-orange-50 text-[#FA3803] text-xs font-bold px-3 py-1.5 rounded-full">
+                                            <span>{inv.name}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPendingInvites(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="text-orange-400"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <InviteByEmail compact onCollect={(inv) => setPendingInvites(prev => [...prev, inv])} />
                         </div>
                     </div>
 

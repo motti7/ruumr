@@ -1,0 +1,103 @@
+{
+  "name": "TeamInvite",
+  "type": "object",
+  "properties": {
+    "inviter_user_id": {
+      "type": "string",
+      "description": "User id of the person who sent the invite."
+    },
+    "inviter_name": {
+      "type": "string",
+      "description": "Display name of the inviter."
+    },
+    "invitee_email": {
+      "type": "string",
+      "description": "Email of the invited friend (lowercased)."
+    },
+    "invitee_name": {
+      "type": "string",
+      "description": "Name the inviter gave the invited friend."
+    },
+    "invitee_user_id": {
+      "type": "string",
+      "description": "User id of the invited friend once known (existing Ruumr user, or after they sign up). Null while pending_signup."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "pending_signup",
+        "accepted",
+        "declined",
+        "cancelled"
+      ],
+      "default": "pending_approval",
+      "description": "pending_approval = waiting for an existing user to approve; pending_signup = friend not on Ruumr yet; accepted/declined/cancelled are terminal."
+    },
+    "virtual_profile_id": {
+      "type": "string",
+      "description": "Profile id of the virtual identity created for a non-Ruumr friend, if any."
+    },
+    "match_id": {
+      "type": "string",
+      "description": "Match id created when the invite is accepted."
+    },
+    "responded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invitee accepted or declined."
+    }
+  },
+  "required": [
+    "inviter_user_id",
+    "invitee_email",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "data.inviter_user_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.inviter_user_id": "{{user.id}}"
+        },
+        {
+          "data.invitee_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.inviter_user_id": "{{user.id}}"
+        },
+        {
+          "data.invitee_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.inviter_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -16,6 +16,7 @@ import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
+import { listIncomingTeamInvites } from "@/api/teamInvites";
 
 function FilterHintButton() {
   return (
@@ -92,6 +93,25 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     matchesCountRef.current = matchesCount;
   }, [matchesCount]);
+
+  // Pending team-join requests this user must approve.
+  const [teamRequestCount, setTeamRequestCount] = useState(0);
+  useEffect(() => {
+    const userId = currentUser?.id;
+    if (!userId || currentPageName === 'Onboarding') return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const requests = await listIncomingTeamInvites(userId);
+        if (!cancelled) setTeamRequestCount(requests.length);
+      } catch (err) {
+        console.error('[ruumr] team requests poll failed', err);
+      }
+    };
+    poll();
+    const interval = setInterval(poll, 60000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [currentUser?.id, currentPageName]);
 
   useEffect(() => {
     if (currentPageName === 'Onboarding') {
@@ -400,6 +420,24 @@ export default function Layout({ children, currentPageName }) {
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
             <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+                {shouldShowNav && teamRequestCount > 0 && currentPageName !== 'GroupTracker' && (
+                    <button
+                        onClick={() => navigate(createPageUrl('GroupTracker'))}
+                        className="w-full flex items-center gap-3 bg-orange-50 border-b border-orange-100 px-4 py-3 text-right active:bg-orange-100"
+                        dir="rtl"
+                    >
+                        <div className="w-9 h-9 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
+                            <UsersRound className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-800">
+                                {teamRequestCount === 1 ? 'יש לך בקשה חדשה לצוות' : `יש לך ${teamRequestCount} בקשות חדשות לצוות`}
+                            </p>
+                            <p className="text-xs text-gray-500">לחץ/י כדי לאשר או לדחות</p>
+                        </div>
+                        <span className="text-[--theme-orange] font-bold text-sm">צפה/י ›</span>
+                    </button>
+                )}
                 {children}
             </main>
 

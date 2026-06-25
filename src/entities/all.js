@@ -10,3 +10,4 @@ export { CharterAnswer } from "./CharterAnswer";
 export { GroupMessage } from "./GroupMessage";
 export { TypingStatus } from "./TypingStatus";
 export { QuestionnairePreference } from "./QuestionnairePreference";
+export { TeamInvite } from "./TeamInvite";
