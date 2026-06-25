@@ -10,13 +10,12 @@ import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion } from '@/lib/cityToRegion';
-import { isNativeIOSApp } from '@/lib/nativeEnvironment';
 
 const ProfileDetail = ({ profile, onClose }) => {
   const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
   const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
   const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
-  const plusMeta = isNativeIOSApp() ? null : (profile.ruumrPlus || profile.ruumr_plus || null);
+  const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const interests = normalizeInterestValues(profile.interests);
 
   const ensureProtocol = (url) => {
@@ -262,7 +261,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [avgRating, setAvgRating] = useState(null);
-  const plusMeta = isNativeIOSApp() ? null : (profile.ruumrPlus || profile.ruumr_plus || null);
+  const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const interests = normalizeInterestValues(profile.interests);
 
   // Use a module-level singleton audio element to guarantee only one plays at a time

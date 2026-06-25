@@ -206,6 +206,17 @@ describe('Chrome visible at all viewport widths (iPad fix)', () => {
     );
     expect(wideBlocks.length).toBe(0);
   });
+
+  it('widens the app shell on tablet instead of keeping a phone-width column', () => {
+    const { container } = renderLayout('Discover');
+    const headerInner = container.querySelector('header > div');
+    const main = container.querySelector('main');
+    const navInner = container.querySelector('nav > div');
+
+    expect(headerInner.className).toContain('md:max-w-5xl');
+    expect(main.className).toContain('md:max-w-5xl');
+    expect(navInner.className).toContain('md:max-w-5xl');
+  });
 });
 
 // Authenticated users without a Profile get locked bottom-nav tabs, while the
@@ -236,8 +247,8 @@ describe('Locked bottom-nav tabs for no-profile users', () => {
   });
 });
 
-describe('Native iOS Plus hiding', () => {
-  it('does not render the Plus tab in the native iOS app', async () => {
+describe('Native iOS Plus tab', () => {
+  it('renders the Plus tab in the native iOS app', async () => {
     vi.resetModules();
     nativeState.isNativeIOSApp.mockReturnValue(true);
     Layout = (await import('@/Layout')).default;
@@ -245,6 +256,6 @@ describe('Native iOS Plus hiding', () => {
     const { container } = renderLayout('Discover');
     const nav = container.querySelector('nav');
     expect(nav).not.toBeNull();
-    expect(nav.textContent).not.toContain('Plus');
+    expect(nav.textContent).toContain('Plus');
   });
 });

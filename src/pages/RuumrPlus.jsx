@@ -332,7 +332,7 @@ export default function RuumrPlusPage() {
         }
       } catch {}
 
-      // Route-level entitlement gate: non-subscribers never see the Plus page,
+      // Route-level entitlement gate: non-entitled users never see the Plus page,
       // covering deep links and nav-intent in addition to the button handler.
       if (!isPlusEntitled(entitledUser)) {
         navigate(createPageUrl(isNativeIOSApp() ? "RuumrPlusComingSoon" : "RuumrPlusPricing"), { replace: true });

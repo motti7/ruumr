@@ -3,11 +3,11 @@ import React, { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check, Sparkles } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
-import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const showPlusLabel = matchType === "ruumr_plus" && !isNativeIOSApp();
+  const showPlusLabel = matchType === "ruumr_plus";
+  const matchTypeLabel = showPlusLabel ? "התאמת Ruumr Plus" : matchType === "mutual" ? "התאמה הדדית" : "התאמה";
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
     onClickProfile();
@@ -41,7 +41,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
       onClick={() => onClickProfile()}
       className="bg-white rounded-2xl shadow-md border border-gray-100 cursor-pointer overflow-hidden hover:shadow-xl"
       role="article"
-      aria-label={`${showPlusLabel ? "התאמת Ruumr Plus" : "התאמה"}: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
+      aria-label={`${matchTypeLabel}: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
     >
       <div className="flex items-center p-4" dir="rtl">
         <div className="relative ml-4">

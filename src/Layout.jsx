@@ -13,7 +13,6 @@ import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
-import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
@@ -89,7 +88,6 @@ export default function Layout({ children, currentPageName }) {
   const { hasProfile } = useOptionalAuth();
   const tabsLocked = hasProfile === false;
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
-  const isNativeIOS = isNativeIOSApp();
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -293,12 +291,13 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    !isNativeIOS && { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
+  const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -362,13 +361,13 @@ export default function Layout({ children, currentPageName }) {
             Previously the mobile chrome was `sm:hidden` and a separate
             chrome-less block rendered at >=640px, which hid the Settings gear and
             bottom nav on iPad — the app WebView is not detected as a native
-            Capacitor platform, so it fell into the wide-screen branch. Ruumr is a
-            mobile-first single-column app, so we render the same chrome everywhere
-            (fixes App Store "Settings button not visible on iPad"). */}
+            Capacitor platform, so it fell into the wide-screen branch. The
+            chrome is shared across sizes, while the content shell widens on
+            tablet so iPad screens do not render as a narrow phone column. */}
         <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className="max-w-md mx-auto flex items-center h-12 relative">
+                <div className={`${appShellWidthClass} flex items-center h-12 relative`}>
         
         {/* קבוצה ימין */}
         <div className="flex items-center w-[96px] justify-start gap-1 pr-2 z-10">
@@ -400,13 +399,13 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`max-w-md mx-auto bg-gray-50 dark:bg-gray-900 `} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
                 {children}
             </main>
 
             {shouldShowNav && (
                 <nav className="fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
-                    <div className="flex items-center justify-around py-2">
+                    <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
                         const isActive = location.pathname === item.path || 
                             (item.name === "גלה" && (location.pathname === '/' || currentPageName === 'Discover'));

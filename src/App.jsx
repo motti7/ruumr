@@ -44,22 +44,20 @@ const PageLoader = () => (
   </div>
 );
 
-const NATIVE_IOS_PLUS_DISABLED_ROUTES = new Set([
-  'RuumrPlus',
-  'RuumrPlusComingSoon',
+const NATIVE_IOS_PAYMENT_DISABLED_ROUTES = new Set([
   'RuumrPlusPricing',
   'RuumrPlusCheckout',
   'RuumrPlusThankYou',
   'ManageSubscription',
 ]);
 
-const NativeIOSPlusUnavailableRedirect = ({ children }) => (
-  isNativeIOSApp() ? <Navigate to="/Discover" replace /> : children
+const NativeIOSPaymentUnavailableRedirect = ({ children }) => (
+  isNativeIOSApp() ? <Navigate to="/RuumrPlusComingSoon" replace /> : children
 );
 
-const wrapNativeIOSPlusGuard = (currentPageName, element) => (
-  NATIVE_IOS_PLUS_DISABLED_ROUTES.has(currentPageName)
-    ? <NativeIOSPlusUnavailableRedirect>{element}</NativeIOSPlusUnavailableRedirect>
+const wrapNativeIOSPaymentGuard = (currentPageName, element) => (
+  NATIVE_IOS_PAYMENT_DISABLED_ROUTES.has(currentPageName)
+    ? <NativeIOSPaymentUnavailableRedirect>{element}</NativeIOSPaymentUnavailableRedirect>
     : element
 );
 
@@ -149,7 +147,7 @@ const AuthenticatedApp = () => {
             <Route
               key={path}
               path={`/${path}`}
-              element={wrapNativeIOSPlusGuard(path,
+              element={wrapNativeIOSPaymentGuard(path,
                 <PageTransition>
                   <LayoutWrapper currentPageName={path}>
                     <Page />
@@ -162,9 +160,9 @@ const AuthenticatedApp = () => {
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
-          <Route path="/RuumrPlusComingSoon" element={wrapNativeIOSPlusGuard('RuumrPlusComingSoon', <PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>)} />
-          <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPlusGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
-          <Route path="/ManageSubscription" element={wrapNativeIOSPlusGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
+          <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
+          <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPaymentGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
+          <Route path="/ManageSubscription" element={wrapNativeIOSPaymentGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

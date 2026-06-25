@@ -1,7 +1,6 @@
 import React from "react";
 import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/ruumrPlusFields";
 import { Sparkles } from "lucide-react";
-import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 
 export default function HouseholdPreferencesGrid({
   profile = {},
@@ -11,7 +10,7 @@ export default function HouseholdPreferencesGrid({
   description = null,
 }) {
   const profileData = /** @type {Record<string, any> & { ruumrPlus?: any; ruumr_plus?: any }} */ (profile);
-  const plusMeta = isNativeIOSApp() ? null : (profileData.ruumrPlus || profileData.ruumr_plus || null);
+  const plusMeta = profileData.ruumrPlus || profileData.ruumr_plus || null;
   const hasAnyValue = HOUSEHOLD_PREFERENCE_FIELDS.some(({ field }) => profileData[field] != null && profileData[field] !== "");
 
   if (!hasAnyValue && !plusMeta) {

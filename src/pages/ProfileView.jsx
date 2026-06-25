@@ -18,7 +18,6 @@ import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { loadRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
-import { isNativeIOSApp } from '@/lib/nativeEnvironment';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -101,8 +100,7 @@ export default function ProfileViewPage() {
   const [isPlusRec, setIsPlusRec] = useState(false);
   // Plus match metadata: prefer anything on the profile, else the score/insight
   // cached from the user's last Ruumr Plus activation for this profile.
-  const isNativeIOS = isNativeIOSApp();
-  const plusMeta = isNativeIOS ? null : (profile?.ruumrPlus || profile?.ruumr_plus || plusMatch || null);
+  const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || plusMatch || null;
   const plusMatchPercent = plusMeta?.score != null ? Math.round((Number(plusMeta.score) || 0) * 100) : null;
   const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
   useEffect(() => {
@@ -138,27 +136,22 @@ export default function ProfileViewPage() {
       setProfile(profilesResult[0]);
       setUserProfile(myProfilesResult[0] || null);
 
-      // Pull the Plus match score/insight from the cached activation outside the
-      // native iOS app. iOS hides Plus until it is available through Apple IAP.
+      // Pull the Plus match score/insight from the cached activation.
       let inPlusCache = false;
-      if (!isNativeIOSApp()) {
-        try {
-          const activation = loadRuumrPlusActivation(user.id);
-          const matchRec = activation?.recommendations?.find(
-            (rec) => String(rec.user_id) === String(userId)
-          );
-          inPlusCache = Boolean(matchRec);
-          setPlusMatch(matchRec?.ruumrPlus || matchRec?.ruumr_plus || null);
-        } catch (_) {
-          setPlusMatch(null);
-        }
-      } else {
+      try {
+        const activation = loadRuumrPlusActivation(user.id);
+        const matchRec = activation?.recommendations?.find(
+          (rec) => String(rec.user_id) === String(userId)
+        );
+        inPlusCache = Boolean(matchRec);
+        setPlusMatch(matchRec?.ruumrPlus || matchRec?.ruumr_plus || null);
+      } catch (_) {
         setPlusMatch(null);
       }
 
       // Carry the Plus context through reliably: the URL param is the primary
       // signal, the cached recommendation is the fallback when it is missing.
-      const isPlusRecommendation = !isNativeIOSApp() && (urlParams.get("fromPlus") === 'true' || inPlusCache);
+      const isPlusRecommendation = urlParams.get("fromPlus") === 'true' || inPlusCache;
       setIsPlusRec(isPlusRecommendation);
 
       // Check for existing match (to allow writing a review)
@@ -190,9 +183,7 @@ export default function ProfileViewPage() {
 
     const swiperId = currentUser.id;
     const swipedId = profile.user_id;
-    const isPlusRecommendation = !isNativeIOSApp() && (
-      isPlusRec || new URLSearchParams(location.search).get("fromPlus") === "true"
-    );
+    const isPlusRecommendation = isPlusRec || new URLSearchParams(location.search).get("fromPlus") === "true";
 
     try {
       if (action !== "like" || !isPlusRecommendation) {
