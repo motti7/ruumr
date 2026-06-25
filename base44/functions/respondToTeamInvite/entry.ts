@@ -74,6 +74,7 @@ async function ensureMatch(sr, a, b, profA, profB) {
         user2_id: b,
         user2_name: profB?.name || '',
         status: 'active',
+        match_type: 'team',
     });
 }
 
@@ -200,6 +201,7 @@ Deno.serve(async (req) => {
             user2_id: user.id,
             user2_name: inviteeName,
             status: 'active',
+            match_type: 'team',
         });
 
         await sr.TeamInvite.update(invite.id, {

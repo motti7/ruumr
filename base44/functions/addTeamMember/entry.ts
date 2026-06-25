@@ -69,6 +69,7 @@ async function ensureMatch(sr, a, b, profA, profB) {
         user2_id: b,
         user2_name: profB?.name || '',
         status: 'active',
+        match_type: 'team',
     });
 }
 
