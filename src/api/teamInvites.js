@@ -42,6 +42,18 @@ export async function claimTeamInvites() {
   return unwrap(raw);
 }
 
+/** Add an existing match to the shared team (propagates to all members). */
+export async function addTeamMember(targetUserId) {
+  const raw = await base44.functions.invoke("addTeamMember", { target_user_id: targetUserId });
+  return unwrap(raw);
+}
+
+/** Remove someone from the shared team — or yourself (leave). Syncs all members. */
+export async function removeTeamMember(targetUserId) {
+  const raw = await base44.functions.invoke("removeTeamMember", { target_user_id: targetUserId });
+  return unwrap(raw);
+}
+
 /** Incoming requests the current user must approve/decline. */
 export async function listIncomingTeamInvites(userId) {
   if (!userId) return [];

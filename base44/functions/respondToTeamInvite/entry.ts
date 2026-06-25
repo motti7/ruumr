@@ -29,13 +29,78 @@ async function sendPush({ userId, title, message, data }) {
     }
 }
 
-function profilePhoto(profile) {
-    return profile?.photos?.[0] || null;
-}
-
 // Remove a pending member entry (matched by invite_id) from a team_members array.
 function removePendingMember(members, inviteId) {
     return (Array.isArray(members) ? members : []).filter((m) => m?.invite_id !== inviteId);
+}
+
+async function getProfile(sr, userId) {
+    const ps = await sr.Profile.filter({ user_id: userId });
+    return ps[0] || null;
+}
+
+function pendingEntries(profile) {
+    return (profile?.team_members || []).filter((m) => m?.pending);
+}
+
+async function resolveMemberUserId(sr, selfId, entry) {
+    if (entry?.user_id) return entry.user_id;
+    if (entry?.match_id) {
+        const ms = await sr.Match.filter({ id: entry.match_id });
+        const m = ms[0];
+        if (m) return String(m.user1_id) === String(selfId) ? m.user2_id : m.user1_id;
+    }
+    return null;
+}
+
+async function rosterUserIds(sr, selfId, profile) {
+    const ids = [String(selfId)];
+    for (const entry of profile?.team_members || []) {
+        if (entry?.pending) continue;
+        const uid = await resolveMemberUserId(sr, selfId, entry);
+        if (uid) ids.push(String(uid));
+    }
+    return [...new Set(ids)];
+}
+
+async function ensureMatch(sr, a, b, profA, profB) {
+    const f1 = await sr.Match.filter({ user1_id: a, user2_id: b });
+    const f2 = await sr.Match.filter({ user1_id: b, user2_id: a });
+    const existing = f1[0] || f2[0];
+    if (existing) return existing;
+    return await sr.Match.create({
+        user1_id: a,
+        user1_name: profA?.name || '',
+        user2_id: b,
+        user2_name: profB?.name || '',
+        status: 'active',
+    });
+}
+
+// Rewrite every member's match-based team_members so they all share one roster.
+// Pending invite entries on each profile are preserved.
+async function writeRoster(sr, memberIds) {
+    const ids = [...new Set(memberIds.map(String))];
+    const profiles = {};
+    for (const id of ids) profiles[id] = await getProfile(sr, id);
+
+    for (const id of ids) {
+        const prof = profiles[id];
+        if (!prof) continue;
+        const matchEntries = [];
+        for (const other of ids) {
+            if (other === id) continue;
+            const oProf = profiles[other];
+            const match = await ensureMatch(sr, id, other, prof, oProf);
+            matchEntries.push({
+                user_id: other,
+                match_id: match.id,
+                name: oProf?.name || '',
+                photo: oProf?.photos?.[0] || null,
+            });
+        }
+        await sr.Profile.update(prof.id, { team_members: [...pendingEntries(prof), ...matchEntries] });
+    }
 }
 
 async function deleteVirtualIfUnused(sr, invite) {
@@ -143,18 +208,17 @@ Deno.serve(async (req) => {
             responded_at: new Date().toISOString(),
         });
 
-        // Inviter team: swap the pending entry for a real match-based member.
+        // Drop the inviter's pending placeholder for this invite, then connect the new
+        // member to the inviter's *whole* existing team so all rosters stay in sync.
         if (inviterProfile) {
-            const members = removePendingMember(inviterProfile.team_members, invite.id);
-            members.push({ match_id: match.id, name: inviteeName, photo: profilePhoto(inviteeProfile) });
-            await sr.Profile.update(inviterProfile.id, { team_members: members });
+            await sr.Profile.update(inviterProfile.id, {
+                team_members: removePendingMember(inviterProfile.team_members, invite.id),
+            });
         }
-        // Invitee team: add the inviter.
-        if (inviteeProfile) {
-            const members = Array.isArray(inviteeProfile.team_members) ? [...inviteeProfile.team_members] : [];
-            members.push({ match_id: match.id, name: inviterName, photo: profilePhoto(inviterProfile) });
-            await sr.Profile.update(inviteeProfile.id, { team_members: members });
-        }
+        const freshInviter = await getProfile(sr, invite.inviter_user_id);
+        const inviterRoster = await rosterUserIds(sr, invite.inviter_user_id, freshInviter);
+        const newRoster = [...new Set([...inviterRoster, String(user.id)])];
+        await writeRoster(sr, newRoster);
 
         await sendPush({
             userId: invite.inviter_user_id,
