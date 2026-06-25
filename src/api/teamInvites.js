@@ -42,7 +42,20 @@ export async function claimTeamInvites() {
   return unwrap(raw);
 }
 
-/** Add an existing match to the shared team (propagates to all members). */
+/**
+ * Send a team-join request to an existing Ruumr user (e.g. a match) by id.
+ * They are NOT added until they approve; they get a push + email and see the
+ * request next time they open the app. Mirrors createTeamInvite's existing-user flow.
+ */
+export async function requestTeamMember(targetUserId, name) {
+  const raw = await base44.functions.invoke("createTeamInvite", {
+    target_user_id: targetUserId,
+    name,
+  });
+  return unwrap(raw);
+}
+
+/** Add an existing match to the shared team immediately (no approval). */
 export async function addTeamMember(targetUserId) {
   const raw = await base44.functions.invoke("addTeamMember", { target_user_id: targetUserId });
   return unwrap(raw);

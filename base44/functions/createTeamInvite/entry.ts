@@ -17,6 +17,11 @@ async function findUserByEmail(sr, email) {
     return users.find((u) => normalizeEmail(u.email) === email) || null;
 }
 
+async function findUserById(sr, userId) {
+    const users = await sr.User.list();
+    return users.find((u) => String(u.id) === String(userId)) || null;
+}
+
 async function sendPush({ userId, title, message, data }) {
     const appId = Deno.env.get('ONESIGNAL_APP_ID');
     const apiKey = Deno.env.get('ONESIGNAL_REST_API_KEY');
@@ -90,9 +95,24 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Authentication required' }, { status: 401 });
         }
 
-        const { email, name } = await req.json();
-        const inviteeEmail = normalizeEmail(email);
-        const inviteeName = String(name || '').trim();
+        const { email, name, target_user_id } = await req.json();
+        const sr = base44.asServiceRole.entities;
+
+        let inviteeEmail = normalizeEmail(email);
+        let inviteeName = String(name || '').trim();
+
+        // Inviting a known user (e.g. an existing match) by id — resolve their email.
+        if (target_user_id) {
+            const targetUser = await findUserById(sr, target_user_id);
+            if (!targetUser) {
+                return Response.json({ error: 'User not found' }, { status: 404 });
+            }
+            inviteeEmail = normalizeEmail(targetUser.email);
+            if (!inviteeName) {
+                const tp = await sr.Profile.filter({ user_id: targetUser.id });
+                inviteeName = tp[0]?.name || targetUser.full_name || '';
+            }
+        }
 
         if (!isValidEmail(inviteeEmail)) {
             return Response.json({ error: 'Valid email is required' }, { status: 400 });
@@ -100,8 +120,6 @@ Deno.serve(async (req) => {
         if (normalizeEmail(inviter.email) === inviteeEmail) {
             return Response.json({ error: 'You cannot invite yourself' }, { status: 400 });
         }
-
-        const sr = base44.asServiceRole.entities;
 
         const inviterProfiles = await sr.Profile.filter({ user_id: inviter.id });
         const inviterProfile = inviterProfiles[0] || null;
@@ -122,6 +140,14 @@ Deno.serve(async (req) => {
         const existingUser = await findUserByEmail(sr, inviteeEmail);
 
         if (existingUser && existingUser.id !== inviter.id) {
+            // Already on the inviter's team → nothing to request.
+            const alreadyTeammate = (inviterProfile?.team_members || []).some(
+                (m) => !m?.pending && String(m?.user_id) === String(existingUser.id)
+            );
+            if (alreadyTeammate) {
+                return Response.json({ success: true, status: 'already_member' });
+            }
+
             // Friend is already on Ruumr → request approval, don't add to team yet.
             const invite = await sr.TeamInvite.create({
                 inviter_user_id: inviter.id,

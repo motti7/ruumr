@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MatchCard from "../components/matches/MatchCard";
 import SwipeableMatchRow from "../components/matches/SwipeableMatchRow";
 import PullToRefresh from "@/components/shared/PullToRefresh";
-import { addTeamMember } from "@/api/teamInvites";
+import { requestTeamMember } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function MatchesPage() {
@@ -160,11 +160,17 @@ export default function MatchesPage() {
   const handleAddToTeam = useCallback(async (partnerUserId, partnerName) => {
     if (!partnerUserId) return;
     try {
-      await addTeamMember(partnerUserId);
-      toast({ title: `${partnerName || 'השותף/ה'} נוסף/ה לצוות ✓`, duration: 3000 });
+      const res = await requestTeamMember(partnerUserId, partnerName);
+      if (res?.status === 'already_member') {
+        toast({ title: `${partnerName || 'השותף/ה'} כבר בצוות שלך` });
+      } else if (res?.status === 'already_pending') {
+        toast({ title: 'כבר שלחת בקשה — ממתינים לאישור' });
+      } else {
+        toast({ title: `נשלחה בקשה ל${partnerName || 'שותף/ה'} 🤝 — תתווסף/י לצוות לאחר אישור`, duration: 3500 });
+      }
     } catch (e) {
-      console.error("Error adding to team:", e);
-      toast({ title: "לא הצלחנו להוסיף לצוות, נסה שוב", variant: "destructive" });
+      console.error("Error requesting team member:", e);
+      toast({ title: "לא הצלחנו לשלוח בקשה, נסה שוב", variant: "destructive" });
     }
   }, [toast]);
 
