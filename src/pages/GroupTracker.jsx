@@ -19,8 +19,8 @@ export default function GroupTrackerPage() {
   const [teamIds, setTeamIds] = useState([]);
   const [targetCount, setTargetCount] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAddPanel, setShowAddPanel] = useState(false);
-  const [showInvitePanel, setShowInvitePanel] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addMode, setAddMode] = useState(null); // null = chooser, 'matches', 'email'
   const [isSaving, setIsSaving] = useState(false);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [pendingMembers, setPendingMembers] = useState([]);
@@ -95,6 +95,16 @@ export default function GroupTrackerPage() {
     setIsSaving(false);
   };
 
+  const openAddModal = () => {
+    setAddMode(null);
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setAddMode(null);
+  };
+
   // Adding/removing a member goes through the backend so every member's roster stays in sync.
   const addToTeam = async (partnerUserId) => {
     setIsSaving(true);
@@ -103,6 +113,7 @@ export default function GroupTrackerPage() {
     } catch (e) { console.error(e); }
     await loadData();
     setIsSaving(false);
+    closeAddModal();
   };
 
   const removeFromTeam = async (partnerUserId) => {
@@ -311,88 +322,30 @@ export default function GroupTrackerPage() {
               ))}
             </AnimatePresence>
 
-            {/* Empty slots */}
+            {/* Empty slots — the first open slot is the "add member" button */}
             {Array.from({ length: remaining }).map((_, i) => (
-              <div key={`empty-${i}`} className="flex flex-col items-center gap-1">
-                <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
-                  <span className="text-xl text-gray-300">?</span>
+              i === 0 ? (
+                <button
+                  key="add-slot"
+                  onClick={openAddModal}
+                  className="flex flex-col items-center gap-1"
+                >
+                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-[--theme-orange] bg-orange-50 flex items-center justify-center active:scale-95 transition-transform">
+                    <Plus className="w-6 h-6 text-[--theme-orange]" />
+                  </div>
+                  <span className="text-xs font-bold text-[--theme-orange]">הוסף</span>
+                </button>
+              ) : (
+                <div key={`empty-${i}`} className="flex flex-col items-center gap-1">
+                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
+                    <span className="text-xl text-gray-300">?</span>
+                  </div>
+                  <span className="text-xs text-gray-400">פנוי</span>
                 </div>
-                <span className="text-xs text-gray-400">פנוי</span>
-              </div>
+              )
             ))}
           </div>
 
-          {/* Add from matches */}
-          {availableToAdd.length > 0 && remaining > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => setShowAddPanel(!showAddPanel)}
-                className="flex items-center gap-2 text-[--theme-orange] font-bold text-sm mx-auto"
-              >
-                <UserPlus className="w-4 h-4" />
-                הוסף מההתאמות שלי
-              </button>
-
-              <AnimatePresence>
-                {showAddPanel && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="mt-3 space-y-2">
-                      {availableToAdd.map(match => (
-                        <div key={match.id} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                            {match.photo ? (
-                              <img src={match.photo} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
-                                {match.name?.[0]}
-                              </div>
-                            )}
-                          </div>
-                          <span className="flex-1 font-medium text-gray-800">{match.name?.split(' ')[0]}</span>
-                          <button
-                            onClick={() => addToTeam(match.partnerId)}
-                            className="flex items-center gap-1 bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full"
-                          >
-                            <Plus className="w-3 h-3" /> הוסף
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-
-        {/* Invite a friend by email */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <button
-            onClick={() => setShowInvitePanel(!showInvitePanel)}
-            className="flex items-center gap-2 text-gray-700 font-bold text-sm mx-auto"
-          >
-            <Mail className="w-4 h-4 text-[--theme-orange]" />
-            יש לך חבר/ה שכבר בצוות? הזמן/י במייל
-          </button>
-          <AnimatePresence>
-            {showInvitePanel && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-4">
-                  <InviteByEmail compact onInvited={loadData} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Full team celebration */}
@@ -417,6 +370,107 @@ export default function GroupTrackerPage() {
           </button>
         )}
       </div>
+
+      {/* Add member modal: choose between matches and email invite */}
+      <AnimatePresence>
+        {showAddModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/40" onClick={closeAddModal} />
+            <motion.div
+              className="relative w-full max-w-md bg-white rounded-t-3xl p-5 pb-8"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              dir="rtl"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">
+                  {addMode === 'matches' ? 'הוסף מההתאמות שלי' : addMode === 'email' ? 'הזמן/י חבר/ה במייל' : 'הוספת שותף/ה לצוות'}
+                </h3>
+                <button onClick={closeAddModal} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Chooser */}
+              {addMode === null && (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setAddMode('matches')}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50 active:scale-[0.98] transition-transform"
+                  >
+                    <div className="w-10 h-10 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
+                      <UserPlus className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-right flex-1">
+                      <p className="font-bold text-gray-800">מההתאמות שלי</p>
+                      <p className="text-xs text-gray-500">הוסף/י מישהו שכבר עשית איתו מאץ'</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setAddMode('email')}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50 active:scale-[0.98] transition-transform"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-right flex-1">
+                      <p className="font-bold text-gray-800">הזמנה במייל</p>
+                      <p className="text-xs text-gray-500">יש לך חבר/ה שכבר בצוות? הזמן/י אותם</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* Add from matches */}
+              {addMode === 'matches' && (
+                <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                  {availableToAdd.length === 0 ? (
+                    <p className="text-center text-gray-500 text-sm py-6">אין התאמות זמינות להוספה</p>
+                  ) : (
+                    availableToAdd.map(match => (
+                      <div key={match.id} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                          {match.photo ? (
+                            <img src={match.photo} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
+                              {match.name?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <span className="flex-1 font-medium text-gray-800">{match.name?.split(' ')[0]}</span>
+                        <button
+                          onClick={() => addToTeam(match.partnerId)}
+                          disabled={isSaving}
+                          className="flex items-center gap-1 bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full disabled:opacity-60"
+                        >
+                          <Plus className="w-3 h-3" /> הוסף
+                        </button>
+                      </div>
+                    ))
+                  )}
+                  <button onClick={() => setAddMode(null)} className="text-gray-400 text-sm font-medium pt-2">חזרה</button>
+                </div>
+              )}
+
+              {/* Invite by email */}
+              {addMode === 'email' && (
+                <div>
+                  <InviteByEmail compact onInvited={loadData} />
+                  <button onClick={() => setAddMode(null)} className="text-gray-400 text-sm font-medium pt-3">חזרה</button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
