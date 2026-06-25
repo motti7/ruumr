@@ -8,11 +8,15 @@ import { motion } from "framer-motion";
 import { Puzzle, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import MatchCard from "../components/matches/MatchCard";
+import SwipeableMatchRow from "../components/matches/SwipeableMatchRow";
 import PullToRefresh from "@/components/shared/PullToRefresh";
+import { addTeamMember } from "@/api/teamInvites";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,6 +157,17 @@ export default function MatchesPage() {
     }
   }, []);
 
+  const handleAddToTeam = useCallback(async (partnerUserId, partnerName) => {
+    if (!partnerUserId) return;
+    try {
+      await addTeamMember(partnerUserId);
+      toast({ title: `${partnerName || 'השותף/ה'} נוסף/ה לצוות ✓`, duration: 3000 });
+    } catch (e) {
+      console.error("Error adding to team:", e);
+      toast({ title: "לא הצלחנו להוסיף לצוות, נסה שוב", variant: "destructive" });
+    }
+  }, [toast]);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await loadMatches();
@@ -254,7 +269,10 @@ export default function MatchesPage() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}>
-              
+
+               <SwipeableMatchRow
+                onDelete={() => handleDeleteMatch(match.id)}
+                onAddToTeam={() => handleAddToTeam(match.profile?.user_id, match.profile?.name)}>
                 <MatchCard
                 match={match.profile}
                 isOnline={match.isOnline}
@@ -290,7 +308,8 @@ export default function MatchesPage() {
                 }
                 }}
                 onDelete={handleDeleteMatch} />
-              
+               </SwipeableMatchRow>
+
               </motion.div>
             )}
           </div>
