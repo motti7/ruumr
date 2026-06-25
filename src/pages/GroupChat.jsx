@@ -21,7 +21,8 @@ export default function GroupChatPage() {
   const [groupId, setGroupId] = useState(null);
   const bottomRef = useRef(null);
 
-  // group_id = the lowest user_id among all team member IDs + my ID (stable identifier)
+  // group_id = sorted set of all member user_ids (+ mine). Keyed on user_id (not match_id)
+  // so every member of the shared team computes the exact same id and sees one chat.
   const buildGroupId = (myId, memberIds) => {
     const all = [myId, ...memberIds].sort();
     return all.join("_");
@@ -39,10 +40,11 @@ export default function GroupChatPage() {
         const prof = profiles[0];
         setMyProfile(prof);
 
-        const members = prof.team_members || [];
+        const members = (prof.team_members || []).filter(m => !m.pending);
         setTeamMembers(members);
 
-        const gid = buildGroupId(userData.id, members.map(m => m.match_id));
+        const memberUserIds = members.map(m => m.user_id).filter(Boolean);
+        const gid = buildGroupId(userData.id, memberUserIds);
         setGroupId(gid);
 
         const msgs = await base44.entities.GroupMessage.filter({ group_id: gid });

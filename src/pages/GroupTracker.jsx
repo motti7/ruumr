@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail } from "lucide-react";
-import { listIncomingTeamInvites, respondToTeamInvite } from "@/api/teamInvites";
+import { listIncomingTeamInvites, respondToTeamInvite, addTeamMember, removeTeamMember } from "@/api/teamInvites";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
 
@@ -81,17 +81,12 @@ export default function GroupTrackerPage() {
     await loadData();
   };
 
-  const saveToProfile = async (newTeamIds, newTarget) => {
+  // team_target is the only membership-adjacent value still written from the client;
+  // the shared roster (team_members) is owned by the backend roster-sync functions.
+  const saveTarget = async (newTarget) => {
     if (!myProfile) return;
     setIsSaving(true);
-    const teamMembers = [
-      ...allMatches
-        .filter(m => newTeamIds.includes(m.id))
-        .map(m => ({ match_id: m.id, name: m.name, photo: m.photo })),
-      // Preserve pending invited friends (added by email) — they aren't match-based.
-      ...pendingMembers.map(p => ({ invite_id: p.invite_id, name: p.name, pending: true })),
-    ];
-    await Profile.update(myProfile.id, { team_members: teamMembers, team_target: newTarget });
+    await Profile.update(myProfile.id, { team_target: newTarget });
     try {
       await syncCurrentProfileToRuumrPlus();
     } catch (syncError) {
@@ -100,21 +95,28 @@ export default function GroupTrackerPage() {
     setIsSaving(false);
   };
 
-  const addToTeam = async (matchId) => {
-    const next = [...teamIds, matchId];
-    setTeamIds(next);
-    await saveToProfile(next, targetCount);
+  // Adding/removing a member goes through the backend so every member's roster stays in sync.
+  const addToTeam = async (partnerUserId) => {
+    setIsSaving(true);
+    try {
+      await addTeamMember(partnerUserId);
+    } catch (e) { console.error(e); }
+    await loadData();
+    setIsSaving(false);
   };
 
-  const removeFromTeam = async (matchId) => {
-    const next = teamIds.filter(id => id !== matchId);
-    setTeamIds(next);
-    await saveToProfile(next, targetCount);
+  const removeFromTeam = async (partnerUserId) => {
+    setIsSaving(true);
+    try {
+      await removeTeamMember(partnerUserId);
+    } catch (e) { console.error(e); }
+    await loadData();
+    setIsSaving(false);
   };
 
   const handleTargetChange = async (val) => {
     setTargetCount(val);
-    await saveToProfile(teamIds, val);
+    await saveTarget(val);
   };
 
   const teamMembers = allMatches.filter(m => teamIds.includes(m.id));
@@ -267,7 +269,7 @@ export default function GroupTrackerPage() {
                       )}
                     </div>
                     <button
-                      onClick={() => removeFromTeam(match.id)}
+                      onClick={() => removeFromTeam(match.partnerId)}
                       className="absolute -top-1 -left-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-sm"
                     >
                       <X className="w-3 h-3 text-white" />
@@ -353,7 +355,7 @@ export default function GroupTrackerPage() {
                           </div>
                           <span className="flex-1 font-medium text-gray-800">{match.name?.split(' ')[0]}</span>
                           <button
-                            onClick={() => addToTeam(match.id)}
+                            onClick={() => addToTeam(match.partnerId)}
                             className="flex items-center gap-1 bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full"
                           >
                             <Plus className="w-3 h-3" /> הוסף
