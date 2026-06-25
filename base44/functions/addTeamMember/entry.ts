@@ -58,10 +58,21 @@ async function rosterUserIds(sr, selfId, profile) {
     return [...new Set(ids)];
 }
 
-async function ensureMatch(sr, a, b, profA, profB) {
-    const f1 = await sr.Match.filter({ user1_id: a, user2_id: b });
-    const f2 = await sr.Match.filter({ user1_id: b, user2_id: a });
-    const existing = f1[0] || f2[0];
+async function ensureMatch(sr, uc, selfId, a, b, profA, profB) {
+    // Look for an existing match between the pair in both directions. A mutual
+    // match created by handleSwipe is written through the user-context client and
+    // is not always visible to the asServiceRole view — so a service-role-only
+    // check can miss it and create a duplicate "team" match. When the caller is a
+    // party to this pair, also check via the user-context client (uc).
+    const queries = [
+        sr.Match.filter({ user1_id: a, user2_id: b }),
+        sr.Match.filter({ user1_id: b, user2_id: a }),
+    ];
+    if (uc && (String(a) === String(selfId) || String(b) === String(selfId))) {
+        queries.push(uc.Match.filter({ user1_id: a, user2_id: b }));
+        queries.push(uc.Match.filter({ user1_id: b, user2_id: a }));
+    }
+    const existing = (await Promise.all(queries)).flat().find(Boolean);
     if (existing) return existing;
     return await sr.Match.create({
         user1_id: a,
@@ -73,7 +84,7 @@ async function ensureMatch(sr, a, b, profA, profB) {
     });
 }
 
-async function writeRoster(sr, memberIds) {
+async function writeRoster(sr, uc, selfId, memberIds) {
     const ids = [...new Set(memberIds.map(String))];
     const profiles = {};
     for (const id of ids) profiles[id] = await getProfile(sr, id);
@@ -85,7 +96,7 @@ async function writeRoster(sr, memberIds) {
         for (const other of ids) {
             if (other === id) continue;
             const oProf = profiles[other];
-            const match = await ensureMatch(sr, id, other, prof, oProf);
+            const match = await ensureMatch(sr, uc, selfId, id, other, prof, oProf);
             matchEntries.push({
                 user_id: other,
                 match_id: match.id,
@@ -126,7 +137,7 @@ Deno.serve(async (req) => {
         const newRoster = [...new Set([...roster, targetId])];
 
         // Connect the new member to the whole existing team, not just the adder.
-        await writeRoster(sr, newRoster);
+        await writeRoster(sr, base44.entities, String(user.id), newRoster);
 
         const adderName = callerProfile.name || user.full_name || 'מישהו';
         await sendPush({
