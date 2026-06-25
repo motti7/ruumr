@@ -45,6 +45,8 @@ const PageLoader = () => (
 );
 
 const NATIVE_IOS_PLUS_DISABLED_ROUTES = new Set([
+  'RuumrPlus',
+  'RuumrPlusComingSoon',
   'RuumrPlusPricing',
   'RuumrPlusCheckout',
   'RuumrPlusThankYou',
@@ -52,7 +54,7 @@ const NATIVE_IOS_PLUS_DISABLED_ROUTES = new Set([
 ]);
 
 const NativeIOSPlusUnavailableRedirect = ({ children }) => (
-  isNativeIOSApp() ? <Navigate to="/RuumrPlusComingSoon" replace /> : children
+  isNativeIOSApp() ? <Navigate to="/Discover" replace /> : children
 );
 
 const wrapNativeIOSPlusGuard = (currentPageName, element) => (
@@ -160,7 +162,7 @@ const AuthenticatedApp = () => {
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
-          <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
+          <Route path="/RuumrPlusComingSoon" element={wrapNativeIOSPlusGuard('RuumrPlusComingSoon', <PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>)} />
           <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPlusGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
           <Route path="/ManageSubscription" element={wrapNativeIOSPlusGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
         </Route>

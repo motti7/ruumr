@@ -13,6 +13,7 @@ import useTabHistory from "@/hooks/useTabHistory";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
+import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
@@ -88,6 +89,7 @@ export default function Layout({ children, currentPageName }) {
   const { hasProfile } = useOptionalAuth();
   const tabsLocked = hasProfile === false;
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
+  const isNativeIOS = isNativeIOSApp();
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -291,10 +293,10 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: "גלה", path: createPageUrl("Discover"), icon: Home },
     { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    !isNativeIOS && { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
-  ];
+  ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
   

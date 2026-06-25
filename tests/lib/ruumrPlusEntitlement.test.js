@@ -40,15 +40,15 @@ describe('isPlusEntitled', () => {
     expect(isPlusEntitled({ is_ruumr_plus: true })).toBe(false);
   });
 
-  it('allows only free/admin/IAP Plus sources inside the native iOS app', () => {
+  it('does not unlock Plus inside the native iOS app until Apple IAP exists', () => {
     mockNative.isNativeIOSApp.mockReturnValue(true);
     mockSim.isRuumrSimulatorMode.mockReturnValue(true);
     mockSim.isRuumrSimulatorPlusLocked.mockReturnValue(false);
 
-    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'admin_grant' })).toBe(true);
-    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'bgu_free' })).toBe(true);
-    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'apple_iap' })).toBe(true);
-    expect(isPlusEntitled({ is_ruumr_plus: true, role: 'admin' })).toBe(true);
+    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'admin_grant' })).toBe(false);
+    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'bgu_free' })).toBe(false);
+    expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'apple_iap' })).toBe(false);
+    expect(isPlusEntitled({ is_ruumr_plus: true, role: 'admin' })).toBe(false);
     expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'wix_paid' })).toBe(false);
     expect(isPlusEntitled({ is_ruumr_plus: true })).toBe(false);
     expect(isPlusEntitled({ is_ruumr_plus: false })).toBe(false);

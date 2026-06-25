@@ -33,7 +33,7 @@ export default function CharterResults({ matchId, onEdit, refreshKey = 0, compac
     return (
       <div className="rounded-3xl border border-orange-100 bg-orange-50 p-5 text-center">
         <h3 className="font-black text-gray-900">מלאו פעם אחת את שאלון ההעדפות</h3>
-        <p className="mt-2 text-sm text-gray-600">התשובות ישמשו גם להתאמות Plus וגם לכל ההתאמות שלך.</p>
+        <p className="mt-2 text-sm text-gray-600">התשובות ישמשו לכל ההתאמות שלך.</p>
         <Button onClick={onEdit} className="mt-4 rounded-full bg-[--theme-orange] text-white">התחל/י שאלון</Button>
       </div>
     );

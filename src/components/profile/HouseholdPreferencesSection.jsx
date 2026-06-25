@@ -8,7 +8,7 @@ export default function HouseholdPreferencesSection({
   disabled = false,
   className = "",
   title = "הרגלים בבית",
-  description = "ככל שתהיו מדויקים יותר, Ruumr Plus ידע להתאים טוב יותר.",
+  description = "ככל שתהיו מדויקים יותר, ההתאמות יהיו טובות יותר.",
 }) {
   return (
     <div className={className}>

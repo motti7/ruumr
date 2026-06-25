@@ -1,22 +1,9 @@
 import { isRuumrSimulatorMode, isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
 import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 
-const NATIVE_IOS_ALLOWED_PLUS_SOURCES = new Set([
-  "admin_grant",
-  "bgu_free",
-  "apple_iap",
-]);
-
 export function isNativeIOSPlusEntitled(user) {
-  if (!isNativeIOSApp() || !user?.is_ruumr_plus) {
-    return false;
-  }
-
-  if (user?.role === "admin") {
-    return true;
-  }
-
-  return NATIVE_IOS_ALLOWED_PLUS_SOURCES.has(String(user?.ruumr_plus_source || "").toLowerCase());
+  void user;
+  return false;
 }
 
 /**
@@ -35,6 +22,9 @@ export function isNativeIOSPlusEntitled(user) {
  */
 export function isPlusEntitled(user) {
   if (isNativeIOSApp()) {
+    // App Review Guideline 3.1.1/3.1.3(b): until Ruumr Plus is available via
+    // Apple In-App Purchase, the native iOS app must not unlock the Plus
+    // digital feature from web/external/admin entitlements.
     return isNativeIOSPlusEntitled(user);
   }
 

@@ -36,6 +36,11 @@ vi.mock('@/lib/ruumrPlusActivation', () => ({
   markRuumrPlusActivationIntent: vi.fn(),
 }));
 
+const nativeState = vi.hoisted(() => ({
+  isNativeIOSApp: vi.fn(() => false),
+}));
+vi.mock('@/lib/nativeEnvironment', () => nativeState);
+
 vi.mock('@/hooks/useAndroidBackButton', () => ({ default: vi.fn() }));
 vi.mock('@/hooks/useTabHistory', () => ({ default: vi.fn() }));
 vi.mock('@/components/reviews/WriteReviewButton', () => ({
@@ -64,6 +69,7 @@ let Layout;
 beforeEach(async () => {
   vi.resetModules();
   authState.hasProfile = null;
+  nativeState.isNativeIOSApp.mockReturnValue(false);
   const mod = await import('@/Layout');
   Layout = mod.default;
 });
@@ -227,5 +233,18 @@ describe('Locked bottom-nav tabs for no-profile users', () => {
     const nav = container.querySelector('nav');
     expect(nav.innerHTML).not.toContain('opacity-40');
     expect(nav.querySelectorAll('.bg-gray-400').length).toBe(0);
+  });
+});
+
+describe('Native iOS Plus hiding', () => {
+  it('does not render the Plus tab in the native iOS app', async () => {
+    vi.resetModules();
+    nativeState.isNativeIOSApp.mockReturnValue(true);
+    Layout = (await import('@/Layout')).default;
+
+    const { container } = renderLayout('Discover');
+    const nav = container.querySelector('nav');
+    expect(nav).not.toBeNull();
+    expect(nav.textContent).not.toContain('Plus');
   });
 });
