@@ -30,10 +30,11 @@
       "type": "string",
       "enum": [
         "mutual",
-        "ruumr_plus"
+        "ruumr_plus",
+        "team"
       ],
       "default": "mutual",
-      "description": "How the match was created. Legacy records without this field are treated as mutual."
+      "description": "How the match was created. 'team' = auto-created when building a shared team roster (no match email sent). Legacy records without this field are treated as mutual."
     },
     "plus_initiator_id": {
       "type": "string",

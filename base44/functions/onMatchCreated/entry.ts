@@ -13,6 +13,13 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'invalid match data' });
     }
 
+    // Team-formed matches (created when building a shared roster) are not swipe
+    // matches — don't send "new match" emails for them.
+    if (match.match_type === 'team') {
+      console.log(`Skipping match email for team-formed match ${match.id || 'new'}`);
+      return Response.json({ skipped: true, reason: 'team match' });
+    }
+
     const { user1_id, user2_id, user1_name, user2_name } = match;
 
     // Fetch users by listing all (User.filter by id doesn't work due to RLS)
