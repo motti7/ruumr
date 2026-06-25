@@ -7,12 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
-import { listIncomingTeamInvites, respondToTeamInvite, addTeamMember, removeTeamMember } from "@/api/teamInvites";
+import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, removeTeamMember } from "@/api/teamInvites";
+import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
 
 export default function GroupTrackerPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
   const [allMatches, setAllMatches] = useState([]);
@@ -105,13 +107,20 @@ export default function GroupTrackerPage() {
     setAddMode(null);
   };
 
-  // Adding/removing a member goes through the backend so every member's roster stays in sync.
-  const addToTeam = async (partnerUserId) => {
+  // Adding a teammate sends an approval request (they aren't added until they confirm).
+  // Removing goes through the backend so every member's roster stays in sync.
+  const addToTeam = async (partnerUserId, partnerName) => {
     setIsSaving(true);
     try {
-      await addTeamMember(partnerUserId);
+      const res = await requestTeamMember(partnerUserId, partnerName);
+      if (res?.status === 'already_member') {
+        toast({ title: `${partnerName || 'השותף/ה'} כבר בצוות שלך` });
+      } else if (res?.status === 'already_pending') {
+        toast({ title: 'כבר שלחת בקשה — ממתינים לאישור' });
+      } else {
+        toast({ title: `נשלחה בקשה ל${partnerName || 'שותף/ה'} 🤝 — יתווסף/ה לצוות לאחר אישור`, duration: 3500 });
+      }
     } catch (e) { console.error(e); }
-    await loadData();
     setIsSaving(false);
     closeAddModal();
   };
@@ -473,7 +482,7 @@ export default function GroupTrackerPage() {
                           </div>
                           <span className="flex-1 font-bold text-gray-800">{match.name?.split(' ')[0]}</span>
                           <button
-                            onClick={() => addToTeam(match.partnerId)}
+                            onClick={() => addToTeam(match.partnerId, match.name)}
                             disabled={isSaving}
                             className="flex items-center gap-1 gradient-orange text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm active:scale-95 transition-transform disabled:opacity-60"
                           >
