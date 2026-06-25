@@ -92,8 +92,8 @@ export default function InviteByEmail({ onInvited, onCollect, compact = false })
           type="email"
           inputMode="email"
           placeholder="כתובת מייל"
-          className="h-10 text-sm bg-white border-gray-200 w-full"
-          dir="ltr"
+          className="h-10 text-sm bg-white border-gray-200 w-full text-right"
+          dir="rtl"
         />
         <AnimatePresence>
           {error && (
