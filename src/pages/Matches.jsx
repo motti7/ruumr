@@ -60,9 +60,22 @@ export default function MatchesPage() {
       const profileMap = {};
       allProfiles.forEach(p => { profileMap[p.user_id] = p; });
 
+      // A pair of users can end up with two Match rows (one created from each
+      // direction), which would render the same person twice. Collapse to one
+      // card per counterpart, keeping the most recently created match.
+      const byCounterpart = new Map();
+      for (const match of allMatches) {
+        const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
+        const existing = byCounterpart.get(otherUserId);
+        if (!existing || new Date(match.created_date) > new Date(existing.created_date)) {
+          byCounterpart.set(otherUserId, match);
+        }
+      }
+      const uniqueMatches = [...byCounterpart.values()];
+
       // Fetch messages per match with individual error resilience
       const matchesWithProfiles = await Promise.all(
-        allMatches.map(async (match) => {
+        uniqueMatches.map(async (match) => {
           const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
           let unreadCount = 0;
           try {

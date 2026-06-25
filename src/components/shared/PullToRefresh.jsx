@@ -28,19 +28,33 @@ export default function PullToRefresh({ onRefresh, children }) {
     if (!el) return;
 
     const handleTouchStart = (e) => {
-      if (el.scrollTop <= 0) {
-        startYRef.current = e.touches[0].clientY;
-      }
+      startYRef.current = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e) => {
       if (startYRef.current === null || isRefreshingRef.current) return;
+      // Only pull-to-refresh while the list is scrolled to the very top.
+      // While there's content scrolled above (scrollTop > 0) — including when
+      // the user is scrolling back UP toward the top — keep the baseline pinned
+      // to the finger so no pull builds up. The pull only starts once they
+      // actually reach the top and keep dragging downward.
+      if (el.scrollTop > 0) {
+        startYRef.current = e.touches[0].clientY;
+        if (pullDistanceRef.current !== 0) {
+          pullDistanceRef.current = 0;
+          setPullDistance(0);
+        }
+        return;
+      }
       const delta = e.touches[0].clientY - startYRef.current;
       if (delta > 0) {
         e.preventDefault();
         const dist = Math.min(delta * 0.5, THRESHOLD * 1.5);
         pullDistanceRef.current = dist;
         setPullDistance(dist);
+      } else if (pullDistanceRef.current !== 0) {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
       }
     };
 
