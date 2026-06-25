@@ -23,7 +23,7 @@ function FilterHintButton() {
     <button
       onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
       aria-label="פילטרים"
-      className="hover:scale-110 transition-transform select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
+      className="header-glow select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
     >
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ pointerEvents: 'none' }}>
         {/* Line 1 */}
@@ -391,7 +391,7 @@ export default function Layout({ children, currentPageName }) {
         
         {/* קבוצה ימין */}
         <div className="flex items-center w-[96px] justify-start gap-1 pr-2 z-10">
-            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="select-none flex items-center justify-center touch-manipulation w-11 h-11">
+            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
             <WriteReviewButton />
@@ -399,7 +399,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* אמצע: כותרת רומר — תמיד במרכז מוחלט של המסך */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Link to={createPageUrl("Discover")} className="select-none pointer-events-auto">
+            <Link to={createPageUrl("Discover")} className="header-glow select-none pointer-events-auto">
                  <h1 className="text-4xl font-bold tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">Ruumr</h1>
             </Link>
         </div>
@@ -409,7 +409,7 @@ export default function Layout({ children, currentPageName }) {
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
+            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
         </div>

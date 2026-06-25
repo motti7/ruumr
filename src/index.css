@@ -179,6 +179,15 @@ button:focus-visible {
     background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
   }
 
+  /* Hover glow for header buttons */
+  .header-glow {
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  .header-glow:hover {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 7px rgba(255, 87, 34, 0.75));
+  }
+
   .components-slider-thumb {
     background-color: var(--theme-orange) !important;
     border-color: var(--theme-orange) !important;
