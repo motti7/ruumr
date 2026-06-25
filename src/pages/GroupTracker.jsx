@@ -6,7 +6,7 @@ import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail } from "lucide-react";
+import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
 import { listIncomingTeamInvites, respondToTeamInvite, addTeamMember, removeTeamMember } from "@/api/teamInvites";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
@@ -375,98 +375,121 @@ export default function GroupTrackerPage() {
       <AnimatePresence>
         {showAddModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-end justify-center"
+            className="fixed inset-0 z-[60] flex items-end justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="absolute inset-0 bg-black/40" onClick={closeAddModal} />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeAddModal} />
             <motion.div
-              className="relative w-full max-w-md bg-white rounded-t-3xl p-5 pb-8"
+              className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[85vh]"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
               dir="rtl"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {addMode === 'matches' ? 'הוסף מההתאמות שלי' : addMode === 'email' ? 'הזמן/י חבר/ה במייל' : 'הוספת שותף/ה לצוות'}
+              {/* Grab handle */}
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                <div className="w-10 h-1.5 rounded-full bg-gray-200" />
+              </div>
+
+              {/* Header */}
+              <div className="flex items-center gap-2 px-5 pt-2 pb-4 flex-shrink-0">
+                {addMode !== null && (
+                  <button
+                    onClick={() => setAddMode(null)}
+                    aria-label="חזרה"
+                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-95 transition-transform"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-gray-600 -scale-x-100" />
+                  </button>
+                )}
+                <h3 className="flex-1 text-xl font-bold text-gray-900 text-right">
+                  {addMode === 'matches' ? 'מההתאמות שלי' : addMode === 'email' ? 'הזמנה במייל' : 'הוספת שותף/ה לצוות'}
                 </h3>
-                <button onClick={closeAddModal} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <button
+                  onClick={closeAddModal}
+                  aria-label="סגור"
+                  className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-95 transition-transform"
+                >
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
 
-              {/* Chooser */}
-              {addMode === null && (
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setAddMode('matches')}
-                    className="w-full flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50 active:scale-[0.98] transition-transform"
-                  >
-                    <div className="w-10 h-10 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
-                      <UserPlus className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-right flex-1">
-                      <p className="font-bold text-gray-800">מההתאמות שלי</p>
-                      <p className="text-xs text-gray-500">הוסף/י מישהו שכבר עשית איתו מאץ'</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setAddMode('email')}
-                    className="w-full flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50 active:scale-[0.98] transition-transform"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-right flex-1">
-                      <p className="font-bold text-gray-800">הזמנה במייל</p>
-                      <p className="text-xs text-gray-500">יש לך חבר/ה שכבר בצוות? הזמן/י אותם</p>
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {/* Add from matches */}
-              {addMode === 'matches' && (
-                <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                  {availableToAdd.length === 0 ? (
-                    <p className="text-center text-gray-500 text-sm py-6">אין התאמות זמינות להוספה</p>
-                  ) : (
-                    availableToAdd.map(match => (
-                      <div key={match.id} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
-                        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                          {match.photo ? (
-                            <img src={match.photo} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
-                              {match.name?.[0]}
-                            </div>
-                          )}
-                        </div>
-                        <span className="flex-1 font-medium text-gray-800">{match.name?.split(' ')[0]}</span>
-                        <button
-                          onClick={() => addToTeam(match.partnerId)}
-                          disabled={isSaving}
-                          className="flex items-center gap-1 bg-[--theme-orange] text-white text-xs font-bold px-3 py-1.5 rounded-full disabled:opacity-60"
-                        >
-                          <Plus className="w-3 h-3" /> הוסף
-                        </button>
+              <div className="px-5 overflow-y-auto flex-1 min-h-0">
+                {/* Chooser */}
+                {addMode === null && (
+                  <div className="space-y-3 pb-1">
+                    <button
+                      onClick={() => setAddMode('matches')}
+                      className="w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-orange-50 to-white border border-orange-100 shadow-sm active:scale-[0.98] transition-transform"
+                    >
+                      <div className="w-12 h-12 rounded-2xl gradient-orange flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-200">
+                        <UserPlus className="w-6 h-6 text-white" />
                       </div>
-                    ))
-                  )}
-                  <button onClick={() => setAddMode(null)} className="text-gray-400 text-sm font-medium pt-2">חזרה</button>
-                </div>
-              )}
+                      <div className="text-right flex-1">
+                        <p className="font-bold text-gray-900">מההתאמות שלי</p>
+                        <p className="text-xs text-gray-500 mt-0.5">הוסף/י מישהו שכבר עשית איתו מאץ'</p>
+                      </div>
+                      <ChevronLeft className="w-5 h-5 text-orange-300 flex-shrink-0" />
+                    </button>
+                    <button
+                      onClick={() => setAddMode('email')}
+                      className="w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 shadow-sm active:scale-[0.98] transition-transform"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center flex-shrink-0 shadow-md shadow-gray-200">
+                        <Mail className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-right flex-1">
+                        <p className="font-bold text-gray-900">הזמנה במייל</p>
+                        <p className="text-xs text-gray-500 mt-0.5">יש לך חבר/ה שכבר בצוות? הזמן/י אותם</p>
+                      </div>
+                      <ChevronLeft className="w-5 h-5 text-gray-300 flex-shrink-0" />
+                    </button>
+                  </div>
+                )}
 
-              {/* Invite by email */}
-              {addMode === 'email' && (
-                <div>
+                {/* Add from matches */}
+                {addMode === 'matches' && (
+                  <div className="space-y-2 pb-1">
+                    {availableToAdd.length === 0 ? (
+                      <div className="text-center py-10">
+                        <UsersRound className="w-10 h-10 text-gray-200 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">אין התאמות זמינות להוספה</p>
+                      </div>
+                    ) : (
+                      availableToAdd.map(match => (
+                        <div key={match.id} className="flex items-center gap-3 p-2.5 rounded-2xl bg-gray-50 border border-gray-100">
+                          <div className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                            {match.photo ? (
+                              <img src={match.photo} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
+                                {match.name?.[0]}
+                              </div>
+                            )}
+                          </div>
+                          <span className="flex-1 font-bold text-gray-800">{match.name?.split(' ')[0]}</span>
+                          <button
+                            onClick={() => addToTeam(match.partnerId)}
+                            disabled={isSaving}
+                            className="flex items-center gap-1 gradient-orange text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm active:scale-95 transition-transform disabled:opacity-60"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> הוסף
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Invite by email */}
+                {addMode === 'email' && (
                   <InviteByEmail compact onInvited={loadData} />
-                  <button onClick={() => setAddMode(null)} className="text-gray-400 text-sm font-medium pt-3">חזרה</button>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}
