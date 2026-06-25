@@ -63,10 +63,21 @@ async function rosterUserIds(sr, selfId, profile) {
     return [...new Set(ids)];
 }
 
-async function ensureMatch(sr, a, b, profA, profB) {
-    const f1 = await sr.Match.filter({ user1_id: a, user2_id: b });
-    const f2 = await sr.Match.filter({ user1_id: b, user2_id: a });
-    const existing = f1[0] || f2[0];
+async function ensureMatch(sr, uc, selfId, a, b, profA, profB) {
+    // Look for an existing match between the pair in both directions. A mutual
+    // match created by handleSwipe is written through the user-context client and
+    // is not always visible to the asServiceRole view — so a service-role-only
+    // check can miss it and create a duplicate "team" match. When the caller is a
+    // party to this pair, also check via the user-context client (uc).
+    const queries = [
+        sr.Match.filter({ user1_id: a, user2_id: b }),
+        sr.Match.filter({ user1_id: b, user2_id: a }),
+    ];
+    if (uc && (String(a) === String(selfId) || String(b) === String(selfId))) {
+        queries.push(uc.Match.filter({ user1_id: a, user2_id: b }));
+        queries.push(uc.Match.filter({ user1_id: b, user2_id: a }));
+    }
+    const existing = (await Promise.all(queries)).flat().find(Boolean);
     if (existing) return existing;
     return await sr.Match.create({
         user1_id: a,
@@ -80,7 +91,7 @@ async function ensureMatch(sr, a, b, profA, profB) {
 
 // Rewrite every member's match-based team_members so they all share one roster.
 // Pending invite entries on each profile are preserved.
-async function writeRoster(sr, memberIds) {
+async function writeRoster(sr, uc, selfId, memberIds) {
     const ids = [...new Set(memberIds.map(String))];
     const profiles = {};
     for (const id of ids) profiles[id] = await getProfile(sr, id);
@@ -92,7 +103,7 @@ async function writeRoster(sr, memberIds) {
         for (const other of ids) {
             if (other === id) continue;
             const oProf = profiles[other];
-            const match = await ensureMatch(sr, id, other, prof, oProf);
+            const match = await ensureMatch(sr, uc, selfId, id, other, prof, oProf);
             matchEntries.push({
                 user_id: other,
                 match_id: match.id,
@@ -195,14 +206,18 @@ Deno.serve(async (req) => {
         const inviterName = invite.inviter_name || inviterProfile?.name || 'מישהו';
         const inviteeName = inviteeProfile?.name || user.full_name || invite.invitee_name || 'מישהו';
 
-        const match = await sr.Match.create({
-            user1_id: invite.inviter_user_id,
-            user1_name: inviterName,
-            user2_id: user.id,
-            user2_name: inviteeName,
-            status: 'active',
-            match_type: 'team',
-        });
+        // Reuse an existing match between the two users (e.g. a mutual swipe
+        // match) instead of blindly creating a new one — otherwise accepting a
+        // team invite between already-matched users produces a duplicate card.
+        const match = await ensureMatch(
+            sr,
+            base44.entities,
+            String(user.id),
+            invite.inviter_user_id,
+            user.id,
+            { name: inviterName },
+            { name: inviteeName },
+        );
 
         await sr.TeamInvite.update(invite.id, {
             status: 'accepted',
@@ -220,7 +235,7 @@ Deno.serve(async (req) => {
         const freshInviter = await getProfile(sr, invite.inviter_user_id);
         const inviterRoster = await rosterUserIds(sr, invite.inviter_user_id, freshInviter);
         const newRoster = [...new Set([...inviterRoster, String(user.id)])];
-        await writeRoster(sr, newRoster);
+        await writeRoster(sr, base44.entities, String(user.id), newRoster);
 
         await sendPush({
             userId: invite.inviter_user_id,
