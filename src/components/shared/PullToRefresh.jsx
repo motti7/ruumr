@@ -77,7 +77,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   return (
     <div
       ref={containerRef}
-      className="relative overflow-y-auto h-full"
+      className="relative overflow-y-auto overflow-x-hidden h-full"
       style={{ overscrollBehavior: "none" }}
     >
       <AnimatePresence>
