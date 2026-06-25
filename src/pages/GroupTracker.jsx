@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
@@ -6,7 +6,10 @@ import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle } from "lucide-react";
+import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail } from "lucide-react";
+import { listIncomingTeamInvites, respondToTeamInvite } from "@/api/teamInvites";
+import InviteByEmail from "@/components/team/InviteByEmail";
+import TeamRequestCard from "@/components/team/TeamRequestCard";
 
 export default function GroupTrackerPage() {
   const navigate = useNavigate();
@@ -17,47 +20,77 @@ export default function GroupTrackerPage() {
   const [targetCount, setTargetCount] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddPanel, setShowAddPanel] = useState(false);
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [incomingRequests, setIncomingRequests] = useState([]);
+  const [pendingMembers, setPendingMembers] = useState([]);
+
+  const loadData = useCallback(async () => {
+    try {
+      const userData = await User.me();
+      setUser(userData);
+
+      const profiles = await base44.entities.Profile.filter({ user_id: userData.id });
+      if (profiles.length === 0) { navigate(createPageUrl('Discover')); return; }
+      const prof = profiles[0];
+      setMyProfile(prof);
+      setTargetCount(prof.team_target || 3);
+
+      // Load saved team from profile
+      const savedTeamIds = (prof.team_members || []).map(m => m.match_id).filter(Boolean);
+      setTeamIds(savedTeamIds);
+
+      // Pending invited friends (added by email, awaiting approval/signup)
+      setPendingMembers((prof.team_members || []).filter(m => m.pending && m.invite_id));
+
+      // Incoming requests this user must approve
+      try {
+        setIncomingRequests(await listIncomingTeamInvites(userData.id));
+      } catch (reqErr) { console.error(reqErr); }
+
+      const m1 = await base44.entities.Match.filter({ user1_id: userData.id, status: 'active' });
+      const m2 = await base44.entities.Match.filter({ user2_id: userData.id, status: 'active' });
+
+      const withPhotos = await Promise.all([...m1, ...m2].map(async (match) => {
+        const partnerId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
+        const partnerName = match.user1_id === userData.id ? match.user2_name : match.user1_name;
+        const partnerProfiles = await base44.entities.Profile.filter({ user_id: partnerId });
+        return { id: match.id, partnerId, name: partnerName, photo: partnerProfiles[0]?.photos?.[0] || null };
+      }));
+      setAllMatches(withPhotos);
+    } catch (e) { console.error(e); }
+  }, [navigate]);
 
   useEffect(() => {
-    const load = async () => {
+    (async () => {
       setIsLoading(true);
-      try {
-        const userData = await User.me();
-        setUser(userData);
-
-        const profiles = await base44.entities.Profile.filter({ user_id: userData.id });
-        if (profiles.length === 0) { navigate(createPageUrl('Discover')); return; }
-        const prof = profiles[0];
-        setMyProfile(prof);
-        setTargetCount(prof.team_target || 3);
-
-        // Load saved team from profile
-        const savedTeamIds = (prof.team_members || []).map(m => m.match_id).filter(Boolean);
-        setTeamIds(savedTeamIds);
-
-        const m1 = await base44.entities.Match.filter({ user1_id: userData.id, status: 'active' });
-        const m2 = await base44.entities.Match.filter({ user2_id: userData.id, status: 'active' });
-
-        const withPhotos = await Promise.all([...m1, ...m2].map(async (match) => {
-          const partnerId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
-          const partnerName = match.user1_id === userData.id ? match.user2_name : match.user1_name;
-          const partnerProfiles = await base44.entities.Profile.filter({ user_id: partnerId });
-          return { id: match.id, partnerId, name: partnerName, photo: partnerProfiles[0]?.photos?.[0] || null };
-        }));
-        setAllMatches(withPhotos);
-      } catch (e) { console.error(e); }
+      await loadData();
       setIsLoading(false);
-    };
-    load();
-  }, []);
+    })();
+  }, [loadData]);
+
+  const cancelPendingInvite = async (inviteId) => {
+    setPendingMembers(prev => prev.filter(m => m.invite_id !== inviteId));
+    try {
+      await respondToTeamInvite(inviteId, 'cancel');
+    } catch (e) { console.error(e); }
+    await loadData();
+  };
+
+  const handleRequestResolved = async () => {
+    await loadData();
+  };
 
   const saveToProfile = async (newTeamIds, newTarget) => {
     if (!myProfile) return;
     setIsSaving(true);
-    const teamMembers = allMatches
-      .filter(m => newTeamIds.includes(m.id))
-      .map(m => ({ match_id: m.id, name: m.name, photo: m.photo }));
+    const teamMembers = [
+      ...allMatches
+        .filter(m => newTeamIds.includes(m.id))
+        .map(m => ({ match_id: m.id, name: m.name, photo: m.photo })),
+      // Preserve pending invited friends (added by email) — they aren't match-based.
+      ...pendingMembers.map(p => ({ invite_id: p.invite_id, name: p.name, pending: true })),
+    ];
     await Profile.update(myProfile.id, { team_members: teamMembers, team_target: newTarget });
     try {
       await syncCurrentProfileToRuumrPlus();
@@ -86,7 +119,7 @@ export default function GroupTrackerPage() {
 
   const teamMembers = allMatches.filter(m => teamIds.includes(m.id));
   const availableToAdd = allMatches.filter(m => !teamIds.includes(m.id));
-  const currentCount = 1 + teamMembers.length;
+  const currentCount = 1 + teamMembers.length + pendingMembers.length;
   const remaining = Math.max(0, targetCount - currentCount);
   const progressPercent = Math.min(100, (currentCount / targetCount) * 100);
 
@@ -137,6 +170,18 @@ export default function GroupTrackerPage() {
       </div>
 
       <div className="p-4 space-y-4">
+
+        {/* Incoming team requests */}
+        {incomingRequests.length > 0 && (
+          <div className="space-y-2">
+            <p className="font-bold text-gray-700 text-right text-sm">בקשות הצטרפות לצוות</p>
+            <AnimatePresence>
+              {incomingRequests.map((invite) => (
+                <TeamRequestCard key={invite.id} invite={invite} onResolved={handleRequestResolved} />
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Target Selector */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -233,6 +278,37 @@ export default function GroupTrackerPage() {
               ))}
             </AnimatePresence>
 
+            {/* Pending invited friends (by email) */}
+            <AnimatePresence>
+              {pendingMembers.map((member) => (
+                <motion.div
+                  key={member.invite_id}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  className="flex flex-col items-center gap-1 relative"
+                >
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-dashed border-orange-300 bg-orange-50 flex items-center justify-center">
+                      <span className="text-orange-500 font-bold text-xl">{member.name?.[0] || '?'}</span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center shadow-sm">
+                      <Clock className="w-3 h-3 text-white" />
+                    </div>
+                    <button
+                      onClick={() => cancelPendingInvite(member.invite_id)}
+                      className="absolute -top-1 -left-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-sm"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                  <span className="text-xs font-medium text-orange-500 max-w-[56px] truncate text-center">
+                    {member.name?.split(' ')[0]}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
             {/* Empty slots */}
             {Array.from({ length: remaining }).map((_, i) => (
               <div key={`empty-${i}`} className="flex flex-col items-center gap-1">
@@ -290,6 +366,31 @@ export default function GroupTrackerPage() {
               </AnimatePresence>
             </div>
           )}
+        </div>
+
+        {/* Invite a friend by email */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <button
+            onClick={() => setShowInvitePanel(!showInvitePanel)}
+            className="flex items-center gap-2 text-gray-700 font-bold text-sm mx-auto"
+          >
+            <Mail className="w-4 h-4 text-[--theme-orange]" />
+            יש לך חבר/ה שכבר בצוות? הזמן/י במייל
+          </button>
+          <AnimatePresence>
+            {showInvitePanel && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-4">
+                  <InviteByEmail compact onInvited={loadData} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Full team celebration */}
