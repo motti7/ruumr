@@ -44,7 +44,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
       aria-label={`${matchTypeLabel}: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
     >
       <div className="flex items-center p-4" dir="rtl">
-        <div className="relative ml-4">
+        <div className="relative w-24 shrink-0 flex justify-start">
           <div className="w-16 h-16 rounded-full border-2 border-gray-100 overflow-hidden">
             <SmartImage
               src={match.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"}
