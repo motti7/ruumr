@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useOptionalAuth } from '@/lib/AuthContext';
 import { User } from '@/entities/User';
@@ -67,6 +68,7 @@ const Step = ({ children, step, currentStep, title }) =>
 
 
 export default function OnboardingPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user: authUser, isLoadingAuth, setHasProfile } = useOptionalAuth();
@@ -408,7 +410,7 @@ export default function OnboardingPage() {
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep, step_name: stepName });if (step === 3 && formData.current_status === 'seeking_apartment') {setStep(5); // Skip apartment details
     } else if (step === 5) {setStep(6); // Go to photos
-    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;const prevStep = () => {if (step === 5 && formData.current_status === 'seeking_apartment') {setStep(3);} else {setStep((s) => Math.max(s - 1, 1));}};const handleFinish = async (shouldVerify = false) => {if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {alert("אנא המתן לסיום העלאת התמונות");return;}const hasBlobPhotos = formData.photos.some((p) => p && p.startsWith('blob:'));const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some((p) => p && p.startsWith('blob:'));if (hasBlobPhotos || hasBlobApartment) {alert("עדיין מעלה תמונות... נסה שוב בעוד רגע");return;}setIsSubmitting(true);
+    } else {setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1));}};const isHasApartment = formData.current_status === 'has_apartment';let displayStep = step;if (!isHasApartment && step > 3) displayStep = step - 1;const displayTotal = isHasApartment ? 8 : 7;const prevStep = () => {if (step === 5 && formData.current_status === 'seeking_apartment') {setStep(3);} else {setStep((s) => Math.max(s - 1, 1));}};const handleFinish = async (shouldVerify = false) => {if (uploadingPhotos.size > 0 || uploadingApartmentPhotos.size > 0) {alert(t("wait_for_uploads"));return;}const hasBlobPhotos = formData.photos.some((p) => p && p.startsWith('blob:'));const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some((p) => p && p.startsWith('blob:'));if (hasBlobPhotos || hasBlobApartment) {alert(t("still_uploading_try_again"));return;}setIsSubmitting(true);
     try {
       // Always fetch fresh user_id directly - don't rely on formData.user_id which may be unset
       const currentUser = await User.me();
@@ -416,7 +418,7 @@ export default function OnboardingPage() {
       const resolvedProfileName = formData.name.trim() || appleDisplayName.trim();
 
       if (!resolvedProfileName) {
-        alert("נא למלא שם מלא לפני ההמשך");
+        alert(t("fill_name_before_continue"));
         setIsSubmitting(false);
         return;
       }
@@ -589,7 +591,7 @@ export default function OnboardingPage() {
         newPhotos[index] = null;
         return { ...prev, [key]: newPhotos };
       });
-      alert("העלאת התמונה נכשלה. אנא נסה שנית.");
+      alert(t("photo_upload_failed"));
     } finally {
       // Untrack upload
       if (isApartment) {
@@ -689,17 +691,17 @@ export default function OnboardingPage() {
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-white" dir={i18n.dir()}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-[--theme-orange] animate-spin" />
-          <span className="text-sm font-semibold text-gray-500">טוען...</span>
+          <span className="text-sm font-semibold text-gray-500">{t("loading")}</span>
         </div>
       </div>);
 
   }
 
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir="rtl" style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
+    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir={i18n.dir()} style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
         #onboarding-root input[type=number]::-webkit-inner-spin-button,
         #onboarding-root input[type=number]::-webkit-outer-spin-button {
@@ -778,12 +780,12 @@ export default function OnboardingPage() {
         }
 
         <div className="flex-1 relative">
-            <Step step={1} currentStep={step} title="בואו נכיר!">
-                <p className="text-center text-base mb-6 -mt-2" style={{ color: '#FFB29D' }}>ספר/י לנו קצת על עצמך</p>
+            <Step step={1} currentStep={step} title={t("onb_step1_title")}>
+                <p className="text-center text-base mb-6 -mt-2" style={{ color: '#FFB29D' }}>{t("onb_step1_subtitle")}</p>
                 <div className="space-y-4">
                     <div className="space-y-1 text-right">
-                        <label className="text-base font-semibold" style={{ color: '#FA3803' }}>שם</label>
-                        <p className="text-xs text-gray-400">כך יוצג שמך לשותפים פוטנציאליים בפרופיל</p>
+                        <label className="text-base font-semibold" style={{ color: '#FA3803' }}>{t("onb_name_label")}</label>
+                        <p className="text-xs text-gray-400">{t("onb_name_hint")}</p>
                         {isAppleUser && appleDisplayName ?
                 // Apple Sign-In returned a valid name — show the input with
                 // the Apple-provided value locked in (readOnly + no onChange).
@@ -808,14 +810,14 @@ export default function OnboardingPage() {
                                 <Input
                     value={formData.name}
                     onChange={(e) => setFormField('name', e.target.value)}
-                    placeholder="השם שיוצג בפרופיל"
+                    placeholder={t("onb_name_placeholder")}
                     className="h-11 bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0 text-base" />
                             </>
                 }
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1 text-right">
-                            <label className="text-base font-semibold" style={{ color: '#FA3803' }}>גיל</label>
+                            <label className="text-base font-semibold" style={{ color: '#FA3803' }}>{t("onb_age_label")}</label>
                             <Input
                     type="number"
                     value={formData.age || ''}
@@ -826,17 +828,17 @@ export default function OnboardingPage() {
                     className="h-11 text-base bg-gray-50 border-gray-200 focus:border-[--theme-orange] focus:ring-0 focus-visible:ring-0" />
                         </div>
                         <div className="flex flex-col gap-1 text-right">
-                            <label className="font-semibold text-base" style={{ color: '#FA3803' }}>מגדר</label>
+                            <label className="font-semibold text-base" style={{ color: '#FA3803' }}>{t("onb_gender_label")}</label>
                             <CustomSelect
                     value={formData.gender}
                     onChange={(v) => setFormField('gender', v)}
-                    options={[{ v: 'male', l: 'זכר' }, { v: 'female', l: 'נקבה' }, { v: 'other', l: 'אחר' }]} />
+                    options={[{ v: 'male', l: t('gender_male') }, { v: 'female', l: t('gender_female') }, { v: 'other', l: t('gender_other') }]} />
                         </div>
                     </div>
 
                     {/* Vibe Section */}
                     <div className="pt-1 text-right">
-                        <label className="text-base font-semibold block mb-4 mt-1" style={{ color: '#FA3803' }}>מה הוויב שלך?</label>
+                        <label className="text-base font-semibold block mb-4 mt-1" style={{ color: '#FA3803' }}>{t("onb_vibe_label")}</label>
                         <Slider
                   dir="ltr"
                   value={[formData.vibe_level]}
@@ -846,9 +848,9 @@ export default function OnboardingPage() {
                   step={1}
                   className="py-2" />
                         <div className="flex justify-between text-xs font-medium mt-1" style={{ color: '#B9BFC8' }}>
-                            <span>תוסס ומסיבתי</span>
-                            <span>מאוזן</span>
-                            <span>שקט וביתי</span>
+                            <span>{t("vibe_lively")}</span>
+                            <span>{t("vibe_balanced")}</span>
+                            <span>{t("vibe_quiet")}</span>
                         </div>
                     </div>
                 </div>
@@ -859,30 +861,30 @@ export default function OnboardingPage() {
                     {/* Status Cards */}
                     <button type="button" onClick={() => setFormField('current_status', 'seeking_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'seeking_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base text-gray-800 font-semibold">מחפש/ת דירה</h3>
+                            <h3 className="text-base text-gray-800 font-semibold">{t("onb_seeking_apartment_title")}</h3>
                             <Search className={`w-5 h-5 ${formData.current_status === 'seeking_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>אין לי עדיין דירה, מחפש/ת להצטרף או למצוא יחד</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>{t("onb_seeking_apartment_desc")}</p>
                     </button>
 
                     <button type="button" onClick={() => setFormField('current_status', 'has_apartment')} className={`w-full px-4 py-3 border-2 rounded-2xl text-right transition-all ${formData.current_status === 'has_apartment' ? 'border-[--theme-orange] bg-orange-50 shadow-sm' : 'border-gray-100 bg-white shadow-sm'}`}>
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-base text-gray-800 font-semibold">יש לי דירה</h3>
+                            <h3 className="text-base text-gray-800 font-semibold">{t("onb_has_apartment_title")}</h3>
                             <Home className={`w-5 h-5 ${formData.current_status === 'has_apartment' ? 'text-[--theme-orange]' : 'text-gray-300'}`} />
                         </div>
-                        <p className="text-gray-500" style={{ fontSize: '13px' }}>יש לי דירה ואני מחפש/ת שותף/ה שיצטרפו</p>
+                        <p className="text-gray-500" style={{ fontSize: '13px' }}>{t("onb_has_apartment_desc")}</p>
                     </button>
 
                     {/* Location */}
                     <div className="space-y-1 pt-2 text-right">
-                        <h3 className="text-base font-semibold" style={{ color: '#FA3803' }}>איפה?</h3>
-                        <p className="mb-1 text-sm" style={{ color: '#FFB29D' }}>ניתן לבחור מספר ערים</p>
+                        <h3 className="text-base font-semibold" style={{ color: '#FA3803' }}>{t("onb_where_label")}</h3>
+                        <p className="mb-1 text-sm" style={{ color: '#FFB29D' }}>{t("onb_multiple_cities_hint")}</p>
                         <CitySelect selectedCities={formData.search_cities} onChange={(cities) => setFormField('search_cities', cities)} />
                     </div>
 
                     {/* Budget */}
                     <div className="text-right pt-1">
-                       <h3 className="text-base font-semibold py-2" style={{ color: '#FA3803' }}>תקציב לשותף</h3>
+                       <h3 className="text-base font-semibold py-2" style={{ color: '#FA3803' }}>{t("onb_budget_label")}</h3>
                        {/* Thumb value label — dir="ltr" so 0% = left, 100% = right */}
                        <div className="relative w-full mb-2" dir="ltr">
                            <div
@@ -922,13 +924,13 @@ export default function OnboardingPage() {
                 </div>
             </Step>
             
-            <Step step={3} currentStep={step} title="העדפות">
+            <Step step={3} currentStep={step} title={t("onb_step3_title")}>
                 <div className="flex flex-col justify-between h-full text-right gap-5">
                     {/* אני מחפש/ת */}
                     <div>
-                        <label className="block mb-2 text-base font-semibold" style={{ color: '#FA3803' }}>אני מחפש/ת</label>
+                        <label className="block mb-2 text-base font-semibold" style={{ color: '#FA3803' }}>{t("onb_looking_for_label")}</label>
                         <div className="flex bg-gray-100 p-1 rounded-xl">
-                            {[{ v: 'male', l: 'שותף' }, { v: 'female', l: 'שותפה' }, { v: 'any', l: 'לא משנה' }].map((opt) =>
+                            {[{ v: 'male', l: t('looking_for_male') }, { v: 'female', l: t('looking_for_female') }, { v: 'any', l: t('looking_for_any') }].map((opt) =>
                   <button key={opt.v} onClick={() => setFormField('looking_for_gender', opt.v)}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${formData.looking_for_gender === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}>
                                     {opt.l}
@@ -940,43 +942,43 @@ export default function OnboardingPage() {
                     {/* זיקה לדת */}
                     <div>
                         <CustomSelect
-                  label="זיקה לדת"
+                  label={t("onb_religion_label")}
                   value={formData.religion}
                   onChange={(v) => setFormField('religion', v)}
                   options={[
-                  { v: 'secular', l: 'חילוני/ת' },
-                  { v: 'traditional', l: 'מסורתי/ת' },
-                  { v: 'national_religious', l: 'דתי/ה לאומי/ת' },
-                  { v: 'religious', l: 'דתי/ה' },
-                  { v: 'haredi', l: 'חרדי/ת' }]
+                  { v: 'secular', l: t('religion_secular') },
+                  { v: 'traditional', l: t('religion_traditional') },
+                  { v: 'national_religious', l: t('religion_national_religious') },
+                  { v: 'religious', l: t('religion_religious') },
+                  { v: 'haredi', l: t('religion_haredi') }]
                   } />
                     </div>
 
                     {/* כשרות + שבת */}
                     <div className="grid grid-cols-2 gap-4">
                         <CustomSelect
-                  label="כשרות"
+                  label={t("onb_kosher_label")}
                   value={formData.kosher_preference}
                   onChange={(v) => setFormField('kosher_preference', v)}
-                  options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]} />
-                
+                  options={[{ v: 'for', l: t('pref_for') }, { v: 'against', l: t('pref_against') }, { v: 'flow', l: t('pref_flexible') }]} />
+
                         <CustomSelect
-                  label="שומר/ת שבת"
+                  label={t("onb_shabbat_label")}
                   value={formData.shabbat_preference}
                   onChange={(v) => setFormField('shabbat_preference', v)}
-                  options={[{ v: 'for', l: 'בעד' }, { v: 'against', l: 'נגד' }, { v: 'flow', l: 'זורם/ת' }]} />
+                  options={[{ v: 'for', l: t('pref_for') }, { v: 'against', l: t('pref_against') }, { v: 'flow', l: t('pref_flexible') }]} />
                 
                     </div>
 
                     {/* חיית מחמד */}
                     <div>
-                        <label className="block mb-2 text-base font-semibold" style={{ color: '#FA3803' }}>חיית מחמד שמצטרפת?</label>
+                        <label className="block mb-2 text-base font-semibold" style={{ color: '#FA3803' }}>{t("onb_pet_label")}</label>
                         <div className="flex gap-2 flex-wrap">
                             {[
-                  { type: 'none', label: 'אין', icon: null },
-                  { type: 'dog', label: 'כלב', icon: null },
-                  { type: 'cat', label: 'חתול', icon: null },
-                  { type: 'other', label: 'אחר', icon: null }].
+                  { type: 'none', label: t('pet_none'), icon: null },
+                  { type: 'dog', label: t('pet_dog'), icon: null },
+                  { type: 'cat', label: t('pet_cat'), icon: null },
+                  { type: 'other', label: t('pet_other'), icon: null }].
                   map(({ type, label, icon }) =>
                   <button key={type} type="button" onClick={() => setFormField('pet_type', type)}
                   className={`rounded-full border text-sm font-semibold transition-all flex items-center py-2 px-5 ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-black' : 'border-gray-300 bg-white text-gray-500'}`}>
@@ -986,14 +988,14 @@ export default function OnboardingPage() {
                         </div>
                         {formData.pet_type === 'other' &&
                 <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-2">
-                                <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder="איזו חיה?" className="h-9 text-sm bg-gray-50 border-gray-200" />
+                                <Input value={formData.pet_other_description} onChange={(e) => setFormField('pet_other_description', e.target.value)} placeholder={t("onb_pet_other_placeholder")} className="h-9 text-sm bg-gray-50 border-gray-200" />
                             </motion.div>
                 }
                     </div>
                 </div>
             </Step>
 
-            <Step step={4} currentStep={step} title="פרטי הדירה">
+            <Step step={4} currentStep={step} title={t("onb_step4_title")}>
                 <div className="space-y-6 text-right">
                     {simulatorMode &&
               <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
@@ -1003,20 +1005,20 @@ export default function OnboardingPage() {
                     <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                         <h3 className="font-bold text-[--theme-orange] mb-4 flex items-center gap-2">
                             <Home className="w-5 h-5" />
-                            הדירה שלך
+                            {t("onb_your_apartment")}
                         </h3>
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label className="text-xs font-bold text-gray-500 mb-1 block">שותפים קיימים</label>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">{t("onb_existing_roommates")}</label>
                                 <Input type="number" value={formData.existing_roommates} onChange={(e) => setFormField('existing_roommates', parseInt(e.target.value) || 0)} className="bg-white border-orange-200" />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-500 mb-1 block">שכירות (סה"כ)</label>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">{t("onb_total_rent")}</label>
                                 <Input type="number" value={formData.apartment_total_budget} onChange={(e) => setFormField('apartment_total_budget', parseInt(e.target.value) || 0)} className="bg-white border-orange-200" />
                             </div>
                         </div>
                         
-                        <label className="text-base font-semibold mb-3 block" style={{ color: '#FA3803' }}>תמונות (מינימום 3)</label>
+                        <label className="text-base font-semibold mb-3 block" style={{ color: '#FA3803' }}>{t("onb_apartment_photos_label")}</label>
                         <div className="grid grid-cols-3 gap-2">
                             {formData.apartment_photos.map((_, i) =>
                   <div
@@ -1025,7 +1027,7 @@ export default function OnboardingPage() {
                     onClick={() => triggerFileInput(i, true)}>
                     
                                     {formData.apartment_photos?.[i] ?
-                    <img src={formData.apartment_photos[i]} alt={`דירה ${i + 1}`} className="w-full h-full object-cover" /> :
+                    <img src={formData.apartment_photos[i]} alt={t('onb_apartment_photo_alt', { number: i + 1 })} className="w-full h-full object-cover" /> :
 
                     uploadingApartmentPhotos.has(i) ?
                     <Loader2 className="w-5 h-5 animate-spin text-[--theme-orange]" /> :
@@ -1040,9 +1042,9 @@ export default function OnboardingPage() {
 
 
 
-            <Step step={5} currentStep={step} title="תחומי עניין">
+            <Step step={5} currentStep={step} title={t("onb_step5_title")}>
                 <div className="flex flex-col h-full text-right">
-                    <p className="text-center mb-4 -mt-3 text-base" style={{ color: '#FFB29D' }}>בחר/י מה שמעניין אותך</p>
+                    <p className="text-center mb-4 -mt-3 text-base" style={{ color: '#FFB29D' }}>{t("onb_interests_subtitle")}</p>
                     <div className="flex flex-wrap justify-center gap-2 overflow-hidden">
                         {INTEREST_OPTIONS.map((interest) => {
                   const selected = (formData.interests || []).includes(interest.id);
@@ -1063,7 +1065,7 @@ export default function OnboardingPage() {
                       'bg-[#FA3803] text-white border-[#FA3803]' :
                       "bg-white border-[#B9BFC8]"}`
                       }>
-                        {interest.label}
+                        {t(interest.labelKey)}
                         <Icon className={`w-4 h-4 flex-shrink-0 stroke-current`} strokeWidth={2} fill="none" />
                             </button>);
                 })}
@@ -1072,21 +1074,21 @@ export default function OnboardingPage() {
                     <div className="flex flex-col gap-6 pt-2">
                         {/* קצת עליי */}
                         <div className="flex flex-col">
-                            <label className="text-base font-semibold block my-1" style={{ color: '#FA3803' }}>קצת עליי</label>
-                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder="תחביבים, עיסוק..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px] py-1.5" style={{ borderColor: '#B9BFC8' }} />
+                            <label className="text-base font-semibold block my-1" style={{ color: '#FA3803' }}>{t("onb_about_me_label")}</label>
+                            <Textarea maxLength={200} value={formData.about_me} onChange={(e) => setFormField('about_me', e.target.value)} placeholder={t("onb_about_me_placeholder")} className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px] py-1.5" style={{ borderColor: '#B9BFC8' }} />
                         </div>
 
                         {/* מה אני מחפש/ת */}
                         <div className="flex flex-col">
-                            <label className="text-base font-semibold block mb-0.5" style={{ color: '#FA3803' }}>מה אני מחפש/ת</label>
-                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder="איזה סוג של שותף/ה..." className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px] px-3 py-1\u05E5" style={{ borderColor: '#B9BFC8' }} />
+                            <label className="text-base font-semibold block mb-0.5" style={{ color: '#FA3803' }}>{t("onb_looking_for_desc_label")}</label>
+                            <Textarea maxLength={200} value={formData.looking_for_description} onChange={(e) => setFormField('looking_for_description', e.target.value)} placeholder={t("onb_looking_for_desc_placeholder")} className="bg-gray-50 border text-sm resize-none h-8 min-h-[32px] px-3 py-1\u05E5" style={{ borderColor: '#B9BFC8' }} />
                         </div>
                     </div>
                 </div>
             </Step>
 
-            <Step step={6} currentStep={step} title="התמונות שלי">
-                <p className="text-center text-gray-500 mb-6">תמונה אחת שווה אלף מילים (ו-2 תמונות שוות התאמה!)</p>
+            <Step step={6} currentStep={step} title={t("onb_step6_title")}>
+                <p className="text-center text-gray-500 mb-6">{t("onb_photos_subtitle")}</p>
                 {simulatorMode &&
             <div className="mb-4 rounded-2xl border border-dashed border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 text-center">
                         Simulator mode is on, so you can continue without uploading photos. Demo photos will be generated automatically.
@@ -1133,15 +1135,15 @@ export default function OnboardingPage() {
                     {/* TOP SECTION: Profile Ready */}
                     <div className="flex flex-col gap-4 flex-shrink-0">
                         <div className="flex items-center justify-center gap-2">
-                            <h2 className="text-3xl font-bold text-black">הפרופיל שלך מוכן!</h2>
+                            <h2 className="text-3xl font-bold text-black">{t("onb_profile_ready")}</h2>
                             <CheckCircle className="w-7 h-7 flex-shrink-0" style={{ color: '#FA3803' }} />
                         </div>
 
                         {/* Social Media Link */}
-                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100" dir="rtl">
+                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100" dir={i18n.dir()}>
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-gray-800 text-base font-bold">קישור לרשת חברתית</span>
-                                <span className="text-sm text-gray-400">(אופציונלי)</span>
+                                <span className="text-gray-800 text-base font-bold">{t("onb_social_link_label")}</span>
+                                <span className="text-sm text-gray-400">{t("optional")}</span>
                                 <div className="flex items-center gap-1.5 mr-auto">
                                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
                                         <Instagram className="w-3.5 h-3.5 text-white" />
@@ -1157,9 +1159,9 @@ export default function OnboardingPage() {
                             <Input
                                 value={formData.social_link}
                                 onChange={(e) => setFormField('social_link', e.target.value)}
-                                placeholder="הדבק קישור כאן"
+                                placeholder={t("onb_paste_link_placeholder")}
                                 className="h-10 text-sm bg-white border-gray-200 w-full"
-                                dir="rtl"
+                                dir={i18n.dir()}
                             />
                             {/* Promotion checkbox */}
                             <button
@@ -1171,19 +1173,19 @@ export default function OnboardingPage() {
                                     {wantsRuumrPromotion && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                                 </div>
                                 <span className="text-sm text-gray-600 leading-snug">
-                                    רוצה למצוא שותף מהר יותר? סמן/י כאן כדי שנעלה את הפרופיל שלך לסטורי באינסטגרם של Ruumr! 🚀
+                                    {t("onb_promotion_text")}
                                 </span>
                             </button>
                         </div>
 
                         {/* Invite a friend already on your team (optional) */}
-                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-3" dir="rtl">
+                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-3" dir={i18n.dir()}>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-gray-800 text-base font-bold">כבר יש לך חבר/ה לצוות?</span>
-                                <span className="text-sm text-gray-400">(אופציונלי)</span>
+                                <span className="text-gray-800 text-base font-bold">{t("onb_team_friend_label")}</span>
+                                <span className="text-sm text-gray-400">{t("optional")}</span>
                             </div>
                             <p className="text-xs text-gray-500 mb-3">
-                                הזמן/י אותם במייל. אם הם כבר ב-Ruumr נבקש אישור, ואם לא — נשלח להם הזמנה.
+                                {t("onb_team_invite_hint")}
                             </p>
                             {pendingInvites.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -1210,15 +1212,15 @@ export default function OnboardingPage() {
                         {/* Divider label */}
                         <div className="flex items-center gap-3 mb-3">
                             <div className="flex-1 h-px bg-gray-200" />
-                            <span className="text-xs text-gray-400 font-medium">אימות פרופיל</span>
+                            <span className="text-xs text-gray-400 font-medium">{t("onb_verification_divider")}</span>
                             <div className="flex-1 h-px bg-gray-200" />
                         </div>
 
                         {/* Verification text */}
                         <div className="w-full mb-4">
-                            <h3 className="text-xl font-bold mb-1">אמת/י את הפרופיל שלך</h3>
+                            <h3 className="text-xl font-bold mb-1">{t("onb_verify_title")}</h3>
                             <p className="text-gray-500 text-sm px-2">
-                                פרופילים מאומתים מקבלים פי 3 יותר פניות! התהליך לוקח פחות מ-2 דקות.
+                                {t("onb_verify_desc")}
                             </p>
                         </div>
 
@@ -1228,13 +1230,13 @@ export default function OnboardingPage() {
                                 onClick={() => handleFinish(true)}
                                 disabled={isSubmitting}
                                 className="w-full h-11 rounded-full text-base font-bold shadow-lg gradient-orange text-white hover:brightness-110 disabled:opacity-70">
-                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'אמת עכשיו (מומלץ)'}
+                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : t('onb_verify_now_button')}
                             </Button>
                             <button
                                 onClick={() => !isSubmitting && handleFinish(false)}
                                 disabled={isSubmitting}
                                 className="w-full text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors py-1 disabled:opacity-50">
-                                אולי אחר כך
+                                {t('onb_maybe_later')}
                             </button>
                         </div>
                     </div>
@@ -1255,7 +1257,7 @@ export default function OnboardingPage() {
           onClick={nextStep}
           className={`w-3/4 max-w-xs h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
           disabled={!canProceed() || isSubmitting}>
-          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'המשך'}
+          {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : t('continue')}
         </Button>
       </div>
       }

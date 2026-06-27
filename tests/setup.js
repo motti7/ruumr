@@ -1,4 +1,10 @@
 import '@testing-library/jest-dom';
+// Initialize the shared i18next instance so components using useTranslation()
+// render in tests. Force Hebrew (the app default) for deterministic output —
+// jsdom reports navigator.language as en-US, which would otherwise auto-detect
+// English and break the existing RTL/Hebrew assertions.
+import i18n from '@/i18n';
+i18n.changeLanguage('he');
 
 const createMemoryStorage = () => {
   const store = {};
