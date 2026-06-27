@@ -1,13 +1,15 @@
 // @ts-nocheck
 import React, { memo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Puzzle, Trash2, X, Check, Sparkles } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
+  const { t, i18n } = useTranslation();
   const [showConfirm, setShowConfirm] = useState(false);
   const showPlusLabel = matchType === "ruumr_plus";
-  const matchTypeLabel = showPlusLabel ? "התאמת Ruumr Plus" : matchType === "mutual" ? "התאמה הדדית" : "התאמה";
+  const matchTypeLabel = showPlusLabel ? t("plus_match") : matchType === "mutual" ? t("mutual_match") : t("match_single");
   const handleProfileClick = useCallback((e) => {
     e.stopPropagation();
     onClickProfile();
@@ -41,14 +43,14 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
       onClick={() => onClickProfile()}
       className="bg-white rounded-2xl shadow-md border border-gray-100 cursor-pointer overflow-hidden hover:shadow-xl"
       role="article"
-      aria-label={`${matchTypeLabel}: ${match.name}, ${match.age || ''} בן/בת, ${match.location || 'מיקום לא צוין'}`}
+      aria-label={t("match_card_aria", { label: matchTypeLabel, name: match.name, age: match.age || '', location: match.location || t("location_not_specified") })}
     >
-      <div className="flex items-center p-4" dir="rtl">
+      <div className="flex items-center p-4" dir={i18n.dir()}>
         <div className="relative w-24 shrink-0 flex justify-start">
           <div className="w-16 h-16 rounded-full border-2 border-gray-100 overflow-hidden">
             <SmartImage
               src={match.photos?.[0] || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"}
-              alt={`תמונת פרופיל של ${match.name}`}
+              alt={t("profile_photo_of", { name: match.name })}
               className="w-full h-full"
               priority={true}
             />
@@ -71,11 +73,11 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
           {showPlusLabel && (
             <div className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-[--theme-orange] mb-2">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>התאמת Ruumr Plus</span>
+              <span>{t("plus_match")}</span>
             </div>
           )}
           <div className="flex items-center text-gray-500 text-sm">
-            <span id={`match-budget-${matchId}`}>תקציב: ₪{match.budget_max?.toLocaleString()}</span>
+            <span id={`match-budget-${matchId}`}>{t("budget_label_short", { amount: match.budget_max?.toLocaleString() })}</span>
           </div>
         </div>
 
@@ -92,14 +94,14 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
                 <button
                   onClick={handleConfirmDelete}
                   className="bg-red-500 text-white p-2.5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md"
-                  aria-label="אישור מחיקה"
+                  aria-label={t("confirm_delete")}
                 >
                   <Check className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleCancelDelete}
                   className="bg-gray-200 text-gray-600 p-2.5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center shadow-md"
-                  aria-label="ביטול"
+                  aria-label={t("cancel")}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -113,7 +115,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
                 whileTap={{ scale: 0.85 }}
                 onClick={handleDeleteClick}
                 className="text-gray-400 bg-gray-100 p-3 rounded-full hover:bg-red-50 hover:text-red-400 transition-all shadow-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label="הסר התאמה"
+                aria-label={t("remove_match")}
               >
                 <Trash2 className="w-5 h-5" />
               </motion.button>

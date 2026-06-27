@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
 import { ThumbsUp, AlertCircle } from "lucide-react";
@@ -10,6 +11,7 @@ import SmartImage from '@/components/shared/SmartImage';
 import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function LikesYouPage() {
+    const { t, i18n } = useTranslation();
     const [profiles, setProfiles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -44,7 +46,7 @@ export default function LikesYouPage() {
             setProfiles(matched);
         } catch (e) {
             console.error(e);
-            setError("שגיאה בטעינת הלייקים. אנא נסה שוב.");
+            setError(t("likes_load_error"));
             setProfiles([]);
         }
         setIsLoading(false);
@@ -88,22 +90,22 @@ export default function LikesYouPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 flex flex-col" dir="rtl">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 flex flex-col" dir={i18n.dir()}>
             <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">לייקים</h1>
-                    <button 
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("nav_likes")}</h1>
+                    <button
                         onClick={() => navigate(createPageUrl('LikesSent'))}
                         className="text-sm font-bold text-[--theme-orange] hover:underline select-none"
                     >
-                        לייקים ששלחתי
+                        {t("likes_i_sent")}
                     </button>
                 </div>
                 {(() => {
                     const unseen = profiles.filter(p => !seenLikeIds.includes(p.user_id)).length;
                     return unseen > 0 ? (
                         <p className="font-medium text-[--theme-orange]">
-                            {unseen} {unseen === 1 ? "לייק חדש" : "לייקים חדשים"}
+                            {unseen} {unseen === 1 ? t("new_like_singular") : t("new_like_plural")}
                         </p>
                     ) : null;
                 })()}
@@ -114,7 +116,7 @@ export default function LikesYouPage() {
                     <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                     <div>
                         <p className="text-red-700 font-medium text-sm">{error}</p>
-                        <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">נסה שוב</button>
+                        <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">{t("try_again")}</button>
                     </div>
                 </div>
             )}
@@ -126,8 +128,8 @@ export default function LikesYouPage() {
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <ThumbsUp className="w-10 h-10 text-gray-300" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">עדיין אין לייקים</h3>
-                            <p className="text-gray-500 dark:text-gray-400">המשך/י להחליק ולעדכן את הפרופיל שלך</p>
+                            <h3 className="text-xl font-bold text-gray-700 dark:text-white mb-2">{t("no_likes_yet")}</h3>
+                            <p className="text-gray-500 dark:text-gray-400">{t("no_likes_desc")}</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-4">
