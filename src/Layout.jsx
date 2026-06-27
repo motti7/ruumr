@@ -391,10 +391,10 @@ export default function Layout({ children, currentPageName }) {
         <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className={`${appShellWidthClass} flex items-center h-12 relative`}>
-        
+                <div className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
+
         {/* קבוצה ימין */}
-        <div className="flex items-center w-[120px] justify-start gap-1 pr-2 z-10">
+        <div className="flex items-center w-[120px] justify-start gap-1 ps-2 z-10">
             <Link to={createPageUrl("Settings")} aria-label={t("settings")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
@@ -410,7 +410,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* קבוצה שמאל */}
-        <div className="flex items-center w-[120px] justify-end gap-1 pl-2 z-10 mr-auto">
+        <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}

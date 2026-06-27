@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -14,6 +15,7 @@ const ISRAEL_CITIES = [
 ];
 
 export default function DiscoverFilters({ filters, onChange }) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState({ kosher: 'all', shabbat: 'all', ...filters, maxAge: filters.maxAge ?? 60 });
   const [cityInput, setCityInput] = useState("");
@@ -92,14 +94,14 @@ export default function DiscoverFilters({ filters, onChange }) {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="bg-white rounded-t-3xl w-full max-w-md p-6"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
-              dir="rtl"
+              dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">פילטרים</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t("filters")}</h3>
                 <button
-                  aria-label="סגור פילטרים"
+                  aria-label={t("close_filters")}
                   onClick={() => setOpen(false)}
                   className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full"
                 >
@@ -110,7 +112,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* City free-text */}
               <div className="mb-6">
                 <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> אזור מגורים רצוי
+                  <MapPin className="w-4 h-4 text-[--theme-orange]" /> {t("desired_area")}
                 </label>
                 <div className="relative">
                   <div className="flex gap-2">
@@ -119,16 +121,16 @@ export default function DiscoverFilters({ filters, onChange }) {
                       value={cityInput}
                       onChange={handleCityInputChange}
                       onKeyDown={handleCityKeyDown}
-                      placeholder="הקלד עיר..."
+                      placeholder={t("type_city")}
                       className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:outline-none focus:ring-0 focus:border-[--theme-orange] transition-colors"
-                      dir="rtl"
+                      dir={i18n.dir()}
                     />
                     <button
                       onClick={() => addCity(cityInput)}
                       disabled={!cityInput.trim()}
                       className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
                     >
-                      הוסף
+                      {t("add")}
                     </button>
                   </div>
                   {citySuggestions.length > 0 && (
@@ -165,7 +167,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* Budget */}
               <div className="mb-6">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  תקציב מקסימלי: <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
+                  {t("max_budget")} <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
@@ -185,12 +187,12 @@ export default function DiscoverFilters({ filters, onChange }) {
 
               {/* Kosher */}
               <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-2 block">כשרות</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">{t("onb_kosher_label")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   {[
-                    { v: 'all', l: 'הכל' },
-                    { v: 'for_or_flow', l: 'בעד / זורם' },
-                    { v: 'against', l: 'נגד' },
+                    { v: 'all', l: t('all') },
+                    { v: 'for_or_flow', l: t('for_or_flexible') },
+                    { v: 'against', l: t('pref_against') },
                   ].map(opt => (
                     <button
                       key={opt.v}
@@ -205,12 +207,12 @@ export default function DiscoverFilters({ filters, onChange }) {
 
               {/* Shabbat */}
               <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-2 block">שמירת שבת</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">{t("shabbat_observance")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   {[
-                    { v: 'all', l: 'הכל' },
-                    { v: 'for_or_flow', l: 'בעד / זורם' },
-                    { v: 'against', l: 'נגד' },
+                    { v: 'all', l: t('all') },
+                    { v: 'for_or_flow', l: t('for_or_flexible') },
+                    { v: 'against', l: t('pref_against') },
                   ].map(opt => (
                     <button
                       key={opt.v}
@@ -226,7 +228,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* Age Range */}
               <div className="mb-8">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  טווח גילאים: <span className="text-[--theme-orange]">{local.minAge}-{local.maxAge}</span>
+                  {t("age_range")} <span className="text-[--theme-orange]">{local.minAge}-{local.maxAge}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
@@ -250,14 +252,14 @@ export default function DiscoverFilters({ filters, onChange }) {
                   onClick={reset}
                   className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-bold text-sm"
                 >
-                  איפוס
+                  {t("reset")}
                 </button>
                 <button
                   onClick={apply}
                   className="flex-1 py-3 rounded-full gradient-orange text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Check className="w-4 h-4" />
-                  החל פילטרים
+                  {t("apply_filters")}
                 </button>
               </div>
             </motion.div>

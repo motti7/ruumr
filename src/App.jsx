@@ -36,14 +36,17 @@ const AdminTools = lazy(() => import('./pages/AdminTools'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
 
-const PageLoader = () => (
+const PageLoader = () => {
+  const { t } = useTranslation();
+  return (
   <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-b from-white via-orange-50 to-orange-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
     <div className="flex flex-col items-center gap-3">
       <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-[--theme-orange] animate-spin" />
-      <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">טוען...</span>
+      <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t("loading")}</span>
     </div>
   </div>
-);
+  );
+};
 
 const NATIVE_IOS_PAYMENT_DISABLED_ROUTES = new Set([
   'RuumrPlusPricing',

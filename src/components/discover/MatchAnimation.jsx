@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 
 export default function MatchAnimation({ profile1, profile2, onDismiss }) {
+  const { t } = useTranslation();
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4000);
     return () => clearTimeout(timer);
@@ -61,7 +63,7 @@ export default function MatchAnimation({ profile1, profile2, onDismiss }) {
         transition={{ delay: 1 }}
         className="text-white text-lg mt-12"
       >
-        את/ה ו{profile2.name} התאמתם!
+        {t("you_and_x_matched", { name: profile2.name })}
       </motion.p>
     </motion.div>
   );
