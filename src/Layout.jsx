@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
+import LanguageToggle from "./components/shared/LanguageToggle";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -390,11 +391,12 @@ export default function Layout({ children, currentPageName }) {
                 <div className={`${appShellWidthClass} flex items-center h-12 relative`}>
         
         {/* קבוצה ימין */}
-        <div className="flex items-center w-[96px] justify-start gap-1 pr-2 z-10">
+        <div className="flex items-center w-[120px] justify-start gap-1 pr-2 z-10">
             <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
             <WriteReviewButton />
+            <LanguageToggle />
         </div>
 
         {/* אמצע: כותרת רומר — תמיד במרכז מוחלט של המסך */}
@@ -405,7 +407,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* קבוצה שמאל */}
-        <div className="flex items-center w-[96px] justify-end gap-1 pl-2 z-10 mr-auto">
+        <div className="flex items-center w-[120px] justify-end gap-1 pl-2 z-10 mr-auto">
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}

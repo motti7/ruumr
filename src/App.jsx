@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
@@ -174,6 +175,21 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  const { i18n } = useTranslation();
+  // Keep the document direction/language in sync with the active language so
+  // Hebrew renders RTL and English renders LTR. Runs on mount and whenever the
+  // user toggles the language from the header.
+  useEffect(() => {
+    const applyDirection = (lng) => {
+      const dir = lng === 'he' ? 'rtl' : 'ltr';
+      document.documentElement.dir = dir;
+      document.documentElement.lang = lng;
+    };
+    applyDirection(i18n.language);
+    i18n.on('languageChanged', applyDirection);
+    return () => i18n.off('languageChanged', applyDirection);
+  }, [i18n]);
+
   const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
   const isNativeWebView = isNativePlatform;
   const [splashDone, setSplashDone] = useState(() => isNativeWebView);
