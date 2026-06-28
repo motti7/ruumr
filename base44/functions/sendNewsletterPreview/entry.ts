@@ -40,7 +40,7 @@ const emailHtml = `<!DOCTYPE html>
           <!-- Subheadline -->
           <tr>
             <td style="padding:0 40px 24px;text-align:center;">
-              <p style="margin:0;font-size:15px;color:#757575;line-height:1.7;">AI שסורק מאות משתמשים ומגיש לך את <strong>ההתאמות הטובות ביותר</strong> — בדיוק בשבילך.<br/>ואז? מתחילים לדבר מיד, ללא צורך בסוויפס הדדיים.</p>
+              <p style="margin:0;font-size:15px;color:#757575;line-height:1.7;">AI שסורק מאות משתמשים ומגיש לך את <strong>ההתאמות הטובות ביותר</strong> — בדיוק בשבילך.<br/>ואז? מתחילים לדבר מיד, ללא צורך בסווייפים הדדיים.</p>
             </td>
           </tr>
 
@@ -57,7 +57,7 @@ const emailHtml = `<!DOCTYPE html>
                   <td width="33%" style="text-align:center;vertical-align:top;">
                     <p style="margin:0;font-size:32px;">⚡</p>
                     <p style="margin:8px 0 4px;font-size:14px;font-weight:700;color:#212121;">גישה מיידית</p>
-                    <p style="margin:0;font-size:12px;color:#999;">ללא צורך בסוויפס הדדיים</p>
+                    <p style="margin:0;font-size:12px;color:#999;">ללא צורך בסווייפים הדדיים</p>
                   </td>
                   <td width="33%" style="text-align:center;vertical-align:top;">
                     <p style="margin:0;font-size:32px;">🤖</p>
