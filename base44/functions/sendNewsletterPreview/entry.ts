@@ -33,7 +33,7 @@ const emailHtml = `<!DOCTYPE html>
           <!-- Headline -->
           <tr>
             <td style="padding:0 40px 24px;text-align:center;">
-              <h1 style="margin:0;font-size:28px;font-weight:800;color:#212121;line-height:1.3;">מצאו את השותף המושלם<br/><span style="color:#F05A28;">בלחיצה כפתור אחת</span></h1>
+              <h1 style="margin:0;font-size:28px;font-weight:800;color:#212121;line-height:1.3;">מצאו את השותף המושלם<br/><span style="color:#F05A28;">בלחיצת כפתור אחת</span></h1>
             </td>
           </tr>
 
