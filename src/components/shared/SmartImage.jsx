@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { ImageOff } from "lucide-react";
 
 /**
@@ -15,6 +16,7 @@ export default function SmartImage({
     showSkeleton = false,
     ...props
 }) {
+    const { t } = useTranslation();
     const [status, setStatus] = useState('idle'); // idle | loading | loaded | error
     const containerRef = useRef(null);
     const imgRef = useRef(null);
@@ -84,7 +86,7 @@ export default function SmartImage({
                 <img
                     ref={imgRef}
                     src={src}
-                    alt={alt || "תמונה"}
+                    alt={alt || t("image_alt")}
                     className="w-full h-full object-cover"
                     loading={priority ? "eager" : "lazy"}
                 />

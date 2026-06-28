@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Match, Profile } from "@/entities/all";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
@@ -14,6 +15,7 @@ import { requestTeamMember } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function MatchesPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -107,7 +109,7 @@ export default function MatchesPage() {
           loadMatches();
         }, delay);
       } else {
-        setError("שגיאה בטעינת ההתאמות. אנא נסה שוב.");
+        setError(t("matches_load_error"));
         setMatches([]);
         setIsLoading(false);
       }
@@ -175,15 +177,15 @@ export default function MatchesPage() {
     try {
       const res = await requestTeamMember(partnerUserId, partnerName);
       if (res?.status === 'already_member') {
-        toast({ title: `${partnerName || 'השותף/ה'} כבר בצוות שלך` });
+        toast({ title: t("already_in_team", { name: partnerName || t("the_roommate") }) });
       } else if (res?.status === 'already_pending') {
-        toast({ title: 'כבר שלחת בקשה — ממתינים לאישור' });
+        toast({ title: t("request_already_pending") });
       } else {
-        toast({ title: `נשלחה בקשה ל${partnerName || 'שותף/ה'} 🤝 — תתווסף/י לצוות לאחר אישור`, duration: 3500 });
+        toast({ title: t("team_request_sent", { name: partnerName || t("the_roommate_short") }), duration: 3500 });
       }
     } catch (e) {
       console.error("Error requesting team member:", e);
-      toast({ title: "לא הצלחנו לשלוח בקשה, נסה שוב", variant: "destructive" });
+      toast({ title: t("team_request_failed"), variant: "destructive" });
     }
   }, [toast]);
 
@@ -216,17 +218,17 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir="rtl" style={{ height: 'calc(100dvh - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir={i18n.dir()} style={{ height: 'calc(100dvh - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
       <PullToRefresh onRefresh={loadMatches}>
       <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">התאמות</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("nav_matches")}</h1>
           <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full select-none touch-manipulation"
-              aria-label="רענן">
+              aria-label={t("refresh")}>
               
             <motion.span
                 animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
@@ -240,7 +242,7 @@ export default function MatchesPage() {
             const unseen = matches.filter((m) => !seenMatchIds.includes(m.id)).length;
             return unseen > 0 ?
             <p className="font-medium text-black">
-              {unseen} {unseen === 1 ? "התאמה חדשה" : "התאמות חדשות"}
+              {unseen} {unseen === 1 ? t("new_match_singular") : t("new_match_plural")}
             </p> :
             null;
           })()}
@@ -251,7 +253,7 @@ export default function MatchesPage() {
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
           <div>
             <p className="text-red-700 font-medium text-sm">{error}</p>
-            <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">נסה שוב</button>
+            <button onClick={handleRefresh} className="text-red-600 text-xs font-bold hover:underline mt-1">{t("try_again")}</button>
           </div>
         </div>
         }
@@ -263,9 +265,9 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 flex flex-col items-center">
             
-             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">אין התאמות עדיין</h2>
+             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">{t("no_matches_yet")}</h2>
              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed px-4">
-               כשתהיה לך התאמה עם מישהו, היא תופיע כאן.
+               {t("no_matches_desc")}
              </p>
              <Link
               to={createPageUrl("Discover")}
@@ -276,7 +278,7 @@ export default function MatchesPage() {
                 whileHover={{ scale: 1.05 }}
                 className="gradient-orange text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform">
                 
-                 חפש שותפים
+                 {t("find_roommates")}
                </motion.button>
              </Link>
            </motion.div> :

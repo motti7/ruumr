@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
@@ -54,6 +55,7 @@ function normalizeProfileCities(profile = {}) {
 }
 
 export default function ProfilePage() {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isEditing, setIsEditing] = useState(false);
@@ -98,14 +100,14 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (uploadingIndex !== null || uploadingApartmentIndex !== null) {
-        toast({ title: "אנא המתן לסיום העלאת התמונות", variant: "destructive" });
+        toast({ title: t("wait_for_uploads"), variant: "destructive" });
         return;
     }
 
     const hasBlobPhotos = formData.photos.some(p => p && p.startsWith('blob:'));
     const hasBlobApartment = formData.apartment_photos && formData.apartment_photos.some(p => p && p.startsWith('blob:'));
     if (hasBlobPhotos || hasBlobApartment) {
-        toast({ title: "חלק מהתמונות לא עלו כראוי. אנא נסה להעלות אותן שוב.", variant: "destructive" });
+        toast({ title: t("photos_failed_retry"), variant: "destructive" });
         return;
     }
 
@@ -129,10 +131,10 @@ export default function ProfilePage() {
       }
       await loadProfile();
       setIsEditing(false);
-      toast({ title: "הפרופיל נשמר בהצלחה ✓", duration: 3000 });
+      toast({ title: t("profile_saved"), duration: 3000 });
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast({ title: "שגיאה בשמירת הפרופיל. אנא נסה שוב.", variant: "destructive" });
+      toast({ title: t("profile_save_error"), variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -195,7 +197,7 @@ export default function ProfilePage() {
         setFormData(prev => ({...prev, photos: newPhotos}));
     } catch (error) { 
         console.error("Upload failed", error);
-        alert(error.message || "העלאת הקובץ נכשלה");
+        alert(error.message || t("file_upload_failed"));
         setFormData(prev => {
             const newPhotos = [...(prev.photos || [])];
             newPhotos[index] = null;
@@ -222,7 +224,7 @@ export default function ProfilePage() {
             newPhotos[index] = null;
             return {...prev, apartment_photos: newPhotos};
         });
-        alert("העלאת התמונה נכשלה");
+        alert(t("photo_upload_failed_short"));
     }
     setUploadingApartmentIndex(null);
   };
@@ -245,7 +247,7 @@ export default function ProfilePage() {
 
       // Basic validation
       if (file.size > 50 * 1024 * 1024) { // 50MB limit
-          alert("הקובץ גדול מדי. אנא העלה סרטון קטן יותר (עד 50MB)");
+          alert(t("video_too_large"));
           return;
       }
 
@@ -257,7 +259,7 @@ export default function ProfilePage() {
           video.onloadedmetadata = async () => {
               window.URL.revokeObjectURL(video.src);
               if (video.duration > 16) { // Allow slightly over 15s for margin
-                  alert("הסרטון ארוך מדי. אנא העלה סרטון של עד 15 שניות.");
+                  alert(t("video_too_long"));
                   setIsUploadingVideo(false);
                   return;
               }
@@ -267,7 +269,7 @@ export default function ProfilePage() {
                   setFormData(prev => ({ ...prev, video_url: file_url }));
               } catch (error) {
                   console.error("Video upload failed", error);
-                  alert("העלאת הסרטון נכשלה. אנא נסה שוב.");
+                  alert(t("video_upload_failed"));
               }
               setIsUploadingVideo(false);
           };
@@ -298,7 +300,7 @@ export default function ProfilePage() {
               }));
               setSpotifySearch("");
           } else {
-              alert("לא נמצא שיר");
+              alert(t("song_not_found"));
           }
       } catch (e) {
           console.error(e);
@@ -319,7 +321,7 @@ export default function ProfilePage() {
     }));
   };
 
-  const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
+  const vibeText = [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")];
 
   if (isLoading) {
     return (
@@ -344,9 +346,9 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center p-4">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-          <p className="text-red-700 font-medium">שגיאה בטעינת הפרופיל</p>
+          <p className="text-red-700 font-medium">{t("profile_load_error")}</p>
           <button onClick={() => window.location.reload()} className="text-red-600 text-sm font-bold hover:underline mt-2">
-            טען מחדש
+            {t("reload")}
           </button>
         </div>
       </div>
@@ -354,7 +356,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24" dir="rtl">
+    <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}>
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
@@ -370,18 +372,18 @@ export default function ProfilePage() {
             <button
               onClick={() => setSelectedApartmentPhoto(null)}
               className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-              aria-label="סגור"
+              aria-label={t("close")}
             >
               <X className="w-6 h-6 text-white" />
             </button>
-            <img src={selectedApartmentPhoto} className="max-w-full max-h-full object-contain" alt="דירה" />
+            <img src={selectedApartmentPhoto} className="max-w-full max-h-full object-contain" alt={t("apartment_alt")} />
           </motion.div>
         )}
       </AnimatePresence>
 
       <div className="bg-white">
         <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800">הפרופיל שלי</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("my_profile")}</h1>
           <Button 
               onClick={() => {
                   if (!isEditing) {
@@ -393,7 +395,7 @@ export default function ProfilePage() {
               disabled={isSaving}
               className="rounded-full gradient-orange text-white shadow-lg"
           >
-              {isSaving ? <><Loader2 className="w-4 h-4 ml-2 animate-spin"/> שומר...</> : isEditing ? <><Save className="w-4 h-4 ml-2"/> שמור</> : <><Edit className="w-4 h-4 ml-2"/> ערוך</>}
+              {isSaving ? <><Loader2 className="w-4 h-4 ml-2 animate-spin"/> {t("saving")}</> : isEditing ? <><Save className="w-4 h-4 ml-2"/> {t("save")}</> : <><Edit className="w-4 h-4 ml-2"/> {t("edit")}</>}
           </Button>
         </div>
 
@@ -408,12 +410,12 @@ export default function ProfilePage() {
                             <AlertCircle className="w-5 h-5 text-orange-500" />
                         </div>
                         <div>
-                            <p className="font-bold text-gray-900 text-sm">הפרופיל לא מאומת</p>
-                            <p className="text-xs text-gray-500">אמת את זהותך כדי לקבל יותר פניות</p>
+                            <p className="font-bold text-gray-900 text-sm">{t("profile_unverified")}</p>
+                            <p className="text-xs text-gray-500">{t("verify_identity_hint")}</p>
                         </div>
                     </div>
                     <div className="bg-[--theme-orange] text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap min-w-fit">
-                        אמת עכשיו
+                        {t("verify_now")}
                     </div>
                 </div>
             </div>
@@ -423,7 +425,7 @@ export default function ProfilePage() {
             <div className="px-4 mt-2">
                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5 text-green-600" />
-                    <p className="font-bold text-green-700 text-sm">פרופיל מאומת</p>
+                    <p className="font-bold text-green-700 text-sm">{t("profile_verified")}</p>
                  </div>
             </div>
         )}
@@ -459,7 +461,7 @@ export default function ProfilePage() {
                                   {formData.photos[i].match(/\.(mp4|mov|webm)$/i) ? (
                                     <video src={formData.photos[i]} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                                   ) : (
-                                    <img src={formData.photos[i]} alt={`תמונה ${i+1}`} className="w-full h-full object-cover" />
+                                    <img src={formData.photos[i]} alt={t('photo_alt', { number: i + 1 })} className="w-full h-full object-cover" />
                                   )}
                                   {/* Drag handle */}
                                   <div {...provided.dragHandleProps} className="absolute top-1 right-1 bg-black/40 rounded-full p-0.5 cursor-grab active:cursor-grabbing z-10">
@@ -474,7 +476,7 @@ export default function ProfilePage() {
                                       setFormData(prev => ({ ...prev, photos: newPhotos }));
                                     }}
                                     className="absolute top-1 left-1 bg-black/40 rounded-full p-0.5 z-10"
-                                    aria-label="מחק תמונה"
+                                    aria-label={t("delete_photo")}
                                   >
                                     <X className="w-3 h-3 text-white" />
                                   </button>
@@ -486,7 +488,7 @@ export default function ProfilePage() {
                                   {...provided.dragHandleProps}
                                 >
                                   <Plus className="w-6 h-6 text-gray-400" />
-                                  {i === 0 && <span className="text-[10px] text-gray-400">תמונות/וידאו</span>}
+                                  {i === 0 && <span className="text-[10px] text-gray-400">{t("photos_video")}</span>}
                                 </div>
                               )}
                               {uploadingIndex === i && (
@@ -523,7 +525,7 @@ export default function ProfilePage() {
                       ) : (
                         <img
                           src={photoUrl}
-                          alt={`תמונה ${i+1}`}
+                          alt={t('photo_alt', { number: i + 1 })}
                           className="w-full h-full object-cover cursor-pointer"
                           onClick={() => setSelectedApartmentPhoto(photoUrl)}
                         />
@@ -543,25 +545,25 @@ export default function ProfilePage() {
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
             <div className="grid grid-cols-2 gap-4">
-                <div className="text-right">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">גיל</label>
+                <div className="text-start">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">{t("onb_age_label")}</label>
                   <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
                 </div>
-                <div className="text-right">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">מגדר</label>
+                <div className="text-start">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">{t("onb_gender_label")}</label>
                   {isEditing ? (
                     <BottomSheetSelect
                       value={formData.gender}
                       onValueChange={(v) => setFormField('gender', v)}
-                      label="מגדר"
+                      label={t("onb_gender_label")}
                       options={[
-                        { value: "male", label: "זכר" },
-                        { value: "female", label: "נקבה" },
-                        { value: "other", label: "אחר" },
+                        { value: "male", label: t("gender_male") },
+                        { value: "female", label: t("gender_female") },
+                        { value: "other", label: t("gender_other") },
                       ]}
                     />
                   ) : (
-                     <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? 'זכר' : formData.gender === 'female' ? 'נקבה' : 'אחר'}</p>
+                     <p className="text-lg font-bold text-[--theme-orange]">{formData.gender === 'male' ? t("gender_male") : formData.gender === 'female' ? t("gender_female") : t("gender_other")}</p>
                   )}
                 </div>
             </div>
@@ -569,82 +571,83 @@ export default function ProfilePage() {
         
         <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <h3 className="font-bold text-gray-800 mb-3 text-right">בעלי חיים</h3>
+              <h3 className="font-bold text-gray-800 mb-3 text-start">{t("pets_section")}</h3>
               <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
-                      {['none', 'dog', 'cat', 'other'].map(type => (
-                          <button 
-                              key={type} 
+                      {['none', 'dog', 'cat', 'other'].map(type => {
+                          const petLabel = { none: t('pet_none'), dog: t('pet_dog'), cat: t('pet_cat'), other: t('pet_other') }[type];
+                          return (
+                          <button
+                              key={type}
                               disabled={!isEditing}
-                              onClick={() => setFormField('pet_type', type)} 
+                              onClick={() => setFormField('pet_type', type)}
                               className={`py-3 px-2 min-h-[44px] border rounded-lg flex flex-col items-center justify-center transition-colors ${formData.pet_type === type ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange]' : 'border-gray-200 text-gray-600'} ${!isEditing && formData.pet_type !== type ? 'opacity-50' : ''}`}
-                              aria-label={`בחר ${{'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]}`}
+                              aria-label={t('select_x', { label: petLabel })}
                           >
-                              <span className="text-sm font-medium">{
-                                  {'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': 'אחר'}[type]
-                              }</span>
+                              <span className="text-sm font-medium">{petLabel}</span>
                           </button>
-                      ))}
+                          );
+                      })}
                   </div>
                   {formData.pet_type === 'other' && (
-                       <Input 
-                          disabled={!isEditing} 
-                          value={formData.pet_other_description || ''} 
-                          onChange={(e) => setFormField('pet_other_description', e.target.value)} 
-                          placeholder="איזו חיה?" 
-                          className="bg-white border-gray-300 text-right" 
-                          dir="rtl"
+                       <Input
+                          disabled={!isEditing}
+                          value={formData.pet_other_description || ''}
+                          onChange={(e) => setFormField('pet_other_description', e.target.value)}
+                          placeholder={t("onb_pet_other_placeholder")}
+                          className="bg-white border-gray-300 text-start"
+                          dir={i18n.dir()}
                        />
                   )}
               </div>
 
-              <h3 className="font-bold text-gray-800 mb-3 text-right">העדפות דת ומסורת</h3>
+              <h3 className="font-bold text-gray-800 mb-3 text-start">{t("religion_tradition_section")}</h3>
               <div className="space-y-3">
                   <div>
-                      <label className="block text-right text-sm font-medium text-gray-600 mb-1">זיקה לדת</label>
+                      <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("onb_religion_label")}</label>
                       <BottomSheetSelect
                            disabled={!isEditing}
                            value={formData.religion}
                            onValueChange={(v) => setFormField('religion', v)}
-                           label="זיקה לדת"
-                           placeholder="בחר..."
+                           label={t("onb_religion_label")}
+                           placeholder={t("select_placeholder")}
                            options={[
-                             { value: "secular", label: "חילוני/ת" },
-                             { value: "traditional", label: "מסורתי/ת" },
-                             { value: "national_religious", label: "דתי/ה לאומי/ת" },
-                             { value: "religious", label: "דתי/ה" },
-                             { value: "haredi", label: "חרדי/ת" },
+                             { value: "secular", label: t("religion_secular") },
+                             { value: "traditional", label: t("religion_traditional") },
+                             { value: "national_religious", label: t("religion_national_religious") },
+                             { value: "religious", label: t("religion_religious") },
+                             { value: "haredi", label: t("religion_haredi") },
                            ]}
                        />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                       <div>
-                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">כשרות</label>
+                          <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("onb_kosher_label")}</label>
                           <BottomSheetSelect
                               disabled={!isEditing}
                               value={formData.kosher_preference}
                               onValueChange={(v) => setFormField('kosher_preference', v)}
-                              label="כשרות"
-                              placeholder="בחר..."
+                              label={t("onb_kosher_label")}
+                              placeholder={t("select_placeholder")}
                               options={[
-                                { value: "for", label: "בעד" },
-                                { value: "against", label: "נגד" },
-                                { value: "flow", label: "זורם/ת" },
+                                { value: "for", label: t("pref_for") },
+                                { value: "against", label: t("pref_against") },
+                                { value: "flow", label: t("pref_flexible") },
                               ]}
                           />
                       </div>
                       <div>
-                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">שמירת שבת</label>
+                          <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("shabbat_observance")}</label>
                           <BottomSheetSelect
                               disabled={!isEditing}
                               value={formData.shabbat_preference}
                               onValueChange={(v) => setFormField('shabbat_preference', v)}
-                              label="שמירת שבת"
-                              placeholder="בחר..."
+                              label={t("shabbat_observance")}
+                              placeholder={t("select_placeholder")}
                               options={[
-                                { value: "for", label: "בעד" },
-                                { value: "against", label: "נגד" },
-                                { value: "flow", label: "זורם/ת" },
+                                { value: "for", label: t("pref_for") },
+                                { value: "against", label: t("pref_against") },
+                                { value: "flow", label: t("pref_flexible") },
                               ]}
                           />
                       </div>
@@ -653,13 +656,13 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">קצת עליי</label>
-              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+              <label className="block text-start font-bold text-gray-700 mb-2">{t("onb_about_me_label")}</label>
+              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start" dir={i18n.dir()} />
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
-                  קישור לרשת חברתית
+              <label className="block text-start font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  {t("onb_social_link_label")}
               </label>
               {isEditing && (
                 <div className="flex gap-3 justify-center mb-3">
@@ -678,14 +681,14 @@ export default function ProfilePage() {
                   disabled={!isEditing} 
                   value={formData.social_link || ""} 
                   onChange={(e) => setFormField('social_link', e.target.value)} 
-                  placeholder="הדבק קישור כאן" 
-                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" 
-                  dir="rtl" 
+                  placeholder={t("onb_paste_link_placeholder")}
+                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start"
+                  dir={i18n.dir()}
               />
             </div>
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">מה אני מחפש/ת</label>
-              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+              <label className="block text-start font-bold text-gray-700 mb-2">{t("onb_looking_for_desc_label")}</label>
+              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start" dir={i18n.dir()} />
             </div>
         </div>
         
@@ -723,9 +726,9 @@ export default function ProfilePage() {
                         <Input 
                             value={spotifySearch} 
                             onChange={(e) => setSpotifySearch(e.target.value)} 
-                            placeholder="חפש שיר..." 
+                            placeholder={t("search_song_placeholder")}
                             className="bg-gray-100 border-gray-300 text-black text-center placeholder:text-gray-400 h-10 text-sm"
-                            dir="rtl"
+                            dir={i18n.dir()}
                             onKeyDown={(e) => e.key === 'Enter' && searchSong()}
                         />
                         <Button 
@@ -733,13 +736,13 @@ export default function ProfilePage() {
                             disabled={isSearchingSong || !spotifySearch.trim()} 
                             className="w-full bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] h-8 text-xs font-semibold"
                         >
-                            {isSearchingSong ? <Loader2 className="animate-spin w-3 h-3"/> : "חפש"}
+                            {isSearchingSong ? <Loader2 className="animate-spin w-3 h-3"/> : t("search")}
                         </Button>
                         </div>
                     ) : (
                         <div className="relative z-20 w-full">
-                            <h3 className="text-bold font-black text-xl mb-1 truncate px-2">{formData.song_name || "אם היית שיר..."}</h3>
-                            <p className="text-gray-700 text-sm truncate px-4">{formData.song_artist || "איזה שיר הוא אתה?"}</p>
+                            <h3 className="text-bold font-black text-xl mb-1 truncate px-2">{formData.song_name || t("if_you_were_a_song")}</h3>
+                            <p className="text-gray-700 text-sm truncate px-4">{formData.song_artist || t("what_song_are_you")}</p>
                             
                             {formData.song_preview_url && (
                                 <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
@@ -748,7 +751,7 @@ export default function ProfilePage() {
                             {!formData.song_name && !isEditing && (
                                 <div className="mt-3">
                                     <span className="inline-flex items-center gap-1 bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] text-xs px-3 py-1.5 rounded-full transition-colors font-semibold">
-                                        <Plus className="w-3 h-3" /> בחר שיר או אמן
+                                        <Plus className="w-3 h-3" /> {t("pick_song_or_artist")}
                                     </span>
                                 </div>
                             )}
@@ -759,7 +762,7 @@ export default function ProfilePage() {
                         <button 
                             onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, itunes_track_id: '', song_name: '', song_preview_url: null, song_artist: '', song_image: '' })); }}
                             className="absolute top-4 right-4 text-[#FA3803] hover:text-[#E64A19] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                            aria-label="הסר שיר"
+                            aria-label={t("remove_song")}
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -772,26 +775,26 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
-                  מחפש/ת
+            <div className="text-start">
+                <label className="block text-start font-bold text-gray-700 mb-2">
+                  {t("looking_for_short")}
                 </label>
                 <BottomSheetSelect
                     disabled={!isEditing}
                     value={formData.looking_for_gender}
                     onValueChange={(v) => setFormField('looking_for_gender', v)}
-                    label="מחפש/ת"
+                    label={t("looking_for_short")}
                     className="mt-1"
                     options={[
-                      { value: "male", label: "שותף" },
-                      { value: "female", label: "שותפה" },
-                      { value: "any", label: "לא משנה" },
+                      { value: "male", label: t("looking_for_male") },
+                      { value: "female", label: t("looking_for_female") },
+                      { value: "any", label: t("looking_for_any") },
                     ]}
                 />
             </div>
             <div>
-                <label className="block text-right font-bold text-gray-700 mb-3">
-                  וייב: <span className="text-[--theme-orange] font-bold text-lg">{vibeText[formData.vibe_level-1] || 'מאוזן'}</span>
+                <label className="block text-start font-bold text-gray-700 mb-3">
+                  {t("vibe_prefix")} <span className="text-[--theme-orange] font-bold text-lg">{vibeText[formData.vibe_level-1] || t("vibe_balanced")}</span>
                 </label>
                 <div className="px-2 py-3">
                   <div className="relative">
@@ -849,12 +852,14 @@ export default function ProfilePage() {
                       }
                     `}</style>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-600 mt-3 px-1 font-medium">
-                    <span>תוסס</span>
-                    <span>חברותי</span>
-                    <span>מאוזן</span>
-                    <span>רגוע</span>
-                    <span>שקט</span>
+                  {/* Pinned LTR so labels line up with the always-LTR range slider
+                      (value 1 = left = quiet … value 5 = right = lively) in both languages. */}
+                  <div dir="ltr" className="flex justify-between text-xs text-gray-600 mt-3 px-1 font-medium">
+                    <span>{t("vibe_lvl_quiet")}</span>
+                    <span>{t("vibe_lvl_relaxed")}</span>
+                    <span>{t("vibe_balanced")}</span>
+                    <span>{t("vibe_lvl_social")}</span>
+                    <span>{t("vibe_lvl_lively")}</span>
                   </div>
                 </div>
             </div>
@@ -862,7 +867,7 @@ export default function ProfilePage() {
 
         {/* תחומי עניין */}
         <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
-          <h3 className="font-bold text-gray-800 mb-3 text-right">תחומי עניין</h3>
+          <h3 className="font-bold text-gray-800 mb-3 text-start">{t("onb_step5_title")}</h3>
           <div className="flex flex-wrap gap-2">
             {INTEREST_OPTIONS.map(interest => {
               const selected = (formData.interests || []).includes(interest.id);
@@ -883,30 +888,30 @@ export default function ProfilePage() {
                       : 'border-gray-200 bg-white text-gray-600'
                   } ${!isEditing ? 'cursor-default' : 'cursor-pointer'}`}
                 >
-                  {interest.label}
+                  {t(interest.labelKey)}
                 </button>
               );
             })}
           </div>
           {!isEditing && (!formData.interests || formData.interests.length === 0) && (
-            <p className="text-gray-400 text-sm text-center mt-2">לחץ על "ערוך" להוספת תחומי עניין</p>
+            <p className="text-gray-400 text-sm text-center mt-2">{t("tap_edit_to_add_interests")}</p>
           )}
         </div>
 
         <div className="space-y-4">
-            <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
-                  סטטוס דירה
+            <div className="text-start">
+                <label className="block text-start font-bold text-gray-700 mb-2">
+                  {t("apartment_status")}
                 </label>
                 <BottomSheetSelect
                      disabled={!isEditing}
                      value={formData.current_status}
                      onValueChange={(v) => setFormField('current_status', v)}
-                     label="סטטוס דירה"
+                     label={t("apartment_status")}
                      className="mt-1"
                      options={[
-                       { value: "seeking_apartment", label: "מחפש/ת דירה" },
-                       { value: "has_apartment", label: "יש לי דירה" },
+                       { value: "seeking_apartment", label: t("onb_seeking_apartment_title") },
+                       { value: "has_apartment", label: t("onb_has_apartment_title") },
                      ]}
                  />
             </div>
@@ -918,7 +923,7 @@ export default function ProfilePage() {
                      <Home className="w-4 h-4" />
                 </div>
                 <label className="block text-lg font-bold text-gray-800">
-                    הדירה שלי
+                    {t("my_apartment")}
                 </label>
             </div>
 
@@ -938,7 +943,7 @@ export default function ProfilePage() {
                         {(formData.apartment_photos?.length > i && formData.apartment_photos[i]) ? (
                             <SmartImage 
                               src={formData.apartment_photos[i]} 
-                              alt={`דירה ${i+1}`} 
+                              alt={t('onb_apartment_photo_alt', { number: i + 1 })}
                               className="w-full h-full"
                               priority={false}
                             />
@@ -947,7 +952,7 @@ export default function ProfilePage() {
                               {isEditing ? (
                                   <>
                                       <Plus className="w-8 h-8 mb-1 text-[--theme-orange]"/>
-                                      <span className="text-xs text-[--theme-orange]">הוסף תמונה</span>
+                                      <span className="text-xs text-[--theme-orange]">{t("add_photo")}</span>
                                   </>
                               ) : (
                                   <Home className="w-6 h-6 opacity-20"/>
@@ -959,35 +964,35 @@ export default function ProfilePage() {
                 ))}
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-                {isEditing ? 'יש להעלות תמונות ברורות של החללים המשותפים והחדר הפנוי' : 'לחץ על תמונה להגדלה'}
+                {isEditing ? t('apartment_photos_hint') : t('tap_photo_to_enlarge')}
             </p>
             </div>
             )}
 
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">תקציב חודשי לשכירות</label>
-                <Input disabled={!isEditing} type="number" placeholder="לדוגמה: 3500" value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-right" dir="rtl" />
+                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")}</label>
+                <Input disabled={!isEditing} type="number" placeholder={t("budget_example_placeholder")} value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-start" dir={i18n.dir()} />
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-2">איזור חיפוש מועדף</label>
+                <label className="block text-start text-sm font-bold text-gray-700 mb-2">{t("preferred_search_area")}</label>
                 <BottomSheetSelect
                     disabled={!isEditing}
                     value={formData.search_area}
                     onValueChange={(v) => setFormField('search_area', v)}
-                    label="איזור חיפוש מועדף"
+                    label={t("preferred_search_area")}
                     options={[
-                      { value: "צפון", label: "צפון" },
-                      { value: "מרכז", label: "מרכז" },
-                      { value: "דרום", label: "דרום" },
-                      { value: "שפלה", label: "שפלה" },
-                      { value: "ירושלים", label: "ירושלים והסביבה" },
+                      { value: "צפון", label: t("area_north") },
+                      { value: "מרכז", label: t("area_center") },
+                      { value: "דרום", label: t("area_south") },
+                      { value: "שפלה", label: t("area_shfela") },
+                      { value: "ירושלים", label: t("area_jerusalem") },
                     ]}
                 />
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">ערים מועדפות</label>
+                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("preferred_cities")}</label>
                 <CitySelect
                   disabled={!isEditing}
                   selectedCities={formData.search_cities || []}

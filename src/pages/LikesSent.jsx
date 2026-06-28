@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
 import { Loader2, ArrowRight, ThumbsUp } from "lucide-react";
@@ -8,6 +9,7 @@ import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
 
 export default function LikesSentPage() {
+    const { t, i18n } = useTranslation();
     const [profiles, setProfiles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
@@ -43,12 +45,12 @@ export default function LikesSentPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-24" dir="rtl">
+        <div className="min-h-screen bg-gray-50 pb-24" dir={i18n.dir()}>
             <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center gap-3">
-                 <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label="חזור">
+                 <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label={t("back")}>
                     <ArrowRight className="w-6 h-6 text-gray-600" />
                 </button>
-                <h1 className="text-2xl font-black text-gray-900">לייקים ששלחתי</h1>
+                <h1 className="text-2xl font-black text-gray-900">{t("likes_i_sent")}</h1>
             </div>
 
             <div className="p-4 grid grid-cols-2 gap-4">
@@ -57,8 +59,8 @@ export default function LikesSentPage() {
                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ThumbsUp className="w-10 h-10 text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-700 mb-2">לא שלחת לייקים עדיין</h3>
-                        <p className="text-gray-500">כנס לעמוד הגילוי והתחל להחליק!</p>
+                        <h3 className="text-xl font-bold text-gray-700 mb-2">{t("no_sent_likes")}</h3>
+                        <p className="text-gray-500">{t("go_discover_start_swiping")}</p>
                     </div>
                 ) : (
                     profiles.map((profile, i) => (

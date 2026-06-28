@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Star, X, ChevronLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
@@ -6,6 +7,7 @@ import WriteReviewModal from "./WriteReviewModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function WriteReviewButton() {
+  const { t, i18n } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +49,7 @@ export default function WriteReviewButton() {
       <button 
         onClick={handleOpen} 
         className="header-glow relative min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="כתוב חוות דעת"
+        aria-label={t("write_review")}
       >
         <Star className="w-6 h-6 text-yellow-400" fill="none" />
       </button>
@@ -68,18 +70,18 @@ export default function WriteReviewButton() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="bg-yellow-50 rounded-t-3xl w-full max-w-md p-6 border-t-4 border-yellow-300"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
-              dir="rtl"
+              dir={i18n.dir()}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-5">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> כתוב חוות דעת</h3>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> {t("write_review")}</h3>
                 <button onClick={() => setShowPicker(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
 
               {isLoading ? (
-                <p className="text-center text-gray-400 py-8">טוען...</p>
+                <p className="text-center text-gray-400 py-8">{t("loading")}</p>
               ) : matches.length === 0 ? (
-                <p className="text-center text-gray-400 py-8">אין לך התאמות עדיין לכתיבת חוות דעת</p>
+                <p className="text-center text-gray-400 py-8">{t("no_matches_for_review")}</p>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto">
                   {matches.map((m) => (
@@ -95,7 +97,7 @@ export default function WriteReviewButton() {
                           {m.name?.[0]}
                         </div>
                       )}
-                      <span className="font-semibold text-gray-800 flex-1 text-right">{m.name}</span>
+                      <span className="font-semibold text-gray-800 flex-1 text-start">{m.name}</span>
                       <ChevronLeft className="w-4 h-4 text-gray-400" />
                     </button>
                   ))}

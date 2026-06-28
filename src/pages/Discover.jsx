@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -38,6 +39,7 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
 };
 
 export default function DiscoverPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { setHasProfile } = useOptionalAuth();
   // Authenticated but no Profile yet → show the locked preview instead of the deck.
@@ -395,7 +397,7 @@ export default function DiscoverPage() {
           } catch {}
           return updated;
         });
-        setSwipeSaveError("לא הצלחנו לשמור את הבחירה. הפרופיל הוחזר כדי שאפשר יהיה לנסות שוב.");
+        setSwipeSaveError(t("swipe_save_failed"));
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
   
@@ -464,8 +466,8 @@ export default function DiscoverPage() {
             <Puzzle className="w-8 h-8 text-white" />
           </div>
         </div>
-        <p className="text-gray-600 font-bold text-lg">מחפש שותפים...</p>
-        <p className="text-gray-400 text-xs mt-2">זה יקח רק שנייה</p>
+        <p className="text-gray-600 font-bold text-lg">{t("searching_roommates")}</p>
+        <p className="text-gray-400 text-xs mt-2">{t("just_a_second")}</p>
       </div>
     );
   }
@@ -492,19 +494,19 @@ export default function DiscoverPage() {
         <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl">
           <Puzzle className="h-10 w-10 text-[--theme-orange]" />
         </div>
-        <h2 className="mb-3 text-2xl font-bold text-gray-900">הייתה בעיה בטעינת המסך</h2>
+        <h2 className="mb-3 text-2xl font-bold text-gray-900">{t("discover_load_error_title")}</h2>
         <p className="mb-6 max-w-sm text-sm leading-relaxed text-gray-600">
-          אפשר לנסות שוב. אם זה ממשיך לקרות, צריך לבדוק את חיבור הנתונים של הסימולטור.
+          {t("discover_load_error_body")}
         </p>
         <div className="flex flex-col gap-3">
           <Button onClick={loadData} className="gradient-orange text-white font-bold px-8 rounded-full shadow-lg">
-            נסה שוב
+            {t("try_again")}
           </Button>
           <button
             onClick={() => navigate(createPageUrl('Onboarding'))}
             className="text-sm font-semibold text-gray-500"
           >
-            מעבר להרשמה
+            {t("go_to_registration")}
           </button>
         </div>
       </div>
@@ -588,9 +590,9 @@ export default function DiscoverPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center h-full text-center px-8"
             >
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">זה הכל לעכשיו!</h2>
-              <p className="text-gray-500 mb-8 leading-relaxed">סיימת לעבור על כל הפרופילים.<br/>נסה לשנות את העדפות החיפוש שלך או חזור מאוחר יותר.</p>
-              <Button onClick={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">רענן</Button>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">{t("thats_all_for_now")}</h2>
+              <p className="text-gray-500 mb-8 leading-relaxed">{t("no_more_profiles_1")}<br/>{t("no_more_profiles_2")}</p>
+              <Button onClick={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">{t("refresh")}</Button>
             </motion.div>
           )}
         </AnimatePresence>

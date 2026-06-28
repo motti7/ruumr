@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Match, Profile, Message } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { base44 } from "@/api/base44Client";
 import { buildMessagePayload } from "@/lib/messagePayload";
 
 export default function ChatPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [match, setMatch] = useState(null);
   const [otherProfile, setOtherProfile] = useState(null);
@@ -227,7 +229,7 @@ export default function ChatPage() {
   if (!otherProfile) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p>לא נמצא פרופיל</p>
+        <p>{t("profile_not_found")}</p>
       </div>
     );
   }
@@ -236,13 +238,13 @@ export default function ChatPage() {
   const lastMyMsgIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => m.sender_id === user?.id).slice(-1)[0]?.i;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir="rtl">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir={i18n.dir()}>
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
         <button
           onClick={() => navigate(createPageUrl("Matches"), { replace: true })}
           className="text-gray-600 p-2 -mr-1"
-          aria-label="חזור"
+          aria-label={t("back")}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 18l6-6-6-6"/>
@@ -265,7 +267,7 @@ export default function ChatPage() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-[--theme-orange] font-medium"
                 >
-                  מקליד/ה...
+                  {t("typing")}
                 </motion.p>
               ) : (
                 <motion.p key="location" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-gray-500">
@@ -299,7 +301,7 @@ export default function ChatPage() {
                  <div className="flex items-center gap-1 mt-0.5 px-1">
                    <CheckCheck className={`w-3.5 h-3.5 ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
                    <span className={`text-[10px] ${msg.is_read ? 'text-[--theme-orange]' : 'text-gray-400'}`}>
-                     {msg.is_read ? 'נקרא' : 'נשלח'}
+                     {msg.is_read ? t('read') : t('sent')}
                    </span>
                  </div>
                )}
@@ -318,7 +320,7 @@ export default function ChatPage() {
             value={newMessage}
             onChange={(e) => handleTyping(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-            placeholder="הקלד/י הודעה..."
+            placeholder={t("type_message")}
             className="flex-1 bg-gray-100 border-0"
           />
           <Button

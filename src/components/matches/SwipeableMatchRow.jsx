@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, useMotionValue, animate } from "framer-motion";
 import { Trash2, UserPlus } from "lucide-react";
 
@@ -12,6 +13,7 @@ const ACTION_WIDTH = 88;
  * @param {{ onDelete?: () => void, onAddToTeam?: () => void, children: React.ReactNode }} props
  */
 export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
+  const { t } = useTranslation();
   const x = useMotionValue(0);
   const [openSide, setOpenSide] = useState(null); // 'delete' | 'add' | null
 
@@ -39,10 +41,10 @@ export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
         aria-hidden={openSide !== "add"}
         className="absolute inset-y-0 left-0 flex flex-col items-center justify-center gap-1 gradient-orange text-white"
         style={{ width: ACTION_WIDTH }}
-        aria-label="הוסף לצוות"
+        aria-label={t("add_to_team")}
       >
         <UserPlus className="w-5 h-5" />
-        <span className="text-[11px] font-bold leading-none">לצוות</span>
+        <span className="text-[11px] font-bold leading-none">{t("to_team")}</span>
       </button>
 
       {/* Delete — right side, revealed on swipe left */}
@@ -53,10 +55,10 @@ export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
         aria-hidden={openSide !== "delete"}
         className="absolute inset-y-0 right-0 flex flex-col items-center justify-center gap-1 bg-red-500 text-white"
         style={{ width: ACTION_WIDTH }}
-        aria-label="הסר התאמה"
+        aria-label={t("remove_match")}
       >
         <Trash2 className="w-5 h-5" />
-        <span className="text-[11px] font-bold leading-none">מחק</span>
+        <span className="text-[11px] font-bold leading-none">{t("delete")}</span>
       </button>
 
       {/* Foreground card (opaque, covers the actions at rest) */}

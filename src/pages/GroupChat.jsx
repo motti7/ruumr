@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { motion } from "framer-motion";
@@ -10,6 +11,7 @@ import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 
 export default function GroupChatPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
@@ -95,7 +97,7 @@ export default function GroupChatPage() {
       await messageMutation.mutateAsync({
         group_id: groupId,
         sender_id: user.id,
-        sender_name: user.full_name || "אני",
+        sender_name: user.full_name || t("me"),
         sender_photo: myProfile?.photos?.[0] || null,
         content: text,
       });
@@ -115,7 +117,7 @@ export default function GroupChatPage() {
   };
 
   const allParticipants = [
-    { id: user?.id, name: "אני", photo: myProfile?.photos?.[0] },
+    { id: user?.id, name: t("me"), photo: myProfile?.photos?.[0] },
     ...teamMembers.map(m => ({ id: m.match_id, name: m.name?.split(' ')[0], photo: m.photo }))
   ];
 
@@ -126,7 +128,7 @@ export default function GroupChatPage() {
           <div className="w-14 h-14 rounded-full bg-[--theme-orange] flex items-center justify-center animate-pulse">
             <UsersRound className="w-7 h-7 text-white" />
           </div>
-          <p className="text-gray-500 font-medium text-sm">טוען צ'אט קבוצתי...</p>
+          <p className="text-gray-500 font-medium text-sm">{t("loading_group_chat")}</p>
         </div>
       </div>
     );
@@ -134,28 +136,28 @@ export default function GroupChatPage() {
 
   if (teamMembers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 p-8 text-center" dir="rtl">
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 p-8 text-center" dir={i18n.dir()}>
         <UsersRound className="w-16 h-16 text-gray-300 mb-4" />
-        <p className="font-black text-xl text-gray-700 mb-2">אין עדיין צוות</p>
-        <p className="text-gray-400 text-sm mb-6">הוסף שותפים לצוות כדי להתחיל צ'אט קבוצתי</p>
+        <p className="font-black text-xl text-gray-700 mb-2">{t("no_team_yet")}</p>
+        <p className="text-gray-400 text-sm mb-6">{t("add_team_for_chat")}</p>
         <button
           onClick={() => navigate(createPageUrl('GroupTracker'))}
           className="gradient-orange text-white font-bold px-6 py-3 rounded-full"
         >
-          לבניית הצוות
+          {t("build_your_team")}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50" dir="rtl">
+    <div className="flex flex-col h-screen bg-gray-50" dir={i18n.dir()}>
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
         <button 
           onClick={() => navigate(createPageUrl('GroupTracker'))} 
           className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
-          aria-label="חזור"
+          aria-label={t("back")}
         >
           <ArrowRight className="w-5 h-5 text-gray-600" />
         </button>
@@ -175,8 +177,8 @@ export default function GroupChatPage() {
             ))}
           </div>
           <div>
-            <p className="font-black text-gray-900 text-sm">צ'אט הצוות</p>
-            <p className="text-[10px] text-gray-400">{allParticipants.length} משתתפים</p>
+            <p className="font-black text-gray-900 text-sm">{t("team_chat")}</p>
+            <p className="text-[10px] text-gray-400">{t("participants_count", { count: allParticipants.length })}</p>
           </div>
         </div>
       </div>
@@ -218,7 +220,7 @@ export default function GroupChatPage() {
                  {msg.content}
                </div>
                <span className="text-[9px] text-gray-300 px-1">
-                 {new Date(msg.created_date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                 {new Date(msg.created_date).toLocaleTimeString(i18n.language === 'he' ? 'he-IL' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                </span>
              </div>
            </motion.div>
@@ -230,7 +232,7 @@ export default function GroupChatPage() {
        <div className="flex items-center justify-center flex-1">
          <div className="text-center text-gray-400 text-sm">
            <p className="text-3xl mb-2">👋</p>
-           <p>שלחו הודעה ראשונה לצוות!</p>
+           <p>{t("send_first_team_message")}</p>
          </div>
        </div>
       )}
@@ -242,14 +244,14 @@ export default function GroupChatPage() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="כתוב הודעה לצוות..."
+          placeholder={t("write_team_message")}
           className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none text-gray-800 placeholder-gray-400"
         />
         <button
            onClick={sendMessage}
            disabled={!input.trim() || isSending}
            className="min-w-[44px] min-h-[44px] gradient-orange rounded-full flex items-center justify-center shadow-md disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
-           aria-label="שלח הודעה"
+           aria-label={t("send_message")}
          >
            <Send className="w-4 h-4 text-white" />
          </button>

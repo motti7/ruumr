@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { base44 } from "@/api/base44Client";
 import { Star } from "lucide-react";
 
@@ -19,6 +20,7 @@ function StarDisplay({ rating, size = "sm" }) {
 }
 
 export default function ReviewsSection({ userId }) {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,7 +41,7 @@ export default function ReviewsSection({ userId }) {
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="font-bold text-lg">חוות דעת</h4>
+        <h4 className="font-bold text-lg">{t("reviews")}</h4>
         <div className="flex items-center gap-2">
           <StarDisplay rating={Math.round(avg)} size="sm" />
           <span className="text-sm font-bold text-gray-700">{avg.toFixed(1)}</span>

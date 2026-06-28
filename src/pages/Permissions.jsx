@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -28,6 +29,7 @@ const PermissionItem = ({ title, subtitle, checked, onChange }) => (
 );
 
 export default function PermissionsPage() {
+    const { t, i18n } = useTranslation();
     const [showInDiscovery, setShowInDiscovery] = useState(true);
     const [showActiveStatus, setShowActiveStatus] = useState(true);
     const [enableNotifications, setEnableNotifications] = useState(true);
@@ -82,25 +84,25 @@ export default function PermissionsPage() {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen pb-24" dir="rtl">
+        <div className="p-6 bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}>
             <div className="flex items-center mb-8">
-                <Link to={createPageUrl("Settings")} className="ml-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label="חזור">
+                <Link to={createPageUrl("Settings")} className="ml-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label={t("back")}>
                     <ArrowLeft className="w-6 h-6 text-gray-600" />
                 </Link>
-                <h1 className="text-3xl font-black text-gray-800">ניהול הרשאות</h1>
+                <h1 className="text-3xl font-black text-gray-800">{t("manage_permissions")}</h1>
             </div>
 
             <div className="space-y-4">
-                <PermissionItem 
-                    title="הופיע בחיפושים" 
-                    subtitle="כבה אפשרות זו כדי להפוך לבלתי נראה באופן זמני." 
-                    checked={showInDiscovery} 
+                <PermissionItem
+                    title={t("show_in_discovery")}
+                    subtitle={t("show_in_discovery_sub")}
+                    checked={showInDiscovery}
                     onChange={handleDiscoveryChange}
                 />
-                <PermissionItem 
-                    title="הצג סטטוס 'פעיל כעת'" 
-                    subtitle="אנשים יוכלו לראות מתי אתה מחובר לאפליקציה." 
-                    checked={showActiveStatus} 
+                <PermissionItem
+                    title={t("show_active_status")}
+                    subtitle={t("show_active_status_sub")}
+                    checked={showActiveStatus}
                     onChange={handleActiveStatusChange}
                 />
             </div>

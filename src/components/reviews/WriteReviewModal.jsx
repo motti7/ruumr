@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { Star, X } from "lucide-react";
@@ -6,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose, onSubmitted = undefined }) {
+  const { t, i18n } = useTranslation();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [text, setText] = useState("");
@@ -21,7 +23,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
       reviewed_id: reviewedUserId,
       rating,
       text: text.trim(),
-      reviewer_name: myProfile[0]?.name || user.full_name || "משתמש"
+      reviewer_name: myProfile[0]?.name || user.full_name || t("user_fallback")
     });
     setIsSubmitting(false);
     onSubmitted && onSubmitted();
@@ -44,15 +46,15 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="bg-yellow-50 rounded-t-3xl w-full max-w-md p-6 border-t-4 border-yellow-300"
           style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
-          dir="rtl"
+          dir={i18n.dir()}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-5">
-            <h3 className="text-xl font-black text-gray-900">כתוב חוות דעת על {reviewedName}</h3>
-            <button 
+            <h3 className="text-xl font-black text-gray-900">{t("write_review_about", { name: reviewedName })}</h3>
+            <button
               onClick={onClose}
               className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-yellow-100 transition-colors"
-              aria-label="סגור"
+              aria-label={t("close")}
             >
               <X className="w-5 h-5 text-gray-400" />
             </button>
@@ -78,7 +80,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="ספר/י על חווית המגורים המשותפים... (אופציונלי)"
+            placeholder={t("review_placeholder")}
             className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-28 focus:outline-none focus:ring-2 focus:ring-[--theme-orange]"
           />
 
@@ -87,7 +89,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
             disabled={rating === 0 || isSubmitting}
             className="w-full mt-4 gradient-orange text-white font-bold rounded-full h-12"
           >
-            {isSubmitting ? "שולח..." : "שלח חוות דעת"}
+            {isSubmitting ? t("sending_short") : t("send_review")}
           </Button>
         </motion.div>
       </motion.div>

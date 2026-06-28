@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { motion } from "framer-motion";
@@ -41,6 +42,7 @@ function CompatibilityRing({ percent, size = 80 }) {
 }
 
 export default function GroupCompatibilityPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
@@ -92,12 +94,12 @@ export default function GroupCompatibilityPage() {
   }, []);
 
   const getStatusLabel = (compat) => {
-    if (!compat) return { text: "טרם התחיל", color: "text-gray-400", icon: Clock };
-    if (compat.myAnswered < 8) return { text: "ממתין לתשובות שלך", color: "text-orange-500", icon: Clock };
-    if (compat.theirAnswered < 8) return { text: "ממתין לשותף/ה", color: "text-blue-500", icon: Clock };
-    if (compat.percent >= 75) return { text: "התאמה מעולה! 🔥", color: "text-green-500", icon: CheckCircle2 };
-    if (compat.percent >= 50) return { text: "התאמה סבירה", color: "text-orange-500", icon: CheckCircle2 };
-    return { text: "יש הבדלים משמעותיים", color: "text-red-500", icon: CheckCircle2 };
+    if (!compat) return { text: t("compat_not_started"), color: "text-gray-400", icon: Clock };
+    if (compat.myAnswered < 8) return { text: t("compat_waiting_you"), color: "text-orange-500", icon: Clock };
+    if (compat.theirAnswered < 8) return { text: t("compat_waiting_partner"), color: "text-blue-500", icon: Clock };
+    if (compat.percent >= 75) return { text: t("compat_excellent"), color: "text-green-500", icon: CheckCircle2 };
+    if (compat.percent >= 50) return { text: t("compat_decent"), color: "text-orange-500", icon: CheckCircle2 };
+    return { text: t("compat_significant_diffs"), color: "text-red-500", icon: CheckCircle2 };
   };
 
   const overallScore = (() => {
@@ -117,7 +119,7 @@ export default function GroupCompatibilityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28" dir="rtl">
+    <div className="min-h-screen bg-gray-50 pb-28" dir={i18n.dir()}>
       {/* Header */}
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-1">
@@ -129,7 +131,7 @@ export default function GroupCompatibilityPage() {
             Group Vibe Check
           </h1>
         </div>
-        <p className="text-gray-500 text-sm mr-10">בדיקת התאמה בין כל חברי הצוות</p>
+        <p className="text-gray-500 text-sm mr-10">{t("vibe_check_subtitle")}</p>
       </div>
 
       <div className="p-4 space-y-4">
@@ -141,10 +143,10 @@ export default function GroupCompatibilityPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-yellow-400 rounded-2xl p-5 text-center text-white"
           >
-            <p className="text-white/80 text-sm font-bold mb-1">ציון הצוות הכולל</p>
+            <p className="text-white/80 text-sm font-bold mb-1">{t("overall_team_score")}</p>
             <p className="text-6xl font-black">{overallScore}%</p>
             <p className="text-white/80 text-sm mt-1">
-              {overallScore >= 75 ? "הצוות הזה יתחבר מעולה! 🔥" : overallScore >= 50 ? "יש פוטנציאל, כדאי לדבר על ההבדלים" : "כדאי לבדוק טוב טוב לפני שסוגרים"}
+              {overallScore >= 75 ? t("team_great_connect") : overallScore >= 50 ? t("team_has_potential") : t("team_check_carefully")}
             </p>
           </motion.div>
         )}
@@ -152,7 +154,7 @@ export default function GroupCompatibilityPage() {
         {/* Team avatars row */}
         {teamMembers.length > 0 && (
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-500 mb-3">חברי הצוות</p>
+            <p className="text-sm font-bold text-gray-500 mb-3">{t("team_members_label")}</p>
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex flex-col items-center gap-1">
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[--theme-orange] shadow">
@@ -164,7 +166,7 @@ export default function GroupCompatibilityPage() {
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] font-bold text-[--theme-orange]">אני</span>
+                <span className="text-[10px] font-bold text-[--theme-orange]">{t("me")}</span>
               </div>
               {teamMembers.map((m, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
@@ -188,13 +190,13 @@ export default function GroupCompatibilityPage() {
         {teamMembers.length === 0 && (
           <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="font-bold text-gray-600 mb-1">עוד אין חברי צוות</p>
-            <p className="text-gray-400 text-sm mb-4">הוסף שותפים מהצוות שלך כדי לבדוק התאמה</p>
+            <p className="font-bold text-gray-600 mb-1">{t("no_team_members_yet")}</p>
+            <p className="text-gray-400 text-sm mb-4">{t("add_members_for_compat")}</p>
             <button
               onClick={() => navigate(createPageUrl('GroupTracker'))}
               className="gradient-orange text-white font-bold px-6 py-2.5 rounded-full text-sm"
             >
-              לבניית הצוות
+              {t("build_your_team")}
             </button>
           </div>
         )}
@@ -240,10 +242,10 @@ export default function GroupCompatibilityPage() {
                   {!bothDone && (
                     <div className="flex gap-2 mt-2 flex-wrap">
                       <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${myDone ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {myDone ? '✓ מילאתי' : '⏳ לא מילאתי'}
+                        {myDone ? t('i_filled') : t('i_didnt_fill')}
                       </span>
                       <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${theirDone ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {theirDone ? `✓ ${member.name?.split(' ')[0]} מילא/ה` : `⏳ ${member.name?.split(' ')[0]} טרם מילא/ה`}
+                        {theirDone ? t('x_filled', { name: member.name?.split(' ')[0] }) : t('x_not_filled', { name: member.name?.split(' ')[0] })}
                       </span>
                     </div>
                   )}
@@ -263,7 +265,7 @@ export default function GroupCompatibilityPage() {
                         className="gradient-orange text-white text-xs font-bold px-3 py-2 rounded-full flex items-center gap-1 shadow"
                       >
                         <Puzzle className="w-3 h-3" />
-                        {compat?.myAnswered > 0 ? "המשך" : "התחל"}
+                        {compat?.myAnswered > 0 ? t("continue") : t("start_action")}
                       </button>
                     )
                   )}
@@ -278,7 +280,7 @@ export default function GroupCompatibilityPage() {
         {teamMembers.length > 0 && (
           <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 text-center">
             <p className="text-orange-700 text-sm font-medium">
-              💡 כדי לראות תוצאות, גם אתה/ת וגם השותפים צריכים למלא את השאלון
+              {t("compat_tip")}
             </p>
           </div>
         )}

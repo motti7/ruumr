@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
 import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles, ArrowUp } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
@@ -8,13 +9,15 @@ import SmartImage from '@/components/shared/SmartImage';
 import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
-import { getInterestLabel, normalizeInterestValues } from '@/lib/interests';
-import { getCitiesRegion } from '@/lib/cityToRegion';
+import { getInterestLabel, getInterestLabelKey, normalizeInterestValues } from '@/lib/interests';
+import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 
 const ProfileDetail = ({ profile, onClose }) => {
-  const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
-  const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
-  const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
+  const { t } = useTranslation();
+  const interestLabel = (v) => { const k = getInterestLabelKey(v); return k ? t(k) : getInterestLabel(v); };
+  const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
+  const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
+  const vibeText = [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")];
   const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const interests = normalizeInterestValues(profile.interests);
 
@@ -45,12 +48,12 @@ const ProfileDetail = ({ profile, onClose }) => {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`פרטים מלאים של ${profile.name}`}>
-      
+      aria-label={t("full_details_of", { name: profile.name })}>
+
             <button
         onClick={onClose}
         className="fixed top-20 right-6 z-[300] min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="סגור פרטים">
+        aria-label={t("close_details")}>
         
                 <X className="text-white w-5 h-5 drop-shadow-lg" strokeWidth={2.5} />
             </button>
@@ -61,11 +64,11 @@ const ProfileDetail = ({ profile, onClose }) => {
                     {plusMeta &&
           <div className="mt-3 inline-flex items-center gap-2 bg-white/15 border border-white/10 px-4 py-2 rounded-full text-sm font-bold">
                             <span className="text-[--theme-orange]">
-                                {Math.round((Number(plusMeta.score) || 0) * 100)}% התאמה
+                                {t("match_percent", { percent: Math.round((Number(plusMeta.score) || 0) * 100) })}
                             </span>
                             <span className="text-white/70">·</span>
                             <span className="text-white">
-                                {plusMeta.messageable ? 'הודעות פתוחות' : 'שיחה נעולה'}
+                                {plusMeta.messageable ? t("messages_open") : t("chat_locked")}
                             </span>
                         </div>
           }
@@ -76,21 +79,21 @@ const ProfileDetail = ({ profile, onClose }) => {
               <div className="flex flex-wrap justify-center gap-1">
                                     <span>{profile.search_cities[0]}</span>
                                     {profile.search_cities[1] && <span>• {profile.search_cities[1]}</span>}
-                                    {profile.search_cities.length > 2 && <span className="text-white/70">• ועוד...</span>}
+                                    {profile.search_cities.length > 2 && <span className="text-white/70">• {t("and_more")}</span>}
                                 </div> :
 
               <span>{profile.location}</span>
               }
                              {(() => {
                 const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                return region ? <span className="text-sm opacity-80">• {region}</span> : null;
+                return region ? <span className="text-sm opacity-80">• {translateRegion(region, t)}</span> : null;
               })()}
                         </div>
                     </div>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                    <h4 className="font-bold mb-2 text-white text-lg" id="about-section">קצת עליי</h4>
+                    <h4 className="font-bold mb-2 text-white text-lg" id="about-section">{t("onb_about_me_label")}</h4>
                     <p className="text-base text-white/95 leading-relaxed mb-3" aria-describedby="about-section">{profile.about_me}</p>
                     {profile.social_link &&
           <a
@@ -98,16 +101,16 @@ const ProfileDetail = ({ profile, onClose }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-6 py-3 rounded-full hover:brightness-110 transition-colors shadow-lg mt-2"
-            aria-label={`בקר בעמוד החברתי של ${profile.name}`}>
-            
+            aria-label={t("visit_social_of", { name: profile.name })}>
+
                           {getSocialIcon(profile.social_link)}
-                          בואו להכיר אותי
+                          {t("get_to_know_me")}
                         </a>
           }
                 </div>
                 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                    <h4 className="font-bold mb-2 text-white text-lg" id="looking-section">מה אני מחפש/ת</h4>
+                    <h4 className="font-bold mb-2 text-white text-lg" id="looking-section">{t("onb_looking_for_desc_label")}</h4>
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
@@ -115,7 +118,7 @@ const ProfileDetail = ({ profile, onClose }) => {
         <div className="bg-gradient-to-br from-[--theme-orange]/25 to-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
                         <h4 className="font-bold mb-2 text-white text-lg flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-[--theme-orange]" />
-                            למה Ruumr Plus אוהב את זה
+                            {t("why_plus_likes")}
                         </h4>
                         <p className="text-base text-white/95 leading-relaxed">{plusMeta.insight}</p>
                         {plusMeta.reasons &&
@@ -127,7 +130,7 @@ const ProfileDetail = ({ profile, onClose }) => {
             )}
                                 {(plusMeta.reasons.shared_interests || []).map((interest, i) =>
             <span key={`interest-${i}`} className="bg-white/15 px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/10">
-                                        {getInterestLabel(interest)}
+                                        {interestLabel(interest)}
                                     </span>
             )}
                             </div>
@@ -137,11 +140,11 @@ const ProfileDetail = ({ profile, onClose }) => {
 
                 {interests.length > 0 &&
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
-                        <h4 className="font-bold mb-3 text-white text-lg">תחומי עניין</h4>
+                        <h4 className="font-bold mb-3 text-white text-lg">{t("onb_step5_title")}</h4>
                         <div className="flex flex-wrap gap-2">
                             {interests.map((interest) =>
             <span key={interest} className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium border border-white/30">
-                                    {getInterestLabel(interest)}
+                                    {interestLabel(interest)}
                                 </span>
             )}
                         </div>
@@ -151,42 +154,42 @@ const ProfileDetail = ({ profile, onClose }) => {
                 <HouseholdPreferencesGrid
           profile={profile}
           variant="dark"
-          title="הרגלים בבית"
-          description="אלו השדות שעוזרים להבין את שגרת החיים בדירה."
+          title={t("home_habits")}
+          description={t("home_habits_desc")}
           className="mt-2" />
         
 
                 <div className="grid grid-cols-2 gap-3" role="list">
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
-                        <span className="text-white/70 block text-sm mb-1">דת</span>
-                        <span className="font-bold text-white text-base" aria-label={`דתיות: ${religionText[profile.religion] || 'לא צוין'}`}>{religionText[profile.religion] || '-'}</span>
+                        <span className="text-white/70 block text-sm mb-1">{t("religion_short")}</span>
+                        <span className="font-bold text-white text-base" aria-label={t("religiosity_aria", { value: religionText[profile.religion] || t("not_specified") })}>{religionText[profile.religion] || '-'}</span>
                     </div>
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
-                        <span className="text-white/70 block text-sm mb-1">וייב</span>
-                        <span className="font-bold text-white text-base" aria-label={`וייב: ${vibeText[profile.vibe_level - 1] || 'לא צוין'}`}>{vibeText[profile.vibe_level - 1] || '-'}</span>
+                        <span className="text-white/70 block text-sm mb-1">{t("vibe_label_short")}</span>
+                        <span className="font-bold text-white text-base" aria-label={t("vibe_aria", { value: vibeText[profile.vibe_level - 1] || t("not_specified") })}>{vibeText[profile.vibe_level - 1] || '-'}</span>
                     </div>
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
-                        <span className="text-white/70 block text-sm mb-1">כשרות</span>
-                        <span className="font-bold text-white text-base" aria-label={`כשרות: ${preferenceText[profile.kosher_preference] || 'לא צוין'}`}>{preferenceText[profile.kosher_preference] || '-'}</span>
+                        <span className="text-white/70 block text-sm mb-1">{t("onb_kosher_label")}</span>
+                        <span className="font-bold text-white text-base" aria-label={t("kosher_aria", { value: preferenceText[profile.kosher_preference] || t("not_specified") })}>{preferenceText[profile.kosher_preference] || '-'}</span>
                     </div>
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
-                        <span className="text-white/70 block text-sm mb-1">שבת</span>
-                        <span className="font-bold text-white text-base" aria-label={`שמירת שבת: ${preferenceText[profile.shabbat_preference] || 'לא צוין'}`}>{preferenceText[profile.shabbat_preference] || '-'}</span>
+                        <span className="text-white/70 block text-sm mb-1">{t("shabbat_short")}</span>
+                        <span className="font-bold text-white text-base" aria-label={t("shabbat_aria", { value: preferenceText[profile.shabbat_preference] || t("not_specified") })}>{preferenceText[profile.shabbat_preference] || '-'}</span>
                     </div>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl flex items-center justify-between">
                      <div>
-                        <h4 className="font-bold text-white text-lg mb-1">בעלי חיים</h4>
+                        <h4 className="font-bold text-white text-lg mb-1">{t("pets_section")}</h4>
                         <span className="text-white/90">
-                            {{ 'none': 'אין', 'dog': 'כלב', 'cat': 'חתול', 'other': profile.pet_other_description || 'אחר' }[profile.pet_type] || 'לא צוין'}
+                            {{ 'none': t('pet_none'), 'dog': t('pet_dog'), 'cat': t('pet_cat'), 'other': profile.pet_other_description || t('pet_other') }[profile.pet_type] || t('not_specified')}
                         </span>
                      </div>
                      <div className="bg-white/20 p-2 rounded-full">
                         {profile.pet_type === 'dog' && <Dog className="w-6 h-6 text-white" />}
                         {profile.pet_type === 'cat' && <Cat className="w-6 h-6 text-white" />}
                         {profile.pet_type === 'other' && <PawPrint className="w-6 h-6 text-white" />}
-                        {profile.pet_type === 'none' && <div className="w-6 h-6 text-white/50 text-xs flex items-center justify-center">אין</div>}
+                        {profile.pet_type === 'none' && <div className="w-6 h-6 text-white/50 text-xs flex items-center justify-center">{t("pet_none")}</div>}
                      </div>
                 </div>
 
@@ -194,13 +197,13 @@ const ProfileDetail = ({ profile, onClose }) => {
         <div className="bg-gradient-to-r from-[--theme-orange] to-[--theme-orange-dark] backdrop-blur-sm p-5 rounded-2xl">
                         <h4 className="font-bold text-white mb-3 flex items-center text-lg">
                             <Home className="w-6 h-6 ml-2" />
-                            יש לי כבר דירה!
+                            {t("i_already_have_apartment")}
                         </h4>
                         {profile.apartment_photos && profile.apartment_photos.length > 0 &&
           <div className="grid grid-cols-3 gap-2 mt-3">
                                 {profile.apartment_photos.filter((p) => p).map((photo, i) =>
             <div key={i} className="w-full aspect-square rounded-lg overflow-hidden">
-                                        <SmartImage src={photo} alt="דירה" className="w-full h-full" priority={false} />
+                                        <SmartImage src={photo} alt={t("apartment_alt")} className="w-full h-full" priority={false} />
                                     </div>
             )}
                             </div>
@@ -213,11 +216,11 @@ const ProfileDetail = ({ profile, onClose }) => {
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                         <h4 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            מצב חיפוש ה Team
+                            {t("team_search_status")}
                         </h4>
                         <div className="flex items-center gap-3 mb-3">
                             <div className="bg-white/20 rounded-full px-3 py-1 text-white text-sm font-bold">
-                                {1 + (profile.team_members?.length || 0)} / {profile.team_target || '?'} אנשים
+                                {1 + (profile.team_members?.length || 0)} / {profile.team_target || '?'} {t("people")}
                             </div>
                             {profile.team_target &&
             <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
@@ -230,7 +233,7 @@ const ProfileDetail = ({ profile, onClose }) => {
                         </div>
                         {profile.team_members && profile.team_members.length > 0 &&
           <div>
-                                <p className="text-white/70 text-xs mb-2">חברי ה Team שכבר מצא/ה:</p>
+                                <p className="text-white/70 text-xs mb-2">{t("team_members_found")}</p>
                                 <div className="flex gap-2 flex-wrap">
                                     {profile.team_members.map((member, i) =>
               <div key={i} className="flex items-center gap-1.5 bg-white/15 rounded-full px-2 py-1">
@@ -257,6 +260,8 @@ const ProfileDetail = ({ profile, onClose }) => {
 };
 
 const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwipe, onSwipeIntent, isActive }) {
+  const { t } = useTranslation();
+  const interestLabel = (v) => { const k = getInterestLabelKey(v); return k ? t(k) : getInterestLabel(v); };
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -440,7 +445,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     }
   }, [isActive, isExpanded, media.length]);
 
-  const vibeText = useMemo(() => ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"], []);
+  const vibeText = useMemo(() => [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")], [t]);
 
   const getPhotoContent = (index) => {
     const isVideo = media[index].type === 'video';
@@ -511,7 +516,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
                                 {profile.is_verified &&
-                <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title="מאומת">
+                <div className="bg-blue-500/90 p-1 rounded-full shadow-lg" title={t("verified")}>
                                         <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
                                     </div>
                 }
@@ -525,20 +530,20 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                   <span>
                     {profile.search_cities[0]}
                     {profile.search_cities[1] && `, ${profile.search_cities[1]}`}
-                    {profile.search_cities.length > 2 && ', ועוד...'}
+                    {profile.search_cities.length > 2 && `, ${t("and_more")}`}
                   </span> :
                   <span>{profile.location}</span>
                   }
                                     {profile.current_status !== 'has_apartment' && (() => {
                     const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                    return region ? <span className="text-sm opacity-80 mt-1">• {region}</span> : null;
+                    return region ? <span className="text-sm opacity-80 mt-1">• {translateRegion(region, t)}</span> : null;
                   })()}
                                 </div>
                             </div>
                             {profile.current_status === 'has_apartment' &&
               <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
                                     <Home className="w-4 h-4 ml-1" />
-                                    יש לי דירה!
+                                    {t("onb_has_apartment_title")}!
                                 </div>
               }
 
@@ -553,16 +558,16 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                         {/* Right column: vibe tag */}
                         <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
                             <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-sm font-bold">
-                                וייב: {vibeText[profile.vibe_level - 1] || 'לא צוין'}
+                                {t("vibe_prefix")} {vibeText[profile.vibe_level - 1] || t("not_specified")}
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-36">
-                            <span className="text-white text-xl font-bold">תקציב ₪{profile.budget_max?.toLocaleString()} לחודש</span>
+                            <span className="text-white text-xl font-bold">{t("budget_per_month", { amount: profile.budget_max?.toLocaleString() })}</span>
                             {interests.length > 0 &&
                                 <div className="flex flex-wrap gap-2 mt-3">
                                     {interests.slice(0, 4).map((interest) =>
                                         <span key={interest} className="bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/30">
-                                            {getInterestLabel(interest)}
+                                            {interestLabel(interest)}
                                         </span>
                                     )}
                                 </div>
@@ -577,7 +582,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
           <>
 
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
-                            <h3 className="text-xl font-bold text-white mb-2">מה אני מחפש/ת</h3>
+                            <h3 className="text-xl font-bold text-white mb-2">{t("onb_looking_for_desc_label")}</h3>
                             <p className="text-white/95 text-base leading-relaxed line-clamp-3">{profile.looking_for_description}</p>
                         </div>
                     </>);
@@ -587,7 +592,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
       return (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
                     <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold">
-                        תמונות מהדירה שלי
+                        {t("photos_from_my_apartment")}
                         <Home className="w-5 h-5 mr-2" />
                     </div>
                 </div>);
@@ -705,7 +710,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                              <button
               onClick={handleMuteToggle}
               className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-              aria-label={isMuted ? "ביטול השתקה" : "השתקה"}>
+              aria-label={isMuted ? t("unmute") : t("mute")}>
               
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-[--theme-orange]" />}
                              </button>
@@ -717,10 +722,10 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
           <button
             onClick={handleExpandOpen}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 touch-manipulation"
-            aria-label="פרטים נוספים">
-            
+            aria-label={t("more_details")}>
+
                             <ArrowUp className="w-5 h-5 text-white drop-shadow" strokeWidth={2.5} />
-                            <span className="text-white text-xs font-medium drop-shadow" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>החליקו לפרטים נוספים</span>
+                            <span className="text-white text-xs font-medium drop-shadow" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>{t("swipe_for_more")}</span>
                         </button>
           }
 

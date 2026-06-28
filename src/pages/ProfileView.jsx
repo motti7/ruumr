@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -13,7 +14,7 @@ import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
-import { getCitiesRegion } from '@/lib/cityToRegion';
+import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
@@ -81,6 +82,7 @@ const AudioPlayer = ({ src }) => {
 };
 
 export default function ProfileViewPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState(/** @type {any} */ (null));
@@ -234,13 +236,13 @@ export default function ProfileViewPage() {
     } catch (error) { 
       console.error("❌ Swipe save failed:", error);
       setShowActions(true);
-      alert("שגיאה בשמירת הסווייפ. אנא נסה שוב.");
+      alert(t("swipe_save_error_alert"));
     }
   };
 
-  const religionText = { secular: "חילוני/ת", traditional: "מסורתי/ת", national_religious: "דתי/ה לאומי/ת", religious: "דתי/ה", haredi: "חרדי/ת" };
-  const preferenceText = { for: "בעד", against: "נגד", flow: "זורם/ת" };
-  const vibeText = ["שקט", "רגוע", "מאוזן", "חברותי", "תוסס"];
+  const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
+  const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
+  const vibeText = [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")];
 
   // Calculate media safely (profile might be null)
   const regularPhotos = profile?.photos?.filter(p => p) || [];
@@ -313,13 +315,13 @@ export default function ProfileViewPage() {
   if (!profile) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p>לא נמצא פרופיל</p>
+        <p>{t("profile_not_found")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden" dir="rtl">
+    <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden" dir={i18n.dir()}>
       <AnimatePresence>
         {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
       </AnimatePresence>
@@ -355,7 +357,7 @@ export default function ProfileViewPage() {
         <button 
           onClick={() => navigate(-1)} 
           className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="חזור"
+          aria-label={t("back")}
         >
           <ArrowRight className="w-6 h-6 text-gray-600" />
         </button>
@@ -415,7 +417,7 @@ export default function ProfileViewPage() {
             {plusMatchPercent != null && (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-[--theme-orange] whitespace-nowrap">
                 <Sparkles className="w-4 h-4" />
-                {plusMatchPercent}% התאמה
+                {t("match_percent", { percent: plusMatchPercent })}
               </span>
             )}
           </div>
@@ -426,27 +428,27 @@ export default function ProfileViewPage() {
                     <>
                         <span>{profile.search_cities[0]}</span>
                         {profile.search_cities[1] && <span>{profile.search_cities[1]}</span>}
-                        {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">ועוד...</span>}
+                        {profile.search_cities.length > 2 && <span className="text-xs text-gray-500">{t("and_more")}</span>}
                     </>
                  ) : (
                     <span>{profile.location}</span>
                  )}
                  {(() => {
                      const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                     return region ? <span className="text-sm text-gray-500 mt-0.5">• {region}</span> : null;
+                     return region ? <span className="text-sm text-gray-500 mt-0.5">• {translateRegion(region, t)}</span> : null;
                  })()}
             </div>
           </div>
           {profile.current_status === 'has_apartment' && (
             <div className="inline-flex items-center bg-[--theme-orange] px-3 py-2 rounded-full text-white text-sm font-bold">
               <Home className="w-4 h-4 ml-1" />
-              יש לי דירה
+              {t("onb_has_apartment_title")}
             </div>
           )}
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-2">קצת עליי</h4>
+          <h4 className="font-bold text-lg mb-2">{t("onb_about_me_label")}</h4>
           <p className="text-gray-700 leading-relaxed mb-4">{profile.about_me}</p>
 
           {/* Custom Audio Player with Fade In */}
@@ -485,13 +487,13 @@ export default function ProfileViewPage() {
               className="inline-flex items-center gap-2 text-white font-bold bg-[--theme-orange] px-4 py-2 rounded-full hover:brightness-110 transition-colors shadow-sm"
             >
               {(() => { const icon = getSocialIcon(profile.social_link); return icon ? React.cloneElement(icon, { className: "w-5 h-5" }) : <LinkIcon className="w-5 h-5" />; })()}
-              בואו להכיר אותי
+              {t("get_to_know_me")}
             </a>
           )}
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-2">מה אני מחפש/ת</h4>
+          <h4 className="font-bold text-lg mb-2">{t("onb_looking_for_desc_label")}</h4>
           <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
         </div>
 
@@ -504,7 +506,7 @@ export default function ProfileViewPage() {
             <p className="text-gray-700 leading-relaxed">{plusMeta.insight}</p>
             {plusMeta.messageable !== undefined && (
               <div className="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-[--theme-orange]">
-                {plusMeta.messageable ? "הודעות פתוחות" : "שיחה נעולה"}
+                {plusMeta.messageable ? t("messages_open") : t("chat_locked")}
               </div>
             )}
           </div>
@@ -518,7 +520,7 @@ export default function ProfileViewPage() {
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[--theme-orange] text-[--theme-orange] font-bold text-sm"
           >
             <Star className="w-5 h-5" />
-            כתוב/י חוות דעת על השותפות
+            {t("write_review_about_partnership")}
           </button>
         )}
 
@@ -533,11 +535,11 @@ export default function ProfileViewPage() {
 
         {interestOptions.length > 0 && (
           <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h4 className="font-bold text-lg mb-3">תחומי עניין</h4>
+            <h4 className="font-bold text-lg mb-3">{t("onb_step5_title")}</h4>
             <div className="flex flex-wrap gap-2">
               {interestOptions.map((interest) => (
                 <span key={interest.id} className={`px-3 py-1.5 rounded-full text-sm font-medium border ${interest.color}`}>
-                  {interest.label}
+                  {interest.labelKey ? t(interest.labelKey) : interest.label}
                 </span>
               ))}
             </div>
@@ -545,37 +547,37 @@ export default function ProfileViewPage() {
         )}
 
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h4 className="font-bold text-lg mb-3">פרטים נוספים</h4>
+          <h4 className="font-bold text-lg mb-3">{t("more_details")}</h4>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <span className="text-gray-500 text-sm block mb-1">דת</span>
+              <span className="text-gray-500 text-sm block mb-1">{t("religion_short")}</span>
               <span className="font-semibold text-gray-900">{profile.religion ? religionText[profile.religion] : '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 text-sm block mb-1">וייב</span>
+              <span className="text-gray-500 text-sm block mb-1">{t("vibe_label_short")}</span>
               <span className="font-semibold text-gray-900">{profile.vibe_level ? vibeText[profile.vibe_level - 1] : '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 text-sm block mb-1">כשרות</span>
+              <span className="text-gray-500 text-sm block mb-1">{t("onb_kosher_label")}</span>
               <span className="font-semibold text-gray-900">{profile.kosher_preference ? preferenceText[profile.kosher_preference] : '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 text-sm block mb-1">שבת</span>
+              <span className="text-gray-500 text-sm block mb-1">{t("shabbat_short")}</span>
               <span className="font-semibold text-gray-900">{profile.shabbat_preference ? preferenceText[profile.shabbat_preference] : '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 text-sm block mb-1">תקציב</span>
+              <span className="text-gray-500 text-sm block mb-1">{t("budget_word")}</span>
               <span className="font-semibold text-[--theme-orange]">{profile.budget_max != null ? `₪${profile.budget_max.toLocaleString()}` : '-'}</span>
             </div>
             {profile.pet_type !== 'none' && (
               <div>
-                <span className="text-gray-500 text-sm block mb-1">חיית מחמד</span>
+                <span className="text-gray-500 text-sm block mb-1">{t("pet_word")}</span>
                 <div className="flex items-center">
                   {profile.pet_type === 'dog' && <Dog className="w-4 h-4 ml-1" />}
                   {profile.pet_type === 'cat' && <Cat className="w-4 h-4 ml-1" />}
                   {profile.pet_type === 'other' && <PawPrint className="w-4 h-4 ml-1" />}
                   <span className="font-semibold text-gray-900">
-                    {profile.pet_type === 'other' ? profile.pet_other_description : profile.pet_type === 'dog' ? 'כלב' : 'חתול'}
+                    {profile.pet_type === 'other' ? profile.pet_other_description : profile.pet_type === 'dog' ? t('pet_dog') : t('pet_cat')}
                   </span>
                 </div>
               </div>
@@ -586,8 +588,8 @@ export default function ProfileViewPage() {
         <HouseholdPreferencesGrid
           profile={profile}
           variant="light"
-          title="הרגלים בבית"
-          description="המידע הזה עוזר להבין את שגרת החיים בדירה."
+          title={t("home_habits")}
+          description={t("home_habits_desc_light")}
         />
       </div>
       

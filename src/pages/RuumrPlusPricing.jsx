@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
@@ -9,10 +10,10 @@ import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { Sparkles, MessageCircle, SlidersHorizontal, ShieldCheck, Check } from "lucide-react";
 
 const benefits = [
-  { icon: Sparkles, title: "התאמות חכמות", description: "דירוג התאמות לפי שגרה, דירה, תקציב והרגלים משותפים." },
-  { icon: MessageCircle, title: "שיחות מוקדמות", description: "פתיחת הודעות עם ההתאמות הכי טובות שלך." },
-  { icon: SlidersHorizontal, title: "סינון לפי הרגלים", description: "התאמה לפי סדר יום, ניקיון, אורחים ורעש." },
-  { icon: ShieldCheck, title: "פרופיל מדויק", description: "פרופיל מאומת לחישוב התאמות אמין יותר." },
+  { icon: Sparkles, titleKey: "pricing_b1_title", descKey: "pricing_b1_desc" },
+  { icon: MessageCircle, titleKey: "pricing_b2_title", descKey: "pricing_b2_desc" },
+  { icon: SlidersHorizontal, titleKey: "pricing_b3_title", descKey: "pricing_b3_desc" },
+  { icon: ShieldCheck, titleKey: "pricing_b4_title", descKey: "pricing_b4_desc" },
 ];
 
 function trackPlusEvent(eventName, mixpanelName, properties = {}) {
@@ -28,6 +29,7 @@ function trackPlusEvent(eventName, mixpanelName, properties = {}) {
 }
 
 export default function RuumrPlusPricingPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
 
@@ -62,7 +64,7 @@ export default function RuumrPlusPricingPage() {
 
   if (!checked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-white" dir={i18n.dir()}>
         <svg className="w-6 h-6 animate-spin text-[--theme-orange]" viewBox="0 0 24 24" fill="none">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
@@ -74,7 +76,7 @@ export default function RuumrPlusPricingPage() {
   return (
     <div
       className="min-h-screen pb-40 sm:pb-24 bg-[radial-gradient(circle_at_top_right,_rgba(250,56,3,0.16),_transparent_36%),linear-gradient(180deg,_#fff8f4_0%,_#ffffff_40%,_#f8fafc_100%)]"
-      dir="rtl"
+      dir={i18n.dir()}
     >
       <div className="px-4 pt-6 space-y-5 max-w-md mx-auto">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#FA3803] via-[#ff6a2a] to-[#ffb45c] px-5 py-7 text-white shadow-2xl text-center">
@@ -82,13 +84,13 @@ export default function RuumrPlusPricingPage() {
             <Sparkles className="w-4 h-4" />
             Ruumr Plus
           </div>
-          <h1 className="mt-4 text-3xl font-black leading-tight">שדרג/י לחוויית Plus</h1>
+          <h1 className="mt-4 text-3xl font-black leading-tight">{t("upgrade_to_plus")}</h1>
           <p className="mt-3 text-sm leading-6 text-white/90">
-            התאמות חכמות יותר, שיחות מוקדמות, וסינון לפי הרגלי מגורים.
+            {t("plus_pricing_tagline")}
           </p>
           <div className="mt-5 flex items-baseline justify-center gap-1">
             <span className="text-5xl font-black">{RUUMR_PLUS_PRICE_ILS} ₪</span>
-            <span className="text-base font-medium text-white/85">/ לחודש</span>
+            <span className="text-base font-medium text-white/85">{t("per_month_slash")}</span>
           </div>
         </div>
 
@@ -96,16 +98,16 @@ export default function RuumrPlusPricingPage() {
           {benefits.map((benefit) => {
             const Icon = benefit.icon;
             return (
-              <div key={benefit.title} className="flex items-start gap-3">
+              <div key={benefit.titleKey} className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-orange-50 text-[--theme-orange]">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-black text-gray-900 flex items-center gap-1">
                     <Check className="w-4 h-4 text-emerald-500" />
-                    {benefit.title}
+                    {t(benefit.titleKey)}
                   </h2>
-                  <p className="mt-0.5 text-sm leading-5 text-gray-600">{benefit.description}</p>
+                  <p className="mt-0.5 text-sm leading-5 text-gray-600">{t(benefit.descKey)}</p>
                 </div>
               </div>
             );
@@ -117,16 +119,16 @@ export default function RuumrPlusPricingPage() {
           onClick={handleSubscribe}
           className="w-full h-12 rounded-full bg-[--theme-orange] text-white font-bold shadow-lg hover:brightness-110"
         >
-          הירשם/י עכשיו · {RUUMR_PLUS_PRICE_ILS} ₪ לחודש
+          {t("subscribe_now", { price: RUUMR_PLUS_PRICE_ILS })}
         </Button>
 
         <p className="text-center text-xs text-gray-500">
-          ניתן לבטל בכל עת. החיוב מתחדש מדי חודש.
+          {t("cancel_anytime")}
         </p>
 
         <div className="text-center">
           <Link to={createPageUrl("Discover")} className="text-sm font-bold text-gray-500 hover:text-gray-700">
-            אולי מאוחר יותר
+            {t("maybe_later_pricing")}
           </Link>
         </div>
       </div>

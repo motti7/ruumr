@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ArrowRight } from "lucide-react";
@@ -6,18 +7,21 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
+// Maps each question id to its i18n catalog key (reusing the charter title keys
+// where the wording matches).
 const QUESTIONS = {
-  q_smoking: "עישון בדירה",
-  q_partners: "בני/בנות זוג",
-  q_pets: "בעלי חיים",
-  q_cleaning_strictness: "עד כמה מקפידים?",
-  q_shopping: "קניות לבית",
-  q_dishes: "כלים בכיור",
-  q_ac: "מלחמות המזגן",
-  q_hosting: "חברים ומסיבות",
+  q_smoking: "cq_smoking_title",
+  q_partners: "cq_partners_title",
+  q_pets: "cq_pets_title",
+  q_cleaning_strictness: "admin_q_cleaning",
+  q_shopping: "cq_shopping_title",
+  q_dishes: "cq_dishes_title",
+  q_ac: "cq_ac_title",
+  q_hosting: "cq_hosting_title",
 };
 
 export default function AdminCharterPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -80,24 +84,24 @@ export default function AdminCharterPage() {
   const questionIds = Object.keys(QUESTIONS);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen" dir="rtl">
+    <div className="p-6 bg-gray-50 min-h-screen" dir={i18n.dir()}>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(createPageUrl("AdminUsers"))}>
             <ArrowRight className="w-5 h-5" />
           </Button>
-          <h1 className="text-2xl font-black text-gray-900">תשובות שאלון התאמה</h1>
-          <span className="text-gray-500 text-sm">({rows.length} משתמשים ענו)</span>
+          <h1 className="text-2xl font-black text-gray-900">{t("admin_charter_title")}</h1>
+          <span className="text-gray-500 text-sm">{t("admin_users_answered", { count: rows.length })}</span>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-right px-4 py-3 font-semibold text-gray-700 whitespace-nowrap">שם משתמש</th>
+                <th className="text-start px-4 py-3 font-semibold text-gray-700 whitespace-nowrap">{t("admin_username")}</th>
                 {questionIds.map((qId) => (
                   <th key={qId} className="text-center px-3 py-3 font-semibold text-gray-700 whitespace-nowrap text-xs">
-                    {QUESTIONS[qId]}
+                    {t(QUESTIONS[qId])}
                   </th>
                 ))}
               </tr>
@@ -112,7 +116,7 @@ export default function AdminCharterPage() {
                       <td key={qId} className="px-3 py-3 text-center">
                         {ans ? (
                           <span className={`px-2 py-1 rounded-full text-xs font-bold ${ans === "a" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"}`}>
-                            {ans === "a" ? "א" : "ב"}
+                            {ans === "a" ? t("answer_a") : t("answer_b")}
                           </span>
                         ) : (
                           <span className="text-gray-300">—</span>

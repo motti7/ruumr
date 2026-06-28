@@ -115,3 +115,31 @@ export function getCitiesRegion(cities) {
 
   return winners.join(' / ');
 }
+
+// Region values are stored/data codes (Hebrew), matching profile.search_area.
+// This maps them to i18n catalog keys so the *display* label can be translated
+// without changing the stored value.
+const REGION_LABEL_KEYS = {
+  'צפון': 'area_north',
+  'מרכז': 'area_center',
+  'דרום': 'area_south',
+  'שפלה': 'area_shfela',
+  'ירושלים': 'area_jerusalem',
+};
+
+/**
+ * Translates a region string (possibly a tie like "צפון / מרכז") for display,
+ * given a react-i18next t() function. Unknown parts pass through unchanged.
+ * @param {string|null|undefined} region
+ * @param {(key: string) => string} t
+ */
+export function translateRegion(region, t) {
+  if (!region) return region;
+  return String(region)
+    .split(' / ')
+    .map((part) => {
+      const key = REGION_LABEL_KEYS[part.trim()];
+      return key ? t(key) : part.trim();
+    })
+    .join(' / ');
+}

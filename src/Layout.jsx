@@ -1,10 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
+import LanguageToggle from "./components/shared/LanguageToggle";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -20,10 +22,11 @@ import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 import { listIncomingTeamInvites } from "@/api/teamInvites";
 
 function FilterHintButton() {
+  const { t } = useTranslation();
   return (
     <button
       onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
-      aria-label="פילטרים"
+      aria-label={t("filters")}
       className="header-glow select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
     >
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ pointerEvents: 'none' }}>
@@ -60,6 +63,7 @@ function isIosLikeBrowserContext() {
 }
 
 export default function Layout({ children, currentPageName }) {
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const [matchesCount, setMatchesCount] = useState(0);
   const [validMatchIdsList, setValidMatchIdsList] = useState([]);
@@ -212,7 +216,7 @@ export default function Layout({ children, currentPageName }) {
           if (browserNotificationsEnabled && validMatchCount > previousTotal && previousTotal !== 0) {
             if (Notification.permission === 'granted') {
               new Notification('ruumr', {
-                body: 'יש לך התאמה חדשה! - ruumr',
+                body: t('new_match_notification'),
                 icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68c919adff6ac6fafb51bed6/8bae169ed_1770239914916.png'
               });
             }
@@ -310,11 +314,11 @@ export default function Layout({ children, currentPageName }) {
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
   const navigationItems = [
-    { name: "גלה", path: createPageUrl("Discover"), icon: Home },
-    { name: "התאמות", path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    { name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    { name: "לייקים", path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
-    { name: "הצוות", path: createPageUrl("GroupTracker"), icon: UsersRound }
+    { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
+    { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
+    { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
+    { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound }
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
@@ -348,7 +352,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
         {!['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -356,9 +360,9 @@ export default function Layout({ children, currentPageName }) {
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Smartphone className="w-8 h-8 text-red-500" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2 dark:text-white">אופס! יש בעיה עם התמונות</h3>
+                    <h3 className="text-xl font-bold mb-2 dark:text-white">{t("photo_error_title")}</h3>
                     <p className="text-gray-600 dark:text-gray-300 mb-6">
-                        חלק מהתמונות בפרופיל שלך לא עלו כראוי ולא ניתן לראות אותן. אנא העלה אותן מחדש כדי שכולם יוכלו לראות אותך.
+                        {t("photo_error_body")}
                     </p>
                     <button 
                         onClick={() => {
@@ -367,14 +371,14 @@ export default function Layout({ children, currentPageName }) {
                         }}
                         className="w-full py-3 rounded-full gradient-orange text-white font-bold shadow-lg"
                     >
-                        תיקון תמונות
+                        {t("photo_error_fix_button")}
                     </button>
-                    <button 
+                    <button
                         onClick={() => setShowPhotoError(false)}
                         className="mt-3 text-gray-400 text-sm font-medium min-h-[44px] flex items-center justify-center px-4"
-                        aria-label="אזכיר לי אחר כך"
+                        aria-label={t("remind_me_later")}
                     >
-                        אזכיר לי אחר כך
+                        {t("remind_me_later")}
                     </button>
                 </div>
             </div>
@@ -389,14 +393,17 @@ export default function Layout({ children, currentPageName }) {
         <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className={`${appShellWidthClass} flex items-center h-12 relative`}>
-        
+                {/* Pinned dir so the header controls keep fixed positions and don't
+                    swap sides when the user switches language (logo stays centered). */}
+                <div dir="rtl" className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
+
         {/* קבוצה ימין */}
-        <div className="flex items-center w-[96px] justify-start gap-1 pr-2 z-10">
-            <Link to={createPageUrl("Settings")} aria-label="הגדרות" className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
+        <div className="flex items-center w-[120px] justify-start gap-1 ps-2 z-10">
+            <Link to={createPageUrl("Settings")} aria-label={t("settings")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
             <WriteReviewButton />
+            <LanguageToggle />
         </div>
 
         {/* אמצע: כותרת רומר — תמיד במרכז מוחלט של המסך */}
@@ -407,11 +414,11 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* קבוצה שמאל */}
-        <div className="flex items-center w-[96px] justify-end gap-1 pl-2 z-10 mr-auto">
+        <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
             {currentPageName === 'Discover' && (
                 <FilterHintButton /> 
             )}
-            <Link to={createPageUrl("Profile")} aria-label="הפרופיל שלי" className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
+            <Link to={createPageUrl("Profile")} aria-label={t("my_profile")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
         </div>
@@ -426,18 +433,18 @@ export default function Layout({ children, currentPageName }) {
                     <button
                         onClick={() => navigate(createPageUrl('GroupTracker'))}
                         className="w-full flex items-center gap-3 bg-orange-50 border-b border-orange-100 px-4 py-3 text-right active:bg-orange-100"
-                        dir="rtl"
+                        dir={i18n.dir()}
                     >
                         <div className="w-9 h-9 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
                             <UsersRound className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-800">
-                                {teamRequestCount === 1 ? 'יש לך בקשה חדשה לצוות' : `יש לך ${teamRequestCount} בקשות חדשות לצוות`}
+                                {teamRequestCount === 1 ? t('team_request_one') : t('team_request_many', { count: teamRequestCount })}
                             </p>
-                            <p className="text-xs text-gray-500">לחץ/י כדי לאשר או לדחות</p>
+                            <p className="text-xs text-gray-500">{t('team_request_tap_hint')}</p>
                         </div>
-                        <span className="text-[--theme-orange] font-bold text-sm">צפה/י ›</span>
+                        <span className="text-[--theme-orange] font-bold text-sm">{t('team_request_view')} ›</span>
                     </button>
                 )}
                 {children}
@@ -447,10 +454,10 @@ export default function Layout({ children, currentPageName }) {
                 <nav className="fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path || 
-                            (item.name === "גלה" && (location.pathname === '/' || currentPageName === 'Discover'));
+                        const isActive = location.pathname === item.path ||
+                            (item.id === "discover" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
-                        const isPlusItem = item.name === "Plus";
+                        const isPlusItem = item.id === "plus";
                         const hasMessageBadge = (item.messageBadge || 0) > 0;
                         const handleClick = (e) => {
                             if (tabsLocked) {
@@ -482,7 +489,7 @@ export default function Layout({ children, currentPageName }) {
                             }
                         };
                         return (
-                        <Link key={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
+                        <Link key={item.id} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${tabsLocked ? 'opacity-40' : ''} ${

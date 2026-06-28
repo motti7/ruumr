@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { UsersRound, Check, X, Loader2 } from "lucide-react";
 import { respondToTeamInvite } from "@/api/teamInvites";
@@ -9,6 +10,7 @@ import { respondToTeamInvite } from "@/api/teamInvites";
  * @param {{ invite: any, onResolved?: (inviteId: string, action: string) => void }} props
  */
 export default function TeamRequestCard({ invite, onResolved }) {
+  const { t, i18n } = useTranslation();
   const [busy, setBusy] = useState(null); // 'accept' | 'decline' | null
 
   const respond = async (action) => {
@@ -29,7 +31,7 @@ export default function TeamRequestCard({ invite, onResolved }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       className="bg-white rounded-2xl p-4 shadow-sm border border-orange-100"
-      dir="rtl"
+      dir={i18n.dir()}
     >
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
@@ -37,9 +39,9 @@ export default function TeamRequestCard({ invite, onResolved }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-bold text-gray-800 leading-tight">
-            {invite.inviter_name || "מישהו"} רוצה אותך בצוות
+            {t("wants_you_in_team", { name: invite.inviter_name || t("someone") })}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">אם תאשר/י, תתווספו אחד לצוות של השני/ה</p>
+          <p className="text-xs text-gray-500 mt-0.5">{t("team_mutual_add_hint")}</p>
         </div>
       </div>
       <div className="flex gap-2 mt-3">
@@ -49,7 +51,7 @@ export default function TeamRequestCard({ invite, onResolved }) {
           className="flex-1 flex items-center justify-center gap-1.5 bg-[--theme-orange] text-white text-sm font-bold py-2 rounded-full disabled:opacity-60"
         >
           {busy === "accept" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          אישור
+          {t("approve")}
         </button>
         <button
           onClick={() => respond("decline")}
@@ -57,7 +59,7 @@ export default function TeamRequestCard({ invite, onResolved }) {
           className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 text-gray-600 text-sm font-bold py-2 rounded-full disabled:opacity-60"
         >
           {busy === "decline" ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-          דחייה
+          {t("decline")}
         </button>
       </div>
     </motion.div>

@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 export default function ImageLightbox({ src, onClose }) {
+    const { t } = useTranslation();
     return (
         <AnimatePresence>
             {src && (
@@ -16,7 +18,7 @@ export default function ImageLightbox({ src, onClose }) {
                     <button
                         className="absolute top-4 right-4 w-[44px] h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0"
                         onClick={onClose}
-                        aria-label="סגור"
+                        aria-label={t("close")}
                     >
                         <X className="w-6 h-6 text-white" />
                     </button>
@@ -25,7 +27,7 @@ export default function ImageLightbox({ src, onClose }) {
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
                         src={src}
-                        alt="תמונה מוגדלת"
+                        alt={t("enlarged_image")}
                         className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     />
