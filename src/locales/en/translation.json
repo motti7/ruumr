@@ -584,5 +584,10 @@
   "send_invite": "Send invitation",
 
   "select_cities": "Select cities...",
-  "no_city_found": "No city found."
+  "no_city_found": "No city found.",
+
+  "coming_to_you": "is on its way",
+  "coming_soon_desc": "We're working on a smart feature to help you find the most compatible roommates — habit-based matches, early conversations, and precise filtering.",
+  "arriving_soon": "Coming very soon",
+  "back_to_browsing": "Back to browsing"
 }

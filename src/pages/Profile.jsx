@@ -545,11 +545,11 @@ export default function ProfilePage() {
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
             <div className="grid grid-cols-2 gap-4">
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-500 mb-1">{t("onb_age_label")}</label>
                   <p className="text-lg font-bold text-[--theme-orange]">{profile.age}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-500 mb-1">{t("onb_gender_label")}</label>
                   {isEditing ? (
                     <BottomSheetSelect
@@ -571,7 +571,7 @@ export default function ProfilePage() {
         
         <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <h3 className="font-bold text-gray-800 mb-3 text-right">{t("pets_section")}</h3>
+              <h3 className="font-bold text-gray-800 mb-3 text-start">{t("pets_section")}</h3>
               <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
                       {['none', 'dog', 'cat', 'other'].map(type => {
@@ -595,16 +595,16 @@ export default function ProfilePage() {
                           value={formData.pet_other_description || ''}
                           onChange={(e) => setFormField('pet_other_description', e.target.value)}
                           placeholder={t("onb_pet_other_placeholder")}
-                          className="bg-white border-gray-300 text-right"
-                          dir="rtl"
+                          className="bg-white border-gray-300 text-start"
+                          dir={i18n.dir()}
                        />
                   )}
               </div>
 
-              <h3 className="font-bold text-gray-800 mb-3 text-right">{t("religion_tradition_section")}</h3>
+              <h3 className="font-bold text-gray-800 mb-3 text-start">{t("religion_tradition_section")}</h3>
               <div className="space-y-3">
                   <div>
-                      <label className="block text-right text-sm font-medium text-gray-600 mb-1">{t("onb_religion_label")}</label>
+                      <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("onb_religion_label")}</label>
                       <BottomSheetSelect
                            disabled={!isEditing}
                            value={formData.religion}
@@ -622,7 +622,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                       <div>
-                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">{t("onb_kosher_label")}</label>
+                          <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("onb_kosher_label")}</label>
                           <BottomSheetSelect
                               disabled={!isEditing}
                               value={formData.kosher_preference}
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                           />
                       </div>
                       <div>
-                          <label className="block text-right text-sm font-medium text-gray-600 mb-1">{t("shabbat_observance")}</label>
+                          <label className="block text-start text-sm font-medium text-gray-600 mb-1">{t("shabbat_observance")}</label>
                           <BottomSheetSelect
                               disabled={!isEditing}
                               value={formData.shabbat_preference}
@@ -656,12 +656,12 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">{t("onb_about_me_label")}</label>
-              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+              <label className="block text-start font-bold text-gray-700 mb-2">{t("onb_about_me_label")}</label>
+              <Textarea disabled={!isEditing} value={formData.about_me || ""} onChange={(e) => setFormField('about_me', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start" dir={i18n.dir()} />
             </div>
 
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="block text-start font-bold text-gray-700 mb-2 flex items-center gap-2">
                   {t("onb_social_link_label")}
               </label>
               {isEditing && (
@@ -682,13 +682,13 @@ export default function ProfilePage() {
                   value={formData.social_link || ""} 
                   onChange={(e) => setFormField('social_link', e.target.value)} 
                   placeholder={t("onb_paste_link_placeholder")}
-                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right"
-                  dir="rtl"
+                  className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start"
+                  dir={i18n.dir()}
               />
             </div>
             <div>
-              <label className="block text-right font-bold text-gray-700 mb-2">{t("onb_looking_for_desc_label")}</label>
-              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-right" dir="rtl" />
+              <label className="block text-start font-bold text-gray-700 mb-2">{t("onb_looking_for_desc_label")}</label>
+              <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start" dir={i18n.dir()} />
             </div>
         </div>
         
@@ -728,7 +728,7 @@ export default function ProfilePage() {
                             onChange={(e) => setSpotifySearch(e.target.value)} 
                             placeholder={t("search_song_placeholder")}
                             className="bg-gray-100 border-gray-300 text-black text-center placeholder:text-gray-400 h-10 text-sm"
-                            dir="rtl"
+                            dir={i18n.dir()}
                             onKeyDown={(e) => e.key === 'Enter' && searchSong()}
                         />
                         <Button 
@@ -775,8 +775,8 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
+            <div className="text-start">
+                <label className="block text-start font-bold text-gray-700 mb-2">
                   {t("looking_for_short")}
                 </label>
                 <BottomSheetSelect
@@ -793,7 +793,7 @@ export default function ProfilePage() {
                 />
             </div>
             <div>
-                <label className="block text-right font-bold text-gray-700 mb-3">
+                <label className="block text-start font-bold text-gray-700 mb-3">
                   {t("vibe_prefix")} <span className="text-[--theme-orange] font-bold text-lg">{vibeText[formData.vibe_level-1] || t("vibe_balanced")}</span>
                 </label>
                 <div className="px-2 py-3">
@@ -852,12 +852,14 @@ export default function ProfilePage() {
                       }
                     `}</style>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-600 mt-3 px-1 font-medium">
-                    <span>{t("vibe_lvl_lively")}</span>
-                    <span>{t("vibe_lvl_social")}</span>
-                    <span>{t("vibe_balanced")}</span>
-                    <span>{t("vibe_lvl_relaxed")}</span>
+                  {/* Pinned LTR so labels line up with the always-LTR range slider
+                      (value 1 = left = quiet … value 5 = right = lively) in both languages. */}
+                  <div dir="ltr" className="flex justify-between text-xs text-gray-600 mt-3 px-1 font-medium">
                     <span>{t("vibe_lvl_quiet")}</span>
+                    <span>{t("vibe_lvl_relaxed")}</span>
+                    <span>{t("vibe_balanced")}</span>
+                    <span>{t("vibe_lvl_social")}</span>
+                    <span>{t("vibe_lvl_lively")}</span>
                   </div>
                 </div>
             </div>
@@ -865,7 +867,7 @@ export default function ProfilePage() {
 
         {/* תחומי עניין */}
         <div className="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200">
-          <h3 className="font-bold text-gray-800 mb-3 text-right">{t("onb_step5_title")}</h3>
+          <h3 className="font-bold text-gray-800 mb-3 text-start">{t("onb_step5_title")}</h3>
           <div className="flex flex-wrap gap-2">
             {INTEREST_OPTIONS.map(interest => {
               const selected = (formData.interests || []).includes(interest.id);
@@ -897,8 +899,8 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-4">
-            <div className="text-right">
-                <label className="block text-right font-bold text-gray-700 mb-2">
+            <div className="text-start">
+                <label className="block text-start font-bold text-gray-700 mb-2">
                   {t("apartment_status")}
                 </label>
                 <BottomSheetSelect
@@ -968,12 +970,12 @@ export default function ProfilePage() {
             )}
 
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")}</label>
-                <Input disabled={!isEditing} type="number" placeholder={t("budget_example_placeholder")} value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-right" dir="rtl" />
+                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")}</label>
+                <Input disabled={!isEditing} type="number" placeholder={t("budget_example_placeholder")} value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-start" dir={i18n.dir()} />
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-2">{t("preferred_search_area")}</label>
+                <label className="block text-start text-sm font-bold text-gray-700 mb-2">{t("preferred_search_area")}</label>
                 <BottomSheetSelect
                     disabled={!isEditing}
                     value={formData.search_area}
@@ -990,7 +992,7 @@ export default function ProfilePage() {
             </div>
             
             <div>
-                <label className="block text-right text-sm font-bold text-gray-700 mb-1">{t("preferred_cities")}</label>
+                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("preferred_cities")}</label>
                 <CitySelect
                   disabled={!isEditing}
                   selectedCities={formData.search_cities || []}
