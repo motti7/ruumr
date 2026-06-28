@@ -14,7 +14,7 @@ import ReviewsSection from '../components/reviews/ReviewsSection';
 import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
-import { getCitiesRegion } from '@/lib/cityToRegion';
+import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
@@ -435,7 +435,7 @@ export default function ProfileViewPage() {
                  )}
                  {(() => {
                      const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                     return region ? <span className="text-sm text-gray-500 mt-0.5">• {region}</span> : null;
+                     return region ? <span className="text-sm text-gray-500 mt-0.5">• {translateRegion(region, t)}</span> : null;
                  })()}
             </div>
           </div>

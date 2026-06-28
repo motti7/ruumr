@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, getInterestLabelKey, normalizeInterestValues } from '@/lib/interests';
-import { getCitiesRegion } from '@/lib/cityToRegion';
+import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 
 const ProfileDetail = ({ profile, onClose }) => {
   const { t } = useTranslation();
@@ -86,7 +86,7 @@ const ProfileDetail = ({ profile, onClose }) => {
               }
                              {(() => {
                 const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                return region ? <span className="text-sm opacity-80">• {region}</span> : null;
+                return region ? <span className="text-sm opacity-80">• {translateRegion(region, t)}</span> : null;
               })()}
                         </div>
                     </div>
@@ -536,7 +536,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                   }
                                     {profile.current_status !== 'has_apartment' && (() => {
                     const region = getCitiesRegion(profile.search_cities) || profile.search_area;
-                    return region ? <span className="text-sm opacity-80 mt-1">• {region}</span> : null;
+                    return region ? <span className="text-sm opacity-80 mt-1">• {translateRegion(region, t)}</span> : null;
                   })()}
                                 </div>
                             </div>
