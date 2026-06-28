@@ -25,7 +25,7 @@ const emailHtml = `<!DOCTYPE html>
           <!-- Branding -->
           <tr>
             <td style="padding:36px 40px 24px;text-align:center;">
-              <p style="margin:0;font-size:44px;font-weight:900;color:#212121;line-height:1;">ruumr</p>
+              <p style="margin:0;font-size:44px;font-weight:900;color:#FF5722;line-height:1;">ruumr</p>
               <p style="margin:4px 0 0;font-size:14px;font-weight:800;color:#F5C518;letter-spacing:4px;">PLUS</p>
             </td>
           </tr>
