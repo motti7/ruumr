@@ -391,7 +391,9 @@ export default function Layout({ children, currentPageName }) {
         <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                <div className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
+                {/* Pinned dir so the header controls keep fixed positions and don't
+                    swap sides when the user switches language (logo stays centered). */}
+                <div dir="rtl" className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
 
         {/* קבוצה ימין */}
         <div className="flex items-center w-[120px] justify-start gap-1 ps-2 z-10">

@@ -169,7 +169,7 @@ export default function RoomiCharter({
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleAnswer(value)}
                     disabled={isSaving}
-                    className={`w-full rounded-2xl border-0 px-4 py-7 text-right text-base font-bold text-white shadow-lg outline-none ${
+                    className={`w-full rounded-2xl border-0 px-4 py-7 text-start text-base font-bold text-white shadow-lg outline-none ${
                       value === "a"
                         ? "bg-gradient-to-r from-orange-500 to-red-600"
                         : "bg-gradient-to-r from-blue-500 to-purple-600"
