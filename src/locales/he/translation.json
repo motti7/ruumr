@@ -560,5 +560,29 @@
   "cq_hosting_title": "חברים ומסיבות",
   "cq_hosting_a": "הבית פתוח",
   "cq_hosting_b": "צריך שקט ותיאום",
-  "cq_hosting_c": "מתאמים מראש ושומרים על שקט אחרי 23:00."
+  "cq_hosting_c": "מתאמים מראש ושומרים על שקט אחרי 23:00.",
+
+  "account_deleted_success": "החשבון והמידע שלך נמחקו בהצלחה.",
+  "delete_error": "אירעה שגיאה במחיקת הנתונים. אנא נסה שנית או צור קשר עם התמיכה.",
+  "delete_account_title": "מחיקת חשבון",
+  "irreversible_action": "פעולה זו בלתי הפיכה",
+  "delete_removes_all": "מחיקת החשבון תסיר את כל המידע שלך מהמערכת, כולל:",
+  "delete_item_profile": "הפרופיל וכל התמונות",
+  "delete_item_matches": "כל ההתאמות וההודעות",
+  "delete_item_prefs": "ההעדפות והחיפושים",
+  "delete_item_login": "פרטי הכניסה המשויכים לחשבון",
+  "delete_my_account": "מחק את החשבון שלי",
+  "deleting": "מוחק...",
+
+  "something_went_wrong": "משהו השתבש, נסה/י שוב",
+  "invite_sent_to": "ההזמנה נשלחה ל{{name}} 🎉",
+  "invite_explainer": "אם {{name}} כבר ב-Ruumr נבקש אישור, ואם לא — נשלח הזמנה להצטרף.",
+  "add_another_friend": "הוסף/י עוד חבר/ה",
+  "invite_friend_by_email": "הזמנת חבר/ה במייל",
+  "friend_name": "שם החבר/ה",
+  "email_address": "כתובת מייל",
+  "send_invite": "שלח/י הזמנה",
+
+  "select_cities": "בחר ערים...",
+  "no_city_found": "לא נמצאה עיר."
 }

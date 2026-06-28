@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Loader2, CheckCircle, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * @param {{ onInvited?: () => void, onCollect?: (invite: { name: string, email: string }) => void, compact?: boolean }} props
  */
 export default function InviteByEmail({ onInvited, onCollect, compact = false }) {
+  const { t, i18n } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -41,7 +43,7 @@ export default function InviteByEmail({ onInvited, onCollect, compact = false })
       setName("");
       setEmail("");
     } catch (err) {
-      setError(err?.message || "משהו השתבש, נסה/י שוב");
+      setError(err?.message || t("something_went_wrong"));
     }
     setIsSending(false);
   };
@@ -52,48 +54,48 @@ export default function InviteByEmail({ onInvited, onCollect, compact = false })
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-green-50 border border-green-100 rounded-2xl p-4 text-center"
-        dir="rtl"
+        dir={i18n.dir()}
       >
         <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-        <p className="font-bold text-gray-800">ההזמנה נשלחה ל{sentName} 🎉</p>
+        <p className="font-bold text-gray-800">{t("invite_sent_to", { name: sentName })}</p>
         <p className="text-sm text-gray-500 mt-1">
-          אם {sentName} כבר ב-Ruumr נבקש אישור, ואם לא — נשלח הזמנה להצטרף.
+          {t("invite_explainer", { name: sentName })}
         </p>
         <button
           onClick={() => setSentName(null)}
           className="mt-3 inline-flex items-center gap-1.5 text-[--theme-orange] font-bold text-sm"
         >
           <UserPlus className="w-4 h-4" />
-          הוסף/י עוד חבר/ה
+          {t("add_another_friend")}
         </button>
       </motion.div>
     );
   }
 
   return (
-    <div className={compact ? "" : "bg-white rounded-2xl p-4 shadow-sm border border-gray-100"} dir="rtl">
+    <div className={compact ? "" : "bg-white rounded-2xl p-4 shadow-sm border border-gray-100"} dir={i18n.dir()}>
       {!compact && (
         <div className="flex items-center gap-2 mb-3">
           <Mail className="w-4 h-4 text-[--theme-orange]" />
-          <p className="font-bold text-gray-700">הזמנת חבר/ה במייל</p>
+          <p className="font-bold text-gray-700">{t("invite_friend_by_email")}</p>
         </div>
       )}
       <div className="space-y-2">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="שם החבר/ה"
+          placeholder={t("friend_name")}
           className="h-10 text-sm bg-white border-gray-200 w-full"
-          dir="rtl"
+          dir={i18n.dir()}
         />
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           type="email"
           inputMode="email"
-          placeholder="כתובת מייל"
+          placeholder={t("email_address")}
           className="h-10 text-sm bg-white border-gray-200 w-full text-right"
-          dir="rtl"
+          dir={i18n.dir()}
         />
         <AnimatePresence>
           {error && (
@@ -112,7 +114,7 @@ export default function InviteByEmail({ onInvited, onCollect, compact = false })
           disabled={!canSend || isSending}
           className="w-full h-10 rounded-full text-sm font-bold gradient-orange text-white hover:brightness-110 disabled:opacity-50"
         >
-          {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "שלח/י הזמנה"}
+          {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("send_invite")}
         </Button>
       </div>
     </div>

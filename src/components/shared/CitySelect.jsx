@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, X, ChevronDown } from 'lucide-react';
 
 const CITIES = [
@@ -12,6 +13,7 @@ const CITIES = [
 sort();
 
 export default function CitySelect({ selectedCities = [], onChange, disabled = false }) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
@@ -88,10 +90,10 @@ export default function CitySelect({ selectedCities = [], onChange, disabled = f
           disabled={disabled}
           onChange={(e) => {setQuery(e.target.value);setOpen(true);}}
           onFocus={() => {if (!disabled) setOpen(true);}}
-          placeholder={safeSelectedCities.length === 0 ? 'בחר ערים...' : ''}
+          placeholder={safeSelectedCities.length === 0 ? t('select_cities') : ''}
           className="flex-1 min-w-[60px] bg-transparent outline-none border-none text-sm text-right placeholder-gray-400 disabled:cursor-not-allowed"
           style={{ boxShadow: 'none' }}
-          dir="rtl" />
+          dir={i18n.dir()} />
         
 
         <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0 ml-1" />
@@ -131,7 +133,7 @@ export default function CitySelect({ selectedCities = [], onChange, disabled = f
           boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
         }}>
         
-          לא נמצאה עיר.
+          {t('no_city_found')}
         </div>
       }
     </div>);

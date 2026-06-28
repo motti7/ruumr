@@ -560,5 +560,29 @@
   "cq_hosting_title": "Friends and parties",
   "cq_hosting_a": "Open house",
   "cq_hosting_b": "Need quiet and coordination",
-  "cq_hosting_c": "Coordinate in advance and keep quiet after 23:00."
+  "cq_hosting_c": "Coordinate in advance and keep quiet after 23:00.",
+
+  "account_deleted_success": "Your account and data were deleted successfully.",
+  "delete_error": "An error occurred while deleting your data. Please try again or contact support.",
+  "delete_account_title": "Delete account",
+  "irreversible_action": "This action is irreversible",
+  "delete_removes_all": "Deleting your account will remove all your data from the system, including:",
+  "delete_item_profile": "Your profile and all photos",
+  "delete_item_matches": "All your matches and messages",
+  "delete_item_prefs": "Your preferences and searches",
+  "delete_item_login": "The login details linked to your account",
+  "delete_my_account": "Delete my account",
+  "deleting": "Deleting...",
+
+  "something_went_wrong": "Something went wrong, please try again",
+  "invite_sent_to": "Invitation sent to {{name}} 🎉",
+  "invite_explainer": "If {{name}} is already on Ruumr we'll ask for approval; if not, we'll send an invitation to join.",
+  "add_another_friend": "Add another friend",
+  "invite_friend_by_email": "Invite a friend by email",
+  "friend_name": "Friend's name",
+  "email_address": "Email address",
+  "send_invite": "Send invitation",
+
+  "select_cities": "Select cities...",
+  "no_city_found": "No city found."
 }
