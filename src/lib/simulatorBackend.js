@@ -4,6 +4,7 @@ import {
   buildSimulatorProfilePhotos,
 } from "@/lib/simulatorMode";
 import { normalizeInterestValues } from "@/lib/interests";
+import { APARTMENT_LIFECYCLE, calculateApartmentPreferenceOutcome } from "@/lib/apartmentPreferences";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SIMULATOR_STATE_STORAGE_KEY = "ruumr_simulator_state";
@@ -28,6 +29,86 @@ const slugify = (value) =>
 
 const stableId = (prefix, value) => `${prefix}-${slugify(value) || "demo"}`;
 const pairStableId = (prefix, left, right) => stableId(prefix, [left, right].map((value) => String(value || "")).sort().join("-"));
+const apartmentTeamKey = (memberIds) => [...new Set(memberIds.map(String))].sort().join("_");
+
+const APARTMENT_DISCOVERY_IMAGES = [
+  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=80",
+];
+
+const APARTMENT_DISCOVERY_NEIGHBORHOODS = [
+  { en: "City Center", he: "מרכז העיר" },
+  { en: "Old North", he: "הצפון הישן" },
+  { en: "Heart of the City", he: "לב העיר" },
+  { en: "Florentin", he: "פלורנטין" },
+  { en: "Yehuda Maccabi", he: "יהודה המכבי" },
+  { en: "Bavli", he: "בבלי" },
+  { en: "Montefiore", he: "מונטיפיורי" },
+  { en: "Kikar Rabin", he: "כיכר רבין" },
+  { en: "Rothschild", he: "רוטשילד" },
+];
+
+const APARTMENT_DISCOVERY_BATCH_COUNT = 3;
+
+function stableNumber(input, modulo) {
+  let hash = 0;
+  const text = String(input || "");
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+  }
+  return hash % modulo;
+}
+
+function normalizeCityName(city) {
+  return String(city || "").trim().replace(/\s+/g, " ");
+}
+
+function cityIdentity(city) {
+  return normalizeCityName(city).toLocaleLowerCase();
+}
+
+function apartmentDiscoverySuggestions({ city, bedrooms, teamKey, batchIndex = 0 }) {
+  if (!city || !bedrooms) return [];
+  if (batchIndex >= APARTMENT_DISCOVERY_BATCH_COUNT) return [];
+  const basePrice = 4300 + bedrooms * 1850 + stableNumber(`${teamKey}:${city}:${batchIndex}`, 650) + batchIndex * 260;
+  return [0, 1, 2].map((index) => ({
+    id: `sim-apartment-${teamKey}-${batchIndex + 1}-${index + 1}`,
+    title: `${bedrooms} חדרי שינה ב${city}`,
+    city,
+    neighborhood: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he,
+    neighborhood_en: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].en,
+    neighborhood_he: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he,
+    address: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he}, ${city}`,
+    address_en: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].en}, ${city}`,
+    address_he: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he}, ${city}`,
+    price: basePrice + index * 420,
+    bedrooms,
+    image: APARTMENT_DISCOVERY_IMAGES[batchIndex * 3 + index],
+    description: `דירת שותפים נעימה עם ${bedrooms} חדרי שינה, סלון נוח וגישה קלה לכל מה שצריך ביום יום.`,
+    listing_url: `https://app.ruumrapp.com/GroupTracker?listing=sim-${batchIndex + 1}-${index + 1}`,
+    source: "simulator",
+    batch_index: batchIndex,
+  }));
+}
+
+function simulatorAutoRankTeamEnabled() {
+  if (import.meta.env.VITE_RUUMR_SIMULATOR_AUTO_RANK_TEAM === "true") {
+    return true;
+  }
+
+  try {
+    return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("simulator_auto_rank_team") === "true";
+  } catch {
+    return false;
+  }
+}
 
 function cloneCollectionRecords(collections = {}) {
   return Object.fromEntries(
@@ -44,6 +125,15 @@ function readPersistedSimulatorState() {
   }
 
   try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("simulator_reset_state") === "true") {
+      window.localStorage.removeItem(SIMULATOR_STATE_STORAGE_KEY);
+      params.delete("simulator_reset_state");
+      const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash || ""}`;
+      window.history.replaceState(window.history.state, "", nextUrl);
+      return null;
+    }
+
     const raw = window.localStorage.getItem(SIMULATOR_STATE_STORAGE_KEY);
     if (!raw) {
       return null;
@@ -53,6 +143,26 @@ function readPersistedSimulatorState() {
     return parsed && typeof parsed === "object" ? parsed : null;
   } catch {
     return null;
+  }
+}
+
+function consumeSimulatorResetFlag() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("simulator_reset_state") !== "true") {
+      return false;
+    }
+    window.localStorage?.removeItem(SIMULATOR_STATE_STORAGE_KEY);
+    params.delete("simulator_reset_state");
+    const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash || ""}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -161,6 +271,7 @@ function createDemoProfile(options = {}) {
     songArtist = "",
     songImage = "",
     videoUrl = null,
+    isApartmentFlowDemoUser = false,
   } = options;
 
   const createdDate = daysAgoIso(createdOffsetDays);
@@ -218,6 +329,7 @@ function createDemoProfile(options = {}) {
     created_date: createdDate,
     updated_date: createdDate,
     ruumrPlus,
+    is_apartment_flow_demo_user: isApartmentFlowDemoUser,
   };
 }
 
@@ -228,6 +340,7 @@ function createDemoState() {
     name: "נועם כהן",
     email: "noam@demo.ruumr",
     role: "user",
+    is_apartment_flow_demo_user: true,
     enable_notifications: false,
     notify_likes: true,
     notify_matches: true,
@@ -525,6 +638,7 @@ function createDemoState() {
     songArtist: "OneRepublic",
     songImage: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/25/46/a7/2546a71a-b2bb-b4c9-4c52-a4daa3ae23ca/13UMGIM15076.rgb.jpg/100x100bb.jpg",
     teamTarget: 2,
+    isApartmentFlowDemoUser: true,
     teamMembers: [
       {
         match_id: pairStableId("match", currentUser.id, maya.user_id),
@@ -675,6 +789,7 @@ function createDemoState() {
     PageView: [],
     TypingStatus: [],
     BannedUser: [],
+    TeamApartmentDiscovery: [],
     GroupTracker: [],
     GroupCompatibility: [],
   };
@@ -1001,6 +1116,453 @@ function createAuthApi(state) {
   };
 }
 
+function getSimulatorProfileByUserId(state, userId) {
+  return (state.collections.Profile || []).find((profile) => String(profile.user_id) === String(userId)) || null;
+}
+
+function simulatorTeamMemberIds(state) {
+  const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id) || state.currentProfile;
+  const ids = [String(state.currentUser.id)];
+  for (const member of currentProfile?.team_members || []) {
+    if (member?.pending || !member?.user_id) continue;
+    ids.push(String(member.user_id));
+  }
+  return [...new Set(ids)];
+}
+
+function simulatorCityState(profiles) {
+  const cityLists = profiles.map((profile) =>
+    (profile?.search_cities || []).map(normalizeCityName).filter(Boolean)
+  );
+
+  const sharedCounts = new Map();
+  const labels = new Map();
+  for (const cities of cityLists) {
+    const seen = new Set();
+    for (const city of cities) {
+      const key = cityIdentity(city);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      labels.set(key, labels.get(key) || city);
+      sharedCounts.set(key, (sharedCounts.get(key) || 0) + 1);
+    }
+  }
+
+  if (!cityLists.length || cityLists.some((cities) => cities.length === 0)) {
+    return {
+      commonCities: [],
+      suggestedCities: [...sharedCounts.entries()]
+        .filter(([, count]) => count > 1)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([key, count]) => ({ city: labels.get(key), count })),
+    };
+  }
+
+  const [firstCities, ...rest] = cityLists;
+  const restSets = rest.map((cities) => new Set(cities.map(cityIdentity)));
+  const commonCities = firstCities.filter((city, index) => {
+    const key = cityIdentity(city);
+    return firstCities.findIndex((candidate) => cityIdentity(candidate) === key) === index
+      && restSets.every((set) => set.has(key));
+  });
+
+  return {
+    commonCities,
+    suggestedCities: commonCities.length
+      ? []
+      : [...sharedCounts.entries()]
+        .filter(([, count]) => count > 1)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([key, count]) => ({ city: labels.get(key), count })),
+  };
+}
+
+function createSimulatorFunctionsApi(state, existingFunctions = {}) {
+  const ensureApartmentDiscovery = async () => {
+    const memberIds = simulatorTeamMemberIds(state);
+    const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id) || state.currentProfile;
+    const targetCount = Number(currentProfile?.team_target || 3);
+
+    if (memberIds.length < 2 || memberIds.length < targetCount) {
+      return { success: true, discovery: null, status: "not_established", member_count: memberIds.length, target_count: targetCount };
+    }
+
+    const key = apartmentTeamKey(memberIds);
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const existing = state.collections.TeamApartmentDiscovery.find((item) => item.team_key === key);
+    if (existing) {
+      const normalized = {
+        ...existing,
+        lifecycle_state: existing.lifecycle_state || (existing.status === "finalized" ? APARTMENT_LIFECYCLE.APARTMENT_VIEWING : APARTMENT_LIFECYCLE.APARTMENT_RANKING),
+        preferences: existing.preferences || existing.rankings || {},
+        current_apartment: existing.current_apartment || existing.winning_apartment || null,
+        eligible_apartments: existing.eligible_apartments || existing.ranking_scores || [],
+        happiness_scores: existing.happiness_scores || existing.ranking_scores || [],
+        rejected_by_veto: existing.rejected_by_veto || [],
+        rejected_apartments: existing.rejected_apartments || [],
+        suggestion_batch_index: Number(existing.suggestion_batch_index || 0),
+        current_apartment_index: Number(existing.current_apartment_index || 0),
+      };
+      Object.assign(existing, normalized);
+      return { success: true, discovery: clone(existing), status: existing.status || "apartment_ranking" };
+    }
+
+    const profiles = memberIds.map((id) => getSimulatorProfileByUserId(state, id)).filter(Boolean);
+    const { commonCities, suggestedCities } = simulatorCityState(profiles);
+    const selectedCity = commonCities[0] || "";
+    const bedrooms = memberIds.length;
+    const discovery = {
+      id: stableId("team-apartment-discovery", key),
+      team_key: key,
+      member_user_ids: memberIds,
+      member_count: memberIds.length,
+      entered_discovery: true,
+      common_cities: commonCities,
+      suggested_cities: suggestedCities,
+      selected_city: selectedCity,
+      bedrooms,
+      suggested_apartments: selectedCity ? apartmentDiscoverySuggestions({ city: selectedCity, bedrooms, teamKey: key, batchIndex: 0 }) : [],
+      lifecycle_state: selectedCity ? APARTMENT_LIFECYCLE.APARTMENT_RANKING : APARTMENT_LIFECYCLE.TEAM_BUILDING,
+      suggestion_batch_index: 0,
+      current_apartment_index: 0,
+      exhausted_suggestions: false,
+      preferences: {},
+      eligible_apartments: [],
+      rejected_by_veto: [],
+      happiness_scores: [],
+      current_apartment: null,
+      selected_apartment: null,
+      rejected_apartments: [],
+      no_eligible_apartment: false,
+      no_more_suggestions: false,
+      rankings: {},
+      rankings_finalized: false,
+      ranking_scores: [],
+      status: selectedCity ? "apartment_ranking" : "needs_city",
+      created_date: nowIso(),
+      updated_date: nowIso(),
+    };
+    state.collections.TeamApartmentDiscovery.push(discovery);
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(discovery), status: discovery.status };
+  };
+
+  const submitApartmentPreferences = async ({ discovery_id: discoveryId, preferences, rankings }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    if (!(discovery.member_user_ids || []).includes(String(state.currentUser.id))) {
+      throw new Error("Not authorized for this team apartment discovery");
+    }
+    if ((discovery.lifecycle_state || APARTMENT_LIFECYCLE.APARTMENT_RANKING) !== APARTMENT_LIFECYCLE.APARTMENT_RANKING) {
+      throw new Error("Preferences can only be changed during apartment ranking.");
+    }
+
+    const submittedPreferences = preferences || rankings || {};
+    const apartmentIds = (discovery.suggested_apartments || []).map((apartment) => apartment.id);
+    const values = Object.values(submittedPreferences || {});
+    if (
+      apartmentIds.length !== 3
+      || Object.keys(submittedPreferences || {}).length !== 3
+      || !apartmentIds.every((apartmentId) => Object.prototype.hasOwnProperty.call(submittedPreferences, apartmentId))
+      || !values.every((value) => ["amazing", "ok", "no_way"].includes(value))
+    ) {
+      throw new Error("Rate all 3 apartments.");
+    }
+
+    const nextPreferences = {
+      ...(discovery.preferences || discovery.rankings || {}),
+      [String(state.currentUser.id)]: {
+        user_id: String(state.currentUser.id),
+        preferences: clone(submittedPreferences),
+        submitted_at: nowIso(),
+      },
+    };
+
+    if (simulatorAutoRankTeamEnabled()) {
+      const apartmentIds = (discovery.suggested_apartments || []).map((apartment) => apartment.id);
+      const preferenceOrders = [
+        ["amazing", "ok", "ok"],
+        ["ok", "amazing", "ok"],
+        ["amazing", "amazing", "ok"],
+      ];
+      (discovery.member_user_ids || []).forEach((memberId, memberIndex) => {
+        const key = String(memberId);
+        if (nextPreferences[key]) return;
+        const order = preferenceOrders[memberIndex % preferenceOrders.length];
+        nextPreferences[key] = {
+          user_id: key,
+          preferences: Object.fromEntries(apartmentIds.map((apartmentId, index) => [apartmentId, order[index]])),
+          submitted_at: nowIso(),
+          simulator_generated: true,
+        };
+      });
+    }
+
+    const allSubmitted = (discovery.member_user_ids || []).every((id) => nextPreferences[String(id)]);
+    const outcome = allSubmitted ? calculateApartmentPreferenceOutcome(discovery.suggested_apartments || [], nextPreferences) : null;
+    state.collections.TeamApartmentDiscovery[idx] = {
+      ...discovery,
+      preferences: nextPreferences,
+      rankings: nextPreferences,
+      no_eligible_apartment: false,
+      no_more_suggestions: false,
+      ...(outcome
+        ? outcome.no_eligible_apartment
+          ? {
+            rankings_finalized: false,
+            lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+            status: "no_eligible_apartment",
+            eligible_apartments: [],
+            rejected_by_veto: outcome.rejected_by_veto,
+            happiness_scores: outcome.happiness_scores,
+            ranking_scores: outcome.happiness_scores,
+            current_apartment: null,
+            winning_apartment_id: "",
+            winning_apartment: null,
+            no_eligible_apartment: true,
+          }
+          : {
+            rankings_finalized: true,
+            lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_VIEWING,
+            status: "apartment_viewing",
+            current_apartment_index: 0,
+            eligible_apartments: outcome.eligible_apartments,
+            rejected_by_veto: outcome.rejected_by_veto,
+            happiness_scores: outcome.happiness_scores,
+            ranking_scores: outcome.happiness_scores,
+            current_apartment: outcome.current_apartment,
+            winning_apartment_id: outcome.current_apartment?.id || "",
+            winning_apartment: outcome.current_apartment || null,
+        }
+        : {}),
+      updated_date: nowIso(),
+    };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]) };
+  };
+
+  const changeApartmentPreferences = async ({ discovery_id: discoveryId }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    const nextPreferences = { ...(discovery.preferences || discovery.rankings || {}) };
+    delete nextPreferences[String(state.currentUser.id)];
+    state.collections.TeamApartmentDiscovery[idx] = {
+      ...discovery,
+      lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+      status: "apartment_ranking",
+      preferences: nextPreferences,
+      rankings: nextPreferences,
+      rankings_finalized: false,
+      no_eligible_apartment: false,
+      no_more_suggestions: false,
+      eligible_apartments: [],
+      rejected_by_veto: [],
+      happiness_scores: [],
+      ranking_scores: [],
+      current_apartment: null,
+      winning_apartment_id: "",
+      winning_apartment: null,
+      updated_date: nowIso(),
+    };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]) };
+  };
+
+  const requestMoreApartmentSuggestions = async ({ discovery_id: discoveryId }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    const nextBatchIndex = Number(discovery.suggestion_batch_index || 0) + 1;
+    const suggestions = apartmentDiscoverySuggestions({
+      city: discovery.selected_city,
+      bedrooms: discovery.bedrooms,
+      teamKey: discovery.team_key,
+      batchIndex: nextBatchIndex,
+    });
+
+    if (!suggestions.length) {
+      state.collections.TeamApartmentDiscovery[idx] = {
+        ...discovery,
+        lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+        status: "no_more_suggestions",
+        no_more_suggestions: true,
+        exhausted_suggestions: true,
+        no_eligible_apartment: false,
+        updated_date: nowIso(),
+      };
+      persistSimulatorState(state);
+      return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]), status: "no_more_suggestions", no_more_suggestions: true };
+    }
+
+    state.collections.TeamApartmentDiscovery[idx] = {
+      ...discovery,
+      lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+      status: "apartment_ranking",
+      suggestion_batch_index: nextBatchIndex,
+      current_apartment_index: 0,
+      suggested_apartments: suggestions,
+      preferences: {},
+      rankings: {},
+      rankings_finalized: false,
+      ranking_scores: [],
+      eligible_apartments: [],
+      rejected_by_veto: [],
+      happiness_scores: [],
+      current_apartment: null,
+      winning_apartment_id: "",
+      winning_apartment: null,
+      no_eligible_apartment: false,
+      no_more_suggestions: false,
+      exhausted_suggestions: false,
+      updated_date: nowIso(),
+    };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]), status: "apartment_ranking" };
+  };
+
+  const scheduleApartmentVisit = async ({ discovery_id: discoveryId, visit_time: visitTime }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    if (!(discovery.member_user_ids || []).includes(String(state.currentUser.id))) {
+      throw new Error("Not authorized for this team apartment discovery");
+    }
+    const visit = new Date(visitTime || "");
+    if (!Number.isFinite(visit.getTime())) throw new Error("A valid visit time is required");
+    state.collections.TeamApartmentDiscovery[idx] = {
+      ...discovery,
+      visit_time: visit.toISOString(),
+      visit_scheduled_by_user_id: String(state.currentUser.id),
+      visit_scheduled_at: nowIso(),
+      updated_date: nowIso(),
+    };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]) };
+  };
+
+  const rejectCurrentApartment = async ({ discovery_id: discoveryId, reason = "other" }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    const currentApartment = discovery.current_apartment || discovery.winning_apartment;
+    if ((discovery.lifecycle_state || APARTMENT_LIFECYCLE.APARTMENT_VIEWING) !== APARTMENT_LIFECYCLE.APARTMENT_VIEWING || !currentApartment) {
+      throw new Error("No current apartment is available to reject.");
+    }
+    const currentIndex = Number(discovery.current_apartment_index || 0);
+    const nextIndex = currentIndex + 1;
+    const nextScore = (discovery.eligible_apartments || [])[nextIndex];
+    const nextApartment = (discovery.suggested_apartments || []).find((apartment) => apartment.id === nextScore?.apartment_id) || null;
+    const rejectedApartments = [
+      ...(discovery.rejected_apartments || []),
+      {
+        apartment_id: currentApartment.id,
+        reason,
+        rejected_by_user_id: String(state.currentUser.id),
+        rejected_at: nowIso(),
+      },
+    ];
+
+    state.collections.TeamApartmentDiscovery[idx] = nextApartment
+      ? {
+        ...discovery,
+        current_apartment_index: nextIndex,
+        current_apartment: nextApartment,
+        winning_apartment_id: nextApartment.id,
+        winning_apartment: nextApartment,
+        rejected_apartments: rejectedApartments,
+        visit_time: "",
+        visit_scheduled_by_user_id: "",
+        visit_scheduled_at: "",
+        updated_date: nowIso(),
+      }
+      : {
+        ...discovery,
+        lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+        status: "apartment_ranking",
+        preferences: {},
+        rankings: {},
+        rankings_finalized: false,
+        current_apartment_index: 0,
+        current_apartment: null,
+        winning_apartment_id: "",
+        winning_apartment: null,
+        rejected_apartments: rejectedApartments,
+        no_eligible_apartment: false,
+        updated_date: nowIso(),
+      };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]) };
+  };
+
+  const chooseCurrentApartment = async ({ discovery_id: discoveryId }) => {
+    state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
+    const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
+    if (idx === -1) throw new Error("Discovery not found");
+    const discovery = state.collections.TeamApartmentDiscovery[idx];
+    const currentApartment = discovery.current_apartment || discovery.winning_apartment;
+    if (!currentApartment) throw new Error("No current apartment is available to choose.");
+    state.collections.TeamApartmentDiscovery[idx] = {
+      ...discovery,
+      lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_FOUND,
+      status: "apartment_found",
+      selected_apartment_id: currentApartment.id,
+      selected_apartment: currentApartment,
+      current_apartment: currentApartment,
+      winning_apartment_id: currentApartment.id,
+      winning_apartment: currentApartment,
+      updated_date: nowIso(),
+    };
+    persistSimulatorState(state);
+    return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]), status: "apartment_found" };
+  };
+
+  return {
+    ...existingFunctions,
+    invoke: async (functionName, data = {}) => {
+      if (functionName === "teamApartmentDiscovery") {
+        if (data?.action === "submit_preferences" || data?.action === "submit_ranking") return submitApartmentPreferences(data);
+        if (data?.action === "change_preferences") return changeApartmentPreferences(data);
+        if (data?.action === "request_more_suggestions") return requestMoreApartmentSuggestions(data);
+        if (data?.action === "schedule_visit") return scheduleApartmentVisit(data);
+        if (data?.action === "reject_current_apartment") return rejectCurrentApartment(data);
+        if (data?.action === "choose_current_apartment") return chooseCurrentApartment(data);
+        return ensureApartmentDiscovery();
+      }
+      if (functionName === "reconcileMyTeam") {
+        return { success: true, roster: simulatorTeamMemberIds(state), reconciled: true };
+      }
+      if (functionName === "removeTeamMember") {
+        const targetId = String(data?.target_user_id || "");
+        const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id);
+        if (currentProfile) {
+          currentProfile.team_members = (currentProfile.team_members || []).filter((member) => String(member.user_id) !== targetId);
+          persistSimulatorState(state);
+        }
+        return { success: true };
+      }
+      if (functionName === "createTeamInvite") {
+        return { success: true, status: "already_pending" };
+      }
+      if (functionName === "respondToTeamInvite" || functionName === "claimTeamInvites") {
+        return { success: true };
+      }
+      if (typeof existingFunctions?.invoke === "function") {
+        return existingFunctions.invoke(functionName, data);
+      }
+      throw new Error(`Simulator function not implemented: ${functionName}`);
+    },
+  };
+}
+
 function createSimulatorEntitiesModule(state, existingEntities = {}) {
   const apiCache = new Map();
 
@@ -1031,11 +1593,13 @@ export function enableSimulatorBackend(base44) {
     return false;
   }
 
-  if (typeof window !== "undefined" && window.__ruumrSimulatorBackendEnabled && window.__ruumrSimulatorState) {
+  const shouldResetState = consumeSimulatorResetFlag();
+
+  if (!shouldResetState && typeof window !== "undefined" && window.__ruumrSimulatorBackendEnabled && window.__ruumrSimulatorState) {
     return true;
   }
 
-  const state = hydrateSimulatorState(createDemoState(), readPersistedSimulatorState());
+  const state = hydrateSimulatorState(createDemoState(), shouldResetState ? null : readPersistedSimulatorState());
   const collections = state.collections;
 
   if (typeof window !== "undefined") {
@@ -1060,6 +1624,7 @@ export function enableSimulatorBackend(base44) {
   }
 
   base44.entities = createSimulatorEntitiesModule(state, base44.entities);
+  base44.functions = createSimulatorFunctionsApi(state, base44.functions);
   try {
     base44.analytics?.cleanup?.();
   } catch {

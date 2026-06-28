@@ -49,6 +49,7 @@
  */
 import AdminCharter from './pages/AdminCharter';
 import AdminTools from './pages/AdminTools';
+import ApartmentMap from './pages/ApartmentMap';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
 import Chat from './pages/Chat';
@@ -76,6 +77,7 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AdminCharter": AdminCharter,
     "AdminTools": AdminTools,
+    "ApartmentMap": ApartmentMap,
     "Banned": Banned,
     "Charter": Charter,
     "Chat": Chat,
@@ -100,7 +102,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Discover",
+    mainPage: "Home",
     Pages: PAGES,
     Layout: __Layout,
 };

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock, MessageCircle, Map } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -80,6 +80,13 @@ export default function Layout({ children, currentPageName }) {
   const [likesCount, setLikesCount] = useState(0);
   const [pendingLikerUserIds, setPendingLikerUserIds] = useState([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [apartmentLifecycle, setApartmentLifecycle] = useState(() => {
+    try {
+      return localStorage.getItem('ruumr_apartment_lifecycle') || '';
+    } catch {
+      return '';
+    }
+  });
   const [seenLikeIds, setSeenLikeIds] = useState(() => {
     try {
       const saved = localStorage.getItem('roomi_seen_like_ids');
@@ -307,19 +314,55 @@ export default function Layout({ children, currentPageName }) {
   // Android hardware back button support
   useAndroidBackButton();
 
+  useEffect(() => {
+    const readLifecycle = () => {
+      try {
+        setApartmentLifecycle(localStorage.getItem('ruumr_apartment_lifecycle') || '');
+      } catch {
+        setApartmentLifecycle('');
+      }
+    };
+    const handleLifecycle = (event) => {
+      setApartmentLifecycle(event?.detail?.lifecycle || '');
+    };
+    readLifecycle();
+    window.addEventListener('storage', readLifecycle);
+    window.addEventListener('ruumr-apartment-lifecycle', handleLifecycle);
+    return () => {
+      window.removeEventListener('storage', readLifecycle);
+      window.removeEventListener('ruumr-apartment-lifecycle', handleLifecycle);
+    };
+  }, [location.pathname]);
+
   // Calculate unseen matches count — only count valid matches not yet seen
   const seenMatchSet = new Set(seenMatchIds);
   const unseenMatchesCount = validMatchIdsList.filter(id => !seenMatchSet.has(id)).length;
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
-  const navigationItems = [
-    { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
-    { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
-    { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound }
-  ].filter(Boolean);
+  const apartmentFlowActive = [
+    'APARTMENT_RANKING',
+    'APARTMENT_VIEWING',
+    'APARTMENT_FOUND',
+  ].includes(apartmentLifecycle);
+
+  const navigationItems = (
+    apartmentFlowActive
+      ? [
+        { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound },
+        { id: "home", name: t("nav_home"), path: createPageUrl("Home"), icon: Home },
+        { id: "plus", name: "Plus", path: createPageUrl("Home"), icon: Sparkles, inert: true },
+        { id: "chats", name: t("nav_chats"), path: createPageUrl("GroupChat"), icon: MessageCircle, messageBadge: unreadMessagesCount },
+        { id: "map", name: t("nav_map"), path: createPageUrl("ApartmentMap"), icon: Map },
+      ]
+      : [
+        { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
+        { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
+        { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+        { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
+        { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound }
+      ]
+  ).filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
@@ -408,7 +451,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* אמצע: כותרת רומר — תמיד במרכז מוחלט של המסך */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Link to={createPageUrl("Discover")} className="header-glow select-none pointer-events-auto">
+            <Link to={apartmentFlowActive ? createPageUrl("Home") : createPageUrl("Discover")} className="header-glow select-none pointer-events-auto">
                  <h1 className="text-4xl font-bold tracking-tight logo-font bg-gradient-to-r from-[--theme-orange] via-red-500 to-[--theme-orange] bg-clip-text text-transparent">Ruumr</h1>
             </Link>
         </div>
@@ -460,8 +503,9 @@ export default function Layout({ children, currentPageName }) {
                 <nav className="fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path ||
-                            (item.id === "discover" && (location.pathname === '/' || currentPageName === 'Discover'));
+                        const isActive = !item.inert && (location.pathname === item.path ||
+                            (item.id === "discover" && (location.pathname === '/' || currentPageName === 'Discover')) ||
+                            (item.id === "home" && (location.pathname === '/' || currentPageName === 'Home')));
                         const Icon = item.icon;
                         const isPlusItem = item.id === "plus";
                         const hasMessageBadge = (item.messageBadge || 0) > 0;
@@ -471,6 +515,11 @@ export default function Layout({ children, currentPageName }) {
                                 // user on Discover, where the "complete profile" CTA lives.
                                 e.preventDefault();
                                 navigate(createPageUrl("Discover"));
+                                return;
+                            }
+
+                            if (isPlusItem && item.inert) {
+                                e.preventDefault();
                                 return;
                             }
 

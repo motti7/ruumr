@@ -1,0 +1,203 @@
+{
+  "name": "TeamApartmentDiscovery",
+  "type": "object",
+  "properties": {
+    "team_key": {
+      "type": "string",
+      "description": "Stable sorted member user ids joined with underscores. Used as the team discovery identity."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "member_count": {
+      "type": "number"
+    },
+    "entered_discovery": {
+      "type": "boolean",
+      "default": true
+    },
+    "common_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suggested_cities": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Fallback city options shared by most team members when no city is common to all."
+    },
+    "selected_city": {
+      "type": "string"
+    },
+    "bedrooms": {
+      "type": "number"
+    },
+    "suggested_apartments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "TEAM_BUILDING",
+        "APARTMENT_RANKING",
+        "APARTMENT_VIEWING",
+        "APARTMENT_FOUND"
+      ],
+      "default": "APARTMENT_RANKING"
+    },
+    "suggestion_batch_index": {
+      "type": "number",
+      "default": 0
+    },
+    "current_apartment_index": {
+      "type": "number",
+      "default": 0
+    },
+    "exhausted_suggestions": {
+      "type": "boolean",
+      "default": false
+    },
+    "preferences": {
+      "type": "object",
+      "description": "Map of user id to that member's apartment preference payload using amazing, ok, or no_way."
+    },
+    "eligible_apartments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "rejected_by_veto": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "happiness_scores": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "current_apartment": {
+      "type": "object"
+    },
+    "selected_apartment_id": {
+      "type": "string"
+    },
+    "selected_apartment": {
+      "type": "object"
+    },
+    "rejected_apartments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "no_eligible_apartment": {
+      "type": "boolean",
+      "default": false
+    },
+    "no_more_suggestions": {
+      "type": "boolean",
+      "default": false
+    },
+    "rankings": {
+      "type": "object",
+      "description": "Map of user id to that member's ranking payload."
+    },
+    "rankings_finalized": {
+      "type": "boolean",
+      "default": false
+    },
+    "ranking_scores": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "winning_apartment_id": {
+      "type": "string"
+    },
+    "winning_apartment": {
+      "type": "object"
+    },
+    "visit_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "visit_scheduled_by_user_id": {
+      "type": "string"
+    },
+    "visit_scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_established",
+        "needs_city",
+        "collecting_options",
+        "ranking",
+        "finalized",
+        "apartment_ranking",
+        "apartment_viewing",
+        "apartment_found",
+        "no_eligible_apartment",
+        "no_more_suggestions"
+      ],
+      "default": "ranking"
+    }
+  },
+  "required": [
+    "team_key",
+    "member_user_ids",
+    "member_count",
+    "entered_discovery"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.team_key": {
+            "$regex": "(^|_){{user.id}}(_|$)"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

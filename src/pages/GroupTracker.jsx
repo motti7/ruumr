@@ -12,6 +12,7 @@ import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, remove
 import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
+import ApartmentDiscoveryPanel from "@/components/team/ApartmentDiscoveryPanel";
 
 export default function GroupTrackerPage() {
   const { t, i18n } = useTranslation();
@@ -149,9 +150,11 @@ export default function GroupTrackerPage() {
 
   const teamMembers = allMatches.filter(m => teamIds.includes(m.id));
   const availableToAdd = allMatches.filter(m => !teamIds.includes(m.id));
+  const realTeamMemberCount = 1 + teamMembers.length;
   const currentCount = 1 + teamMembers.length + pendingMembers.length;
   const remaining = Math.max(0, targetCount - currentCount);
   const progressPercent = Math.min(100, (currentCount / targetCount) * 100);
+  const isEstablishedTeam = targetCount >= 2 && realTeamMemberCount >= targetCount;
 
   if (isLoading) {
     return (
@@ -375,6 +378,8 @@ export default function GroupTrackerPage() {
             <p className="text-white/80 text-sm mt-1">{t("team_complete_desc")}</p>
           </div>
         )}
+
+        <ApartmentDiscoveryPanel userId={user?.id} isEstablished={isEstablishedTeam} />
 
         {/* CTA - find more partners */}
         {remaining > 0 && (
