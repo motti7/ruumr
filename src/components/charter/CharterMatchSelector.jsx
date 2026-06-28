@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { X, Puzzle } from 'lucide-react';
 import { Match, Profile } from '@/entities/all';
@@ -8,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 export default function CharterMatchSelector({ onClose }) {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,23 +50,23 @@ export default function CharterMatchSelector({ onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
-      dir="rtl"
+      dir={i18n.dir()}
     >
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-500 to-black p-6 pb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-black text-white">חוזה שותפות 🤝</h1>
+            <h1 className="text-2xl font-black text-white">{t("partnership_charter")}</h1>
             <button
               onClick={onClose}
               className="min-w-[44px] min-h-[44px] bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 active:scale-95 transition-transform"
-              aria-label="סגור"
+              aria-label={t("close")}
             >
               <X className="w-6 h-6 text-white" />
             </button>
           </div>
           <p className="text-white/90 text-sm">
-            בחר עם מי תרצה/י לבדוק התאמה
+            {t("choose_who_to_check")}
           </p>
         </div>
 
@@ -85,7 +87,7 @@ export default function CharterMatchSelector({ onClose }) {
               <div className="relative w-24 h-24 mx-auto mb-4">
                 <Puzzle className="w-24 h-24 text-[--theme-orange]" />
               </div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">צריך להתאים עם מישהו קודם</h3>
+              <h3 className="text-xl font-bold text-gray-700 mb-2">{t("need_match_first")}</h3>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">

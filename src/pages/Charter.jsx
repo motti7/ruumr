@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Match } from "@/entities/all";
 import { User } from "@/entities/User";
@@ -11,6 +12,7 @@ import CharterResults from "@/components/charter/CharterResults";
 import { base44 } from "@/api/base44Client";
 
 export default function CharterPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [matchId, setMatchId] = useState(null);
@@ -38,12 +40,12 @@ export default function CharterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pb-28" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-4 pb-28" dir={i18n.dir()}>
       <div className="mb-5 flex items-center gap-3">
         <BackButton />
         <div>
-          <h1 className="text-2xl font-black text-gray-900">שאלון התאמה</h1>
-          <p className="text-sm text-gray-500">התשובות נשמרות ומשמשות בכל ההתאמות שלך.</p>
+          <h1 className="text-2xl font-black text-gray-900">{t("match_questionnaire_title")}</h1>
+          <p className="text-sm text-gray-500">{t("answers_saved_for_all")}</p>
         </div>
       </div>
       {matchId && (
@@ -59,7 +61,7 @@ export default function CharterPage() {
               onClick={() => navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(matchId)}`)}
               className="mt-4 h-12 w-full rounded-full bg-[--theme-orange] font-bold text-white"
             >
-              המשך/י לצ'אט
+              {t("continue_to_chat")}
             </Button>
           )}
         </>

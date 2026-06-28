@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Loader2, X } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -23,6 +24,7 @@ export default function RoomiCharter({
   onComplete,
   requirePlusSync = false,
 }) {
+  const { t, i18n } = useTranslation();
   const initial = useMemo(() => normalizeCharterAnswers(initialAnswers), [initialAnswers]);
   const firstMissingIndex = Math.max(0, CHARTER_QUESTIONS.findIndex((question) => !initial[question.id]));
   const [answers, setAnswers] = useState(initial);
@@ -51,13 +53,13 @@ export default function RoomiCharter({
 
       // Get current user's profile name for the email
       const myProfiles = await base44.entities.Profile.filter({ user_id: user.id });
-      const myName = myProfiles[0]?.name || user.full_name || 'ההתאמה שלך';
+      const myName = myProfiles[0]?.name || user.full_name || t('your_match');
 
       // Send push notification
       await base44.functions.invoke("sendPushNotification", {
         user_id: partnerId,
-        title: "השאלון מחכה לך!",
-        message: `${myName} כבר מילא/ה את שאלון הדירה - עכשיו התור שלך.`,
+        title: t('questionnaire_waiting'),
+        message: t('partner_filled_questionnaire', { name: myName }),
         data: { type: "charter", match_id: matchId },
       });
 
@@ -105,8 +107,8 @@ export default function RoomiCharter({
       console.error("Questionnaire save failed:", saveError);
       setError(
         requirePlusSync
-          ? "התשובות נשמרו בטופס, אבל לא הצלחנו לסנכרן אותן ל-Plus. נסו שוב."
-          : "לא הצלחנו לשמור את התשובות. נסו שוב."
+          ? t('charter_plus_sync_failed')
+          : t('charter_save_failed')
       );
     } finally {
       setIsSaving(false);
@@ -127,13 +129,13 @@ export default function RoomiCharter({
   };
 
   return (
-    <div className="fixed inset-0 z-[80] overflow-hidden bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600" dir="rtl">
+    <div className="fixed inset-0 z-[80] overflow-hidden bg-gradient-to-br from-slate-900 via-orange-700 to-orange-600" dir={i18n.dir()}>
       <button
         type="button"
         onClick={onClose}
         disabled={isSaving}
         className="absolute left-4 top-14 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/10 backdrop-blur-md"
-        aria-label="סגור"
+        aria-label={t("close")}
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}
       >
         <X className="h-6 w-6 text-white" />
@@ -154,10 +156,10 @@ export default function RoomiCharter({
           >
             <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-400 to-orange-500 shadow-2xl">
               <div className="px-6 pb-7 pt-10 text-center">
-                <p className="mb-2 text-xs font-bold text-white/70">{currentLevel?.name}</p>
+                <p className="mb-2 text-xs font-bold text-white/70">{currentLevel?.nameKey ? t(currentLevel.nameKey) : currentLevel?.name}</p>
                 <div className="mb-4 text-6xl">{currentQuestion.emoji}</div>
-                <h2 className="text-2xl font-black text-white">{currentQuestion.title}</h2>
-                <p className="mt-2 font-bold text-white/80">מה את/ה מעדיפ/ה?</p>
+                <h2 className="text-2xl font-black text-white">{t(currentQuestion.titleKey)}</h2>
+                <p className="mt-2 font-bold text-white/80">{t("what_do_you_prefer")}</p>
               </div>
               <div className="space-y-4 px-6 pb-10">
                 {["a", "b"].map((value) => (
@@ -173,7 +175,7 @@ export default function RoomiCharter({
                         : "bg-gradient-to-r from-blue-500 to-purple-600"
                     } ${answers[currentQuestion.id] === value ? "ring-2 ring-white/30" : ""}`}
                   >
-                    {value === "a" ? currentQuestion.option_a : currentQuestion.option_b}
+                    {value === "a" ? t(currentQuestion.optionAKey) : t(currentQuestion.optionBKey)}
                   </motion.button>
                 ))}
               </div>
@@ -194,7 +196,7 @@ export default function RoomiCharter({
             disabled={isSaving}
             className="mt-3 w-full rounded-full bg-[--theme-orange] text-white"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "נסה/י שוב"}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("retry")}
           </Button>
         </div>
       )}
