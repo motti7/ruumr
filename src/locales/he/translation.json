@@ -759,5 +759,13 @@
   "banner_offer_badge": "⏰ הצעה לחמישים הראשונים",
   "banner_title": "רומר פלוס הגיע!",
   "banner_description": "AI שמוצא לך את השותפים המושלמים בלחיצה אחת — ופותח צ'אט מיידי. רק 25₪ עד תחילת השנה האקדמית הבאה!",
-  "banner_cta": "✨ גלה עוד"
+  "banner_cta": "✨ גלה עוד",
+
+  "sim_insight_complementary": "אחד כבר בדירה",
+  "sim_insight_same_city": "אותה עיר",
+  "sim_insight_budget_fit": "תקציב תואם",
+  "sim_insight_vibe_close": "וייב דומה",
+  "sim_insight_shared_interests": "תחומי עניין משותפים",
+  "sim_insight_lifestyle": "הרגלים דומים",
+  "sim_insight_default": "נראית התאמה טובה לשיחה ראשונה"
 }

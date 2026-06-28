@@ -35,7 +35,9 @@ import {
 import SmartImage from "@/components/shared/SmartImage";
 import RoomiCharter from "@/components/charter/RoomiCharter";
 import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
-import { getInterestLabel } from "@/lib/interests";
+import { getInterestLabel, getInterestLabelKey } from "@/lib/interests";
+import i18n from "@/i18n";
+import { translateRegion } from "@/lib/cityToRegion";
 import {
   Crown,
   Lock,
@@ -72,12 +74,15 @@ const quickLinks = [
 ];
 
 function getRecommendationLocation(profile = {}) {
+  // search_area is a stored Hebrew region code — translate it for display
+  // (city names stay as-is, matching ProfileCard/ProfileView).
+  const region = translateRegion(profile.search_area, i18n.t.bind(i18n));
   if (profile.current_status !== "has_apartment" && Array.isArray(profile.search_cities) && profile.search_cities.length > 0) {
-    const cityParts = [profile.search_cities[0], profile.search_area].filter(Boolean);
+    const cityParts = [profile.search_cities[0], region].filter(Boolean);
     return cityParts.join(" • ");
   }
 
-  return [profile.location, profile.search_area].filter(Boolean).join(" • ");
+  return [profile.location, region].filter(Boolean).join(" • ");
 }
 
 function formatActivationWindow(milliseconds = 0, t = (k) => k) {
@@ -120,7 +125,7 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
   const tags = [
     ...(profile.current_status === "has_apartment" ? [t("onb_has_apartment_title")] : []),
     ...sharedCities.slice(0, 2),
-    ...sharedInterests.slice(0, 2).map((interest) => getInterestLabel(interest)),
+    ...sharedInterests.slice(0, 2).map((interest) => { const k = getInterestLabelKey(interest); return k ? t(k) : getInterestLabel(interest); }),
   ];
 
   const openProfile = () => {

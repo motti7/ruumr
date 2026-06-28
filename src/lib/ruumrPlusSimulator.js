@@ -1,3 +1,4 @@
+import i18n from "@/i18n";
 import { Profile } from "@/entities/Profile";
 import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
 import { applyTwoStageSwipeFilter } from "@/lib/ruumrPlusDisplayFilter";
@@ -309,26 +310,26 @@ function buildInsight(reasons = {}) {
   const phrases = [];
 
   if (reasons.status === "complementary") {
-    phrases.push("אחד כבר בדירה");
+    phrases.push(i18n.t("sim_insight_complementary"));
   }
   if (reasons.city_match) {
-    phrases.push("אותה עיר");
+    phrases.push(i18n.t("sim_insight_same_city"));
   }
   if (reasons.budget_fit) {
-    phrases.push("תקציב תואם");
+    phrases.push(i18n.t("sim_insight_budget_fit"));
   }
   if (reasons.vibe_close) {
-    phrases.push("וייב דומה");
+    phrases.push(i18n.t("sim_insight_vibe_close"));
   }
   if ((reasons.shared_interests || []).length > 0) {
-    phrases.push("תחומי עניין משותפים");
+    phrases.push(i18n.t("sim_insight_shared_interests"));
   }
   if (reasons.lifestyle_overlap) {
-    phrases.push("הרגלים דומים");
+    phrases.push(i18n.t("sim_insight_lifestyle"));
   }
 
   if (phrases.length === 0) {
-    return "נראית התאמה טובה לשיחה ראשונה";
+    return i18n.t("sim_insight_default");
   }
 
   return phrases.slice(0, 3).join(" · ");

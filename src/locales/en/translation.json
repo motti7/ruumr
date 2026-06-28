@@ -759,5 +759,13 @@
   "banner_offer_badge": "⏰ Offer for the first fifty",
   "banner_title": "Ruumr Plus is here!",
   "banner_description": "AI that finds your perfect roommates in one tap — and opens an instant chat. Just ₪25 until the beginning of the next academic year!",
-  "banner_cta": "✨ Discover more"
+  "banner_cta": "✨ Discover more",
+
+  "sim_insight_complementary": "One already has the apartment",
+  "sim_insight_same_city": "Same city",
+  "sim_insight_budget_fit": "Matching budget",
+  "sim_insight_vibe_close": "Similar vibe",
+  "sim_insight_shared_interests": "Shared interests",
+  "sim_insight_lifestyle": "Similar habits",
+  "sim_insight_default": "Looks like a good match for a first conversation"
 }
