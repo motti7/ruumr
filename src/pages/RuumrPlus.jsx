@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
@@ -49,38 +50,22 @@ import {
 } from "lucide-react";
 
 const featureCards = [
-  {
-    icon: Sparkles,
-    title: "התאמות חכמות",
-    description: "Ruumr Plus מדרג התאמות לפי שגרה, דירה, תקציב והרגלים משותפים.",
-  },
-  {
-    icon: MessageCircle,
-    title: "שיחות חכמות",
-    description: "כשרמת ההתאמה גבוהה, אפשר לפתוח הודעות מוקדם יותר ולשוחח מהר יותר.",
-  },
-  {
-    icon: SlidersHorizontal,
-    title: "הרגלים בבית",
-    description: "הסינון לוקח בחשבון סדר יום, ניקיון, אורחים, רעש ומידע ביתי נוסף.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "פרופיל מדויק",
-    description: "פרופיל מלא ומאומת מאפשר ל-Plus לחשב התאמות אמינות יותר.",
-  },
+  { icon: Sparkles, titleKey: "feat_smart_matches_title", descKey: "feat_smart_matches_desc" },
+  { icon: MessageCircle, titleKey: "feat_smart_chats_title", descKey: "feat_smart_chats_desc" },
+  { icon: SlidersHorizontal, titleKey: "home_habits", descKey: "feat_home_habits_desc" },
+  { icon: ShieldCheck, titleKey: "feat_accurate_profile_title", descKey: "feat_accurate_profile_desc" },
 ];
 
 const quickLinks = [
   {
-    title: "המשך/י ל-Discover",
-    description: "אם תרצה/י להמשיך לסווייפ הרגיל אחרי שראית את תוצאות Plus.",
+    titleKey: "continue_to_discover",
+    descKey: "quicklink_discover_desc",
     to: createPageUrl("Discover"),
     icon: Sparkles,
   },
   {
-    title: "ערוך/י את הפרופיל",
-    description: "פרטי הפרופיל וההרגלים הביתיים משפרים את איכות ה-Plus.",
+    titleKey: "edit_profile_title",
+    descKey: "quicklink_profile_desc",
     to: createPageUrl("Profile"),
     icon: UsersRound,
   },
@@ -95,18 +80,18 @@ function getRecommendationLocation(profile = {}) {
   return [profile.location, profile.search_area].filter(Boolean).join(" • ");
 }
 
-function formatActivationWindow(milliseconds = 0) {
+function formatActivationWindow(milliseconds = 0, t = (k) => k) {
   const totalMinutes = Math.max(0, Math.ceil(Number(milliseconds) / 60000));
   if (totalMinutes <= 0) {
-    return "כעת";
+    return t("now");
   }
 
   // Under an hour: show minutes. Otherwise show whole hours only (no trailing minutes).
   if (totalMinutes < 60) {
-    return `${totalMinutes} דקות`;
+    return t("minutes_count", { count: totalMinutes });
   }
 
-  return `${Math.round(totalMinutes / 60)} שעות`;
+  return t("hours_count", { count: Math.round(totalMinutes / 60) });
 }
 
 // Fire to both analytics sinks (Base44 + Mixpanel) without ever disrupting the
@@ -124,15 +109,16 @@ function trackPlusEvent(eventName, mixpanelName, properties = {}) {
 }
 
 function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const score = Math.round((Number(plusMeta?.score) || 0) * 100);
-  const locationLabel = getRecommendationLocation(profile) || "ללא מיקום";
-  const insight = plusMeta?.insight || "יש כאן התאמה מעניינת לשיחה ראשונה.";
+  const locationLabel = getRecommendationLocation(profile) || t("no_location");
+  const insight = plusMeta?.insight || t("interesting_match_insight");
   const sharedCities = Array.isArray(plusMeta?.reasons?.shared_cities) ? plusMeta.reasons.shared_cities : [];
   const sharedInterests = Array.isArray(plusMeta?.reasons?.shared_interests) ? plusMeta.reasons.shared_interests : [];
   const tags = [
-    ...(profile.current_status === "has_apartment" ? ["יש לי דירה"] : []),
+    ...(profile.current_status === "has_apartment" ? [t("onb_has_apartment_title")] : []),
     ...sharedCities.slice(0, 2),
     ...sharedInterests.slice(0, 2).map((interest) => getInterestLabel(interest)),
   ];
@@ -159,7 +145,7 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
       onClick={openProfile}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProfile(); } }}
       className="group cursor-pointer overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-      aria-label={`פתח/י את הפרופיל של ${profile.name}`}
+      aria-label={t("open_profile_of", { name: profile.name })}
     >
       <div className="relative aspect-[4/3] bg-gray-100">
         <SmartImage
@@ -172,19 +158,19 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
 
         <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
           <span className="rounded-full bg-black/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
-            {score}% התאמה
+            {t("match_percent", { percent: score })}
           </span>
           <span className={`rounded-full px-3 py-1.5 text-xs font-bold backdrop-blur-sm ${
             plusMeta?.messageable ? "bg-emerald-500/90 text-white" : "bg-white/90 text-gray-800"
           }`}>
-            {plusMeta?.messageable ? "הודעות פתוחות" : "שיחה נעולה"}
+            {plusMeta?.messageable ? t("messages_open") : t("chat_locked")}
           </span>
         </div>
 
         <div className="absolute bottom-3 right-3 left-3 text-white">
           <div className="flex items-center gap-2 justify-end">
             {profile.is_verified && (
-              <span className="rounded-full bg-blue-500/90 px-2 py-1 text-[10px] font-bold">מאומת</span>
+              <span className="rounded-full bg-blue-500/90 px-2 py-1 text-[10px] font-bold">{t("verified")}</span>
             )}
             <h3 className="text-2xl font-black leading-tight drop-shadow">
               {profile.name}, {profile.age}
@@ -213,7 +199,7 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
             <button
               type="button"
               onClick={(e) => handleSwipeClick(e, "like")}
-              aria-label={`אהבתי את ${profile.name}`}
+              aria-label={t("like_x", { name: profile.name })}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white shadow"
             >
               <Heart className="h-4 w-4" fill="white" />
@@ -221,14 +207,14 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
             <button
               type="button"
               onClick={(e) => handleSwipeClick(e, "dislike")}
-              aria-label={`דחה את ${profile.name}`}
+              aria-label={t("dislike_x", { name: profile.name })}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-gray-300"
             >
               <X className="h-4 w-4" strokeWidth={3} />
             </button>
           </div>
           <span className="inline-flex items-center gap-1 text-sm font-bold text-[--theme-orange]">
-            פתח/י פרופיל
+            {t("open_profile")}
             <ChevronLeft className="w-4 h-4" />
           </span>
         </div>
@@ -238,6 +224,7 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
 }
 
 export default function RuumrPlusPage() {
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
@@ -261,8 +248,8 @@ export default function RuumrPlusPage() {
   });
   const [plusState, setPlusState] = useState({
     status: "loading",
-    label: "בודק מצב Plus...",
-    description: "טוען נתוני חשבון והתראות שמורות.",
+    label: t("checking_plus_status"),
+    description: t("loading_account_data"),
   });
 
   const applyActivationRecord = useCallback((record, {
@@ -294,28 +281,28 @@ export default function RuumrPlusPage() {
       status: nextStatus,
       label:
         nextStatus === "active"
-          ? "Plus פעיל"
+          ? t("plus_active")
           : nextStatus === "saved"
-            ? "תוצאות שמורות"
+            ? t("saved_results")
             : nextStatus === "locked"
-              ? "Plus נעול"
+              ? t("plus_locked")
               : nextStatus === "fallback"
-                ? "מצב דמו"
+                ? t("demo_mode")
                 : "Ruumr Plus",
       description:
         nextStatus === "active"
-          ? `Plus פעיל. אפשר להפעיל שוב בעוד ${formatActivationWindow(remainingMs)}.`
+          ? t("plus_active_desc", { window: formatActivationWindow(remainingMs, t) })
           : nextStatus === "saved"
-            ? "התוצאות האחרונות נשמרו כאן. אפשר להפעיל שוב עכשיו."
+            ? t("saved_results_desc")
             : nextStatus === "locked"
-              ? "Ruumr Plus עוד לא פתוח לחשבון הזה."
+              ? t("plus_not_open_account")
               : nextStatus === "fallback"
-                ? "לא הצלחנו לטעון את מצב החשבון כרגע."
-                : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-72 שעות.",
+                ? t("couldnt_load_account")
+                : t("plus_idle_desc"),
     });
 
     return normalized;
-  }, []);
+  }, [t]);
 
   const loadAndRestoreActivation = useCallback(async (cancelledRef = { current: false }) => {
     try {
@@ -390,8 +377,8 @@ export default function RuumrPlusPage() {
       });
       setPlusState({
         status: "idle",
-        label: "Ruumr Plus מוכן",
-        description: "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן ל-72 שעות.",
+        label: t("plus_ready"),
+        description: t("plus_idle_desc"),
       });
     } catch (error) {
       if (cancelledRef.current) return;
@@ -399,11 +386,11 @@ export default function RuumrPlusPage() {
       console.error("Failed to load Ruumr Plus profile state:", error);
       setPlusState({
         status: "fallback",
-        label: "מצב דמו",
-        description: "לא הצלחנו לטעון את מצב החשבון כרגע.",
+        label: t("demo_mode"),
+        description: t("couldnt_load_account"),
       });
     }
-  }, [applyActivationRecord, navigate]);
+  }, [applyActivationRecord, navigate, t]);
 
   useEffect(() => {
     const cancelledRef = { current: false };
@@ -456,8 +443,8 @@ export default function RuumrPlusPage() {
         setShowQuestionnaire(true);
         setPlusState({
           status: "idle",
-          label: "נדרש שאלון התאמה",
-          description: "כדי להפעיל Plus צריך להשלים קודם את שאלון ההעדפות.",
+          label: t("questionnaire_required"),
+          description: t("questionnaire_required_desc"),
         });
         return null;
       }
@@ -467,8 +454,8 @@ export default function RuumrPlusPage() {
     setPlusState((prev) => ({
       ...prev,
       status: "loading",
-      label: "מפעיל/ה Plus...",
-      description: "מחפש 5 התאמות ושומר אותן למסך הזה.",
+      label: t("activating_plus"),
+      description: t("finding_5_matches"),
     }));
 
     try {
@@ -539,8 +526,8 @@ export default function RuumrPlusPage() {
         });
         setPlusState({
           status: "locked",
-          label: "Plus נעול",
-          description: "Ruumr Plus עוד לא פתוח לחשבון הזה.",
+          label: t("plus_locked"),
+          description: t("plus_not_open_account"),
         });
         trackPlusEvent("plus_locked_shown", "Plus Locked Shown", { source });
         return null;
@@ -596,14 +583,14 @@ export default function RuumrPlusPage() {
       });
       setPlusState({
         status: "fallback",
-        label: "מצב דמו",
-        description: "לא הצלחנו להפעיל את Ruumr Plus כרגע.",
+        label: t("demo_mode"),
+        description: t("couldnt_activate_plus"),
       });
       return null;
     } finally {
       setIsActivating(false);
     }
-  }, [applyActivationRecord, currentProfile, currentUser, isActivating, localProfiles, userSwipes]);
+  }, [applyActivationRecord, currentProfile, currentUser, isActivating, localProfiles, userSwipes, t]);
 
   const handleQuestionnaireComplete = useCallback((preference) => {
     const source = pendingActivationSource;
@@ -648,22 +635,22 @@ export default function RuumrPlusPage() {
   const cooldownActive = activationFresh && plusRecommendations.length > 0;
   const cooldownRemainingMs = cooldownActive ? getRuumrPlusActivationRemainingMs(activationRecord) : 0;
   const primaryActionLabel = isActivating
-    ? "מפעיל/ה Plus..."
+    ? t("activating_plus")
     : isLocked
-      ? "Plus עדיין לא זמין"
+      ? t("plus_not_available_yet")
       : cooldownActive
-        ? `זמין שוב בעוד ${formatActivationWindow(cooldownRemainingMs)}`
+        ? t("available_again_in", { window: formatActivationWindow(cooldownRemainingMs, t) })
         : activationRecord
-          ? "הפעל/י Plus שוב"
-          : "הפעל/י Plus";
+          ? t("activate_plus_again")
+          : t("activate_plus");
   const resultsHeading = activationRecord
-    ? "התוצאות האחרונות שלך ב-Ruumr Plus"
-    : "התוצאות שלך ב-Ruumr Plus";
+    ? t("your_latest_plus_results")
+    : t("your_plus_results");
   const resultsSubheading = activationRecord
     ? activationFresh
-      ? "התוצאות השמורות שלך מופיעות כאן. אפשר להפעיל שוב בעוד 72 שעות."
-      : "התוצאות השמורות שלך מופיעות כאן. אפשר להפעיל שוב עכשיו."
-    : "כאן תראה/י את ההתאמות שחושבו עבורך, בלי לצאת ממסך Plus.";
+      ? t("saved_results_72h")
+      : t("saved_results_now")
+    : t("plus_results_intro");
 
   const handlePrimaryAction = useCallback(() => {
     if (isActivating || isLocked || cooldownActive || !currentUser || !currentProfile) {
@@ -751,7 +738,7 @@ export default function RuumrPlusPage() {
   return (
     <div
       className="min-h-screen pb-40 sm:pb-24 bg-[radial-gradient(circle_at_top_right,_rgba(250,56,3,0.16),_transparent_36%),linear-gradient(180deg,_#fff8f4_0%,_#ffffff_40%,_#f8fafc_100%)]"
-      dir="rtl"
+      dir={i18n.dir()}
     >
       <div className="px-4 pt-4 space-y-5">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#FA3803] via-[#ff6a2a] to-[#ffb45c] px-5 py-6 text-white shadow-2xl">
@@ -765,12 +752,11 @@ export default function RuumrPlusPage() {
             </div>
 
             <h1 className="mt-4 text-3xl font-black leading-tight">
-              התאמות חכמות יותר. פרופילים מדויקים יותר.
+              {t("plus_hero_title")}
             </h1>
 
             <p className="mt-3 max-w-md text-sm leading-6 text-white/90">
-              לחיצה על Plus מפעילה עד 5 התאמות חכמות, שומרת אותן כאן למשך 72 שעות,
-              ומאפשרת לחזור אליהן בלי לעבור למסך הסווייפ הרגיל.
+              {t("plus_hero_desc")}
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -780,7 +766,7 @@ export default function RuumrPlusPage() {
               </span>
               {currentUser?.full_name && (
                 <span className="text-xs font-medium text-white/80">
-                  מחובר/ת כ-{currentUser.full_name}
+                  {t("logged_in_as", { name: currentUser.full_name })}
                 </span>
               )}
             </div>
@@ -821,7 +807,7 @@ export default function RuumrPlusPage() {
                 }}
                 className="h-12 rounded-full border-white/25 bg-white/10 text-white font-bold hover:bg-white/15"
               >
-                ערוך/י העדפות התאמה
+                {t("edit_match_prefs")}
               </Button>
 
             </div>
@@ -842,7 +828,7 @@ export default function RuumrPlusPage() {
             <div className="flex flex-col items-end gap-2">
               {!isLocked && (
                 <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange]">
-                  {(plusRecommendationsMeta.matchedCount ?? plusRecommendations.length ?? 0)} התאמות
+                  {t("matches_count", { count: plusRecommendationsMeta.matchedCount ?? plusRecommendations.length ?? 0 })}
                 </span>
               )}
               <span className={`rounded-full px-3 py-1 text-xs font-bold ${
@@ -877,15 +863,15 @@ export default function RuumrPlusPage() {
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white text-[--theme-orange] shadow-sm">
                 <Lock className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-black text-gray-900">Ruumr Plus עדיין לא זמין לחשבון שלך</h3>
+              <h3 className="text-lg font-black text-gray-900">{t("plus_not_available_account")}</h3>
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                התאמות Plus נפתחות בהדרגה. נעדכן אותך כאן ברגע שהן יהיו זמינות — בינתיים אפשר להמשיך לגלות התאמות במסך הרגיל.
+                {t("plus_gradual_rollout")}
               </p>
               <Button
                 asChild
                 className="mt-4 h-11 rounded-full bg-[--theme-orange] font-bold text-white hover:brightness-110"
               >
-                <Link to={createPageUrl("Discover")}>המשך/י ל-Discover</Link>
+                <Link to={createPageUrl("Discover")}>{t("continue_to_discover")}</Link>
               </Button>
             </div>
           ) : plusRecommendations.length > 0 ? (
@@ -897,12 +883,12 @@ export default function RuumrPlusPage() {
           ) : (
             <div className="mt-4 rounded-[1.75rem] border border-dashed border-orange-200 bg-orange-50/70 p-5 text-center">
               <h3 className="text-lg font-black text-gray-900">
-                {activationRecord ? "לא נמצאו התאמות שמורות" : "עוד אין תוצאות להצגה"}
+                {activationRecord ? t("no_saved_matches") : t("no_results_yet")}
               </h3>
               <p className="mt-2 text-sm leading-6 text-gray-600">
                 {activationRecord
-                  ? "אפשר להפעיל את Ruumr Plus שוב כדי לרענן את ההתאמות השמורות."
-                  : "לחיצה על Plus תחשב 5 התאמות ותשמור אותן כאן למשך 72 שעות."}
+                  ? t("reactivate_to_refresh")
+                  : t("plus_compute_save_72")}
               </p>
               <Button
                 type="button"
@@ -918,16 +904,16 @@ export default function RuumrPlusPage() {
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             {plusRecommendationsMeta.generatedAt && (
               <span>
-                עודכן לאחרונה: {new Date(plusRecommendationsMeta.generatedAt).toLocaleString("he-IL")}
+                {t("last_updated", { date: new Date(plusRecommendationsMeta.generatedAt).toLocaleString(i18n.language === "he" ? "he-IL" : "en-US") })}
               </span>
             )}
             {plusRecommendationsMeta.source && (
               <span className="rounded-full bg-gray-100 px-2.5 py-1 font-bold text-gray-600">
                 {plusRecommendationsMeta.source === "simulator" || plusRecommendationsMeta.source === "simulator-fallback"
-                  ? "מצב סימולטור"
+                  ? t("simulator_mode_label")
                   : plusRecommendationsMeta.source === "saved"
-                    ? "תוצאות שמורות"
-                    : "תוצאות חיות"}
+                    ? t("saved_results")
+                    : t("live_results")}
               </span>
             )}
           </div>
@@ -937,14 +923,14 @@ export default function RuumrPlusPage() {
           {featureCards.map((card) => {
             const Icon = card.icon;
             return (
-              <div key={card.title} className="rounded-3xl border border-orange-100 bg-white p-4 shadow-sm">
+              <div key={card.titleKey} className="rounded-3xl border border-orange-100 bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-[--theme-orange]">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-base font-black text-gray-900">{card.title}</h2>
-                    <p className="mt-1 text-sm leading-5 text-gray-600">{card.description}</p>
+                    <h2 className="text-base font-black text-gray-900">{t(card.titleKey)}</h2>
+                    <p className="mt-1 text-sm leading-5 text-gray-600">{t(card.descKey)}</p>
                   </div>
                 </div>
               </div>
@@ -955,8 +941,8 @@ export default function RuumrPlusPage() {
         <div className="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black text-gray-900">איפה תראה/י את Plus</h2>
-              <p className="mt-1 text-sm text-gray-500">אלה המסכים שבהם Ruumr Plus כבר מחובר לאפליקציה.</p>
+              <h2 className="text-xl font-black text-gray-900">{t("where_youll_see_plus")}</h2>
+              <p className="mt-1 text-sm text-gray-500">{t("plus_entry_desc")}</p>
             </div>
             <div className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange]">
               Entry points
@@ -968,7 +954,7 @@ export default function RuumrPlusPage() {
               const Icon = item.icon;
               return (
                 <Link
-                  key={item.title}
+                  key={item.titleKey}
                   to={item.to}
                   className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 transition-colors hover:bg-orange-50/70"
                 >
@@ -977,8 +963,8 @@ export default function RuumrPlusPage() {
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">{item.title}</p>
-                      <p className="text-sm text-gray-500">{item.description}</p>
+                      <p className="font-bold text-gray-900">{t(item.titleKey)}</p>
+                      <p className="text-sm text-gray-500">{t(item.descKey)}</p>
                     </div>
                   </div>
                   <ChevronLeft className="w-5 h-5 text-gray-300" />
