@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
+import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -348,6 +349,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir="rtl">
+        {!['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
