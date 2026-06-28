@@ -115,16 +115,23 @@ const emailHtml = `<!DOCTYPE html>
 </html>`;
 
 const BATCH_SIZE = 25;
+const EMAIL_DELAY_MS = 3000; // 3 seconds between emails to avoid rate limit
 const EXCLUDED = ['mottishif7', 'mottishiffer', 'moti dolev'];
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Read current offset from payload
-    let body = {};
-    try { body = await req.json(); } catch {}
-    const offset = typeof body.offset === 'number' ? body.offset : 0;
+    // Get or create progress tracker
+    let progress = await base44.asServiceRole.entities.NewsletterProgress.get('main_campaign');
+    if (!progress) {
+      progress = await base44.asServiceRole.entities.NewsletterProgress.create({
+        id: 'main_campaign',
+        offset: 0,
+        sent_emails: [],
+        started_at: new Date().toISOString()
+      });
+    }
 
     // Get all users
     let allUsers = [];
@@ -137,24 +144,29 @@ Deno.serve(async (req) => {
       skip += 50;
     }
 
-    const emails = allUsers
+    const allEmails = allUsers
       .map(u => u.email)
       .filter(e => e && !EXCLUDED.some(kw => e.toLowerCase().includes(kw)));
 
-    const chunk = emails.slice(offset, offset + BATCH_SIZE);
-    const isDone = chunk.length === 0;
+    // Filter out already sent emails
+    const sentEmails = new Set(progress.sent_emails || []);
+    const remainingEmails = allEmails.filter(e => !sentEmails.has(e));
 
-    if (isDone) {
+    if (remainingEmails.length === 0) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: 'mottishif7@gmail.com',
         subject: '✅ שליחת הניוזלטר הסתיימה!',
-        body: `<p dir="rtl">סיימנו לשלוח לכל ${emails.length} המשתמשים. הכל עבר בהצלחה!</p>`,
+        body: `<p dir="rtl">סיימנו לשלוח לכל ${allEmails.length} המשתמשים. הכל עבר בהצלחה!</p>`,
         from_name: 'Ruumr System'
       });
-      return Response.json({ done: true, totalEmails: emails.length, message: 'All emails sent! Admin notified.' });
+      return Response.json({ done: true, totalSent: allEmails.length, message: 'All emails sent! Admin notified.' });
     }
 
+    // Send batch with delays
+    const chunk = remainingEmails.slice(0, BATCH_SIZE);
     let sent = 0, failed = 0;
+    const newlySent = [];
+
     for (const email of chunk) {
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
@@ -163,17 +175,35 @@ Deno.serve(async (req) => {
           body: emailHtml,
           from_name: "Ruumr"
         });
+        newlySent.push(email);
         sent++;
+        // Wait between emails to avoid rate limit
+        if (sent < chunk.length) {
+          await new Promise(resolve => setTimeout(resolve, EMAIL_DELAY_MS));
+        }
       } catch (e) {
         console.error(`Failed to send to ${email}:`, e.message);
         failed++;
       }
     }
 
-    const nextOffset = offset + chunk.length;
-    const remaining = emails.length - nextOffset;
-    console.log(`Batch done: offset=${offset}, sent=${sent}, failed=${failed}, nextOffset=${nextOffset}, remaining=${remaining}`);
-    return Response.json({ done: false, sent, failed, offset, nextOffset, remaining, totalEmails: emails.length });
+    // Update progress
+    await base44.asServiceRole.entities.NewsletterProgress.update('main_campaign', {
+      offset: progress.offset + newlySent.length,
+      sent_emails: [...(progress.sent_emails || []), ...newlySent],
+      last_updated: new Date().toISOString()
+    });
+
+    const remaining = allEmails.length - (progress.offset + newlySent.length);
+    console.log(`Batch done: sent=${sent}, failed=${failed}, totalSent=${progress.offset + newlySent.length}, remaining=${remaining}`);
+    return Response.json({ 
+      done: false, 
+      sent, 
+      failed, 
+      totalSent: progress.offset + newlySent.length,
+      remaining,
+      totalEmails: allEmails.length 
+    });
   } catch (error) {
     console.error('sendNewsletterBatch error:', error);
     return Response.json({ error: error.message }, { status: 500 });

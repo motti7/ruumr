@@ -1,0 +1,54 @@
+{
+  "name": "NewsletterProgress",
+  "type": "object",
+  "properties": {
+    "offset": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of emails sent so far"
+    },
+    "sent_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of email addresses that have been sent"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the campaign started"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update time"
+    }
+  },
+  "required": [
+    "offset",
+    "sent_emails"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
