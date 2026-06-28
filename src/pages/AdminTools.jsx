@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
@@ -23,6 +24,7 @@ function getPlusSource(user) {
 // The client cannot touch the User entity directly: Base44 restricts listing it
 // to project collaborators, so the bridge does the read and the flag update.
 export default function AdminToolsPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
@@ -58,7 +60,7 @@ export default function AdminToolsPage() {
       } catch (error) {
         console.error("[AdminTools] loading users failed", error);
         if (!cancelled) {
-          setFeedback({ type: "error", text: `טעינת המשתמשים נכשלה: ${error?.message || "לא ידוע"}` });
+          setFeedback({ type: "error", text: t("admin_load_users_failed", { error: error?.message || t("unknown_error") }) });
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -95,11 +97,11 @@ export default function AdminToolsPage() {
       setFeedback({
         type: "ok",
         text: user.is_ruumr_plus
-          ? `גישה ל-Plus באפליקציית iOS הופעלה עבור ${user.full_name || user.email}`
-          : `Plus הופעל עבור ${user.full_name || user.email}`,
+          ? t("admin_ios_plus_enabled", { name: user.full_name || user.email })
+          : t("admin_plus_enabled", { name: user.full_name || user.email }),
       });
     } catch (error) {
-      setFeedback({ type: "error", text: `שגיאה בהפעלת Plus: ${error?.message || "לא ידוע"}` });
+      setFeedback({ type: "error", text: t("admin_grant_error", { error: error?.message || t("unknown_error") }) });
     } finally {
       setPending((prev) => {
         const next = { ...prev };
@@ -117,9 +119,9 @@ export default function AdminToolsPage() {
       // one call (flag first, so the paywall re-engages immediately).
       await revokeRuumrPlusEntitlement({ userId: user.id });
       setUserPlus(user.id, false, "none");
-      setFeedback({ type: "ok", text: `Plus בוטל עבור ${user.full_name || user.email}` });
+      setFeedback({ type: "ok", text: t("admin_plus_revoked", { name: user.full_name || user.email }) });
     } catch (error) {
-      setFeedback({ type: "error", text: `שגיאה בביטול Plus: ${error?.message || "לא ידוע"}` });
+      setFeedback({ type: "error", text: t("admin_revoke_error", { error: error?.message || t("unknown_error") }) });
     } finally {
       setPending((prev) => {
         const next = { ...prev };
@@ -138,15 +140,15 @@ export default function AdminToolsPage() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen" dir="rtl">
+    <div className="p-6 bg-gray-50 min-h-screen" dir={i18n.dir()}>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
           <Sparkles className="w-6 h-6 text-[--theme-orange]" />
-          <h1 className="text-2xl font-black text-gray-900">ניהול Ruumr Plus</h1>
-          <span className="text-sm font-medium text-gray-500">({users.length} משתמשים)</span>
+          <h1 className="text-2xl font-black text-gray-900">{t("admin_manage_plus")}</h1>
+          <span className="text-sm font-medium text-gray-500">{t("admin_users_count", { count: users.length })}</span>
         </div>
         <p className="text-sm text-gray-500 mb-5">
-          הפעלה מסנכרנת את הדגל ב-Base44 ואת ההרשאה בשרת Plus בלחיצה אחת.
+          {t("admin_sync_note")}
         </p>
 
         <div className="relative mb-4">
@@ -155,7 +157,7 @@ export default function AdminToolsPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי שם, אימייל או מזהה"
+            placeholder={t("admin_search_placeholder")}
             className="w-full h-11 rounded-xl border border-gray-200 bg-white pr-10 pl-4 text-sm outline-none focus:border-[--theme-orange]"
           />
         </div>
@@ -174,7 +176,7 @@ export default function AdminToolsPage() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 divide-y divide-gray-100">
           {filtered.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-gray-400">לא נמצאו משתמשים</div>
+            <div className="px-4 py-8 text-center text-sm text-gray-400">{t("admin_no_users")}</div>
           ) : (
             filtered.slice(0, 100).map((user) => {
               const busy = pending[user.id];
@@ -186,7 +188,7 @@ export default function AdminToolsPage() {
                 <div key={user.id} className="flex items-center gap-3 px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-900 truncate">{user.full_name || "ללא שם"}</span>
+                      <span className="font-bold text-gray-900 truncate">{user.full_name || t("admin_no_name")}</span>
                       {isPlus && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-bold text-[--theme-orange]">
                           <Check className="w-3 h-3" />
@@ -195,7 +197,7 @@ export default function AdminToolsPage() {
                       )}
                       {hasIOSPlusAccess && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-                          iOS פעיל
+                          {t("admin_ios_active")}
                         </span>
                       )}
                     </div>
@@ -216,7 +218,7 @@ export default function AdminToolsPage() {
                           ) : (
                             <>
                               <Sparkles className="w-4 h-4 ml-1" />
-                              אפשר iOS
+                              {t("admin_enable_ios")}
                             </>
                           )}
                         </Button>
@@ -233,7 +235,7 @@ export default function AdminToolsPage() {
                         ) : (
                           <>
                             <X className="w-4 h-4 ml-1" />
-                            בטל Plus
+                            {t("admin_revoke_plus")}
                           </>
                         )}
                       </Button>
@@ -250,7 +252,7 @@ export default function AdminToolsPage() {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 ml-1" />
-                          הפעל Plus
+                          {t("admin_enable_plus")}
                         </>
                       )}
                     </Button>
@@ -263,7 +265,7 @@ export default function AdminToolsPage() {
 
         {filtered.length > 100 && (
           <p className="mt-3 text-center text-xs text-gray-400">
-            מוצגים 100 מתוך {filtered.length} — כל המשתמשים נטענו; השתמש/י בחיפוש כדי למצוא מישהו ספציפי.
+            {t("admin_showing_100", { count: filtered.length })}
           </p>
         )}
       </div>
