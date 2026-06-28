@@ -754,5 +754,10 @@
   "admin_users_answered": "({{count}} users answered)",
   "admin_username": "Username",
   "answer_a": "A",
-  "answer_b": "B"
+  "answer_b": "B",
+
+  "banner_offer_badge": "⏰ Offer for the first fifty",
+  "banner_title": "Ruumr Plus is here!",
+  "banner_description": "AI that finds your perfect roommates in one tap — and opens an instant chat. Just ₪25 until the beginning of the next academic year!",
+  "banner_cta": "✨ Discover more"
 }

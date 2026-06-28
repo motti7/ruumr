@@ -754,5 +754,10 @@
   "admin_users_answered": "({{count}} משתמשים ענו)",
   "admin_username": "שם משתמש",
   "answer_a": "א",
-  "answer_b": "ב"
+  "answer_b": "ב",
+
+  "banner_offer_badge": "⏰ הצעה לחמישים הראשונים",
+  "banner_title": "רומר פלוס הגיע!",
+  "banner_description": "AI שמוצא לך את השותפים המושלמים בלחיצה אחת — ופותח צ'אט מיידי. רק 25₪ עד תחילת השנה האקדמית הבאה!",
+  "banner_cta": "✨ גלה עוד"
 }

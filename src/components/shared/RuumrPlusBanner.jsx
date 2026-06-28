@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Sparkles } from 'lucide-react';
 
 const BANNER_KEY = 'ruumr_plus_banner_seen_session';
 
 export default function RuumrPlusBanner() {
+  const { t, i18n } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -24,13 +26,13 @@ export default function RuumrPlusBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" dir="rtl">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" dir={i18n.dir()}>
       <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center">
         {/* Close button */}
         <button
           onClick={dismiss}
           className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-          aria-label="סגור"
+          aria-label={t("close")}
         >
           <X className="w-5 h-5" />
         </button>
@@ -42,17 +44,17 @@ export default function RuumrPlusBanner() {
 
         {/* Limited time badge */}
         <p className="text-[--theme-orange] text-sm font-semibold mb-2">
-          ⏰ הצעה לחמישים הראשונים
+          {t("banner_offer_badge")}
         </p>
 
         {/* Title */}
         <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          רומר פלוס הגיע!
+          {t("banner_title")}
         </h2>
 
         {/* Description */}
         <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">
-          AI שמוצא לך את השותפים המושלמים בלחיצה אחת — ופותח צ'אט מיידי. רק 25₪ עד תחילת השנה האקדמית הבאה!
+          {t("banner_description")}
         </p>
 
         {/* CTA Button */}
@@ -63,7 +65,7 @@ export default function RuumrPlusBanner() {
           onClick={dismiss}
           className="block w-full py-4 rounded-2xl gradient-orange text-white font-bold text-lg shadow-lg active:opacity-90"
         >
-          ✨ גלה עוד
+          {t("banner_cta")}
         </a>
       </div>
     </div>
