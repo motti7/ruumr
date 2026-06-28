@@ -33,14 +33,14 @@ const emailHtml = `<!DOCTYPE html>
           <!-- Headline -->
           <tr>
             <td style="padding:0 40px 24px;text-align:center;">
-              <h1 style="margin:0;font-size:28px;font-weight:800;color:#212121;line-height:1.3;">מצאו את השותף המושלם<br/><span style="color:#F05A28;">בלחיצת כפתור אחת</span></h1>
+              <h1 style="margin:0;font-size:28px;font-weight:800;color:#212121;line-height:1.3;">מצאו את השותף המושלם<br/><span style="color:#F05A28;">בלחיצה כפתור אחת</span></h1>
             </td>
           </tr>
 
           <!-- Subheadline -->
           <tr>
             <td style="padding:0 40px 24px;text-align:center;">
-              <p style="margin:0;font-size:15px;color:#757575;line-height:1.7;">AI שסורק מאות משתמשים ומגיש לך את <strong>ההתאמות הטובות ביותר</strong> — בדיוק בשבילך.<br/>ואז? מתחילים לדבר מיד, ללא צורך בסווייפים הדדיים.</p>
+              <p style="margin:0;font-size:15px;color:#757575;line-height:1.7;">AI שסורק מאות משתמשים ומגיש לך את <strong>ההתאמות הטובות ביותר</strong> — בדיוק בשבילך.<br/>ואז? מתחילים לדבר מיד, ללא צורך בסוויפס הדדיים.</p>
             </td>
           </tr>
 
@@ -57,7 +57,7 @@ const emailHtml = `<!DOCTYPE html>
                   <td width="33%" style="text-align:center;vertical-align:top;">
                     <p style="margin:0;font-size:32px;">⚡</p>
                     <p style="margin:8px 0 4px;font-size:14px;font-weight:700;color:#212121;">גישה מיידית</p>
-                    <p style="margin:0;font-size:12px;color:#999;">ללא צורך בסווייפים הדדיים</p>
+                    <p style="margin:0;font-size:12px;color:#999;">ללא צורך בסוויפס הדדיים</p>
                   </td>
                   <td width="33%" style="text-align:center;vertical-align:top;">
                     <p style="margin:0;font-size:32px;">🤖</p>
