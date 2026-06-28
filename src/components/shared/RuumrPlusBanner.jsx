@@ -52,7 +52,7 @@ export default function RuumrPlusBanner() {
 
         {/* Description */}
         <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">
-          AI שמוצא לך את השותפים המושלמים בלחיצה אחת — ופותח צ'אט מיידי. רק 25₪ עד תחילת שנה הבאה.
+          AI שמוצא לך את השותפים המושלמים בלחיצה אחת — ופותח צ'אט מיידי. רק 25₪ עד תחילת השנה האקדמית הבאה.
         </p>
 
         {/* CTA Button */}
