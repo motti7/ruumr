@@ -123,10 +123,10 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     // Get or create progress tracker
-    let progress = await base44.asServiceRole.entities.NewsletterProgress.get('main_campaign');
+    let progressRecords = await base44.asServiceRole.entities.NewsletterProgress.filter({});
+    let progress = progressRecords.length > 0 ? progressRecords[0] : null;
     if (!progress) {
       progress = await base44.asServiceRole.entities.NewsletterProgress.create({
-        id: 'main_campaign',
         offset: 0,
         sent_emails: [],
         started_at: new Date().toISOString()
@@ -148,8 +148,9 @@ Deno.serve(async (req) => {
       .map(u => u.email)
       .filter(e => e && !EXCLUDED.some(kw => e.toLowerCase().includes(kw)));
 
-    // Filter out already sent emails
-    const sentEmails = new Set(progress.sent_emails || []);
+    // Filter out already sent emails using the LATEST progress data
+    const currentProgress = await base44.asServiceRole.entities.NewsletterProgress.get(progress.id);
+    const sentEmails = new Set(currentProgress.sent_emails || []);
     const remainingEmails = allEmails.filter(e => !sentEmails.has(e));
 
     if (remainingEmails.length === 0) {
@@ -162,12 +163,18 @@ Deno.serve(async (req) => {
       return Response.json({ done: true, totalSent: allEmails.length, message: 'All emails sent! Admin notified.' });
     }
 
-    // Send batch with delays
+    // Send batch with delays - save progress after EACH email to prevent duplicates
     const chunk = remainingEmails.slice(0, BATCH_SIZE);
     let sent = 0, failed = 0;
-    const newlySent = [];
 
     for (const email of chunk) {
+      // Double-check this email wasn't already sent (safety check)
+      const latestProgress = await base44.asServiceRole.entities.NewsletterProgress.get(progress.id);
+      if ((latestProgress.sent_emails || []).includes(email)) {
+        console.log(`Skipping ${email} - already in sent_emails`);
+        continue;
+      }
+
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: email,
@@ -175,8 +182,15 @@ Deno.serve(async (req) => {
           body: emailHtml,
           from_name: "Ruumr"
         });
-        newlySent.push(email);
         sent++;
+        
+        // IMMEDIATELY save progress after each successful send
+        await base44.asServiceRole.entities.NewsletterProgress.update(progress.id, {
+          offset: latestProgress.offset + 1,
+          sent_emails: [...(latestProgress.sent_emails || []), email],
+          last_updated: new Date().toISOString()
+        });
+        
         // Wait between emails to avoid rate limit
         if (sent < chunk.length) {
           await new Promise(resolve => setTimeout(resolve, EMAIL_DELAY_MS));
@@ -187,20 +201,14 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update progress
-    await base44.asServiceRole.entities.NewsletterProgress.update('main_campaign', {
-      offset: progress.offset + newlySent.length,
-      sent_emails: [...(progress.sent_emails || []), ...newlySent],
-      last_updated: new Date().toISOString()
-    });
-
-    const remaining = allEmails.length - (progress.offset + newlySent.length);
-    console.log(`Batch done: sent=${sent}, failed=${failed}, totalSent=${progress.offset + newlySent.length}, remaining=${remaining}`);
+    const finalProgress = await base44.asServiceRole.entities.NewsletterProgress.get(progress.id);
+    const remaining = allEmails.length - finalProgress.offset;
+    console.log(`Batch done: sent=${sent}, failed=${failed}, totalSent=${finalProgress.offset}, remaining=${remaining}`);
     return Response.json({ 
       done: false, 
       sent, 
       failed, 
-      totalSent: progress.offset + newlySent.length,
+      totalSent: finalProgress.offset,
       remaining,
       totalEmails: allEmails.length 
     });
