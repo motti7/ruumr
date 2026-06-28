@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { User } from "@/entities/User";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -34,6 +35,7 @@ const SettingsItem = ({ icon, title, action, isLink, to, href, target, rel, onCl
 
 
 export default function SettingsPage() {
+  const { t, i18n } = useTranslation();
   const { logout } = useAuth();
   const [notifyLikes, setNotifyLikes] = useState(true);
   const [notifyMatches, setNotifyMatches] = useState(true);
@@ -77,65 +79,65 @@ export default function SettingsPage() {
 
 
   return (
-    <div className="p-4 pb-24 bg-gray-50 min-h-screen" dir="rtl">
+    <div className="p-4 pb-24 bg-gray-50 min-h-screen" dir={i18n.dir()}>
       <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">הגדרות</h1>
+        <h1 className="text-3xl font-bold text-gray-800">{t("settings")}</h1>
       </div>
 
       <div className="space-y-4">
           <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <p className="font-bold text-lg mb-2 text-gray-800">התראות</p>
+              <p className="font-bold text-lg mb-2 text-gray-800">{t("notifications")}</p>
               <div className="divide-y divide-gray-100">
-                <SettingsItem 
-                  icon={<Heart className="w-5 h-5 text-[--theme-orange]"/>} 
-                  title="לייקים חדשים" 
-                  action={<TinderSwitch defaultChecked={notifyLikes} onChange={handleNotifyLikesChange} />} 
+                <SettingsItem
+                  icon={<Heart className="w-5 h-5 text-[--theme-orange]"/>}
+                  title={t("new_likes_setting")}
+                  action={<TinderSwitch defaultChecked={notifyLikes} onChange={handleNotifyLikesChange} />}
                 />
-                <SettingsItem 
-                  icon={<Bell className="w-5 h-5 text-[--theme-orange]"/>} 
-                  title="התאמות והודעות חדשות" 
-                  action={<TinderSwitch defaultChecked={notifyMatches} onChange={handleNotifyMatchesChange} />} 
+                <SettingsItem
+                  icon={<Bell className="w-5 h-5 text-[--theme-orange]"/>}
+                  title={t("matches_messages_setting")}
+                  action={<TinderSwitch defaultChecked={notifyMatches} onChange={handleNotifyMatchesChange} />}
                 />
-              </div>
-          </div>
-        
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <p className="font-bold text-lg mb-2 text-gray-800">חשבון</p>
-              <div className="divide-y divide-gray-100">
-                <SettingsItem icon={<Lock className="w-5 h-5 text-gray-500"/>} title="ניהול הרשאות" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Permissions")} />
               </div>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <p className="font-bold text-lg mb-2 text-gray-800">תמיכה</p>
-               <div className="divide-y divide-gray-100">
-                <SettingsItem icon={<HelpCircle className="w-5 h-5 text-gray-500"/>} title="מרכז עזרה" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("HelpCenter")} />
-                <SettingsItem icon={<Shield className="w-5 h-5 text-gray-500"/>} title="תנאי שימוש" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Terms")} />
-                <SettingsItem icon={<img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" className="w-6 h-6"/>} title="צור קשר" action={<ChevronLeft className="text-gray-400"/>} href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" />
+              <p className="font-bold text-lg mb-2 text-gray-800">{t("account")}</p>
+              <div className="divide-y divide-gray-100">
+                <SettingsItem icon={<Lock className="w-5 h-5 text-gray-500"/>} title={t("manage_permissions")} action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Permissions")} />
               </div>
           </div>
-        
+
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+              <p className="font-bold text-lg mb-2 text-gray-800">{t("support")}</p>
+               <div className="divide-y divide-gray-100">
+                <SettingsItem icon={<HelpCircle className="w-5 h-5 text-gray-500"/>} title={t("help_center")} action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("HelpCenter")} />
+                <SettingsItem icon={<Shield className="w-5 h-5 text-gray-500"/>} title={t("terms_of_use")} action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("Terms")} />
+                <SettingsItem icon={<img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" className="w-6 h-6"/>} title={t("contact_us")} action={<ChevronLeft className="text-gray-400"/>} href="https://wa.me/972548523140" target="_blank" rel="noopener noreferrer" />
+              </div>
+          </div>
+
         <div className="pt-6 space-y-4">
-             <Button 
+             <Button
               onClick={handleLogout}
               variant="ghost"
               className="w-full text-center text-gray-600 font-bold text-lg min-h-[44px]"
-              aria-label="התנתקות"
+              aria-label={t("logout")}
             >
               <LogOut className="w-5 h-5 ml-2" />
-              התנתקות
+              {t("logout")}
             </Button>
 
-            <Button 
-               onClick={() => setShowDeleteModal(true)} 
-               variant="ghost" 
+            <Button
+               onClick={() => setShowDeleteModal(true)}
+               variant="ghost"
                className="w-full text-center text-red-500 font-bold text-lg min-h-[44px]"
-               aria-label="פתח דיאלוג מחיקת חשבון"
+               aria-label={t("open_delete_account_dialog")}
              >
                 <Trash2 className="w-5 h-5 ml-2" />
-                מחק חשבון
+                {t("delete_account")}
             </Button>
             
 

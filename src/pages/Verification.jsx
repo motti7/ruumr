@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,6 +12,7 @@ import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
 export default function VerificationPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const fromOnboarding = location.state?.fromOnboarding === true;
@@ -39,13 +41,13 @@ export default function VerificationPage() {
     try {
       await base44.integrations.Core.SendEmail({
         to: email,
-        subject: "קוד האימות שלך ל-ruumr",
-        body: `היי, קוד האימות שלך ל-ruumr הוא: ${newCode}`
+        subject: t("verify_email_subject"),
+        body: t("verify_email_body", { code: newCode })
       });
       setStep(2);
     } catch (error) {
       console.error("Error sending email:", error);
-      alert("שגיאה בשליחת המייל, אנא נסה שנית.");
+      alert(t("email_send_error"));
     } finally {
       setIsLoading(false);
     }
@@ -88,13 +90,13 @@ export default function VerificationPage() {
         console.error(error);
       }
     } else {
-      alert("קוד שגוי");
+      alert(t("wrong_code"));
     }
     setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col p-6 relative overflow-hidden" dir="rtl">
+    <div className="min-h-screen bg-white flex flex-col p-6 relative overflow-hidden" dir={i18n.dir()}>
         {/* Background blobs */}
         <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
@@ -193,13 +195,13 @@ export default function VerificationPage() {
                             </motion.div>
                         </div>
 
-                        <h1 className="text-3xl font-black text-gray-900 mb-3 text-center">בואו נאמת שזה אתם</h1>
+                        <h1 className="text-3xl font-black text-gray-900 mb-3 text-center">{t("lets_verify_you")}</h1>
                         <p className="text-gray-500 text-center mb-8 text-lg">
-                            כדי לשמור על הקהילה שלנו בטוחה, אנחנו צריכים לוודא את כתובת המייל שלך.
+                            {t("verify_email_intro")}
                         </p>
 
                         <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-8">
-                            <label className="text-xs font-bold text-gray-400 mb-1 block">המייל שלך</label>
+                            <label className="text-xs font-bold text-gray-400 mb-1 block">{t("your_email")}</label>
                             <Input 
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -213,7 +215,7 @@ export default function VerificationPage() {
                             disabled={isLoading || !email.includes('@')}
                             className="w-full py-6 rounded-2xl gradient-orange text-white text-lg font-bold shadow-lg shadow-orange-200 hover:scale-[1.02] transition-transform"
                         >
-                            {isLoading ? <RefreshCw className="animate-spin" /> : "שלח לי קוד"}
+                            {isLoading ? <RefreshCw className="animate-spin" /> : t("send_me_code")}
                         </Button>
                     </motion.div>
                 )}
@@ -226,9 +228,9 @@ export default function VerificationPage() {
                         exit={{ opacity: 0, x: -20 }}
                         className="w-full text-center"
                     >
-                        <h1 className="text-3xl font-black text-gray-900 mb-3">הקוד בדרך!</h1>
+                        <h1 className="text-3xl font-black text-gray-900 mb-3">{t("code_on_the_way")}</h1>
                         <p className="text-gray-500 mb-8 text-lg">
-                            שלחנו קוד אימות לכתובת <span className="font-bold text-gray-800">{email}</span>
+                            {t("sent_code_to")} <span className="font-bold text-gray-800">{email}</span>
                         </p>
 
                         <div className="flex justify-center gap-3 mb-10" dir="ltr">
@@ -251,11 +253,11 @@ export default function VerificationPage() {
                             disabled={isLoading || code.some(d => !d)}
                             className="w-full py-6 rounded-2xl gradient-orange text-white text-lg font-bold shadow-lg shadow-orange-200"
                         >
-                            {isLoading ? <RefreshCw className="animate-spin" /> : "אימות"}
+                            {isLoading ? <RefreshCw className="animate-spin" /> : t("verify_action")}
                         </Button>
 
                         <button onClick={() => setStep(1)} className="mt-6 text-gray-400 text-sm font-medium hover:text-gray-600">
-                            לא קיבלתי קוד / החלף מייל
+                            {t("didnt_get_code")}
                         </button>
                     </motion.div>
                 )}
@@ -324,8 +326,8 @@ export default function VerificationPage() {
                                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.75 }}
                             />
                         </div>
-                        <h1 className="text-3xl font-black text-gray-900 mb-2">החשבון אומת!</h1>
-                        <p className="text-gray-500 text-lg">ברוכים הבאים לקהילה הרשמית.</p>
+                        <h1 className="text-3xl font-black text-gray-900 mb-2">{t("account_verified")}</h1>
+                        <p className="text-gray-500 text-lg">{t("welcome_to_community")}</p>
                     </motion.div>
                 )}
             </AnimatePresence>
