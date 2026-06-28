@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 const BANNER_KEY = 'ruumr_plus_banner_seen_session';
 
 export default function RuumrPlusBanner() {
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
     // Show once per session (per app open)
@@ -56,15 +61,19 @@ export default function RuumrPlusBanner() {
         </p>
 
         {/* CTA Button */}
-        <a
-          href="https://ruumrapp.com/RuumrPlus"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={dismiss}
+        <button
+          onClick={() => {
+            dismiss();
+            if (isNative) {
+              navigate(createPageUrl('RuumrPlus'));
+            } else {
+              window.open('https://ruumrapp.com/RuumrPlus', '_blank');
+            }
+          }}
           className="block w-full py-4 rounded-2xl gradient-orange text-white font-bold text-lg shadow-lg active:opacity-90"
         >
           ✨ גלה עוד
-        </a>
+        </button>
       </div>
     </div>
   );
