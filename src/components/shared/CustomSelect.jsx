@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, Check } from 'lucide-react';
 
 export default function CustomSelect({ label, value, onChange, options }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const listRef = useRef(null);
@@ -29,7 +31,7 @@ export default function CustomSelect({ label, value, onChange, options }) {
         className="w-full h-11 px-3 rounded-md border border-gray-200 bg-gray-50 text-gray-800 flex items-center justify-between gap-2 transition-colors text-base"
         style={{ borderColor: open ? '#FA3803' : undefined }}>
         
-        <span>{selected ? selected.l : 'בחר/י'}</span>
+        <span>{selected ? selected.l : t('select_prompt')}</span>
         <ChevronDown
           className="w-4 h-4 flex-shrink-0 transition-transform"
           style={{ color: '#FA3803', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />

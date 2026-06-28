@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apple, Loader2 } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/lib/AuthContext';
@@ -9,6 +10,7 @@ const providers = [
 ];
 
 export default function NativeAuthLogin() {
+  const { t, i18n } = useTranslation();
   const { loginWithProvider } = useAuth();
   const [pendingProvider, setPendingProvider] = useState(null);
 
@@ -23,13 +25,13 @@ export default function NativeAuthLogin() {
   };
 
   return (
-    <main dir="rtl" className="min-h-screen bg-[#fbfaf8] text-slate-950 flex items-center justify-center px-5 py-8">
+    <main dir={i18n.dir()} className="min-h-screen bg-[#fbfaf8] text-slate-950 flex items-center justify-center px-5 py-8">
       <section className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-[#ff6b35] text-white flex items-center justify-center text-2xl font-black shadow-sm">
             R
           </div>
-          <h1 className="text-2xl font-black tracking-normal">התחברות ל-Ruumr</h1>
+          <h1 className="text-2xl font-black tracking-normal">{t("login_to_ruumr")}</h1>
         </div>
 
         <div className="space-y-3">
@@ -46,7 +48,7 @@ export default function NativeAuthLogin() {
               ) : (
                 <Icon className="h-5 w-5" aria-hidden="true" />
               )}
-              <span>כניסה עם {label}</span>
+              <span>{t("sign_in_with", { provider: label })}</span>
             </button>
           ))}
         </div>

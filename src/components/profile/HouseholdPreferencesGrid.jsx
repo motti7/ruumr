@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/ruumrPlusFields";
 import { Sparkles } from "lucide-react";
 
@@ -6,9 +7,11 @@ export default function HouseholdPreferencesGrid({
   profile = {},
   className = "",
   variant = "light",
-  title = "הרגלים בבית",
+  title,
   description = null,
 }) {
+  const { t } = useTranslation();
+  const finalTitle = title === undefined ? t("home_habits") : title;
   const profileData = /** @type {Record<string, any> & { ruumrPlus?: any; ruumr_plus?: any }} */ (profile);
   const plusMeta = profileData.ruumrPlus || profileData.ruumr_plus || null;
   const hasAnyValue = HOUSEHOLD_PREFERENCE_FIELDS.some(({ field }) => profileData[field] != null && profileData[field] !== "");
@@ -35,15 +38,16 @@ export default function HouseholdPreferencesGrid({
 
     const field = HOUSEHOLD_PREFERENCE_FIELDS.find((item) => item.field === fieldName);
     const match = field?.options.find((option) => String(option.value) === String(value));
-    return match?.label ?? String(value);
+    if (!match) return String(value);
+    return match.labelKey ? t(match.labelKey) : (match.label ?? String(value));
   };
 
   return (
     <div className={`${containerClassName} rounded-2xl p-4 ${className}`}>
-      {(title || description || plusMeta) && (
+      {(finalTitle || description || plusMeta) && (
         <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="text-right">
-            {title && <h4 className={`font-bold text-lg ${variant === "dark" ? "text-white" : "text-gray-900"}`}>{title}</h4>}
+          <div className="text-start">
+            {finalTitle && <h4 className={`font-bold text-lg ${variant === "dark" ? "text-white" : "text-gray-900"}`}>{finalTitle}</h4>}
             {description && <p className={`text-sm mt-1 ${variant === "dark" ? "text-white/70" : "text-gray-500"}`}>{description}</p>}
           </div>
           {plusMeta && (
@@ -58,10 +62,10 @@ export default function HouseholdPreferencesGrid({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {HOUSEHOLD_PREFERENCE_FIELDS.map(({ field, label }) => (
-          <div key={field} className={`rounded-xl p-3 ${cardClassName}`}>
-            <span className={`text-xs font-medium block mb-1 ${labelClassName}`}>{label}</span>
-            <span className={`font-bold ${valueClassName}`}>{getLabel(field, profileData[field])}</span>
+        {HOUSEHOLD_PREFERENCE_FIELDS.map((f) => (
+          <div key={f.field} className={`rounded-xl p-3 ${cardClassName}`}>
+            <span className={`text-xs font-medium block mb-1 ${labelClassName}`}>{f.labelKey ? t(f.labelKey) : f.label}</span>
+            <span className={`font-bold ${valueClassName}`}>{getLabel(f.field, profileData[f.field])}</span>
           </div>
         ))}
       </div>

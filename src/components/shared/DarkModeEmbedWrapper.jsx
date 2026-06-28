@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, Music } from 'lucide-react';
 
 export default function DarkModeEmbedWrapper({
@@ -15,6 +16,7 @@ export default function DarkModeEmbedWrapper({
   embedHTML, // For iframe embeds
   className = '',
 }) {
+  const { t } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showFallback, setShowFallback] = useState(!embedUrl && !embedHTML);
 
@@ -85,16 +87,16 @@ export default function DarkModeEmbedWrapper({
           )}
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {fallbackTitle || 'שיר'}
+              {fallbackTitle || t('song_word')}
             </p>
             <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              {fallbackArtist || 'אומן'}
+              {fallbackArtist || t('artist_word')}
             </p>
           </div>
         </div>
         {!embedUrl && (
           <p className={`text-xs mt-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-            לא ניתן לטעון את ההטמעה בעכו"ם זה
+            {t('cannot_load_embed_here')}
           </p>
         )}
       </div>
@@ -106,7 +108,7 @@ export default function DarkModeEmbedWrapper({
     <div className={`rounded-lg p-4 flex items-center gap-3 ${isDarkMode ? 'bg-red-950/30 border border-red-900/50' : 'bg-red-50 border border-red-200'} ${className}`}>
       <AlertCircle className={`w-5 h-5 flex-shrink-0 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
       <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
-        לא ניתן לטעון את ההטמעה
+        {t('cannot_load_embed')}
       </p>
     </div>
   );

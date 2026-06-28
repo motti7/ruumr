@@ -3,6 +3,7 @@
  * Renders a tap target that opens a bottom sheet with full-size option rows.
  */
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronDown, X } from "lucide-react";
 
@@ -10,15 +11,18 @@ export default function BottomSheetSelect({
   value,
   onValueChange,
   options = [],        // [{ value, label }]
-  placeholder = "בחר...",
+  placeholder,
   disabled = false,
   label,
-  dir = "rtl",
+  dir,
   className = "",
 }) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const finalPlaceholder = placeholder === undefined ? t("select_placeholder") : placeholder;
+  const finalDir = dir === undefined ? i18n.dir() : dir;
 
-  const selectedLabel = options.find(o => o.value === value)?.label ?? placeholder;
+  const selectedLabel = options.find(o => o.value === value)?.label ?? finalPlaceholder;
 
   const handleSelect = (val) => {
     onValueChange?.(val);
@@ -38,7 +42,7 @@ export default function BottomSheetSelect({
         className={`flex items-center justify-between w-full min-h-[44px] px-4 py-2 rounded-md border border-input bg-white text-sm shadow-sm transition-colors
           ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-50 active:scale-[0.98]"}
           ${className}`}
-        dir={dir}
+        dir={finalDir}
       >
         <span className={value ? "text-gray-900" : "text-gray-400"}>{selectedLabel}</span>
         <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -61,7 +65,7 @@ export default function BottomSheetSelect({
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
               className="bg-white rounded-t-3xl w-full max-w-md overflow-hidden"
               style={{ paddingBottom: "calc(1rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))" }}
-              dir={dir}
+              dir={finalDir}
               onClick={e => e.stopPropagation()}
             >
               {/* Handle */}
@@ -74,7 +78,7 @@ export default function BottomSheetSelect({
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <h3 className="font-bold text-gray-900 text-base">{label}</h3>
                   <button
-                    aria-label="סגור"
+                    aria-label={t("close")}
                     onClick={() => setOpen(false)}
                     className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full text-gray-400 hover:text-gray-700"
                   >
