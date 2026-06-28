@@ -397,12 +397,12 @@ export default function Layout({ children, currentPageName }) {
                     swap sides when the user switches language (logo stays centered). */}
                 <div dir="rtl" className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
 
-        {/* קבוצה ימין */}
+        {/* קבוצה ימין — קבועה בכל הטאבים (הגדרות + החלפת שפה) כדי שהכפתורים
+            לא יזוזו ושיישאר מרווח מספק מהלוגו במרכז. */}
         <div className="flex items-center w-[120px] justify-start gap-1 ps-2 z-10">
             <Link to={createPageUrl("Settings")} aria-label={t("settings")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
-            <WriteReviewButton />
             <LanguageToggle />
         </div>
 
@@ -413,10 +413,16 @@ export default function Layout({ children, currentPageName }) {
             </Link>
         </div>
 
-        {/* קבוצה שמאל */}
+        {/* קבוצה שמאל — כפתור הפרופיל קבוע בקצה החיצוני (justify-end נועל אותו
+            במקום), והכפתור תלוי-הטאב מופיע מצדו הפנימי בלבד: פילטר ב-Discover,
+            כתיבת ביקורת ב-Matches. הם לעולם לא מופיעים יחד, כך שהקבוצה מכילה
+            לכל היותר שני כפתורים ושום כפתור אחר לא זז בין הטאבים. */}
         <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
             {currentPageName === 'Discover' && (
-                <FilterHintButton /> 
+                <FilterHintButton />
+            )}
+            {currentPageName === 'Matches' && (
+                <WriteReviewButton />
             )}
             <Link to={createPageUrl("Profile")} aria-label={t("my_profile")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
