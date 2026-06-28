@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     // Send preview to admin
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: 'mottishif7@gmail.com',
-      subject: '[טיוטה לאישור] ✨ רומר פלוס – הצעה לחמישים הראשונים!',
+      subject: '✨ רומר פלוס הגיע — הצעה לחמישים הראשונים!',
       body: emailHtml,
       from_name: 'Ruumr'
     });
