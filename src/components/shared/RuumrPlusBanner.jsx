@@ -2,24 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Sparkles } from 'lucide-react';
 
-const BANNER_KEY = 'ruumr_plus_banner_seen_session';
+const BANNER_SESSION_KEY = 'ruumr_plus_banner_seen_session';
+const BANNER_COUNT_KEY = 'ruumr_plus_banner_open_count';
 
 export default function RuumrPlusBanner() {
   const { t, i18n } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Show once per session (per app open)
-    const seen = sessionStorage.getItem(BANNER_KEY);
-    if (!seen) {
-      // Small delay so the app shell loads first
-      const t = setTimeout(() => setVisible(true), 800);
-      return () => clearTimeout(t);
+    // Show once every 2 app opens (tracked in localStorage)
+    const seenThisSession = sessionStorage.getItem(BANNER_SESSION_KEY);
+    if (seenThisSession) return;
+
+    const count = parseInt(localStorage.getItem(BANNER_COUNT_KEY) || '0', 10) + 1;
+    localStorage.setItem(BANNER_COUNT_KEY, String(count));
+
+    // Show on every even-numbered open (2nd, 4th, 6th, ...)
+    if (count % 2 === 0) {
+      const timer = setTimeout(() => setVisible(true), 800);
+      return () => clearTimeout(timer);
     }
   }, []);
 
   const dismiss = () => {
-    sessionStorage.setItem(BANNER_KEY, '1');
+    sessionStorage.setItem(BANNER_SESSION_KEY, '1');
     setVisible(false);
   };
 
