@@ -3,12 +3,16 @@ import {
   buildSimulatorApartmentPhotos,
   buildSimulatorProfilePhotos,
 } from "@/lib/simulatorMode";
+import { DEMO_CITY_OPTIONS, DEMO_STAGES, demoStageParamPresent, getDemoCityKey, isDemoApartmentServicesStage, isDemoHousingStage, setDemoStage } from "@/lib/demoStage";
 import { normalizeInterestValues } from "@/lib/interests";
 import { APARTMENT_LIFECYCLE, calculateApartmentPreferenceOutcome } from "@/lib/apartmentPreferences";
+import { getDefaultDemoScenario } from "@/demo/demoScenario";
+import { normalizeCharterAnswers } from "@/lib/charterCompletion";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SIMULATOR_STATE_STORAGE_KEY = "ruumr_simulator_state";
-const SIMULATOR_STATE_VERSION = 2;
+const SIMULATOR_STATE_VERSION = 5;
+const DEMO_STAGE2_CREATED_AT = "2026-06-29T09:00:00.000Z";
 
 const nowIso = () => new Date().toISOString();
 const daysAgoIso = (days = 0) => new Date(Date.now() - Number(days || 0) * DAY_MS).toISOString();
@@ -43,19 +47,84 @@ const APARTMENT_DISCOVERY_IMAGES = [
   "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=80",
 ];
 
-const APARTMENT_DISCOVERY_NEIGHBORHOODS = [
-  { en: "City Center", he: "מרכז העיר" },
-  { en: "Old North", he: "הצפון הישן" },
-  { en: "Heart of the City", he: "לב העיר" },
-  { en: "Florentin", he: "פלורנטין" },
-  { en: "Yehuda Maccabi", he: "יהודה המכבי" },
-  { en: "Bavli", he: "בבלי" },
-  { en: "Montefiore", he: "מונטיפיורי" },
-  { en: "Kikar Rabin", he: "כיכר רבין" },
-  { en: "Rothschild", he: "רוטשילד" },
-];
-
 const APARTMENT_DISCOVERY_BATCH_COUNT = 3;
+
+const SHARED_AMENITIES = {
+  balcony: { en: "Balcony", he: "מרפסת" },
+  elevator: { en: "Elevator", he: "מעלית" },
+  shelter: { en: "Safe room", he: "ממ\"ד" },
+  furnished: { en: "Partly furnished", he: "מרוהטת חלקית" },
+  renovated: { en: "Renovated", he: "משופצת" },
+  pets: { en: "Pets considered", he: "אפשרות לחיות מחמד" },
+  parking: { en: "Parking nearby", he: "חניה באזור" },
+  storage: { en: "Storage", he: "מחסן" },
+};
+
+const CITY_APARTMENT_MARKETS = {
+  "תל אביב": {
+    key: "tel_aviv",
+    en: "Tel Aviv",
+    center: { lat: 32.0809, lng: 34.7806 },
+    teammateLocations: [
+      { type: "work", label_he: "משרדי שרונה", label_en: "Sarona offices", lat: 32.0709, lng: 34.7865 },
+      { type: "university", label_he: "אוניברסיטת תל אביב", label_en: "Tel Aviv University", lat: 32.1133, lng: 34.8044 },
+      { type: "work", label_he: "מתחם רוטשילד", label_en: "Rothschild work area", lat: 32.0639, lng: 34.7732 },
+    ],
+    apartments: [
+      { neighborhood_he: "הצפון הישן", neighborhood_en: "Old North", address_he: "דיזנגוף 214, תל אביב", address_en: "214 Dizengoff St, Tel Aviv", lat: 32.0882, lng: 34.7742, price: 11800, floor: 3, size_sqm: 92, amenities: ["balcony", "elevator", "renovated"], commute_he: "12 דקות לאוניברסיטה באוטובוס", commute_en: "12 minutes to the university by bus" },
+      { neighborhood_he: "לב העיר", neighborhood_en: "Heart of the City", address_he: "שינקין 31, תל אביב", address_en: "31 Sheinkin St, Tel Aviv", lat: 32.0669, lng: 34.7738, price: 10950, floor: 2, size_sqm: 86, amenities: ["furnished", "renovated", "pets"], commute_he: "הליכה קצרה לרוטשילד ולתחבורה", commute_en: "Short walk to Rothschild and transit" },
+      { neighborhood_he: "פלורנטין", neighborhood_en: "Florentin", address_he: "פרנקל 42, תל אביב", address_en: "42 Frenkel St, Tel Aviv", lat: 32.0568, lng: 34.7676, price: 9850, floor: 4, size_sqm: 88, amenities: ["balcony", "shelter", "furnished"], commute_he: "קרוב לרכבת הקלה ולאזורי עבודה", commute_en: "Near light rail and work areas" },
+      { neighborhood_he: "יהודה המכבי", neighborhood_en: "Yehuda Maccabi", address_he: "יהודה המכבי 56, תל אביב", address_en: "56 Yehuda Maccabi St, Tel Aviv", lat: 32.0952, lng: 34.7895, price: 12400, floor: 1, size_sqm: 96, amenities: ["elevator", "storage", "renovated"], commute_he: "נוח לאוניברסיטה ולפארק הירקון", commute_en: "Convenient for TAU and Park HaYarkon" },
+      { neighborhood_he: "בבלי", neighborhood_en: "Bavli", address_he: "הרב הרצוג 12, תל אביב", address_en: "12 HaRav Herzog St, Tel Aviv", lat: 32.0958, lng: 34.7971, price: 11650, floor: 5, size_sqm: 94, amenities: ["elevator", "parking", "balcony"], commute_he: "שקטה וקרובה ליציאה לאיילון", commute_en: "Quiet street with quick Ayalon access" },
+      { neighborhood_he: "מונטיפיורי", neighborhood_en: "Montefiore", address_he: "שדרות יהודית 18, תל אביב", address_en: "18 Yehudit Blvd, Tel Aviv", lat: 32.0689, lng: 34.7924, price: 10400, floor: 2, size_sqm: 83, amenities: ["renovated", "furnished", "shelter"], commute_he: "קרוב לעזריאלי ולרכבת השלום", commute_en: "Near Azrieli and HaShalom train" },
+      { neighborhood_he: "כיכר רבין", neighborhood_en: "Rabin Square", address_he: "אבן גבירול 82, תל אביב", address_en: "82 Ibn Gabirol St, Tel Aviv", lat: 32.0808, lng: 34.7819, price: 11250, floor: 3, size_sqm: 90, amenities: ["balcony", "elevator", "pets"], commute_he: "מרכזית ונוחה לכל חברי הצוות", commute_en: "Central and easy for the whole team" },
+      { neighborhood_he: "רוטשילד", neighborhood_en: "Rothschild", address_he: "שדרות רוטשילד 96, תל אביב", address_en: "96 Rothschild Blvd, Tel Aviv", lat: 32.0639, lng: 34.7734, price: 12600, floor: 4, size_sqm: 91, amenities: ["renovated", "balcony", "elevator"], commute_he: "מעולה למי שעובד במרכז העיר", commute_en: "Great for central city work commutes" },
+      { neighborhood_he: "יד אליהו", neighborhood_en: "Yad Eliyahu", address_he: "לה גוארדיה 48, תל אביב", address_en: "48 La Guardia St, Tel Aviv", lat: 32.0624, lng: 34.7959, price: 9400, floor: 2, size_sqm: 89, amenities: ["shelter", "parking", "storage"], commute_he: "מחיר טוב ויציאה מהירה לצירים ראשיים", commute_en: "Good value with fast main-road access" },
+    ],
+  },
+  "באר שבע": {
+    key: "beer_sheva",
+    en: "Be'er Sheva",
+    center: { lat: 31.2529, lng: 34.7915 },
+    teammateLocations: [
+      { type: "university", label_he: "אוניברסיטת בן גוריון", label_en: "Ben-Gurion University", lat: 31.2622, lng: 34.8015 },
+      { type: "work", label_he: "פארק ההייטק גב ים", label_en: "Gav-Yam Negev Tech Park", lat: 31.2637, lng: 34.8126 },
+      { type: "work", label_he: "מרכז העיר", label_en: "City center", lat: 31.2448, lng: 34.7925 },
+    ],
+    apartments: [
+      { neighborhood_he: "שכונה ב'", neighborhood_en: "Neighborhood Bet", address_he: "ביאליק 22, באר שבע", address_en: "22 Bialik St, Be'er Sheva", lat: 31.2586, lng: 34.7939, price: 5200, floor: 2, size_sqm: 84, amenities: ["furnished", "renovated", "balcony"], commute_he: "הליכה נוחה לאוניברסיטה", commute_en: "Comfortable walk to BGU" },
+      { neighborhood_he: "שכונה ג'", neighborhood_en: "Neighborhood Gimel", address_he: "וינגייט 16, באר שבע", address_en: "16 Wingate St, Be'er Sheva", lat: 31.2641, lng: 34.7961, price: 5600, floor: 3, size_sqm: 88, amenities: ["elevator", "shelter", "furnished"], commute_he: "קרובה לאוניברסיטה ולרכבת צפון", commute_en: "Near BGU and North train station" },
+      { neighborhood_he: "העיר העתיקה", neighborhood_en: "Old City", address_he: "החלוץ 7, באר שבע", address_en: "7 HeHalutz St, Be'er Sheva", lat: 31.2418, lng: 34.7908, price: 4800, floor: 1, size_sqm: 78, amenities: ["renovated", "pets", "storage"], commute_he: "קרובה למסעדות ולתחבורה", commute_en: "Close to restaurants and transit" },
+      { neighborhood_he: "רמות", neighborhood_en: "Ramot", address_he: "רמות 61, באר שבע", address_en: "61 Ramot, Be'er Sheva", lat: 31.2821, lng: 34.7967, price: 6100, floor: 4, size_sqm: 96, amenities: ["parking", "elevator", "balcony"], commute_he: "שקטה ומרווחת, נסיעה קצרה לאוניברסיטה", commute_en: "Quiet and spacious, short ride to BGU" },
+      { neighborhood_he: "נווה זאב", neighborhood_en: "Neve Ze'ev", address_he: "טבנקין 28, באר שבע", address_en: "28 Tabenkin St, Be'er Sheva", lat: 31.2349, lng: 34.7738, price: 5400, floor: 2, size_sqm: 91, amenities: ["shelter", "parking", "renovated"], commute_he: "מתאימה לצוות עם רכב", commute_en: "Good for a team with a car" },
+      { neighborhood_he: "שכונה ו'", neighborhood_en: "Neighborhood Vav", address_he: "משעול סביון 3, באר שבע", address_en: "3 Savyon Path, Be'er Sheva", lat: 31.2718, lng: 34.7838, price: 5050, floor: 3, size_sqm: 83, amenities: ["furnished", "balcony", "storage"], commute_he: "קרובה לשירותים יומיומיים", commute_en: "Close to daily essentials" },
+      { neighborhood_he: "מרכז אזרחי", neighborhood_en: "Civic Center", address_he: "התקווה 11, באר שבע", address_en: "11 HaTikva St, Be'er Sheva", lat: 31.2487, lng: 34.7927, price: 4950, floor: 2, size_sqm: 80, amenities: ["renovated", "elevator", "furnished"], commute_he: "נוחה למרכז ולתחבורה ציבורית", commute_en: "Convenient for downtown and transit" },
+      { neighborhood_he: "כלניות", neighborhood_en: "Kalaniyot", address_he: "כלנית 19, באר שבע", address_en: "19 Kalanit St, Be'er Sheva", lat: 31.2704, lng: 34.8232, price: 5900, floor: 1, size_sqm: 94, amenities: ["parking", "shelter", "pets"], commute_he: "קרובה לפארק ההייטק", commute_en: "Near the tech park" },
+      { neighborhood_he: "שכונה ד'", neighborhood_en: "Neighborhood Dalet", address_he: "רגר 138, באר שבע", address_en: "138 Rager Blvd, Be'er Sheva", lat: 31.2658, lng: 34.7897, price: 5150, floor: 3, size_sqm: 85, amenities: ["balcony", "furnished", "renovated"], commute_he: "מרכזית לסטודנטים ולעבודה", commute_en: "Central for students and work" },
+    ],
+  },
+  "ירושלים": {
+    key: "jerusalem",
+    en: "Jerusalem",
+    center: { lat: 31.7683, lng: 35.2137 },
+    teammateLocations: [
+      { type: "university", label_he: "קמפוס גבעת רם", label_en: "Givat Ram campus", lat: 31.7751, lng: 35.1974 },
+      { type: "work", label_he: "מרכז העיר", label_en: "City center", lat: 31.7812, lng: 35.2198 },
+      { type: "university", label_he: "בצלאל", label_en: "Bezalel", lat: 31.7814, lng: 35.2237 },
+    ],
+    apartments: [
+      { neighborhood_he: "נחלאות", neighborhood_en: "Nachlaot", address_he: "אגריפס 74, ירושלים", address_en: "74 Agripas St, Jerusalem", lat: 31.7842, lng: 35.2111, price: 8200, floor: 2, size_sqm: 82, amenities: ["renovated", "balcony", "furnished"], commute_he: "קרובה לשוק ולרכבת הקלה", commute_en: "Near the market and light rail" },
+      { neighborhood_he: "רחביה", neighborhood_en: "Rehavia", address_he: "עזה 31, ירושלים", address_en: "31 Gaza St, Jerusalem", lat: 31.7719, lng: 35.2124, price: 9100, floor: 3, size_sqm: 88, amenities: ["elevator", "storage", "renovated"], commute_he: "נוחה לגבעת רם ולמרכז", commute_en: "Convenient for Givat Ram and downtown" },
+      { neighborhood_he: "המושבה הגרמנית", neighborhood_en: "German Colony", address_he: "עמק רפאים 42, ירושלים", address_en: "42 Emek Refaim St, Jerusalem", lat: 31.7635, lng: 35.2196, price: 9400, floor: 2, size_sqm: 92, amenities: ["balcony", "pets", "furnished"], commute_he: "רחוב חי ונגיש לשירותים יומיומיים", commute_en: "Lively street with daily services nearby" },
+      { neighborhood_he: "קטמון", neighborhood_en: "Katamon", address_he: "הל\"ה 18, ירושלים", address_en: "18 HaLamed Hei St, Jerusalem", lat: 31.7609, lng: 35.2104, price: 8350, floor: 1, size_sqm: 86, amenities: ["shelter", "renovated", "parking"], commute_he: "שקטה ומתאימה לשגרת לימודים", commute_en: "Quiet and good for study routines" },
+      { neighborhood_he: "טלביה", neighborhood_en: "Talbiya", address_he: "מרכוס 9, ירושלים", address_en: "9 Marcus St, Jerusalem", lat: 31.7701, lng: 35.2214, price: 9800, floor: 3, size_sqm: 90, amenities: ["elevator", "balcony", "storage"], commute_he: "קרובה לתיאטרון ולמרכז העיר", commute_en: "Near the theater and city center" },
+      { neighborhood_he: "בית הכרם", neighborhood_en: "Beit HaKerem", address_he: "החלוץ 29, ירושלים", address_en: "29 HaHalutz St, Jerusalem", lat: 31.7798, lng: 35.1894, price: 7900, floor: 2, size_sqm: 87, amenities: ["furnished", "parking", "renovated"], commute_he: "נוחה לקמפוס גבעת רם", commute_en: "Convenient for Givat Ram campus" },
+      { neighborhood_he: "מרכז העיר", neighborhood_en: "City Center", address_he: "יפו 64, ירושלים", address_en: "64 Jaffa St, Jerusalem", lat: 31.7838, lng: 35.2186, price: 8600, floor: 4, size_sqm: 80, amenities: ["elevator", "furnished", "shelter"], commute_he: "על ציר הרכבת הקלה", commute_en: "On the light rail corridor" },
+      { neighborhood_he: "בקעה", neighborhood_en: "Baka", address_he: "דרך בית לחם 88, ירושלים", address_en: "88 Bethlehem Rd, Jerusalem", lat: 31.7559, lng: 35.2226, price: 8750, floor: 2, size_sqm: 89, amenities: ["balcony", "pets", "storage"], commute_he: "שכונתית ונגישה", commute_en: "Neighborhood feel with easy access" },
+      { neighborhood_he: "קריית שמואל", neighborhood_en: "Kiryat Shmuel", address_he: "הרצוג 22, ירושלים", address_en: "22 Herzog St, Jerusalem", lat: 31.7667, lng: 35.2077, price: 8050, floor: 1, size_sqm: 84, amenities: ["renovated", "parking", "furnished"], commute_he: "בין רחביה לקטמון", commute_en: "Between Rehavia and Katamon" },
+    ],
+  },
+};
 
 function stableNumber(input, modulo) {
   let hash = 0;
@@ -74,31 +143,90 @@ function cityIdentity(city) {
   return normalizeCityName(city).toLocaleLowerCase();
 }
 
+function cityMarketFor(city) {
+  const normalized = normalizeCityName(city);
+  return CITY_APARTMENT_MARKETS[normalized] || CITY_APARTMENT_MARKETS[DEMO_CITY_OPTIONS.tel_aviv.he];
+}
+
+function stage2DemoCityName() {
+  const demoCity = DEMO_CITY_OPTIONS[getDemoCityKey()];
+  return demoCity?.he || "";
+}
+
+function apartmentChatGroupId(teamKey, apartmentId) {
+  return `${teamKey}_apt_${apartmentId}`;
+}
+
+function stage2TeamChatGroupId(memberIds = []) {
+  return apartmentTeamKey(memberIds);
+}
+
 function apartmentDiscoverySuggestions({ city, bedrooms, teamKey, batchIndex = 0 }) {
   if (!city || !bedrooms) return [];
   if (batchIndex >= APARTMENT_DISCOVERY_BATCH_COUNT) return [];
-  const basePrice = 4300 + bedrooms * 1850 + stableNumber(`${teamKey}:${city}:${batchIndex}`, 650) + batchIndex * 260;
-  return [0, 1, 2].map((index) => ({
-    id: `sim-apartment-${teamKey}-${batchIndex + 1}-${index + 1}`,
-    title: `${bedrooms} חדרי שינה ב${city}`,
-    city,
-    neighborhood: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he,
-    neighborhood_en: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].en,
-    neighborhood_he: APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he,
-    address: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he}, ${city}`,
-    address_en: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].en}, ${city}`,
-    address_he: `${APARTMENT_DISCOVERY_NEIGHBORHOODS[batchIndex * 3 + index].he}, ${city}`,
-    price: basePrice + index * 420,
-    bedrooms,
-    image: APARTMENT_DISCOVERY_IMAGES[batchIndex * 3 + index],
-    description: `דירת שותפים נעימה עם ${bedrooms} חדרי שינה, סלון נוח וגישה קלה לכל מה שצריך ביום יום.`,
-    listing_url: `https://app.ruumrapp.com/GroupTracker?listing=sim-${batchIndex + 1}-${index + 1}`,
-    source: "simulator",
-    batch_index: batchIndex,
-  }));
+  const market = cityMarketFor(city);
+  const offset = batchIndex * 3;
+  return market.apartments.slice(offset, offset + 3).map((apartment, index) => {
+    const absoluteIndex = offset + index;
+    const amenityRecords = (apartment.amenities || []).map((key) => SHARED_AMENITIES[key]).filter(Boolean);
+    return {
+      id: `sim-apartment-${teamKey}-${market.key}-${batchIndex + 1}-${index + 1}`,
+      title: `${bedrooms} חדרי שינה ב${market.en}`,
+      title_en: `${bedrooms}-bedroom apartment in ${market.en}`,
+      title_he: `דירת ${bedrooms} חדרי שינה ב${city}`,
+      city,
+      city_en: market.en,
+      neighborhood: apartment.neighborhood_he,
+      neighborhood_en: apartment.neighborhood_en,
+      neighborhood_he: apartment.neighborhood_he,
+      address: apartment.address_he,
+      address_en: apartment.address_en,
+      address_he: apartment.address_he,
+      price: apartment.price + stableNumber(`${teamKey}:${city}:${absoluteIndex}`, 180),
+      bedrooms,
+      floor: apartment.floor,
+      size_sqm: apartment.size_sqm,
+      latitude: apartment.lat,
+      longitude: apartment.lng,
+      image: APARTMENT_DISCOVERY_IMAGES[absoluteIndex % APARTMENT_DISCOVERY_IMAGES.length],
+      images: [
+        APARTMENT_DISCOVERY_IMAGES[absoluteIndex % APARTMENT_DISCOVERY_IMAGES.length],
+        APARTMENT_DISCOVERY_IMAGES[(absoluteIndex + 3) % APARTMENT_DISCOVERY_IMAGES.length],
+        APARTMENT_DISCOVERY_IMAGES[(absoluteIndex + 6) % APARTMENT_DISCOVERY_IMAGES.length],
+      ],
+      amenities: apartment.amenities || [],
+      amenities_en: amenityRecords.map((item) => item.en),
+      amenities_he: amenityRecords.map((item) => item.he),
+      commute_note_en: apartment.commute_en,
+      commute_note_he: apartment.commute_he,
+      description_en: `A realistic shared apartment option with ${bedrooms} bedrooms, ${apartment.size_sqm} sqm, and a location that works for the team's daily routine.`,
+      description_he: `דירת שותפים ריאליסטית עם ${bedrooms} חדרי שינה, ${apartment.size_sqm} מ"ר ומיקום שמתאים לשגרה היומיומית של הצוות.`,
+      suggested_viewing_slots: [
+        "2026-07-02T18:00",
+        "2026-07-05T17:30",
+      ],
+      listing_url: `https://app.ruumrapp.com/ApartmentDetail?apartmentId=sim-${market.key}-${batchIndex + 1}-${index + 1}`,
+      source: "simulator",
+      batch_index: batchIndex,
+    };
+  });
+}
+
+function scenarioApartmentSuggestions(state, { batchIndex = 0 } = {}) {
+  if (batchIndex !== 0 || !state?.scenario?.apartment_search?.apartments?.length) return [];
+  return state.scenario.apartment_search.apartments.map((apartment) => apartmentFromScenario(apartment, state.scenario));
+}
+
+function apartmentDiscoverySuggestionsForState(state, options) {
+  const scenarioSuggestions = scenarioApartmentSuggestions(state, options);
+  return scenarioSuggestions.length ? scenarioSuggestions : apartmentDiscoverySuggestions(options);
 }
 
 function simulatorAutoRankTeamEnabled() {
+  if (isDemoHousingStage()) {
+    return true;
+  }
+
   if (import.meta.env.VITE_RUUMR_SIMULATOR_AUTO_RANK_TEAM === "true") {
     return true;
   }
@@ -108,6 +236,31 @@ function simulatorAutoRankTeamEnabled() {
   } catch {
     return false;
   }
+}
+
+function scenarioTeammatePreferences(state, discovery) {
+  const scenarioPreferences = state?.scenario?.apartment_search?.teammate_preferences || {};
+  if (!state?.scenario?.apartment_search?.auto_submit_teammate_preferences) return null;
+  const apartmentIds = new Set((discovery?.suggested_apartments || []).map((apartment) => String(apartment.id)));
+  const entries = Object.entries(scenarioPreferences)
+    .filter(([userId]) => String(userId) !== String(state.currentUser.id))
+    .map(([userId, preferences]) => {
+      const normalized = Object.fromEntries(
+        Object.entries(preferences || {}).filter(([apartmentId]) => apartmentIds.has(String(apartmentId)))
+      );
+      return [
+        String(userId),
+        {
+          user_id: String(userId),
+          preferences: normalized,
+          submitted_at: nowIso(),
+          simulator_generated: true,
+          simulator_scenario: true,
+        },
+      ];
+    })
+    .filter(([, record]) => Object.keys(record.preferences || {}).length === apartmentIds.size);
+  return Object.fromEntries(entries);
 }
 
 function cloneCollectionRecords(collections = {}) {
@@ -157,6 +310,12 @@ function consumeSimulatorResetFlag() {
       return false;
     }
     window.localStorage?.removeItem(SIMULATOR_STATE_STORAGE_KEY);
+    Object.keys(window.localStorage || {}).forEach((key) => {
+      if (key.startsWith("ruumr_plus_activation:")) {
+        window.localStorage.removeItem(key);
+      }
+    });
+    window.sessionStorage?.removeItem("ruumr_plus_pending_activation");
     params.delete("simulator_reset_state");
     const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash || ""}`;
     window.history.replaceState(window.history.state, "", nextUrl);
@@ -329,11 +488,12 @@ function createDemoProfile(options = {}) {
     created_date: createdDate,
     updated_date: createdDate,
     ruumrPlus,
+    ruumr_plus: ruumrPlus,
     is_apartment_flow_demo_user: isApartmentFlowDemoUser,
   };
 }
 
-function createDemoState() {
+function createLegacyDemoState() {
   const currentUser = {
     id: "demo-user-noam",
     full_name: "נועם כהן",
@@ -437,6 +597,10 @@ function createDemoState() {
     ruumrPlus: {
       score: 0.92,
       insight: "יש כאן התאמה מצוינת לשיחות שקטות, בית מסודר ואיזון טוב בין שגרה לעשייה.",
+      insight_i18n: {
+        he: "יש כאן התאמה מצוינת לשיחות שקטות, בית מסודר ואיזון טוב בין שגרה לעשייה.",
+        en: "A strong match for quiet conversations, a tidy home, and a balanced routine.",
+      },
       reasons: {
         shared_cities: ["תל אביב"],
         shared_interests: ["plants", "reading"],
@@ -504,6 +668,10 @@ function createDemoState() {
     ruumrPlus: {
       score: 0.81,
       insight: "יש הרבה חפיפה סביב יצירתיות, סדר יום וגישה חברתית מאוזנת.",
+      insight_i18n: {
+        he: "יש הרבה חפיפה סביב יצירתיות, סדר יום וגישה חברתית מאוזנת.",
+        en: "There is strong overlap around creativity, daily rhythm, and a balanced social style.",
+      },
       reasons: {
         shared_cities: [],
         shared_interests: ["music", "art"],
@@ -682,7 +850,7 @@ function createDemoState() {
     updated_date: daysAgoIso(0),
   };
 
-  const groupId = [currentUser.id, matchMaya.id].sort().join("_");
+  const groupId = [currentUser.id, maya.user_id].sort().join("_");
   const groupMessage1 = {
     id: stableId("group-message", "1"),
     group_id: groupId,
@@ -805,6 +973,294 @@ function createDemoState() {
   };
 }
 
+function profileFromScenario(profile = {}) {
+  return createDemoProfile({
+    userId: profile.user_id,
+    name: profile.name,
+    age: profile.age,
+    gender: profile.gender || "male",
+    location: profile.location,
+    searchCities: profile.search_cities || [],
+    searchArea: profile.search_area || "מרכז",
+    currentStatus: profile.current_status || "seeking_apartment",
+    budgetMin: profile.budget_min,
+    budgetMax: profile.budget_max,
+    vibeLevel: profile.vibe_level,
+    aboutMe: profile.about_me || "",
+    lookingForDescription: profile.looking_for_description || "",
+    lookingForGender: profile.looking_for_gender || "any",
+    religion: profile.religion || "secular",
+    kosherPreference: profile.kosher_preference || "flow",
+    shabbatPreference: profile.shabbat_preference || "flow",
+    petType: profile.pet_type || "none",
+    interests: profile.interests || [],
+    smokingPreference: profile.smoking_preference || "against",
+    petPreference: profile.pet_preference || "flow",
+    cleanliness: profile.cleanliness || "4",
+    shopping: profile.shopping || "3",
+    acWars: profile.ac_wars || "3",
+    dishesInSink: profile.dishes_in_sink || "4",
+    friendsAndParties: profile.friends_and_parties || "3",
+    apartmentTotalBudget: profile.apartment_total_budget || 5000,
+    existingRoommates: profile.existing_roommates || 0,
+    teamTarget: profile.team_target || 3,
+    isVisible: profile.is_visible !== false,
+    isVerified: profile.is_verified !== false,
+    createdOffsetDays: profile.created_offset_days || 0,
+    ruumrPlus: profile.ruumr_plus || null,
+    photos: profile.photos || null,
+    apartmentPhotos: profile.apartment_photos || null,
+    songPreviewUrl: profile.song_preview_url || null,
+    songName: profile.song_name || "",
+    songArtist: profile.song_artist || "",
+    songImage: profile.song_image || "",
+    isApartmentFlowDemoUser: profile.role === "current",
+  });
+}
+
+function apartmentFromScenario(apartment = {}, scenario = {}) {
+  return {
+    id: apartment.id,
+    title: apartment.title_he || apartment.title || apartment.title_en,
+    title_en: apartment.title_en || apartment.title,
+    title_he: apartment.title_he || apartment.title,
+    city: scenario.apartment_search?.city || DEMO_CITY_OPTIONS.tel_aviv.he,
+    city_en: DEMO_CITY_OPTIONS[scenario.apartment_search?.city_key]?.en || "Tel Aviv",
+    neighborhood: apartment.neighborhood_he || apartment.neighborhood,
+    neighborhood_en: apartment.neighborhood_en || apartment.neighborhood,
+    neighborhood_he: apartment.neighborhood_he || apartment.neighborhood,
+    address: apartment.address_he || apartment.address,
+    address_en: apartment.address_en || apartment.address,
+    address_he: apartment.address_he || apartment.address,
+    price: apartment.price,
+    bedrooms: apartment.bedrooms,
+    floor: apartment.floor,
+    size_sqm: apartment.size_sqm,
+    latitude: apartment.latitude,
+    longitude: apartment.longitude,
+    image: apartment.image,
+    images: apartment.images?.length ? apartment.images : [apartment.image].filter(Boolean),
+    amenities: apartment.amenities || [],
+    amenities_en: apartment.amenities_en || [],
+    amenities_he: apartment.amenities_he || [],
+    commute_note_en: apartment.commute_note_en || "",
+    commute_note_he: apartment.commute_note_he || "",
+    description_en: apartment.description_en || "",
+    description_he: apartment.description_he || "",
+    suggested_viewing_slots: [
+      scenario.apartment_search?.viewing_slot,
+      "2026-07-05T17:30:00.000Z",
+    ].filter(Boolean),
+    listing_url: apartment.listing_url || `https://app.ruumrapp.com/ApartmentDetail?apartmentId=${encodeURIComponent(apartment.id)}`,
+    source: "scenario",
+    batch_index: 0,
+  };
+}
+
+function questionnairePreferenceFromScenario(preference = {}) {
+  const completedAt = preference.completed_at || daysAgoIso(1);
+  return {
+    id: stableId("questionnaire", preference.user_id),
+    user_id: preference.user_id,
+    version: Number(preference.version) || 1,
+    completed_at: completedAt,
+    source: preference.source || "demo_scenario",
+    source_match_id: preference.source_match_id || null,
+    answers: normalizeCharterAnswers(preference.answers || {}),
+    simulator_scenario: true,
+    created_date: completedAt,
+    updated_date: completedAt,
+  };
+}
+
+function createScenarioMatch(currentUser, targetProfile, createdDate = daysAgoIso(1), matchType = "mutual") {
+  return {
+    id: pairStableId("match", currentUser.id, targetProfile.user_id),
+    user1_id: currentUser.id,
+    user2_id: targetProfile.user_id,
+    user1_name: currentUser.full_name || currentUser.name,
+    user2_name: targetProfile.name,
+    status: "active",
+    match_type: matchType,
+    created_date: createdDate,
+    updated_date: createdDate,
+    simulator_scenario: true,
+  };
+}
+
+function createScenarioMessages(scenario, profileByUserId, currentUser) {
+  const messages = [];
+  const groupMessages = [];
+  const directThreads = scenario.chats?.direct || [];
+  directThreads.forEach((thread, threadIndex) => {
+    const teammate = profileByUserId.get(String(thread.with_user_id));
+    if (!teammate) return;
+    const matchId = pairStableId("match", currentUser.id, teammate.user_id);
+    (thread.messages || []).forEach((message, messageIndex) => {
+      const created = daysAgoIso(message.days_ago ?? 0);
+      messages.push({
+        id: stableId("message", `scenario-${threadIndex}-${messageIndex}`),
+        match_id: matchId,
+        sender_id: message.sender_id,
+        content: message.content,
+        is_read: message.is_read !== false,
+        created_date: created,
+        updated_date: created,
+        simulator_scenario: true,
+      });
+    });
+  });
+
+  const lockedIds = scenario.team?.locked_user_ids || [];
+  const groupId = [currentUser.id, ...lockedIds].sort().join("_");
+  (scenario.chats?.group?.messages || []).forEach((message, index) => {
+    const sender = profileByUserId.get(String(message.sender_id));
+    const created = daysAgoIso(message.days_ago ?? 0);
+    groupMessages.push({
+      id: stableId("group-message", `scenario-${index}`),
+      group_id: groupId,
+      sender_id: message.sender_id,
+      sender_name: sender?.name || currentUser.full_name,
+      sender_photo: sender?.photos?.[0] || null,
+      content: message.content,
+      created_date: created,
+      updated_date: created,
+      simulator_scenario: true,
+    });
+  });
+
+  return { messages, groupMessages, groupId };
+}
+
+function scenarioPhaseToDemoStage(phase) {
+  const normalized = String(phase || "").trim();
+  if (normalized === "apartment_search" || normalized === "phase_2") return DEMO_STAGES.APARTMENT_SEARCH;
+  if (normalized === "move_in" || normalized === "apartment_services" || normalized === "phase_3" || normalized === "phase_4") {
+    return DEMO_STAGES.APARTMENT_SERVICES;
+  }
+  return DEMO_STAGES.TEAM_BUILDING;
+}
+
+function createScenarioDemoState({ reset = false } = {}) {
+  let scenario;
+  try {
+    scenario = getDefaultDemoScenario();
+  } catch (error) {
+    console.warn("[ruumr] failed to load demo scenario; falling back to legacy simulator state", error);
+    return null;
+  }
+
+  if (reset && !demoStageParamPresent()) {
+    setDemoStage(scenarioPhaseToDemoStage(scenario.starting_phase));
+  }
+
+  const currentUser = {
+    id: scenario.current_user.id,
+    full_name: scenario.current_user.full_name || scenario.current_user.name,
+    name: scenario.current_user.name || scenario.current_user.full_name,
+    email: scenario.current_user.email,
+    role: "user",
+    is_apartment_flow_demo_user: true,
+    enable_notifications: false,
+    notify_likes: true,
+    notify_matches: true,
+    created_date: nowIso(),
+    updated_date: nowIso(),
+  };
+
+  const profiles = scenario.profiles.map(profileFromScenario);
+  const questionnairePreferences = (scenario.questionnaire_preferences || []).map(questionnairePreferenceFromScenario);
+  const profileByUserId = new Map(profiles.map((profile) => [String(profile.user_id), profile]));
+  const currentProfile = profileByUserId.get(String(currentUser.id));
+  if (!currentProfile) return null;
+
+  const lockedIds = scenario.team?.locked_user_ids || [];
+  currentProfile.team_target = scenario.team?.target_count || currentProfile.team_target || 3;
+  currentProfile.team_members = lockedIds
+    .map((userId) => profileByUserId.get(String(userId)))
+    .filter(Boolean)
+    .map((profile) => ({
+      match_id: pairStableId("match", currentUser.id, profile.user_id),
+      user_id: profile.user_id,
+      name: profile.name,
+      photo: profile.photos?.[0] || null,
+      simulator_scenario: true,
+    }));
+
+  const matches = lockedIds
+    .map((userId) => profileByUserId.get(String(userId)))
+    .filter(Boolean)
+    .map((profile) => createScenarioMatch(currentUser, profile));
+
+  const swipes = lockedIds
+    .map((userId) => profileByUserId.get(String(userId)))
+    .filter(Boolean)
+    .flatMap((profile) => [
+      {
+        id: stableId("swipe", `scenario-current-${profile.user_id}`),
+        swiper_id: currentUser.id,
+        swiped_id: profile.user_id,
+        action: "like",
+        created_date: daysAgoIso(1),
+        updated_date: daysAgoIso(1),
+        simulator_scenario: true,
+      },
+      {
+        id: stableId("swipe", `scenario-reverse-${profile.user_id}`),
+        swiper_id: profile.user_id,
+        swiped_id: currentUser.id,
+        action: "like",
+        created_date: daysAgoIso(1),
+        updated_date: daysAgoIso(1),
+        simulator_scenario: true,
+      },
+    ]);
+
+  const { messages, groupMessages, groupId } = createScenarioMessages(scenario, profileByUserId, currentUser);
+  const users = profiles.map((profile) => ({
+    id: profile.user_id,
+    full_name: profile.user_id === currentUser.id ? currentUser.full_name : profile.name,
+    name: profile.name,
+    email: `${slugify(profile.name)}@demo.ruumr`,
+    role: "user",
+    enable_notifications: profile.user_id !== currentUser.id,
+    notify_likes: true,
+    notify_matches: true,
+    created_date: profile.created_date,
+    updated_date: profile.updated_date,
+  }));
+
+  return {
+    currentUser,
+    currentProfile,
+    users,
+    collections: {
+      Profile: profiles,
+      Swipe: swipes,
+      Match: matches,
+      Message: messages,
+      GroupMessage: groupMessages,
+      CharterAnswer: [],
+      QuestionnairePreference: questionnairePreferences,
+      Review: [],
+      PageView: [],
+      TypingStatus: [],
+      BannedUser: [],
+      TeamApartmentDiscovery: [],
+      GroupTracker: [],
+      GroupCompatibility: [],
+    },
+    groupId,
+    matchMaya: matches[0] || null,
+    partnerUserId: lockedIds[0] || "",
+    scenario,
+  };
+}
+
+function createDemoState(options = {}) {
+  return createScenarioDemoState(options) || createLegacyDemoState();
+}
+
 export function getSimulatorBackendState() {
   if (typeof window === "undefined") {
     return null;
@@ -910,6 +1366,43 @@ function upsertByPair(collection, record, leftKey, rightKey) {
     next.push(record);
   }
   return next;
+}
+
+function addScenarioTeamMemberForMatch(state, matchRecord) {
+  const autoLockIds = new Set((state?.scenario?.team?.auto_lock_on_ruumr_plus_like || []).map(String));
+  if (!autoLockIds.size || !matchRecord) return;
+
+  const participants = [String(matchRecord.user1_id), String(matchRecord.user2_id)];
+  if (!participants.includes(String(state.currentUser.id))) return;
+  const targetId = participants.find((id) => id !== String(state.currentUser.id));
+  if (!targetId || !autoLockIds.has(targetId)) return;
+
+  const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id);
+  const targetProfile = getSimulatorProfileByUserId(state, targetId);
+  if (!currentProfile || !targetProfile) return;
+
+  const alreadyMember = (currentProfile.team_members || []).some((member) => String(member.user_id) === String(targetId) && !member.pending);
+  if (alreadyMember) return;
+
+  currentProfile.team_target = state.scenario?.team?.target_count || currentProfile.team_target || 3;
+  currentProfile.team_members = [
+    ...(currentProfile.team_members || []),
+    {
+      match_id: matchRecord.id,
+      user_id: targetProfile.user_id,
+      name: targetProfile.name,
+      photo: targetProfile.photos?.[0] || null,
+      simulator_scenario: true,
+      auto_locked_from_ruumr_plus: true,
+    },
+  ];
+  currentProfile.updated_date = nowIso();
+  if (state.currentProfile && String(state.currentProfile.user_id) === String(currentProfile.user_id)) {
+    state.currentProfile = { ...state.currentProfile, ...clone(currentProfile) };
+  }
+  if (1 + (currentProfile.team_members || []).filter((member) => !member.pending).length >= Number(currentProfile.team_target || 3)) {
+    setDemoStage(DEMO_STAGES.APARTMENT_SEARCH);
+  }
 }
 
 function createCollectionApi(state, collectionName) {
@@ -1028,6 +1521,7 @@ function createCollectionApi(state, collectionName) {
 
     if (collectionName === "Match") {
       state.collections.Match = upsertByPair(getCollection(), record, "user1_id", "user2_id");
+      addScenarioTeamMemberForMatch(state, record);
       persistSimulatorState(state);
       return clone(record);
     }
@@ -1179,11 +1673,227 @@ function simulatorCityState(profiles) {
   };
 }
 
+function buildStage2TeamLocations(state, memberIds, selectedCity) {
+  const market = cityMarketFor(selectedCity);
+  return memberIds.map((memberId, index) => {
+    const profile = getSimulatorProfileByUserId(state, memberId);
+    const location = market.teammateLocations[index % market.teammateLocations.length];
+    return {
+      user_id: String(memberId),
+      name: profile?.name || profile?.full_name || "Teammate",
+      photo: profile?.photos?.[0] || null,
+      type: location.type,
+      label_he: location.label_he,
+      label_en: location.label_en,
+      latitude: location.lat,
+      longitude: location.lng,
+    };
+  });
+}
+
+function ensureStage2DemoTeam(state) {
+  if (!isDemoHousingStage()) return;
+  const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id) || state.currentProfile;
+  if (!currentProfile) return;
+
+  const desiredCount = Math.max(Number(currentProfile.team_target || 3), 3);
+  const currentMemberIds = new Set(
+    (currentProfile.team_members || [])
+      .filter((member) => !member.pending && member.user_id)
+      .map((member) => String(member.user_id))
+  );
+  const fillerIds = [
+    "demo-user-maya",
+    "demo-user-eitan",
+    "demo-user-tamar",
+    "demo-user-lihi",
+    "demo-user-ori",
+    "demo-user-yuval",
+  ];
+
+  const nextMembers = [...(currentProfile.team_members || [])];
+  for (const fillerId of fillerIds) {
+    if (1 + currentMemberIds.size >= desiredCount) break;
+    if (String(fillerId) === String(state.currentUser.id) || currentMemberIds.has(fillerId)) continue;
+    const profile = getSimulatorProfileByUserId(state, fillerId);
+    if (!profile) continue;
+    const matchId = pairStableId("match", state.currentUser.id, fillerId);
+    currentMemberIds.add(fillerId);
+    nextMembers.push({
+      match_id: matchId,
+      user_id: fillerId,
+      name: profile.name,
+      photo: profile.photos?.[0] || null,
+      simulator_filled: true,
+    });
+
+    state.collections.Match = state.collections.Match || [];
+    if (!state.collections.Match.some((match) => String(match.id) === String(matchId))) {
+      state.collections.Match.push({
+        id: matchId,
+        user1_id: state.currentUser.id,
+        user2_id: fillerId,
+        user1_name: state.currentUser.full_name || state.currentUser.name,
+        user2_name: profile.name,
+        status: "active",
+        match_type: "mutual",
+        created_date: DEMO_STAGE2_CREATED_AT,
+        updated_date: DEMO_STAGE2_CREATED_AT,
+        simulator_filled: true,
+      });
+    }
+  }
+
+  const patch = {
+    team_target: desiredCount,
+    team_members: nextMembers,
+    is_apartment_flow_demo_user: true,
+    updated_date: nowIso(),
+  };
+  Object.assign(currentProfile, patch);
+  if (state.currentProfile && String(state.currentProfile.user_id) === String(currentProfile.user_id)) {
+    Object.assign(state.currentProfile, patch);
+  }
+  const profileIdx = (state.collections.Profile || []).findIndex((profile) => String(profile.user_id) === String(currentProfile.user_id));
+  if (profileIdx >= 0) {
+    state.collections.Profile[profileIdx] = {
+      ...state.collections.Profile[profileIdx],
+      ...patch,
+    };
+  }
+}
+
+function ensureApartmentChatSeeds(state, discovery) {
+  if (!isDemoHousingStage() || !discovery?.team_key) return;
+  state.collections.GroupMessage = state.collections.GroupMessage || [];
+  const apartments = discovery.suggested_apartments || [];
+  const memberIds = discovery.member_user_ids || [];
+  const profiles = memberIds.map((id) => getSimulatorProfileByUserId(state, id)).filter(Boolean);
+
+  apartments.forEach((apartment, index) => {
+    const groupId = apartmentChatGroupId(discovery.team_key, apartment.id);
+    if (state.collections.GroupMessage.some((message) => message.group_id === groupId)) return;
+    const [first, second, third] = profiles;
+    const messages = [
+      {
+        sender: second || first,
+        content: `מה אתם חושבים על דירה ${index + 1}? המיקום נראה לי ממש נוח.`,
+        content_en: `What do you think about Apartment ${index + 1}? The location looks really convenient to me.`,
+      },
+      {
+        sender: first || second,
+        content: apartment.commute_note_he || "הנסיעה נראית סבירה לכולם.",
+        content_en: apartment.commute_note_en || "The commute looks reasonable for everyone.",
+      },
+      {
+        sender: third || first || second,
+        content: "אם כולם זורמים, אפשר לקבוע ביקור ולראות איך זה מרגיש במציאות.",
+        content_en: "If everyone is into it, we can schedule a viewing and see how it feels in person.",
+      },
+    ].filter((message) => message.sender);
+
+    messages.forEach((message, messageIndex) => {
+      const created = `2026-06-29T09:${String(10 + index * 6 + messageIndex * 2).padStart(2, "0")}:00.000Z`;
+      state.collections.GroupMessage.push({
+        id: stableId("apartment-message", `${groupId}-${messageIndex + 1}`),
+        group_id: groupId,
+        sender_id: message.sender.user_id,
+        sender_name: message.sender.name,
+        sender_photo: message.sender.photos?.[0] || null,
+        content: message.content,
+        content_en: message.content_en,
+        apartment_id: apartment.id,
+        created_date: created,
+        updated_date: created,
+        simulator_seeded: true,
+      });
+    });
+  });
+}
+
+function ensureStage2GroupChatSeeds(state, discovery) {
+  if (!isDemoHousingStage() || !discovery?.team_key) return;
+  state.collections.GroupMessage = state.collections.GroupMessage || [];
+
+  const groupId = stage2TeamChatGroupId(discovery.member_user_ids || []);
+  if (!groupId || state.collections.GroupMessage.some((message) => message.id === stableId("group-message", `${groupId}-stage2-coffee-1`))) {
+    return;
+  }
+
+  const profilesById = new Map(
+    (discovery.member_user_ids || [])
+      .map((id) => getSimulatorProfileByUserId(state, id))
+      .filter(Boolean)
+      .map((profile) => [String(profile.user_id), profile])
+  );
+  const currentProfile = profilesById.get(String(state.currentUser.id));
+  const maya = profilesById.get("demo-user-maya") || [...profilesById.values()].find((profile) => profile !== currentProfile);
+  const eitan = profilesById.get("demo-user-eitan") || [...profilesById.values()].find((profile) => profile !== currentProfile && profile !== maya);
+  const apartments = discovery.suggested_apartments || [];
+  const viewingApartment =
+    apartments.find((apartment) => String(apartment.id) === String(state?.scenario?.apartment_search?.selected_apartment_id))
+    || apartments[0]
+    || null;
+  const apartmentNameHe = viewingApartment?.neighborhood_he || viewingApartment?.neighborhood || "דיזנגוף";
+  const apartmentNameEn = viewingApartment?.neighborhood_en || viewingApartment?.neighborhood || "Dizengoff";
+  const coffeeShopHe = apartmentNameHe === "הצפון הישן" ? "קפה נחת בדיזנגוף" : `בית קפה ליד ${apartmentNameHe}`;
+  const coffeeShopEn = apartmentNameEn === "Old North" ? "Cafe Nahat on Dizengoff" : `a coffee shop near ${apartmentNameEn}`;
+  const createdTimes = [
+    "2026-06-30T14:04:00.000Z",
+    "2026-06-30T14:07:00.000Z",
+    "2026-06-30T14:10:00.000Z",
+    "2026-06-30T14:13:00.000Z",
+  ];
+  const messages = [
+    {
+      sender: maya || currentProfile,
+      content: `קבעתי לנו לראות את הדירה ב${apartmentNameHe} מחר ב-18:00. ניפגש לפני זה ב${coffeeShopHe}?`,
+      content_en: `I scheduled us to check out the ${apartmentNameEn} apartment tomorrow at 18:00. Want to meet first at ${coffeeShopEn}?`,
+    },
+    {
+      sender: eitan || currentProfile || maya,
+      content: "מעולה, מתאים לי לשבת שם חצי שעה לפני ולסגור יחד מה חשוב לנו לבדוק בדירה.",
+      content_en: "Perfect. I’m good with sitting there half an hour before and agreeing what we want to check in the apartment.",
+    },
+    {
+      sender: currentProfile || maya || eitan,
+      content: "כן, וגם נעבור על שלוש האופציות בדירוג לפני שנחליט סופית.",
+      content_en: "Yes, and let’s go over the three apartment options in the ranking before we decide.",
+    },
+    {
+      sender: maya || eitan || currentProfile,
+      content: "סגור. אני אביא לפטופ, נשב על קפה ונשווה מחיר, רעש ותחבורה.",
+      content_en: "Done. I’ll bring my laptop, we’ll sit over coffee and compare price, noise, and transit.",
+    },
+  ].filter((message) => message.sender);
+
+  messages.forEach((message, index) => {
+    const created = createdTimes[index] || `2026-06-30T14:${String(4 + index * 3).padStart(2, "0")}:00.000Z`;
+    state.collections.GroupMessage.push({
+      id: stableId("group-message", `${groupId}-stage2-coffee-${index + 1}`),
+      group_id: groupId,
+      sender_id: message.sender.user_id,
+      sender_name: message.sender.name,
+      sender_photo: message.sender.photos?.[0] || null,
+      content: message.content,
+      content_en: message.content_en,
+      apartment_id: viewingApartment?.id || "",
+      created_date: created,
+      updated_date: created,
+      simulator_seeded: true,
+      simulator_stage2_group_chat: true,
+    });
+  });
+}
+
 function createSimulatorFunctionsApi(state, existingFunctions = {}) {
   const ensureApartmentDiscovery = async () => {
+    ensureStage2DemoTeam(state);
     const memberIds = simulatorTeamMemberIds(state);
     const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id) || state.currentProfile;
-    const targetCount = Number(currentProfile?.team_target || 3);
+    const targetCount = isDemoHousingStage()
+      ? Math.max(Number(currentProfile?.team_target || 3), 3)
+      : Number(currentProfile?.team_target || 3);
 
     if (memberIds.length < 2 || memberIds.length < targetCount) {
       return { success: true, discovery: null, status: "not_established", member_count: memberIds.length, target_count: targetCount };
@@ -1193,6 +1903,58 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
     state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
     const existing = state.collections.TeamApartmentDiscovery.find((item) => item.team_key === key);
     if (existing) {
+      const stage2City = stage2DemoCityName();
+      if (isDemoHousingStage() && stage2City && existing.selected_city !== stage2City) {
+        Object.assign(existing, {
+          selected_city: stage2City,
+          common_cities: [stage2City],
+          suggested_apartments: apartmentDiscoverySuggestionsForState(state, { city: stage2City, bedrooms: existing.bedrooms || memberIds.length, teamKey: key, batchIndex: 0 }),
+          suggestion_batch_index: 0,
+          preferences: {},
+          rankings: {},
+          rankings_finalized: false,
+          eligible_apartments: [],
+          rejected_by_veto: [],
+          happiness_scores: [],
+          ranking_scores: [],
+          current_apartment: null,
+          selected_apartment: null,
+          winning_apartment_id: "",
+          winning_apartment: null,
+          rejected_apartments: [],
+          no_eligible_apartment: false,
+          no_more_suggestions: false,
+          lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+          status: "apartment_ranking",
+          updated_date: nowIso(),
+        });
+      }
+      if (isDemoApartmentServicesStage()) {
+        const selectedCity = stage2City || existing.selected_city || DEMO_CITY_OPTIONS.tel_aviv.he;
+        const suggestedApartments = existing.suggested_apartments?.length
+          ? existing.suggested_apartments
+          : apartmentDiscoverySuggestionsForState(state, { city: selectedCity, bedrooms: existing.bedrooms || memberIds.length, teamKey: key, batchIndex: 0 });
+        const selectedApartment =
+          existing.selected_apartment
+          || existing.current_apartment
+          || existing.winning_apartment
+          || suggestedApartments[0]
+          || null;
+        Object.assign(existing, {
+          selected_city: selectedCity,
+          common_cities: [selectedCity],
+          suggested_apartments: suggestedApartments,
+          team_locations: existing.team_locations?.length ? existing.team_locations : buildStage2TeamLocations(state, memberIds, selectedCity),
+          lifecycle_state: selectedApartment ? APARTMENT_LIFECYCLE.APARTMENT_FOUND : APARTMENT_LIFECYCLE.APARTMENT_RANKING,
+          status: selectedApartment ? "apartment_found" : "apartment_ranking",
+          selected_apartment_id: selectedApartment?.id || "",
+          selected_apartment: selectedApartment,
+          current_apartment: selectedApartment,
+          winning_apartment_id: selectedApartment?.id || "",
+          winning_apartment: selectedApartment,
+          updated_date: nowIso(),
+        });
+      }
       const normalized = {
         ...existing,
         lifecycle_state: existing.lifecycle_state || (existing.status === "finalized" ? APARTMENT_LIFECYCLE.APARTMENT_VIEWING : APARTMENT_LIFECYCLE.APARTMENT_RANKING),
@@ -1204,15 +1966,21 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
         rejected_apartments: existing.rejected_apartments || [],
         suggestion_batch_index: Number(existing.suggestion_batch_index || 0),
         current_apartment_index: Number(existing.current_apartment_index || 0),
+        team_locations: existing.team_locations?.length ? existing.team_locations : buildStage2TeamLocations(state, memberIds, existing.selected_city),
       };
       Object.assign(existing, normalized);
+      ensureApartmentChatSeeds(state, existing);
+      ensureStage2GroupChatSeeds(state, existing);
+      persistSimulatorState(state);
       return { success: true, discovery: clone(existing), status: existing.status || "apartment_ranking" };
     }
 
     const profiles = memberIds.map((id) => getSimulatorProfileByUserId(state, id)).filter(Boolean);
     const { commonCities, suggestedCities } = simulatorCityState(profiles);
-    const selectedCity = commonCities[0] || "";
+    const selectedCity = stage2DemoCityName() || commonCities[0] || (isDemoHousingStage() ? DEMO_CITY_OPTIONS.tel_aviv.he : "");
     const bedrooms = memberIds.length;
+    const suggestedApartments = selectedCity ? apartmentDiscoverySuggestionsForState(state, { city: selectedCity, bedrooms, teamKey: key, batchIndex: 0 }) : [];
+    const stage3SelectedApartment = isDemoApartmentServicesStage() ? suggestedApartments[0] || null : null;
     const discovery = {
       id: stableId("team-apartment-discovery", key),
       team_key: key,
@@ -1223,8 +1991,13 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       suggested_cities: suggestedCities,
       selected_city: selectedCity,
       bedrooms,
-      suggested_apartments: selectedCity ? apartmentDiscoverySuggestions({ city: selectedCity, bedrooms, teamKey: key, batchIndex: 0 }) : [],
-      lifecycle_state: selectedCity ? APARTMENT_LIFECYCLE.APARTMENT_RANKING : APARTMENT_LIFECYCLE.TEAM_BUILDING,
+      suggested_apartments: suggestedApartments,
+      team_locations: selectedCity ? buildStage2TeamLocations(state, memberIds, selectedCity) : [],
+      lifecycle_state: stage3SelectedApartment
+        ? APARTMENT_LIFECYCLE.APARTMENT_FOUND
+        : selectedCity
+          ? APARTMENT_LIFECYCLE.APARTMENT_RANKING
+          : APARTMENT_LIFECYCLE.TEAM_BUILDING,
       suggestion_batch_index: 0,
       current_apartment_index: 0,
       exhausted_suggestions: false,
@@ -1232,19 +2005,24 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       eligible_apartments: [],
       rejected_by_veto: [],
       happiness_scores: [],
-      current_apartment: null,
-      selected_apartment: null,
+      current_apartment: stage3SelectedApartment,
+      selected_apartment: stage3SelectedApartment,
+      selected_apartment_id: stage3SelectedApartment?.id || "",
+      winning_apartment_id: stage3SelectedApartment?.id || "",
+      winning_apartment: stage3SelectedApartment,
       rejected_apartments: [],
       no_eligible_apartment: false,
       no_more_suggestions: false,
       rankings: {},
       rankings_finalized: false,
       ranking_scores: [],
-      status: selectedCity ? "apartment_ranking" : "needs_city",
+      status: stage3SelectedApartment ? "apartment_found" : selectedCity ? "apartment_ranking" : "needs_city",
       created_date: nowIso(),
       updated_date: nowIso(),
     };
     state.collections.TeamApartmentDiscovery.push(discovery);
+    ensureApartmentChatSeeds(state, discovery);
+    ensureStage2GroupChatSeeds(state, discovery);
     persistSimulatorState(state);
     return { success: true, discovery: clone(discovery), status: discovery.status };
   };
@@ -1282,7 +2060,14 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       },
     };
 
-    if (simulatorAutoRankTeamEnabled()) {
+    const scenarioGeneratedPreferences = scenarioTeammatePreferences(state, discovery);
+    if (scenarioGeneratedPreferences) {
+      Object.entries(scenarioGeneratedPreferences).forEach(([memberId, record]) => {
+        if (!nextPreferences[memberId]) {
+          nextPreferences[memberId] = record;
+        }
+      });
+    } else if (simulatorAutoRankTeamEnabled()) {
       const apartmentIds = (discovery.suggested_apartments || []).map((apartment) => apartment.id);
       const preferenceOrders = [
         ["amazing", "ok", "ok"],
@@ -1380,7 +2165,7 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
     if (idx === -1) throw new Error("Discovery not found");
     const discovery = state.collections.TeamApartmentDiscovery[idx];
     const nextBatchIndex = Number(discovery.suggestion_batch_index || 0) + 1;
-    const suggestions = apartmentDiscoverySuggestions({
+    const suggestions = apartmentDiscoverySuggestionsForState(state, {
       city: discovery.selected_city,
       bedrooms: discovery.bedrooms,
       teamKey: discovery.team_key,
@@ -1423,6 +2208,7 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       exhausted_suggestions: false,
       updated_date: nowIso(),
     };
+    ensureApartmentChatSeeds(state, state.collections.TeamApartmentDiscovery[idx]);
     persistSimulatorState(state);
     return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]), status: "apartment_ranking" };
   };
@@ -1521,6 +2307,7 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       winning_apartment: currentApartment,
       updated_date: nowIso(),
     };
+    setDemoStage(DEMO_STAGES.APARTMENT_SERVICES);
     persistSimulatorState(state);
     return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]), status: "apartment_found" };
   };
@@ -1599,7 +2386,7 @@ export function enableSimulatorBackend(base44) {
     return true;
   }
 
-  const state = hydrateSimulatorState(createDemoState(), shouldResetState ? null : readPersistedSimulatorState());
+  const state = hydrateSimulatorState(createDemoState({ reset: shouldResetState }), shouldResetState ? null : readPersistedSimulatorState());
   const collections = state.collections;
 
   if (typeof window !== "undefined") {

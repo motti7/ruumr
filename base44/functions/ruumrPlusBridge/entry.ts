@@ -702,6 +702,7 @@
                       ...body,
                       user_id: recommendationUserId,
                   }),
+                  language: String(body.language || 'he').toLowerCase().split('-')[0] === 'en' ? 'en' : 'he',
                   exclude_user_ids: swipeExclusions.exclude_user_ids,
                   liked_user_ids: swipeExclusions.liked_user_ids,
               };

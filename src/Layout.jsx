@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock, MessageCircle, Map } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock, MessageCircle, Map, PackageCheck } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -17,6 +17,8 @@ import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { DEMO_STAGES, getDemoStage, isDemoApartmentServicesStage, isDemoHousingStage } from "@/lib/demoStage";
+import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 import { listIncomingTeamInvites } from "@/api/teamInvites";
@@ -101,6 +103,8 @@ export default function Layout({ children, currentPageName }) {
   const { hasProfile } = useOptionalAuth();
   const tabsLocked = hasProfile === false;
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
+  const direction = getLanguageDirection(i18n);
+  const textAlignClass = isRtlLanguage(i18n) ? 'text-right' : 'text-left';
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -340,21 +344,34 @@ export default function Layout({ children, currentPageName }) {
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
-  const apartmentFlowActive = [
+  const simulatorMode = isRuumrSimulatorMode();
+  const simulatorDemoStage = simulatorMode ? getDemoStage() : "";
+  const standardDemoNavActive = simulatorMode && simulatorDemoStage === DEMO_STAGES.TEAM_BUILDING;
+
+  const apartmentFlowActive = !standardDemoNavActive && ([
     'APARTMENT_RANKING',
     'APARTMENT_VIEWING',
     'APARTMENT_FOUND',
-  ].includes(apartmentLifecycle);
+  ].includes(apartmentLifecycle) || (simulatorMode && isDemoHousingStage()));
+  const apartmentServicesActive =
+    !standardDemoNavActive &&
+    (apartmentLifecycle === 'APARTMENT_FOUND' || (simulatorMode && isDemoApartmentServicesStage()));
 
   const navigationItems = (
     apartmentFlowActive
-      ? [
-        { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound },
-        { id: "home", name: t("nav_home"), path: createPageUrl("Home"), icon: Home },
-        { id: "plus", name: "Plus", path: createPageUrl("Home"), icon: Sparkles, inert: true },
-        { id: "chats", name: t("nav_chats"), path: createPageUrl("GroupChat"), icon: MessageCircle, messageBadge: unreadMessagesCount },
-        { id: "map", name: t("nav_map"), path: createPageUrl("ApartmentMap"), icon: Map },
-      ]
+      ? apartmentServicesActive
+        ? [
+          { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound },
+          { id: "services", name: t("nav_services"), path: createPageUrl("ApartmentServices"), icon: PackageCheck },
+          { id: "chats", name: t("nav_chats"), path: createPageUrl("TeamChats"), icon: MessageCircle, messageBadge: unreadMessagesCount },
+        ]
+        : [
+          { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound },
+          { id: "home", name: t("nav_home"), path: createPageUrl("Home"), icon: Home },
+          { id: "chats", name: t("nav_chats"), path: createPageUrl("TeamChats"), icon: MessageCircle, messageBadge: unreadMessagesCount },
+          { id: "map", name: t("nav_map"), path: createPageUrl("ApartmentMap"), icon: Map },
+          { id: "plus", name: "Plus", path: createPageUrl("Home"), icon: Sparkles, inert: true },
+        ]
       : [
         { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
         { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
@@ -395,8 +412,8 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
-        {!['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={direction}>
+        {!apartmentFlowActive && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -481,8 +498,8 @@ export default function Layout({ children, currentPageName }) {
                 {shouldShowNav && teamRequestCount > 0 && currentPageName !== 'GroupTracker' && (
                     <button
                         onClick={() => navigate(createPageUrl('GroupTracker'))}
-                        className="w-full flex items-center gap-3 bg-orange-50 border-b border-orange-100 px-4 py-3 text-right active:bg-orange-100"
-                        dir={i18n.dir()}
+                        className={`w-full flex items-center gap-3 bg-orange-50 border-b border-orange-100 px-4 py-3 ${textAlignClass} active:bg-orange-100`}
+                        dir={direction}
                     >
                         <div className="w-9 h-9 rounded-full gradient-orange flex items-center justify-center flex-shrink-0">
                             <UsersRound className="w-5 h-5 text-white" />

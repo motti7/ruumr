@@ -17,7 +17,9 @@ import {
 import {
   buildSimulatorRuumrPlusRecommendations,
 } from "@/lib/ruumrPlusSimulator";
+import { getSimulatorBackendState } from "@/lib/simulatorBackend";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { isCharterComplete, normalizeCharterAnswers } from "@/lib/charterCompletion";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isNativeIOSApp } from "@/lib/nativeEnvironment";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
@@ -36,7 +38,7 @@ import SmartImage from "@/components/shared/SmartImage";
 import RoomiCharter from "@/components/charter/RoomiCharter";
 import { resolveCurrentQuestionnairePreference } from "@/api/questionnairePreferences";
 import { getInterestLabel, getInterestLabelKey } from "@/lib/interests";
-import i18n from "@/i18n";
+import { resolveRuumrPlusInsight } from "@/lib/ruumrPlusInsight";
 import { translateRegion } from "@/lib/cityToRegion";
 import {
   Crown,
@@ -73,10 +75,35 @@ const quickLinks = [
   },
 ];
 
-function getRecommendationLocation(profile = {}) {
+function getScenarioQuestionnairePreference(userId) {
+  if (!isRuumrSimulatorMode() || !userId) {
+    return null;
+  }
+
+  const preferences = getSimulatorBackendState()?.scenario?.questionnaire_preferences;
+  const scenarioPreference = Array.isArray(preferences)
+    ? preferences.find((preference) => String(preference?.user_id) === String(userId))
+    : null;
+  const answers = normalizeCharterAnswers(scenarioPreference?.answers || {});
+  if (!isCharterComplete(answers)) {
+    return null;
+  }
+
+  return {
+    id: scenarioPreference.id || `scenario-questionnaire-${userId}`,
+    user_id: userId,
+    version: Number(scenarioPreference.version) || 1,
+    completed_at: scenarioPreference.completed_at || new Date().toISOString(),
+    source: scenarioPreference.source || "demo_scenario",
+    source_match_id: scenarioPreference.source_match_id || null,
+    answers,
+  };
+}
+
+function getRecommendationLocation(profile = {}, t = (key) => key) {
   // search_area is a stored Hebrew region code — translate it for display
   // (city names stay as-is, matching ProfileCard/ProfileView).
-  const region = translateRegion(profile.search_area, i18n.t.bind(i18n));
+  const region = translateRegion(profile.search_area, t);
   if (profile.current_status !== "has_apartment" && Array.isArray(profile.search_cities) && profile.search_cities.length > 0) {
     const cityParts = [profile.search_cities[0], region].filter(Boolean);
     return cityParts.join(" • ");
@@ -114,12 +141,14 @@ function trackPlusEvent(eventName, mixpanelName, properties = {}) {
 }
 
 function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const textDirection = i18n.dir();
+  const isRtl = textDirection === "rtl";
   const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const score = Math.round((Number(plusMeta?.score) || 0) * 100);
-  const locationLabel = getRecommendationLocation(profile) || t("no_location");
-  const insight = plusMeta?.insight || t("interesting_match_insight");
+  const locationLabel = getRecommendationLocation(profile, t) || t("no_location");
+  const insight = resolveRuumrPlusInsight(plusMeta, i18n.language, t("interesting_match_insight"));
   const sharedCities = Array.isArray(plusMeta?.reasons?.shared_cities) ? plusMeta.reasons.shared_cities : [];
   const sharedInterests = Array.isArray(plusMeta?.reasons?.shared_interests) ? plusMeta.reasons.shared_interests : [];
   const tags = [
@@ -172,16 +201,26 @@ function RuumrPlusRecommendationCard({ profile, position, onSwipe }) {
           </span>
         </div>
 
-        <div className="absolute bottom-3 right-3 left-3 text-white">
-          <div className="flex items-center gap-2 justify-end">
+        <div className="absolute bottom-3 right-3 left-3 text-white" style={{ textAlign: isRtl ? "right" : "left" }}>
+          <div className={`flex items-center gap-2 ${isRtl ? "justify-end" : "justify-start"}`} dir="ltr">
             {profile.is_verified && (
               <span className="rounded-full bg-blue-500/90 px-2 py-1 text-[10px] font-bold">{t("verified")}</span>
             )}
-            <h3 className="text-2xl font-black leading-tight drop-shadow">
-              {profile.name}, {profile.age}
+            <h3 className="text-2xl font-black leading-tight drop-shadow" dir={textDirection}>
+              <bdi>{profile.name}</bdi>
+              {profile.age ? (
+                isRtl ? (
+                  <>
+                    <span>, </span>
+                    <span dir="ltr">{profile.age}</span>
+                  </>
+                ) : (
+                  <span dir="ltr">, {profile.age}</span>
+                )
+              ) : null}
             </h3>
           </div>
-          <p className="mt-1 text-sm text-white/85">{locationLabel}</p>
+          <p className="mt-1 text-sm text-white/85" dir={textDirection}>{locationLabel}</p>
         </div>
       </div>
 
@@ -432,7 +471,12 @@ export default function RuumrPlusPage() {
       return existing;
     }
 
-    if (!questionnaireChecked) {
+    const scenarioPreference = getScenarioQuestionnairePreference(currentUser.id);
+    if (scenarioPreference) {
+      setQuestionnairePreference(scenarioPreference);
+    }
+
+    if (!questionnaireChecked && !scenarioPreference) {
       try {
         const resolved = await resolveCurrentQuestionnairePreference();
         setQuestionnairePreference(resolved.preference);
@@ -470,6 +514,7 @@ export default function RuumrPlusPage() {
 
       const response = await activateRuumrPlusRecommendations({
         userId: currentUser.id,
+        language: i18n.language,
         localProfiles,
         currentProfile,
         userSwipes,
@@ -545,6 +590,7 @@ export default function RuumrPlusPage() {
             limit: RUUMR_PLUS_RECOMMENDATION_LIMIT,
             refresh: false,
             requirePlus: true,
+            language: i18n.language,
             localProfiles,
             currentProfile,
             userSwipes,

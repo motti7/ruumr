@@ -16,6 +16,7 @@ Restructure Ruumr around lifecycle states: `TEAM_BUILDING`, `APARTMENT_RANKING`,
 - Done: state-aware home routing shows apartment flow after the team is complete.
 - Done: added viewing and found states.
 - Done: added lifecycle-aware bottom navigation for apartment states.
+- Done: replaced the apartment map placeholder with a real Leaflet/OpenStreetMap map.
 - Done: added rejection, choose, schedule, change-ratings, find-more, no-eligible, and no-more-suggestions paths.
 - To add later: production apartment source integration.
 - To add later: production-grade feature flag management UI.

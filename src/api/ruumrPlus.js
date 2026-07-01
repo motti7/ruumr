@@ -17,6 +17,7 @@ export const RUUMR_PLUS_RECOMMENDATION_LIMIT = 5;
  * @property {any | null} [currentProfile]
  * @property {any} [requestId]
  * @property {any} [request_id]
+ * @property {string} [language]
  * @property {any[]} [userSwipes]
  */
 
@@ -115,6 +116,7 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
     userId = null,
     localProfiles = null,
     currentProfile = null,
+    language = "he",
     userSwipes = [],
   } = options;
 
@@ -149,6 +151,7 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
       limit,
       requestId: options.requestId ?? options.request_id ?? null,
       requirePlus,
+      language,
       localProfiles: Array.isArray(localProfiles) ? localProfiles.map(attachQuestionnaire) : localProfiles,
       currentProfile: attachQuestionnaire(currentProfile),
       userSwipes,
@@ -161,6 +164,7 @@ export async function fetchRuumrPlusRecommendations(options = {}) {
     limit,
     refresh,
     require_plus: requirePlus,
+    language: String(language || "he").toLowerCase().split("-")[0] === "en" ? "en" : "he",
     user_id: userId ?? undefined,
   });
 }
@@ -338,6 +342,9 @@ export function mergeRuumrPlusRecommendations({ localProfiles = [], recommendati
         semantic_similarity: recommendation.semantic_similarity ?? null,
         structured_score: recommendation.structured_score ?? null,
         insight: recommendation.insight ?? "",
+        insight_en: recommendation.insight_en ?? recommendation.insight_i18n?.en ?? "",
+        insight_he: recommendation.insight_he ?? recommendation.insight_i18n?.he ?? "",
+        insight_i18n: recommendation.insight_i18n ?? null,
         reasons: recommendation.reasons ?? {},
         compatibility: recommendation.compatibility ?? {},
         messageable: Boolean(recommendation.messageable),

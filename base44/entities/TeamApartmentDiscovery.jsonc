@@ -44,6 +44,13 @@
         "type": "object"
       }
     },
+    "team_locations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Demo-mode teammate university/work locations for apartment map context."
+    },
     "lifecycle_state": {
       "type": "string",
       "enum": [

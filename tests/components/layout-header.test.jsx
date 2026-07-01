@@ -28,8 +28,11 @@ vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: () => false },
 }));
 
+const simulatorState = vi.hoisted(() => ({
+  enabled: false,
+}));
 vi.mock('@/lib/simulatorMode', () => ({
-  isRuumrSimulatorMode: () => false,
+  isRuumrSimulatorMode: () => simulatorState.enabled,
 }));
 
 vi.mock('@/lib/ruumrPlusActivation', () => ({
@@ -68,6 +71,8 @@ let Layout;
 
 beforeEach(async () => {
   vi.resetModules();
+  window.localStorage.clear();
+  simulatorState.enabled = false;
   authState.hasProfile = null;
   nativeState.isNativeIOSApp.mockReturnValue(false);
   const mod = await import('@/Layout');
@@ -127,6 +132,22 @@ describe('Bottom Nav Rendering', () => {
       expect(navs.length).toBe(0);
       unmount();
     }
+  });
+
+  it('keeps standard nav for simulator demo stage 1 despite stale apartment lifecycle', async () => {
+    simulatorState.enabled = true;
+    window.localStorage.setItem('ruumr_demo_stage', '1');
+    window.localStorage.setItem('ruumr_apartment_lifecycle', 'APARTMENT_FOUND');
+    const mod = await import('@/Layout');
+    Layout = mod.default;
+
+    const { container } = renderLayout('RuumrPlus');
+    const nav = container.querySelector('nav');
+
+    expect(nav).not.toBeNull();
+    expect(nav.querySelector('a[href="/RuumrPlus"]')).not.toBeNull();
+    expect(nav.querySelector('a[href="/ApartmentServices"]')).toBeNull();
+    expect(nav.querySelector('a[href="/TeamChats"]')).toBeNull();
   });
 });
 

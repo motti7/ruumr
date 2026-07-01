@@ -19,6 +19,7 @@ import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { loadRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
+import { resolveRuumrPlusInsight } from '@/lib/ruumrPlusInsight';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -497,13 +498,15 @@ export default function ProfileViewPage() {
           <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
         </div>
 
-        {plusMeta && plusMeta.insight && (
+        {plusMeta && resolveRuumrPlusInsight(plusMeta, i18n.language, t("interesting_match_insight")) && (
           <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
             <h4 className="font-bold text-lg mb-2 flex items-center gap-2 text-[--theme-orange]">
               <Sparkles className="w-5 h-5" />
               Ruumr Plus
             </h4>
-            <p className="text-gray-700 leading-relaxed">{plusMeta.insight}</p>
+            <p className="text-gray-700 leading-relaxed">
+              {resolveRuumrPlusInsight(plusMeta, i18n.language, t("interesting_match_insight"))}
+            </p>
             {plusMeta.messageable !== undefined && (
               <div className="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-[--theme-orange]">
                 {plusMeta.messageable ? t("messages_open") : t("chat_locked")}

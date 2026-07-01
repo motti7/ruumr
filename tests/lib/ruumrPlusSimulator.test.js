@@ -43,6 +43,20 @@ describe('buildSimulatorRuumrPlusRecommendations entitlement gating', () => {
     expect(res.access_granted).toBe(true);
   });
 
+  it('returns simulator insight in the requested language', async () => {
+    const res = await buildSimulatorRuumrPlusRecommendations({
+      userId: 'sim_r1',
+      requirePlus: true,
+      language: 'en',
+      currentProfile: requestor,
+      localProfiles: [requestor, candidate],
+    });
+
+    expect(res.recommendations[0].insight).toContain('One already has the apartment');
+    expect(res.recommendations[0].insight).not.toMatch(/[\u0590-\u05FF]/);
+    expect(res.recommendations[0].insight_i18n.he).toMatch(/[\u0590-\u05FF]/);
+  });
+
   it('throws a 403 when the simulator Plus-locked flag is set', async () => {
     window.localStorage.setItem('ruumr_simulator_plus_locked', 'true');
     await expect(

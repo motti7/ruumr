@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Florentin apartment demo image">
+  <rect width="1200" height="800" fill="#ECFDF5"/>
+  <rect x="110" y="100" width="980" height="600" rx="42" fill="#fff"/>
+  <rect x="170" y="160" width="840" height="230" rx="30" fill="#A7F3D0"/>
+  <rect x="170" y="445" width="330" height="120" rx="26" fill="#065F46" opacity=".86"/>
+  <rect x="560" y="445" width="260" height="120" rx="26" fill="#FB923C" opacity=".9"/>
+  <text x="600" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="800" fill="#064E3B">42 Frenkel St</text>
+</svg>

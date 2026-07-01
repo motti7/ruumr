@@ -49,6 +49,8 @@
  */
 import AdminCharter from './pages/AdminCharter';
 import AdminTools from './pages/AdminTools';
+import ApartmentChat from './pages/ApartmentChat';
+import ApartmentDetail from './pages/ApartmentDetail';
 import ApartmentMap from './pages/ApartmentMap';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
@@ -69,7 +71,10 @@ import RuumrPlusCheckout from './pages/RuumrPlusCheckout';
 import Profile from './pages/Profile';
 import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
+import ApartmentServices from './pages/ApartmentServices';
+import ServiceProviderDetail from './pages/ServiceProviderDetail';
 import Terms from './pages/Terms';
+import TeamChats from './pages/TeamChats';
 import Verification from './pages/Verification';
 import __Layout from './Layout.jsx';
 
@@ -77,6 +82,8 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AdminCharter": AdminCharter,
     "AdminTools": AdminTools,
+    "ApartmentChat": ApartmentChat,
+    "ApartmentDetail": ApartmentDetail,
     "ApartmentMap": ApartmentMap,
     "Banned": Banned,
     "Charter": Charter,
@@ -97,7 +104,10 @@ export const PAGES = {
     "Profile": Profile,
     "ProfileView": ProfileView,
     "Settings": Settings,
+    "ApartmentServices": ApartmentServices,
+    "ServiceProviderDetail": ServiceProviderDetail,
     "Terms": Terms,
+    "TeamChats": TeamChats,
     "Verification": Verification,
 }
 

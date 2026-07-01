@@ -9,6 +9,14 @@ import { ArrowRight, Send, UsersRound } from "lucide-react";
 import SmartImage from "@/components/shared/SmartImage";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
+import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { isDemoHousingStage } from "@/lib/demoStage";
+import { ensureTeamApartmentDiscovery } from "@/api/teamApartmentDiscovery";
+
+function messageContent(message, language) {
+  return language === "he" ? message.content : message.content_en || message.content;
+}
 
 export default function GroupChatPage() {
   const { t, i18n } = useTranslation();
@@ -30,10 +38,22 @@ export default function GroupChatPage() {
     return all.join("_");
   };
 
+  const legacyGroupIds = (myId, members) =>
+    (members || [])
+      .map((member) => member.match_id)
+      .filter(Boolean)
+      .map((matchId) => [myId, matchId].sort().join("_"));
+
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
       try {
+        if (isRuumrSimulatorMode() && isDemoHousingStage()) {
+          await ensureTeamApartmentDiscovery().catch((error) => {
+            console.error("[ruumr] stage 2 group chat seed failed", error);
+          });
+        }
+
         const userData = await User.me();
         setUser(userData);
 
@@ -49,7 +69,15 @@ export default function GroupChatPage() {
         const gid = buildGroupId(userData.id, memberUserIds);
         setGroupId(gid);
 
-        const msgs = await base44.entities.GroupMessage.filter({ group_id: gid });
+        const groupIdsToRead = [...new Set([gid, ...legacyGroupIds(userData.id, members)])];
+        const messageBatches = await Promise.all(
+          groupIdsToRead.map((id) =>
+            base44.entities.GroupMessage.filter({ group_id: id }).catch(() => [])
+          )
+        );
+        const msgs = messageBatches
+          .flat()
+          .filter((message, index, all) => all.findIndex((item) => item.id === message.id) === index);
         msgs.sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
         setMessages(msgs);
       } catch (e) {
@@ -94,13 +122,19 @@ export default function GroupChatPage() {
     const text = input.trim();
     setInput("");
     try {
-      await messageMutation.mutateAsync({
+      const sentMessage = await messageMutation.mutateAsync({
         group_id: groupId,
         sender_id: user.id,
         sender_name: user.full_name || t("me"),
         sender_photo: myProfile?.photos?.[0] || null,
         content: text,
       });
+      if (sentMessage) {
+        setMessages(prev => {
+          if (prev.find(m => m.id === sentMessage.id)) return prev;
+          return [...prev, sentMessage].sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
+        });
+      }
     } catch (error) {
       console.error("Error sending group message:", error);
       setInput(text);
@@ -120,6 +154,10 @@ export default function GroupChatPage() {
     { id: user?.id, name: t("me"), photo: myProfile?.photos?.[0] },
     ...teamMembers.map(m => ({ id: m.match_id, name: m.name?.split(' ')[0], photo: m.photo }))
   ];
+  const direction = getLanguageDirection(i18n);
+  const isRtl = isRtlLanguage(i18n);
+  const bubbleTextClass = isRtl ? 'text-right' : 'text-left';
+  const avatarStackClass = isRtl ? '-space-x-2 space-x-reverse' : '-space-x-2';
 
   if (isLoading) {
     return (
@@ -136,7 +174,7 @@ export default function GroupChatPage() {
 
   if (teamMembers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 p-8 text-center" dir={i18n.dir()}>
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50 p-8 text-center" dir={direction}>
         <UsersRound className="w-16 h-16 text-gray-300 mb-4" />
         <p className="font-black text-xl text-gray-700 mb-2">{t("no_team_yet")}</p>
         <p className="text-gray-400 text-sm mb-6">{t("add_team_for_chat")}</p>
@@ -151,7 +189,7 @@ export default function GroupChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50" dir={i18n.dir()}>
+    <div className="flex flex-col h-screen bg-gray-50" dir={direction}>
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
         <button 
@@ -161,9 +199,9 @@ export default function GroupChatPage() {
         >
           <ArrowRight className="w-5 h-5 text-gray-600" />
         </button>
-        <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1">
           {/* Avatar stack */}
-          <div className="flex -space-x-2 space-x-reverse">
+          <div className={`flex ${avatarStackClass}`}>
             {allParticipants.slice(0, 4).map((p, i) => (
               <div key={i} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
                 {p.photo ? (
@@ -176,7 +214,7 @@ export default function GroupChatPage() {
               </div>
             ))}
           </div>
-          <div>
+          <div className={bubbleTextClass}>
             <p className="font-black text-gray-900 text-sm">{t("team_chat")}</p>
             <p className="text-[10px] text-gray-400">{t("participants_count", { count: allParticipants.length })}</p>
           </div>
@@ -189,12 +227,22 @@ export default function GroupChatPage() {
        containerHeight="flex-1"
        renderMessage={(msg) => {
          const isMe = msg.sender_id === user?.id;
+         const rowSideClass = isMe
+           ? isRtl ? 'justify-end' : 'justify-start'
+           : isRtl ? 'justify-start' : 'justify-end';
+         const rowDirectionClass = !isMe && !isRtl ? 'flex-row-reverse' : 'flex-row';
+         const stackSideClass = isMe
+           ? isRtl ? 'items-end' : 'items-start'
+           : isRtl ? 'items-start' : 'items-end';
+         const bubbleOnRight = isMe ? isRtl : !isRtl;
+         const bubbleTailClass = bubbleOnRight ? 'rounded-br-sm' : 'rounded-bl-sm';
          return (
            <motion.div
              key={msg.id}
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+             dir="ltr"
+             className={`flex items-end gap-2 ${rowSideClass} ${rowDirectionClass}`}
            >
              {/* Avatar */}
              {!isMe && (
@@ -208,16 +256,16 @@ export default function GroupChatPage() {
                   )}
                 </div>
               )}
-             <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
+             <div dir={direction} className={`max-w-[75%] ${stackSideClass} flex flex-col gap-0.5`}>
                {!isMe && (
                  <span className="text-[10px] text-gray-400 font-medium px-1">{msg.sender_name}</span>
                )}
-               <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+               <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${bubbleTextClass} ${
                  isMe
-                   ? 'gradient-orange text-white rounded-tr-sm'
-                   : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
+                   ? `gradient-orange text-white ${bubbleTailClass}`
+                   : `bg-white border border-gray-100 text-gray-800 ${bubbleTailClass} shadow-sm`
                }`}>
-                 {msg.content}
+                 {messageContent(msg, i18n.language)}
                </div>
                <span className="text-[9px] text-gray-300 px-1">
                  {new Date(msg.created_date).toLocaleTimeString(i18n.language === 'he' ? 'he-IL' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -245,7 +293,8 @@ export default function GroupChatPage() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t("write_team_message")}
-          className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none text-gray-800 placeholder-gray-400"
+          dir={direction}
+          className={`flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none text-gray-800 placeholder-gray-400 ${bubbleTextClass}`}
         />
         <button
            onClick={sendMessage}

@@ -7,12 +7,22 @@ import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
+import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft, Home } from "lucide-react";
 import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, removeTeamMember, reconcileMyTeam } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
-import ApartmentDiscoveryPanel from "@/components/team/ApartmentDiscoveryPanel";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
+
+function publishApartmentRankingLifecycle() {
+  try {
+    window.localStorage?.setItem("ruumr_apartment_lifecycle", "APARTMENT_RANKING");
+    window.dispatchEvent(new CustomEvent("ruumr-apartment-lifecycle", { detail: { lifecycle: "APARTMENT_RANKING" } }));
+  } catch {
+    // Best-effort nav hint only.
+  }
+}
 
 export default function GroupTrackerPage() {
   const { t, i18n } = useTranslation();
@@ -116,6 +126,14 @@ export default function GroupTrackerPage() {
     setAddMode(null);
   };
 
+  const continueToHome = () => {
+    if (isRuumrSimulatorMode()) {
+      setDemoStage(DEMO_STAGES.APARTMENT_SEARCH);
+      publishApartmentRankingLifecycle();
+    }
+    navigate(createPageUrl('Home'));
+  };
+
   // Adding a teammate sends an approval request (they aren't added until they confirm).
   // Removing goes through the backend so every member's roster stays in sync.
   const addToTeam = async (partnerUserId, partnerName) => {
@@ -150,11 +168,9 @@ export default function GroupTrackerPage() {
 
   const teamMembers = allMatches.filter(m => teamIds.includes(m.id));
   const availableToAdd = allMatches.filter(m => !teamIds.includes(m.id));
-  const realTeamMemberCount = 1 + teamMembers.length;
   const currentCount = 1 + teamMembers.length + pendingMembers.length;
   const remaining = Math.max(0, targetCount - currentCount);
   const progressPercent = Math.min(100, (currentCount / targetCount) * 100);
-  const isEstablishedTeam = targetCount >= 2 && realTeamMemberCount >= targetCount;
 
   if (isLoading) {
     return (
@@ -376,10 +392,15 @@ export default function GroupTrackerPage() {
             </div>
             <p className="font-bold text-white text-xl">{t("team_ready")}</p>
             <p className="text-white/80 text-sm mt-1">{t("team_complete_desc")}</p>
+            <button
+              onClick={continueToHome}
+              className="mt-4 inline-flex items-center justify-center gap-2 bg-white text-[--theme-orange] font-extrabold px-5 py-3 rounded-full shadow-md active:scale-95 transition-transform"
+            >
+              <Home className="w-4 h-4" />
+              {t("team_go_home")}
+            </button>
           </div>
         )}
-
-        <ApartmentDiscoveryPanel userId={user?.id} isEstablished={isEstablishedTeam} />
 
         {/* CTA - find more partners */}
         {remaining > 0 && (

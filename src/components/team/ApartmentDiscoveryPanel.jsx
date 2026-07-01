@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import {
@@ -12,11 +13,15 @@ import {
   Home,
   Loader2,
   MapPin,
+  MessageCircle,
   RotateCcw,
   ThumbsDown,
   Trophy,
   XCircle,
 } from "lucide-react";
+import { createPageUrl } from "@/utils";
+import { isRtlLanguage } from "@/lib/languageDirection";
+import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
 import {
   changeApartmentPreferences,
   chooseCurrentApartment,
@@ -92,6 +97,7 @@ function publishLifecycle(discovery) {
 
 export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [discovery, setDiscovery] = useState(null);
   const [status, setStatus] = useState(null);
@@ -288,7 +294,9 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
     try {
       const result = await chooseCurrentApartment({ discoveryId: discovery.id });
       saveDiscoveryResult(result);
+      setDemoStage(DEMO_STAGES.APARTMENT_SERVICES);
       toast({ title: t("apartment_chosen_toast") });
+      navigate(createPageUrl("ApartmentServices"));
     } catch (error) {
       console.error(error);
       toast({ title: t("apartment_choose_error") });
@@ -401,6 +409,8 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
             index={index}
             selectedPreference={preferences[apartment.id]}
             onPreference={handlePreference}
+            onDetail={() => navigate(`${createPageUrl("ApartmentDetail")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
+            onChat={() => navigate(`${createPageUrl("ApartmentChat")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
             priceFormatter={priceFormatter}
           />
         ))}
@@ -432,7 +442,8 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
 }
 
 function ApartmentShell({ discovery, selectedCityLabel, children }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
 
   return (
     <section className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
@@ -441,7 +452,7 @@ function ApartmentShell({ discovery, selectedCityLabel, children }) {
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
             <Home className="w-7 h-7" />
           </div>
-          <div className="flex-1 text-right">
+          <div className={`flex-1 ${textAlignClass}`}>
             <h2 className="text-2xl font-extrabold">{t("apartment_team_ready_title")}</h2>
             <p className="text-white/85 text-sm mt-1">{t("apartment_team_ready_subtitle")}</p>
           </div>
@@ -473,9 +484,12 @@ function ApartmentShell({ discovery, selectedCityLabel, children }) {
   );
 }
 
-function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPreference, priceFormatter }) {
+function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPreference, onDetail, onChat, priceFormatter }) {
   const { t, i18n } = useTranslation();
   const city = displayCity(apartment.city, i18n.language);
+  const isRtl = isRtlLanguage(i18n);
+  const textAlignClass = isRtl ? "text-right" : "text-left";
+  const priceAlignClass = isRtl ? "text-left" : "text-right";
 
   return (
     <motion.article
@@ -487,31 +501,38 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
       <img src={apartment.image} alt="" className="w-full h-40 object-cover" />
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="text-right">
+          <div className={textAlignClass}>
             <h3 className="font-extrabold text-gray-900 leading-6">
               {t("apartment_card_title", { bedrooms: apartment.bedrooms, city })}
             </h3>
             <p className="text-xs font-bold text-gray-500 mt-1">{displayAddress(apartment, i18n.language)}</p>
           </div>
-          <div className="text-left flex-shrink-0">
+          <div className={`${priceAlignClass} flex-shrink-0`}>
             <p className="text-lg font-extrabold text-[--theme-orange]">{priceFormatter.format(apartment.price || 0)}</p>
             <p className="text-[11px] font-bold text-gray-400">{t("apartment_price_month")}</p>
           </div>
         </div>
-        <p className="text-sm text-gray-500 leading-6">
+        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>
           {t("apartment_card_description", { bedrooms: apartment.bedrooms })}
         </p>
-        {apartment.listing_url && (
-          <a
-            href={apartment.listing_url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-bold text-orange-700"
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onDetail}
+            className="min-h-10 rounded-xl bg-orange-50 text-orange-700 text-xs font-extrabold flex items-center justify-center gap-1"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             {t("apartment_listing_details")}
-          </a>
-        )}
+          </button>
+          <button
+            type="button"
+            onClick={onChat}
+            className="min-h-10 rounded-xl bg-gray-50 text-gray-700 text-xs font-extrabold flex items-center justify-center gap-1"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            {t("apartment_chat_cta")}
+          </button>
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {APARTMENT_PREFERENCES.map((preference) => {
             const active = selectedPreference === preference;
@@ -555,6 +576,7 @@ function ViewingView({
   const apartment = discovery.current_apartment || discovery.winning_apartment;
   const score = discovery.eligible_apartments?.find((item) => item.apartment_id === apartment?.id);
   const scheduledDate = discovery.visit_time ? new Date(discovery.visit_time) : null;
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
 
   if (!apartment) return null;
 
@@ -565,13 +587,13 @@ function ViewingView({
           <div className="w-11 h-11 rounded-2xl bg-green-500 text-white flex items-center justify-center">
             <Trophy className="w-6 h-6" />
           </div>
-          <div className="flex-1 text-right">
+          <div className={`flex-1 ${textAlignClass}`}>
             <h3 className="text-xl font-extrabold text-gray-900">{t("apartment_viewing_title")}</h3>
             <p className="text-sm text-gray-600 mt-1">{t("apartment_viewing_body")}</p>
           </div>
         </div>
         {score && (
-          <p className="text-xs font-bold text-green-700 mt-3">
+          <p className={`text-xs font-bold text-green-700 mt-3 ${textAlignClass}`}>
             {t("apartment_happiness_score", { points: score.points, amazingVotes: score.amazing_votes })}
           </p>
         )}
@@ -647,10 +669,11 @@ function ViewingView({
 
 function FoundView({ apartment, priceFormatter }) {
   const { t, i18n } = useTranslation();
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-green-50 border border-green-100 p-5 text-right">
+      <div className={`rounded-2xl bg-green-50 border border-green-100 p-5 ${textAlignClass}`}>
         <div className="w-12 h-12 rounded-2xl bg-green-600 text-white flex items-center justify-center mb-3">
           <Check className="w-7 h-7" />
         </div>
@@ -665,29 +688,33 @@ function FoundView({ apartment, priceFormatter }) {
 function ApartmentSummaryCard({ apartment, priceFormatter, language }) {
   const { t } = useTranslation();
   const city = displayCity(apartment.city, language);
+  const isRtl = String(language).toLowerCase().split("-")[0] === "he";
+  const textAlignClass = isRtl ? "text-right" : "text-left";
+  const priceAlignClass = isRtl ? "text-left" : "text-right";
 
   return (
     <article className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
       <img src={apartment.image} alt="" className="w-full h-44 object-cover" />
       <div className="p-4 space-y-2">
         <div className="flex items-start justify-between gap-3">
-          <div className="text-right">
+          <div className={textAlignClass}>
             <h3 className="font-extrabold text-gray-900">{t("apartment_card_title", { bedrooms: apartment.bedrooms, city })}</h3>
             <p className="text-xs font-bold text-gray-500 mt-1">{displayAddress(apartment, language)}</p>
           </div>
-          <p className="text-lg font-extrabold text-[--theme-orange]">{priceFormatter.format(apartment.price || 0)}</p>
+          <p className={`text-lg font-extrabold text-[--theme-orange] ${priceAlignClass}`}>{priceFormatter.format(apartment.price || 0)}</p>
         </div>
-        <p className="text-sm text-gray-500 leading-6">{t("apartment_card_description", { bedrooms: apartment.bedrooms })}</p>
+        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>{t("apartment_card_description", { bedrooms: apartment.bedrooms })}</p>
       </div>
     </article>
   );
 }
 
 function NoEligibleState({ onChangePreferences, onFindMore, isSaving }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
 
   return (
-    <div className="rounded-2xl bg-red-50 border border-red-100 p-4 space-y-4 text-right">
+    <div className={`rounded-2xl bg-red-50 border border-red-100 p-4 space-y-4 ${textAlignClass}`}>
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl bg-red-500 text-white flex items-center justify-center">
           <XCircle className="w-6 h-6" />
@@ -719,8 +746,11 @@ function NoEligibleState({ onChangePreferences, onFindMore, isSaving }) {
 }
 
 function EmptyOptionsState({ title, body, icon }) {
+  const { i18n } = useTranslation();
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
+
   return (
-    <div className="rounded-2xl bg-gray-50 border border-gray-100 p-5 text-right">
+    <div className={`rounded-2xl bg-gray-50 border border-gray-100 p-5 ${textAlignClass}`}>
       <div className="w-12 h-12 rounded-2xl bg-gray-900 text-white flex items-center justify-center mb-3">
         {icon}
       </div>
@@ -731,14 +761,16 @@ function EmptyOptionsState({ title, body, icon }) {
 }
 
 function NeedsCityState({ discovery }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
+
   return (
     <section className="bg-white rounded-2xl p-5 shadow-sm border border-orange-100 space-y-4">
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
           <AlertCircle className="w-6 h-6 text-[--theme-orange]" />
         </div>
-        <div className="flex-1 text-right">
+        <div className={`flex-1 ${textAlignClass}`}>
           <h2 className="text-xl font-extrabold text-gray-900">{t("apartment_no_common_city_title")}</h2>
           <p className="text-sm text-gray-500 mt-1 leading-6">{t("apartment_no_common_city_body")}</p>
         </div>

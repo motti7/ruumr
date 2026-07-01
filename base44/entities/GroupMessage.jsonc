@@ -21,6 +21,14 @@
     "content": {
       "type": "string",
       "description": "Message text"
+    },
+    "content_en": {
+      "type": "string",
+      "description": "Optional English message text for deterministic demo messages"
+    },
+    "apartment_id": {
+      "type": "string",
+      "description": "Optional apartment id when the group message belongs to an apartment-specific thread"
     }
   },
   "required": [

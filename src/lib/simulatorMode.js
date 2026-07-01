@@ -4,6 +4,7 @@ const SIMULATOR_STORAGE_KEY = 'ruumr_simulator_mode';
 const SIMULATOR_QUERY_PARAM = 'simulator_mode';
 const SIMULATOR_PLUS_LOCKED_STORAGE_KEY = 'ruumr_simulator_plus_locked';
 const SIMULATOR_PLUS_LOCKED_QUERY_PARAM = 'simulator_plus_locked';
+const DEMO_STAGE_QUERY_PARAM = 'demo_stage';
 
 const PROFILE_PALETTE = [
   ['#FA3803', '#FF7A45'],
@@ -94,11 +95,15 @@ export function isRuumrSimulatorMode() {
   }
 
   try {
-    const queryValue = new URLSearchParams(window.location.search).get(SIMULATOR_QUERY_PARAM);
+    const params = new URLSearchParams(window.location.search);
+    const queryValue = params.get(SIMULATOR_QUERY_PARAM);
+    const demoStageValue = params.get(DEMO_STAGE_QUERY_PARAM);
     if (queryValue === 'true' || queryValue === '1') {
       window.localStorage.setItem(SIMULATOR_STORAGE_KEY, 'true');
     } else if (queryValue === 'false' || queryValue === '0') {
       window.localStorage.removeItem(SIMULATOR_STORAGE_KEY);
+    } else if (['1', '2', '3'].includes(String(demoStageValue || '').trim())) {
+      window.localStorage.setItem(SIMULATOR_STORAGE_KEY, 'true');
     }
   } catch {
     // Ignore malformed URL state; fall back to stored/env values.

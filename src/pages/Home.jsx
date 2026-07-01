@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router-dom";
 import Discover from "@/pages/Discover";
 import ApartmentDiscoveryPanel from "@/components/team/ApartmentDiscoveryPanel";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { isDemoApartmentServicesStage, isDemoApartmentStage } from "@/lib/demoStage";
 
 function publishTeamBuildingLifecycle() {
   try {
@@ -21,10 +23,9 @@ function establishedTeamCount(profile) {
 }
 
 function apartmentFlowAllowed(user, profile) {
-  if (isRuumrSimulatorMode()) return true;
-  const killSwitch = import.meta.env.VITE_RUUMR_APARTMENT_FLOW_KILL_SWITCH === "true";
-  const demoUser = Boolean(user?.is_apartment_flow_demo_user || profile?.is_apartment_flow_demo_user);
-  return !killSwitch || demoUser;
+  void user;
+  void profile;
+  return isRuumrSimulatorMode() && isDemoApartmentStage();
 }
 
 export default function Home() {
@@ -40,7 +41,8 @@ export default function Home() {
         const profile = profiles[0] || null;
         const count = establishedTeamCount(profile);
         const target = Number(profile?.team_target || 3);
-        const established = count >= 2 && count >= target && apartmentFlowAllowed(user, profile);
+        const forceDemoStage2 = isRuumrSimulatorMode() && isDemoApartmentStage();
+        const established = forceDemoStage2 || (count >= 2 && count >= target && apartmentFlowAllowed(user, profile));
         if (!cancelled) {
           if (!established) {
             publishTeamBuildingLifecycle();
@@ -70,6 +72,10 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  if (isRuumrSimulatorMode() && isDemoApartmentServicesStage()) {
+    return <Navigate to="/ApartmentServices" replace />;
   }
 
   if (state.established) {

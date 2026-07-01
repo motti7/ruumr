@@ -5,7 +5,6 @@ import { User } from "@/entities/User";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Send, Loader2, CheckCheck } from "lucide-react";
-import BackButton from "@/components/shared/BackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -236,6 +235,8 @@ export default function ChatPage() {
 
   // Find last message sent by me to show read receipt
   const lastMyMsgIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => m.sender_id === user?.id).slice(-1)[0]?.i;
+  const isRtl = i18n.dir() === 'rtl';
+  const bubbleTextClass = isRtl ? 'text-right' : 'text-left';
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" dir={i18n.dir()}>
@@ -288,11 +289,17 @@ export default function ChatPage() {
          renderMessage={(msg, idx) => {
            const isMyMessage = msg.sender_id === user.id;
            const isLastMyMsg = idx === lastMyMsgIndex;
+           const bubbleSideClass = isMyMessage
+             ? isRtl ? "items-end" : "items-start"
+             : isRtl ? "items-start" : "items-end";
+           const bubbleOnRight = isMyMessage ? isRtl : !isRtl;
+           const bubbleTailClass = bubbleOnRight ? "rounded-br-sm" : "rounded-bl-sm";
            return (
-             <div key={msg.id || idx} className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"}`}>
+             <div key={msg.id || idx} dir="ltr" className={`flex flex-col ${bubbleSideClass}`}>
                <div
-                 className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${
-                   isMyMessage ? "gradient-orange text-white" : "bg-white text-gray-900 border border-gray-200"
+                 dir={i18n.dir()}
+                 className={`max-w-[75%] px-4 py-2 rounded-2xl transition-opacity ${bubbleTextClass} ${
+                   isMyMessage ? `gradient-orange text-white ${bubbleTailClass}` : `bg-white text-gray-900 border border-gray-200 ${bubbleTailClass}`
                  }`}
                >
                  <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -321,7 +328,8 @@ export default function ChatPage() {
             onChange={(e) => handleTyping(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder={t("type_message")}
-            className="flex-1 bg-gray-100 border-0"
+            dir={i18n.dir()}
+            className={`flex-1 bg-gray-100 border-0 ${bubbleTextClass}`}
           />
           <Button
             onClick={handleSendMessage}

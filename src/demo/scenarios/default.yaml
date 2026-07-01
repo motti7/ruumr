@@ -1,0 +1,338 @@
+version: 1
+id: tel-aviv-team-to-move-in
+name: Tel Aviv roommate team and move-in services
+starting_phase: team_building
+
+current_user:
+  id: demo-user-noam
+  full_name: נועם כהן
+  name: נועם
+  email: noam@demo.ruumr
+
+profiles:
+  - id: noam
+    user_id: demo-user-noam
+    role: current
+    name: נועם
+    age: 28
+    gender: male
+    location: תל אביב
+    current_status: seeking_apartment
+    search_cities: [תל אביב, רמת גן]
+    budget_min: 2800
+    budget_max: 4800
+    vibe_level: 3
+    team_target: 3
+    about_me: אוהב מוזיקה, אימונים וערבים רגועים בבית מסודר.
+    looking_for_description: מחפש שותפים קלילים, מסודרים ועם תקשורת טובה.
+    interests: [music, gym, travel, hosting, tech]
+    photos:
+      - /demo-assets/profiles/noam.svg
+
+  - id: maya
+    user_id: demo-user-maya
+    role: locked_roommate
+    name: מאיה לוי
+    age: 26
+    gender: female
+    location: תל אביב
+    current_status: seeking_apartment
+    search_cities: [תל אביב, גבעתיים]
+    budget_min: 2800
+    budget_max: 4800
+    vibe_level: 4
+    about_me: מעצבת מוצר שאוהבת בוקר שקט, קפה טוב ומוזיקה ברקע.
+    looking_for_description: מחפשת שותפים מסודרים, קלילים, ושיחה טובה כשצריך.
+    interests: [plants, reading, photography, yoga, homebody]
+    photos:
+      - /demo-assets/profiles/maya.svg
+    ruumr_plus:
+      score: 0.92
+      insight: התאמה מצוינת סביב סדר, בית נעים ותקשורת רגועה.
+      insight_i18n:
+        he: התאמה מצוינת סביב סדר, בית נעים ותקשורת רגועה.
+        en: A strong fit around tidiness, a calm home, and easy communication.
+      messageable: true
+
+  - id: eitan
+    user_id: demo-user-eitan
+    role: ruumr_plus_pick
+    name: איתן בר
+    age: 25
+    gender: male
+    location: גבעת שמואל
+    current_status: seeking_apartment
+    search_cities: [תל אביב, רמת גן]
+    budget_min: 3000
+    budget_max: 5000
+    vibe_level: 4
+    about_me: עובד היברידי, אוהב מוזיקה, צילום ובישולים פשוטים באמצע השבוע.
+    looking_for_description: מחפש צוות שמכבד פרטיות אבל יודע לתאם דברים מהר.
+    interests: [music, photography, cooking, tech, travel]
+    photos:
+      - /demo-assets/profiles/eitan.svg
+    ruumr_plus:
+      score: 0.89
+      insight: "בחירה טובה להשלמת הצוות: תקציב דומה, אזורי חיפוש חופפים והרגלי בית קרובים."
+      insight_i18n:
+        he: "בחירה טובה להשלמת הצוות: תקציב דומה, אזורי חיפוש חופפים והרגלי בית קרובים."
+        en: "A strong team addition: similar budget, overlapping search areas, and close home habits."
+      messageable: true
+
+  - id: tamar
+    user_id: demo-user-tamar
+    role: ruumr_plus_candidate
+    name: תמר ישראלי
+    age: 24
+    gender: female
+    location: ירושלים
+    current_status: seeking_apartment
+    search_cities: [ירושלים]
+    budget_min: 2200
+    budget_max: 3600
+    vibe_level: 5
+    about_me: סטודנטית לעיצוב, אוהבת בישול, מוזיקה וטיולים.
+    looking_for_description: מחפשת שותפים נעימים עם תקשורת פתוחה.
+    interests: [cooking, music, travel, art, nightlife]
+    photos:
+      - /demo-assets/profiles/tamar.svg
+    ruumr_plus:
+      score: 0.77
+      insight: התאמה אישית טובה, אבל אזורי החיפוש פחות חופפים לצוות תל אביב.
+      insight_i18n:
+        he: התאמה אישית טובה, אבל אזורי החיפוש פחות חופפים לצוות תל אביב.
+        en: A good personal fit, though the search areas overlap less with the Tel Aviv team.
+      messageable: true
+
+  - id: ori
+    user_id: demo-user-ori
+    role: available_candidate
+    name: אורי בן דוד
+    age: 29
+    gender: male
+    location: חיפה
+    current_status: seeking_apartment
+    search_cities: [חיפה, קריות]
+    budget_min: 2400
+    budget_max: 4200
+    vibe_level: 3
+    about_me: עובד היברידי, אוהב גיימינג, ספורט ומסעדות טובות.
+    looking_for_description: מחפש דירה נעימה עם אנשים זורמים.
+    interests: [gaming, business, soccer_basketball, tech]
+    photos:
+      - /demo-assets/profiles/ori.svg
+    ruumr_plus:
+      score: 0.68
+      insight: התאמה חברתית סבירה, אבל העיר והתקציב פחות מדויקים לתרחיש.
+      insight_i18n:
+        he: התאמה חברתית סבירה, אבל העיר והתקציב פחות מדויקים לתרחיש.
+        en: A reasonable social fit, but the city and budget are less aligned for this setup.
+      messageable: true
+
+team:
+  target_count: 3
+  locked_user_ids:
+    - demo-user-maya
+  auto_lock_on_ruumr_plus_like:
+    - demo-user-eitan
+
+ruumr_plus:
+  recommendation_user_ids:
+    - demo-user-eitan
+    - demo-user-tamar
+    - demo-user-ori
+  like_user_id: demo-user-eitan
+
+questionnaire_preferences:
+  - user_id: demo-user-noam
+    source: demo_scenario
+    completed_at: "2026-06-29T08:30:00.000Z"
+    answers:
+      q_smoking: b
+      q_partners: a
+      q_pets: a
+      q_cleaning_strictness: a
+      q_shopping: a
+      q_dishes: a
+      q_ac: b
+      q_hosting: b
+  - user_id: demo-user-maya
+    source: demo_scenario
+    completed_at: "2026-06-29T08:45:00.000Z"
+    answers:
+      q_smoking: b
+      q_partners: a
+      q_pets: a
+      q_cleaning_strictness: a
+      q_shopping: a
+      q_dishes: a
+      q_ac: b
+      q_hosting: b
+  - user_id: demo-user-eitan
+    source: demo_scenario
+    completed_at: "2026-06-29T09:00:00.000Z"
+    answers:
+      q_smoking: b
+      q_partners: a
+      q_pets: a
+      q_cleaning_strictness: a
+      q_shopping: b
+      q_dishes: a
+      q_ac: b
+      q_hosting: b
+  - user_id: demo-user-tamar
+    source: demo_scenario
+    completed_at: "2026-06-29T09:10:00.000Z"
+    answers:
+      q_smoking: b
+      q_partners: a
+      q_pets: a
+      q_cleaning_strictness: b
+      q_shopping: a
+      q_dishes: b
+      q_ac: b
+      q_hosting: a
+  - user_id: demo-user-ori
+    source: demo_scenario
+    completed_at: "2026-06-29T09:15:00.000Z"
+    answers:
+      q_smoking: a
+      q_partners: a
+      q_pets: b
+      q_cleaning_strictness: b
+      q_shopping: b
+      q_dishes: b
+      q_ac: a
+      q_hosting: a
+
+chats:
+  direct:
+    - with_user_id: demo-user-maya
+      messages:
+        - sender_id: demo-user-noam
+          content: היי מאיה, נראה שאנחנו ממש באותו ראש לגבי דירה מסודרת.
+          days_ago: 1
+          is_read: true
+        - sender_id: demo-user-maya
+          content: לגמרי. אם נמצא עוד שותף/ה טוב/ה אפשר להתחיל לחפש ברצינות.
+          days_ago: 0
+          is_read: false
+  group:
+    messages:
+      - sender_id: demo-user-noam
+        content: אחרי שנשלים את הצוות, נבחר עיר ונדרג דירות ביחד.
+        days_ago: 1
+      - sender_id: demo-user-maya
+        content: מתאים לי. תל אביב או גבעתיים הכי נוח לי.
+        days_ago: 0
+
+apartment_search:
+  city_key: tel_aviv
+  city: תל אביב
+  auto_submit_teammate_preferences: true
+  selected_apartment_id: apt-dizengoff-214
+  viewing_slot: "2026-07-02T18:00:00.000Z"
+  teammate_preferences:
+    demo-user-maya:
+      apt-dizengoff-214: amazing
+      apt-sheinkin-31: ok
+      apt-florentin-42: ok
+    demo-user-eitan:
+      apt-dizengoff-214: amazing
+      apt-sheinkin-31: ok
+      apt-florentin-42: no_way
+  apartments:
+    - id: apt-dizengoff-214
+      title_he: דירת 3 חדרי שינה בדיזנגוף
+      title_en: 3-bedroom apartment on Dizengoff
+      neighborhood_he: הצפון הישן
+      neighborhood_en: Old North
+      address_he: דיזנגוף 214, תל אביב
+      address_en: 214 Dizengoff St, Tel Aviv
+      price: 11840
+      bedrooms: 3
+      floor: 3
+      size_sqm: 92
+      latitude: 32.0882
+      longitude: 34.7742
+      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=82"
+      images:
+        - "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=82"
+      amenities: [balcony, elevator, renovated]
+      amenities_he: [מרפסת, מעלית, משופצת]
+      amenities_en: [Balcony, Elevator, Renovated]
+      commute_note_he: 12 דקות לאוניברסיטה באוטובוס וקרוב לסופר.
+      commute_note_en: 12 minutes to the university by bus and close to groceries.
+      description_he: דירה מוארת ומתאימה לצוות של שלושה שותפים, עם סלון נעים ומיקום שמאפשר לזוז בקלות בעיר.
+      description_en: Bright three-roommate apartment with a comfortable living room and an easy central location.
+    - id: apt-sheinkin-31
+      title_he: דירת 3 חדרי שינה בשינקין
+      title_en: 3-bedroom apartment on Sheinkin
+      neighborhood_he: לב העיר
+      neighborhood_en: Heart of the City
+      address_he: שינקין 31, תל אביב
+      address_en: 31 Sheinkin St, Tel Aviv
+      price: 11020
+      bedrooms: 3
+      floor: 2
+      size_sqm: 86
+      latitude: 32.0669
+      longitude: 34.7738
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=82"
+      images:
+        - "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=82"
+      amenities: [furnished, renovated, pets]
+      amenities_he: [מרוהטת חלקית, משופצת, אפשרות לחיות מחמד]
+      amenities_en: [Partly furnished, Renovated, Pets considered]
+      commute_note_he: הליכה קצרה לרוטשילד ולתחבורה.
+      commute_note_en: Short walk to Rothschild and transit.
+      description_he: אופציה מרכזית וחיה, קצת קטנה יותר אבל במחיר טוב.
+      description_en: Central and lively, a bit smaller but strong value.
+    - id: apt-florentin-42
+      title_he: דירת 3 חדרי שינה בפלורנטין
+      title_en: 3-bedroom apartment in Florentin
+      neighborhood_he: פלורנטין
+      neighborhood_en: Florentin
+      address_he: פרנקל 42, תל אביב
+      address_en: 42 Frenkel St, Tel Aviv
+      price: 9900
+      bedrooms: 3
+      floor: 4
+      size_sqm: 88
+      latitude: 32.0568
+      longitude: 34.7676
+      image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=82"
+      images:
+        - "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=1200&q=82"
+        - "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=82"
+      amenities: [balcony, shelter, furnished]
+      amenities_he: [מרפסת, ממ"ד, מרוהטת חלקית]
+      amenities_en: [Balcony, Safe room, Partly furnished]
+      commute_note_he: קרוב לרכבת הקלה ולאזורי עבודה.
+      commute_note_en: Near light rail and work areas.
+      description_he: דירה מגניבה במחיר נוח, אבל פחות שקטה לצוות הזה.
+      description_en: Cool and affordable, but a little less quiet for this team.
+
+move_in:
+  checklist:
+    - id: keys
+      done: true
+      he: הדירה נבחרה
+      en: Apartment chosen
+    - id: internet
+      done: false
+      he: לתאם התקנת אינטרנט
+      en: Book internet setup
+    - id: moving
+      done: false
+      he: לתכנן הובלה וכניסה
+      en: Plan move-in logistics
+    - id: essentials
+      done: false
+      he: לסגור ציוד ללילה הראשון
+      en: Cover first-night essentials

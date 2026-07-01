@@ -66,16 +66,21 @@ describe('simulatorBackend', () => {
     enableSimulatorBackend(base44);
     const state = window.__ruumrSimulatorState;
     const currentId = state.currentUser.id;
-    const seededOneSidedLike = state.collections.Swipe.find(
-      (swipe) => swipe.swiper_id === currentId && swipe.action === 'like' &&
-        !state.collections.Swipe.some(
-          (candidate) =>
-            candidate.swiper_id === swipe.swiped_id &&
-            candidate.swiped_id === currentId &&
-            candidate.action === 'like'
+    const targetId = 'demo-user-eitan';
+    state.collections.Swipe = state.collections.Swipe.filter(
+      (swipe) =>
+        !(
+          [currentId, targetId].includes(swipe.swiper_id) &&
+          [currentId, targetId].includes(swipe.swiped_id)
         )
     );
-    const targetId = seededOneSidedLike.swiped_id;
+    state.collections.Match = state.collections.Match.filter(
+      (match) =>
+        !(
+          [currentId, targetId].includes(match.user1_id) &&
+          [currentId, targetId].includes(match.user2_id)
+        )
+    );
 
     await base44.entities.Match.create({
       user1_id: currentId,
@@ -83,6 +88,11 @@ describe('simulatorBackend', () => {
       status: 'active',
       match_type: 'ruumr_plus',
       plus_initiator_id: currentId,
+    });
+    await base44.entities.Swipe.create({
+      swiper_id: currentId,
+      swiped_id: targetId,
+      action: 'like',
     });
     await base44.entities.Swipe.create({
       swiper_id: targetId,
@@ -104,5 +114,37 @@ describe('simulatorBackend', () => {
       match_type: 'mutual',
       plus_initiator_id: currentId,
     });
+  });
+
+  it('seeds stage 2 with three apartment suggestions and a full-team coffee chat while waiting for my ranking', async () => {
+    window.localStorage.setItem('ruumr_demo_stage', '2');
+    const base44 = {
+      auth: {},
+      entities: {},
+      functions: {},
+      analytics: { cleanup: vi.fn(), track: vi.fn() },
+      appLogs: { logUserInApp: vi.fn() },
+    };
+    enableSimulatorBackend(base44);
+
+    const result = await base44.functions.invoke('teamApartmentDiscovery', { action: 'ensure' });
+    const discovery = result.discovery;
+
+    expect(result.status).toBe('apartment_ranking');
+    expect(discovery.lifecycle_state).toBe('APARTMENT_RANKING');
+    expect(discovery.suggested_apartments).toHaveLength(3);
+    expect(discovery.preferences?.['demo-user-noam']).toBeUndefined();
+    expect(discovery.suggested_apartments.every((apartment) => apartment.image.startsWith('https://images.unsplash.com/'))).toBe(true);
+    expect(discovery.suggested_apartments.every((apartment) => apartment.images.length >= 3)).toBe(true);
+
+    const groupId = [...discovery.member_user_ids].sort().join('_');
+    const messages = await base44.entities.GroupMessage.filter({ group_id: groupId });
+    const seededMessages = messages.filter((message) => message.simulator_stage2_group_chat);
+
+    expect(seededMessages).toHaveLength(4);
+    expect(seededMessages.map((message) => message.sender_id)).toContain('demo-user-maya');
+    expect(seededMessages.map((message) => message.sender_id)).toContain('demo-user-eitan');
+    expect(seededMessages.some((message) => message.content_en.includes('coffee'))).toBe(true);
+    expect(seededMessages.some((message) => message.content_en.includes('check out'))).toBe(true);
   });
 });

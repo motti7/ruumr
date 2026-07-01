@@ -11,9 +11,10 @@ import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, getInterestLabelKey, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
+import { resolveRuumrPlusInsight } from '@/lib/ruumrPlusInsight';
 
 const ProfileDetail = ({ profile, onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const interestLabel = (v) => { const k = getInterestLabelKey(v); return k ? t(k) : getInterestLabel(v); };
   const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
   const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
@@ -114,13 +115,15 @@ const ProfileDetail = ({ profile, onClose }) => {
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
-                {plusMeta && plusMeta.insight &&
+                {plusMeta && resolveRuumrPlusInsight(plusMeta, i18n.language, t("interesting_match_insight")) &&
         <div className="bg-gradient-to-br from-[--theme-orange]/25 to-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
                         <h4 className="font-bold mb-2 text-white text-lg flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-[--theme-orange]" />
                             {t("why_plus_likes")}
                         </h4>
-                        <p className="text-base text-white/95 leading-relaxed">{plusMeta.insight}</p>
+                        <p className="text-base text-white/95 leading-relaxed">
+                          {resolveRuumrPlusInsight(plusMeta, i18n.language, t("interesting_match_insight"))}
+                        </p>
                         {plusMeta.reasons &&
           <div className="flex flex-wrap gap-2 mt-3">
                                 {(plusMeta.reasons.shared_cities || []).map((city, i) =>

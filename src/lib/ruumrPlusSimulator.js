@@ -1,6 +1,7 @@
 import i18n from "@/i18n";
 import { Profile } from "@/entities/Profile";
 import { getInterestLabel, normalizeInterestValues } from "@/lib/interests";
+import { normalizeInsightLanguage, resolveRuumrPlusInsight } from "@/lib/ruumrPlusInsight";
 import { applyTwoStageSwipeFilter } from "@/lib/ruumrPlusDisplayFilter";
 import { calculateCharterCompatibility, isCharterComplete } from "@/lib/charterCompletion";
 import { isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
@@ -10,6 +11,7 @@ import { isRuumrSimulatorPlusLocked } from "@/lib/simulatorMode";
  * @property {any} [userId]
  * @property {number} [limit]
  * @property {any} [requestId]
+ * @property {string} [language]
  * @property {boolean} [requirePlus]
  * @property {boolean} [refresh]
  * @property {any[] | null} [localProfiles]
@@ -306,30 +308,31 @@ function collectSharedItems(left = [], right = [], formatter = (value) => value)
   return uniqueList(result);
 }
 
-function buildInsight(reasons = {}) {
+function buildInsight(reasons = {}, language = i18n.language) {
+  const t = i18n.getFixedT(normalizeInsightLanguage(language));
   const phrases = [];
 
   if (reasons.status === "complementary") {
-    phrases.push(i18n.t("sim_insight_complementary"));
+    phrases.push(t("sim_insight_complementary"));
   }
   if (reasons.city_match) {
-    phrases.push(i18n.t("sim_insight_same_city"));
+    phrases.push(t("sim_insight_same_city"));
   }
   if (reasons.budget_fit) {
-    phrases.push(i18n.t("sim_insight_budget_fit"));
+    phrases.push(t("sim_insight_budget_fit"));
   }
   if (reasons.vibe_close) {
-    phrases.push(i18n.t("sim_insight_vibe_close"));
+    phrases.push(t("sim_insight_vibe_close"));
   }
   if ((reasons.shared_interests || []).length > 0) {
-    phrases.push(i18n.t("sim_insight_shared_interests"));
+    phrases.push(t("sim_insight_shared_interests"));
   }
   if (reasons.lifestyle_overlap) {
-    phrases.push(i18n.t("sim_insight_lifestyle"));
+    phrases.push(t("sim_insight_lifestyle"));
   }
 
   if (phrases.length === 0) {
-    return i18n.t("sim_insight_default");
+    return t("sim_insight_default");
   }
 
   return phrases.slice(0, 3).join(" · ");
@@ -368,7 +371,7 @@ function buildEntitlementSummary(userId, accessGranted) {
   };
 }
 
-function evaluateCandidate(requestor, candidate) {
+function evaluateCandidate(requestor, candidate, language = i18n.language) {
   if (!requestor || !candidate || String(requestor.user_id) === String(candidate.user_id)) {
     return null;
   }
@@ -497,7 +500,11 @@ function evaluateCandidate(requestor, candidate) {
     score: Number(totalScore.toFixed(4)),
     semantic_similarity: Number(semanticSimilarity.toFixed(4)),
     structured_score: Number(structuredScore.toFixed(4)),
-    insight: buildInsight(reasons),
+    insight: buildInsight(reasons, language),
+    insight_i18n: {
+      en: buildInsight(reasons, "en"),
+      he: buildInsight(reasons, "he"),
+    },
     reasons,
     compatibility: {
       age: Number(ageScore.toFixed(4)),
@@ -541,6 +548,75 @@ async function loadSimulatorProfiles({ userId = null, localProfiles = null, curr
   };
 }
 
+function getScenarioRecommendationIds() {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const ids = window.__ruumrSimulatorState?.scenario?.ruumr_plus?.recommendation_user_ids;
+  return Array.isArray(ids) ? ids.map((id) => String(id)).filter(Boolean) : [];
+}
+
+function buildScenarioRecommendations({
+  requestorProfile,
+  allProfiles,
+  userSwipes = [],
+  limit = 12,
+  language = i18n.language,
+} = {}) {
+  const scenarioIds = getScenarioRecommendationIds();
+  if (!scenarioIds.length || !requestorProfile) {
+    return null;
+  }
+
+  const profileByUserId = new Map(
+    uniqueProfilesByUserId(allProfiles)
+      .filter(Boolean)
+      .map((profile) => [String(profile.user_id), profile])
+  );
+  const rankedCandidates = scenarioIds
+    .map((userId, index) => {
+      const profile = profileByUserId.get(String(userId));
+      if (!profile || profile.is_visible === false || String(profile.user_id) === String(requestorProfile.user_id)) {
+        return null;
+      }
+
+      const meta = profile.ruumrPlus || profile.ruumr_plus || {};
+      const score = Number.isFinite(Number(meta.score))
+        ? Number(Number(meta.score).toFixed(4))
+        : Number(Math.max(0.5, 0.95 - index * 0.05).toFixed(4));
+      const fallbackInsight = i18n.getFixedT(normalizeInsightLanguage(language))("interesting_match_insight");
+
+      return {
+        user_id: profile.user_id,
+        score,
+        semantic_similarity: score,
+        structured_score: score,
+        insight: resolveRuumrPlusInsight(meta, language, fallbackInsight),
+        insight_i18n: meta.insight_i18n || {
+          en: resolveRuumrPlusInsight(meta, "en", i18n.getFixedT("en")("interesting_match_insight")),
+          he: resolveRuumrPlusInsight(meta, "he", i18n.getFixedT("he")("interesting_match_insight")),
+        },
+        reasons: {
+          ...(meta.reasons || {}),
+          scenario_rank: index + 1,
+          scenario_recommendation: true,
+        },
+        compatibility: meta.compatibility || { scenario: 1 },
+        questionnaire_compatibility: meta.questionnaire_compatibility || null,
+        profile,
+        messageable: meta.messageable !== false,
+      };
+    })
+    .filter(Boolean);
+
+  if (!rankedCandidates.length) {
+    return [];
+  }
+
+  return applyTwoStageSwipeFilter(rankedCandidates, userSwipes, limit || rankedCandidates.length);
+}
+
 /**
  * @param {SimulatorRecommendationOptions} options
  */
@@ -549,6 +625,7 @@ export async function buildSimulatorRuumrPlusRecommendations({
   limit = 12,
   requestId = null,
   requirePlus = true,
+  language = i18n.language,
   localProfiles = null,
   currentProfile = null,
   userSwipes = [],
@@ -593,6 +670,34 @@ export async function buildSimulatorRuumrPlusRecommendations({
     throw error;
   }
 
+  const scenarioRecommendations = buildScenarioRecommendations({
+    requestorProfile,
+    allProfiles,
+    userSwipes,
+    limit: safeLimit || 12,
+    language,
+  });
+  if (scenarioRecommendations) {
+    return {
+      ok: true,
+      status: "ok",
+      mode: "simulator",
+      request_id: requestId ?? `sim_${Date.now()}`,
+      user_id: requestorProfile.user_id,
+      requestor: requestorProfile,
+      limit: safeLimit || 12,
+      candidate_count: scenarioRecommendations.length,
+      matched_count: scenarioRecommendations.length,
+      access_granted: accessGranted,
+      entitlement: buildEntitlementSummary(requestorProfile.user_id, accessGranted),
+      client_contract: buildClientContract({ accessGranted, requirePlus }),
+      recommendations: scenarioRecommendations,
+      generated_at: new Date().toISOString(),
+      cached: false,
+      scenario_id: typeof window !== "undefined" ? window.__ruumrSimulatorState?.scenario?.id || null : null,
+    };
+  }
+
   const candidateProfiles = uniqueProfilesByUserId(
     allProfiles.filter((profile) => {
       if (!profile) return false;
@@ -602,7 +707,7 @@ export async function buildSimulatorRuumrPlusRecommendations({
   );
 
   const rankedCandidates = candidateProfiles
-    .map((candidate) => evaluateCandidate(requestorProfile, candidate))
+    .map((candidate) => evaluateCandidate(requestorProfile, candidate, language))
     .filter(Boolean)
     .sort((left, right) => {
       if (right.score !== left.score) return right.score - left.score;
