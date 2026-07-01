@@ -172,7 +172,7 @@ export default function ApartmentChat() {
           className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
           aria-label={t("back")}
         >
-          <ArrowRight className="w-5 h-5 text-gray-600" />
+          <ArrowRight className={`w-5 h-5 text-gray-600 ${isRtl ? "" : "rotate-180"}`} />
         </button>
         <div className="w-10 h-10 rounded-xl bg-orange-50 text-[--theme-orange] flex items-center justify-center">
           <Building2 className="w-5 h-5" />

@@ -12,6 +12,7 @@ import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, remove
 import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
 import TeamRequestCard from "@/components/team/TeamRequestCard";
+import TeamCompleteCelebration from "@/components/team/TeamCompleteCelebration";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
 
@@ -39,6 +40,7 @@ export default function GroupTrackerPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [pendingMembers, setPendingMembers] = useState([]);
+  const [celebration, setCelebration] = useState(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -130,26 +132,56 @@ export default function GroupTrackerPage() {
     if (isRuumrSimulatorMode()) {
       setDemoStage(DEMO_STAGES.APARTMENT_SEARCH);
       publishApartmentRankingLifecycle();
+      // Pass the stage explicitly in the URL so Home lands on stage 2 no matter
+      // how demo_stage was last read from storage.
+      navigate(`${createPageUrl('Home')}?simulator_mode=true&demo_stage=${DEMO_STAGES.APARTMENT_SEARCH}`);
+      return;
     }
     navigate(createPageUrl('Home'));
   };
 
   // Adding a teammate sends an approval request (they aren't added until they confirm).
   // Removing goes through the backend so every member's roster stays in sync.
+  const showCelebration = async () => {
+    let members = [];
+    try {
+      const profiles = await Profile.filter({ user_id: user.id });
+      const me = profiles[0];
+      members = [
+        { name: me?.name, photo: me?.photos?.find(Boolean) || null },
+        ...((me?.team_members || []).map((m) => ({ name: m.name, photo: m.photo }))),
+      ];
+    } catch { /* avatars are best-effort */ }
+    setCelebration({ members });
+  };
+
+  const handleCelebrationContinue = () => {
+    setCelebration(null);
+    continueToHome();
+  };
+
   const addToTeam = async (partnerUserId, partnerName) => {
     setIsSaving(true);
     try {
       const res = await requestTeamMember(partnerUserId, partnerName);
-      if (res?.status === 'already_member') {
-        toast({ title: t("already_in_team", { name: partnerName || t("the_roommate") }) });
-      } else if (res?.status === 'already_pending') {
+      if (res?.status === 'already_pending') {
         toast({ title: t("request_already_pending") });
+        closeAddModal();
+        setIsSaving(false);
+        return;
+      }
+      // Added (or already there) — refresh the roster so the new teammate shows.
+      closeAddModal();
+      await loadData();
+      if (res?.team_complete) {
+        await showCelebration();
+      } else if (res?.status === 'already_member') {
+        toast({ title: t("already_in_team", { name: partnerName || t("the_roommate") }) });
       } else {
-        toast({ title: t("team_request_sent_member", { name: partnerName || t("the_roommate_short") }), duration: 3500 });
+        toast({ title: t("teammate_added", { name: partnerName || t("the_roommate_short") }), duration: 3000 });
       }
     } catch (e) { console.error(e); }
     setIsSaving(false);
-    closeAddModal();
   };
 
   const removeFromTeam = async (partnerUserId) => {
@@ -253,7 +285,7 @@ export default function GroupTrackerPage() {
         {/* Progress */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <div className="text-right">
+            <div className="text-start">
               <p className="text-4xl font-bold text-[--theme-orange]">
                 {currentCount}<span className="text-2xl text-gray-300">/{targetCount}</span>
               </p>
@@ -280,7 +312,7 @@ export default function GroupTrackerPage() {
 
         {/* Team Members */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="font-bold text-gray-700 mb-4 text-right">{t("the_team")}</p>
+          <p className="font-bold text-gray-700 mb-4 text-center">{t("the_team")}</p>
           <div className="flex flex-wrap gap-3 justify-center">
             {/* Me */}
             <div className="flex flex-col items-center gap-1">
@@ -537,6 +569,9 @@ export default function GroupTrackerPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {celebration && (
+        <TeamCompleteCelebration members={celebration.members} onContinue={handleCelebrationContinue} />
+      )}
     </div>
   );
 }

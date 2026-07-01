@@ -75,12 +75,24 @@ const wrapNativeIOSPaymentGuard = (currentPageName, element) => (
     : element
 );
 
+const HOUSING_LIFECYCLES = new Set(['APARTMENT_RANKING', 'APARTMENT_VIEWING', 'APARTMENT_FOUND']);
+// The team is genuinely in the apartment flow when the lifecycle says so, even
+// if demo_stage drifted — keeps housing sub-pages (map, chat, detail) reachable.
+const hasActiveApartmentLifecycle = () => {
+  try {
+    return HOUSING_LIFECYCLES.has(window.localStorage?.getItem('ruumr_apartment_lifecycle'));
+  } catch {
+    return false;
+  }
+};
+
 const wrapDemoStageGuard = (currentPageName, element) => {
   if (currentPageName === 'ApartmentMap' && isRuumrSimulatorMode() && isDemoApartmentServicesStage()) {
     return <Navigate to="/ApartmentServices" replace />;
   }
 
-  return DEMO_HOUSING_ROUTES.has(currentPageName) && !(isRuumrSimulatorMode() && isDemoHousingStage())
+  const inApartmentFlow = isRuumrSimulatorMode() && (isDemoHousingStage() || hasActiveApartmentLifecycle());
+  return DEMO_HOUSING_ROUTES.has(currentPageName) && !inApartmentFlow
     ? <Navigate to="/Home" replace />
     : element;
 };

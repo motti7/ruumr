@@ -5,50 +5,54 @@ starting_phase: team_building
 
 current_user:
   id: demo-user-noam
-  full_name: נועם כהן
-  name: נועם
+  full_name: Noam Cohen
+  name: Noam
   email: noam@demo.ruumr
 
 profiles:
   - id: noam
     user_id: demo-user-noam
     role: current
-    name: נועם
+    name: Noam
     age: 28
     gender: male
-    location: תל אביב
+    location: Tel Aviv
     current_status: seeking_apartment
-    search_cities: [תל אביב, רמת גן]
+    search_cities: [Tel Aviv, Ramat Gan]
     budget_min: 2800
     budget_max: 4800
     vibe_level: 3
     team_target: 3
-    about_me: אוהב מוזיקה, אימונים וערבים רגועים בבית מסודר.
-    looking_for_description: מחפש שותפים קלילים, מסודרים ועם תקשורת טובה.
+    about_me: Into music, workouts, and calm evenings in a tidy home.
+    looking_for_description: Looking for easygoing, tidy roommates with good communication.
     interests: [music, gym, travel, hosting, tech]
     photos:
-      - /demo-assets/profiles/noam.svg
+      - /demo-assets/profiles/noam.jpg
+      - /demo-assets/profiles/noam-2.jpg
+      - /demo-assets/profiles/noam-3.jpg
 
   - id: maya
     user_id: demo-user-maya
     role: locked_roommate
-    name: מאיה לוי
+    name: Maya Levi
     age: 26
     gender: female
-    location: תל אביב
+    location: Tel Aviv
     current_status: seeking_apartment
-    search_cities: [תל אביב, גבעתיים]
+    search_cities: [Tel Aviv, Givatayim]
     budget_min: 2800
     budget_max: 4800
     vibe_level: 4
-    about_me: מעצבת מוצר שאוהבת בוקר שקט, קפה טוב ומוזיקה ברקע.
-    looking_for_description: מחפשת שותפים מסודרים, קלילים, ושיחה טובה כשצריך.
+    about_me: Product designer who loves quiet mornings, good coffee, and music in the background.
+    looking_for_description: Looking for tidy, easygoing roommates and good conversation when it counts.
     interests: [plants, reading, photography, yoga, homebody]
     photos:
-      - /demo-assets/profiles/maya.svg
+      - /demo-assets/profiles/maya.jpg
+      - /demo-assets/profiles/maya-2.jpg
+      - /demo-assets/profiles/maya-3.jpg
     ruumr_plus:
       score: 0.92
-      insight: התאמה מצוינת סביב סדר, בית נעים ותקשורת רגועה.
+      insight: A strong fit around tidiness, a calm home, and easy communication.
       insight_i18n:
         he: התאמה מצוינת סביב סדר, בית נעים ותקשורת רגועה.
         en: A strong fit around tidiness, a calm home, and easy communication.
@@ -57,23 +61,26 @@ profiles:
   - id: eitan
     user_id: demo-user-eitan
     role: ruumr_plus_pick
-    name: איתן בר
+    hidden_from_discover: true
+    name: Eitan Bar
     age: 25
     gender: male
-    location: גבעת שמואל
+    location: Givat Shmuel
     current_status: seeking_apartment
-    search_cities: [תל אביב, רמת גן]
+    search_cities: [Tel Aviv, Ramat Gan]
     budget_min: 3000
     budget_max: 5000
     vibe_level: 4
-    about_me: עובד היברידי, אוהב מוזיקה, צילום ובישולים פשוטים באמצע השבוע.
-    looking_for_description: מחפש צוות שמכבד פרטיות אבל יודע לתאם דברים מהר.
+    about_me: Hybrid worker who loves music, photography, and simple midweek cooking.
+    looking_for_description: Looking for a team that respects privacy but coordinates quickly.
     interests: [music, photography, cooking, tech, travel]
     photos:
-      - /demo-assets/profiles/eitan.svg
+      - /demo-assets/profiles/eitan.jpg
+      - /demo-assets/profiles/eitan-2.jpg
+      - /demo-assets/profiles/eitan-3.jpg
     ruumr_plus:
       score: 0.89
-      insight: "בחירה טובה להשלמת הצוות: תקציב דומה, אזורי חיפוש חופפים והרגלי בית קרובים."
+      insight: "A strong team addition: similar budget, overlapping search areas, and close home habits."
       insight_i18n:
         he: "בחירה טובה להשלמת הצוות: תקציב דומה, אזורי חיפוש חופפים והרגלי בית קרובים."
         en: "A strong team addition: similar budget, overlapping search areas, and close home habits."
@@ -82,23 +89,26 @@ profiles:
   - id: tamar
     user_id: demo-user-tamar
     role: ruumr_plus_candidate
-    name: תמר ישראלי
+    hidden_from_discover: true
+    name: Tamar Israeli
     age: 24
     gender: female
-    location: ירושלים
+    location: Jerusalem
     current_status: seeking_apartment
-    search_cities: [ירושלים]
+    search_cities: [Jerusalem]
     budget_min: 2200
     budget_max: 3600
     vibe_level: 5
-    about_me: סטודנטית לעיצוב, אוהבת בישול, מוזיקה וטיולים.
-    looking_for_description: מחפשת שותפים נעימים עם תקשורת פתוחה.
+    about_me: Design student who loves cooking, music, and traveling.
+    looking_for_description: Looking for friendly roommates with open communication.
     interests: [cooking, music, travel, art, nightlife]
     photos:
-      - /demo-assets/profiles/tamar.svg
+      - /demo-assets/profiles/tamar.jpg
+      - /demo-assets/profiles/tamar-2.jpg
+      - /demo-assets/profiles/tamar-3.jpg
     ruumr_plus:
       score: 0.77
-      insight: התאמה אישית טובה, אבל אזורי החיפוש פחות חופפים לצוות תל אביב.
+      insight: A good personal fit, though the search areas overlap less with the Tel Aviv team.
       insight_i18n:
         he: התאמה אישית טובה, אבל אזורי החיפוש פחות חופפים לצוות תל אביב.
         en: A good personal fit, though the search areas overlap less with the Tel Aviv team.
@@ -107,40 +117,131 @@ profiles:
   - id: ori
     user_id: demo-user-ori
     role: available_candidate
-    name: אורי בן דוד
+    name: Ori Ben-David
     age: 29
     gender: male
-    location: חיפה
+    location: Haifa
     current_status: seeking_apartment
-    search_cities: [חיפה, קריות]
+    search_cities: [Haifa, Krayot]
     budget_min: 2400
     budget_max: 4200
     vibe_level: 3
-    about_me: עובד היברידי, אוהב גיימינג, ספורט ומסעדות טובות.
-    looking_for_description: מחפש דירה נעימה עם אנשים זורמים.
+    about_me: Hybrid worker who loves gaming, sports, and good restaurants.
+    looking_for_description: Looking for a comfortable apartment with easygoing people.
     interests: [gaming, business, soccer_basketball, tech]
     photos:
-      - /demo-assets/profiles/ori.svg
+      - /demo-assets/profiles/ori.jpg
+      - /demo-assets/profiles/ori-2.jpg
+      - /demo-assets/profiles/ori-3.jpg
     ruumr_plus:
       score: 0.68
-      insight: התאמה חברתית סבירה, אבל העיר והתקציב פחות מדויקים לתרחיש.
+      insight: A reasonable social fit, but the city and budget are less aligned for this setup.
       insight_i18n:
         he: התאמה חברתית סבירה, אבל העיר והתקציב פחות מדויקים לתרחיש.
         en: A reasonable social fit, but the city and budget are less aligned for this setup.
+      messageable: true
+
+  - id: daniel
+    user_id: demo-user-daniel
+    role: available_candidate
+    name: Daniel Katz
+    age: 27
+    gender: male
+    location: Tel Aviv
+    current_status: seeking_apartment
+    search_cities: [Tel Aviv, Ramat Gan]
+    budget_min: 3000
+    budget_max: 5000
+    vibe_level: 3
+    about_me: Backend developer who cooks a lot and runs by the beach on weekends.
+    looking_for_description: Looking for laid-back roommates who keep shared spaces tidy.
+    interests: [cooking, gym, tech, music, travel]
+    photos:
+      - /demo-assets/profiles/daniel.jpg
+      - /demo-assets/profiles/daniel-2.jpg
+      - /demo-assets/profiles/daniel-3.jpg
+
+  - id: roi
+    user_id: demo-user-roi
+    role: available_candidate
+    name: Roi Azoulay
+    age: 26
+    gender: male
+    location: Tel Aviv
+    current_status: seeking_apartment
+    search_cities: [Tel Aviv, Givatayim]
+    budget_min: 2800
+    budget_max: 4600
+    vibe_level: 4
+    about_me: Product guy, big on live music, board games, and Friday dinners at home.
+    looking_for_description: Looking for friendly, communicative people to share a home with.
+    interests: [music, gaming, tech, cooking, nightlife]
+    photos:
+      - /demo-assets/profiles/roi.jpg
+      - /demo-assets/profiles/roi-2.jpg
+      - /demo-assets/profiles/roi-3.jpg
+
+  - id: noa
+    user_id: demo-user-noa
+    role: available_candidate
+    name: Noa Peretz
+    age: 25
+    gender: female
+    location: Tel Aviv
+    current_status: seeking_apartment
+    search_cities: [Tel Aviv, Ramat Gan]
+    budget_min: 2800
+    budget_max: 4500
+    vibe_level: 3
+    about_me: Illustrator and coffee addict who loves plants, yoga, and quiet mornings.
+    looking_for_description: Looking for tidy, easygoing roommates with good vibes.
+    interests: [art, yoga, plants, reading, music]
+    photos:
+      - /demo-assets/profiles/noa.jpg
+      - /demo-assets/profiles/noa-2.jpg
+      - /demo-assets/profiles/noa-3.jpg
+
+  - id: yonatan
+    user_id: demo-user-yonatan
+    role: ruumr_plus_candidate
+    hidden_from_discover: true
+    name: Yonatan Gal
+    age: 27
+    gender: male
+    location: Tel Aviv
+    current_status: seeking_apartment
+    search_cities: [Tel Aviv, Ramat Gan]
+    budget_min: 2900
+    budget_max: 4800
+    vibe_level: 3
+    about_me: Sound engineer who loves basketball, street food, and late-night studio sessions.
+    looking_for_description: Looking for chill, respectful roommates who are easy to coordinate with.
+    interests: [music, soccer_basketball, cooking, nightlife, tech]
+    photos:
+      - /demo-assets/profiles/yonatan.jpg
+      - /demo-assets/profiles/yonatan-2.jpg
+      - /demo-assets/profiles/yonatan-3.jpg
+    ruumr_plus:
+      score: 0.72
+      insight: Strong overlap on schedule and neighborhoods, with an easygoing social style.
+      insight_i18n:
+        he: חפיפה חזקה בשעות ובאזורים, עם סגנון חברתי זורם.
+        en: Strong overlap on schedule and neighborhoods, with an easygoing social style.
       messageable: true
 
 team:
   target_count: 3
   locked_user_ids:
     - demo-user-maya
-  auto_lock_on_ruumr_plus_like:
-    - demo-user-eitan
+  # Manual team building: Ruumr Plus likes create a match (Matches tab) but do
+  # NOT auto-add to the team. The user adds teammates manually from Matches.
+  auto_lock_on_ruumr_plus_like: []
 
 ruumr_plus:
   recommendation_user_ids:
     - demo-user-eitan
     - demo-user-tamar
-    - demo-user-ori
+    - demo-user-yonatan
   like_user_id: demo-user-eitan
 
 questionnaire_preferences:
@@ -210,20 +311,20 @@ chats:
     - with_user_id: demo-user-maya
       messages:
         - sender_id: demo-user-noam
-          content: היי מאיה, נראה שאנחנו ממש באותו ראש לגבי דירה מסודרת.
+          content: Hey Maya, looks like we're totally on the same page about a tidy apartment.
           days_ago: 1
           is_read: true
         - sender_id: demo-user-maya
-          content: לגמרי. אם נמצא עוד שותף/ה טוב/ה אפשר להתחיל לחפש ברצינות.
+          content: Totally. If we find one more good roommate, we can start searching for real.
           days_ago: 0
           is_read: false
   group:
     messages:
       - sender_id: demo-user-noam
-        content: אחרי שנשלים את הצוות, נבחר עיר ונדרג דירות ביחד.
+        content: Once we complete the team, we'll pick a city and rank apartments together.
         days_ago: 1
       - sender_id: demo-user-maya
-        content: מתאים לי. תל אביב או גבעתיים הכי נוח לי.
+        content: Works for me. Tel Aviv or Givatayim are easiest for me.
         days_ago: 0
 
 apartment_search:

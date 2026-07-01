@@ -6,6 +6,7 @@ import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock, MessageCircle, Map, PackageCheck } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
+import DemoStageSwitcher from "./components/dev/DemoStageSwitcher";
 import LanguageToggle from "./components/shared/LanguageToggle";
 import { motion } from "framer-motion";
 
@@ -370,7 +371,6 @@ export default function Layout({ children, currentPageName }) {
           { id: "home", name: t("nav_home"), path: createPageUrl("Home"), icon: Home },
           { id: "chats", name: t("nav_chats"), path: createPageUrl("TeamChats"), icon: MessageCircle, messageBadge: unreadMessagesCount },
           { id: "map", name: t("nav_map"), path: createPageUrl("ApartmentMap"), icon: Map },
-          { id: "plus", name: "Plus", path: createPageUrl("Home"), icon: Sparkles, inert: true },
         ]
       : [
         { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
@@ -413,6 +413,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={direction}>
+        <DemoStageSwitcher />
         {!apartmentFlowActive && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">

@@ -23,6 +23,7 @@ import { APARTMENT_LIFECYCLE } from "@/lib/apartmentPreferences";
 import { useToast } from "@/components/ui/use-toast";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
+import GalleryLightbox from "@/components/shared/GalleryLightbox";
 
 function displayAddress(apartment, language) {
   return language === "he"
@@ -66,6 +67,7 @@ export default function ApartmentDetail() {
   const [state, setState] = useState({ loading: true, discovery: null });
   const [visitTime, setVisitTime] = useState("");
   const [saving, setSaving] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const visitTimeInputRef = useRef(null);
   const apartmentId = searchParams.get("apartmentId") || "";
   const direction = getLanguageDirection(i18n);
@@ -191,7 +193,7 @@ export default function ApartmentDetail() {
           className="w-11 h-11 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center"
           aria-label={t("back")}
         >
-          <ArrowRight className="w-5 h-5 text-gray-700" />
+          <ArrowRight className={`w-5 h-5 text-gray-700 ${isRtl ? "" : "rotate-180"}`} />
         </button>
         <div className={`${textAlignClass} flex-1`}>
           <h1 className="text-2xl font-extrabold text-gray-900">{t("apartment_detail_title")}</h1>
@@ -201,11 +203,15 @@ export default function ApartmentDetail() {
 
       <main className="p-4 space-y-4">
         <section className="space-y-2">
-          <img src={images[0]} alt="" className="w-full h-64 object-cover rounded-2xl shadow-sm" />
+          <button type="button" onClick={() => setLightboxIndex(0)} className="block w-full" aria-label={t("enlarged_image")}>
+            <img src={images[0]} alt="" className="w-full h-64 object-cover rounded-2xl shadow-sm" />
+          </button>
           {images.length > 1 && (
             <div className="grid grid-cols-2 gap-2">
-              {images.slice(1, 3).map((image) => (
-                <img key={image} src={image} alt="" className="w-full h-28 object-cover rounded-xl" />
+              {images.slice(1, 3).map((image, i) => (
+                <button type="button" key={image} onClick={() => setLightboxIndex(i + 1)} className="block w-full" aria-label={t("enlarged_image")}>
+                  <img src={image} alt="" className="w-full h-28 object-cover rounded-xl" />
+                </button>
               ))}
             </div>
           )}
@@ -321,6 +327,9 @@ export default function ApartmentDetail() {
           </button>
         </div>
       </main>
+      {lightboxIndex !== null && (
+        <GalleryLightbox images={images} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+      )}
     </div>
   );
 }

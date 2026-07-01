@@ -242,8 +242,12 @@ function scenarioTeammatePreferences(state, discovery) {
   const scenarioPreferences = state?.scenario?.apartment_search?.teammate_preferences || {};
   if (!state?.scenario?.apartment_search?.auto_submit_teammate_preferences) return null;
   const apartmentIds = new Set((discovery?.suggested_apartments || []).map((apartment) => String(apartment.id)));
+  // Only apply scenario preferences for people who are actually on the team, so
+  // a team built from arbitrary Plus picks doesn't inherit a non-member's votes.
+  const memberIds = new Set((discovery?.member_user_ids || []).map((id) => String(id)));
   const entries = Object.entries(scenarioPreferences)
     .filter(([userId]) => String(userId) !== String(state.currentUser.id))
+    .filter(([userId]) => memberIds.size === 0 || memberIds.has(String(userId)))
     .map(([userId, preferences]) => {
       const normalized = Object.fromEntries(
         Object.entries(preferences || {}).filter(([apartmentId]) => apartmentIds.has(String(apartmentId)))
@@ -260,7 +264,12 @@ function scenarioTeammatePreferences(state, discovery) {
       ];
     })
     .filter(([, record]) => Object.keys(record.preferences || {}).length === apartmentIds.size);
-  return Object.fromEntries(entries);
+  // Return null (not an empty object) when no scenario teammate covers the
+  // current batch — e.g. after "find three more" surfaces non-scenario
+  // apartments whose ids aren't in teammate_preferences. A null result lets
+  // submitApartmentPreferences fall through to the auto-rank fallback so the
+  // teammates still submit and the flow doesn't softlock at "1/3".
+  return entries.length ? Object.fromEntries(entries) : null;
 }
 
 function cloneCollectionRecords(collections = {}) {
@@ -281,6 +290,7 @@ function readPersistedSimulatorState() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("simulator_reset_state") === "true") {
       window.localStorage.removeItem(SIMULATOR_STATE_STORAGE_KEY);
+      try { window.sessionStorage?.removeItem("ruumr_apartment_intro_seen"); } catch { /* ignore */ }
       params.delete("simulator_reset_state");
       const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash || ""}`;
       window.history.replaceState(window.history.state, "", nextUrl);
@@ -431,6 +441,7 @@ function createDemoProfile(options = {}) {
     songImage = "",
     videoUrl = null,
     isApartmentFlowDemoUser = false,
+    hiddenFromDiscover = false,
   } = options;
 
   const createdDate = daysAgoIso(createdOffsetDays);
@@ -490,6 +501,10 @@ function createDemoProfile(options = {}) {
     ruumrPlus,
     ruumr_plus: ruumrPlus,
     is_apartment_flow_demo_user: isApartmentFlowDemoUser,
+    // Demo-only: keep a profile out of the regular swipe deck while still
+    // letting Ruumr Plus surface it (Plus reads recommendation_user_ids and
+    // ignores this flag). Defaults false, so real users are unaffected.
+    hidden_from_discover: hiddenFromDiscover,
   };
 }
 
@@ -1008,6 +1023,7 @@ function profileFromScenario(profile = {}) {
     isVerified: profile.is_verified !== false,
     createdOffsetDays: profile.created_offset_days || 0,
     ruumrPlus: profile.ruumr_plus || null,
+    hiddenFromDiscover: profile.hidden_from_discover === true,
     photos: profile.photos || null,
     apartmentPhotos: profile.apartment_photos || null,
     songPreviewUrl: profile.song_preview_url || null,
@@ -2067,7 +2083,10 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
           nextPreferences[memberId] = record;
         }
       });
-    } else if (simulatorAutoRankTeamEnabled()) {
+    }
+    // Auto-rank any team member the scenario didn't cover (e.g. a team built
+    // from arbitrary Plus picks), so submission never stalls waiting on them.
+    if (simulatorAutoRankTeamEnabled()) {
       const apartmentIds = (discovery.suggested_apartments || []).map((apartment) => apartment.id);
       const preferenceOrders = [
         ["amazing", "ok", "ok"],
@@ -2337,7 +2356,48 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
         return { success: true };
       }
       if (functionName === "createTeamInvite") {
-        return { success: true, status: "already_pending" };
+        // Manual add-to-team from an existing match: in the demo there is no
+        // counterparty to approve, so add the matched teammate immediately.
+        const targetId = String(data?.target_user_id || "");
+        const currentProfile = getSimulatorProfileByUserId(state, state.currentUser.id);
+        const targetProfile = targetId ? getSimulatorProfileByUserId(state, targetId) : null;
+        // Email / no-target invites have no one to add yet — leave pending.
+        if (!targetId || !currentProfile || !targetProfile) {
+          return { success: true, status: "already_pending" };
+        }
+        const members = currentProfile.team_members || [];
+        const activeMemberCount = (mem) => 1 + mem.filter((member) => !member.pending).length;
+        const isComplete = (count) => count >= Number(currentProfile.team_target || 3);
+        if (members.some((member) => String(member.user_id) === targetId && !member.pending)) {
+          const count = activeMemberCount(members);
+          return { success: true, status: "already_member", team_complete: isComplete(count), member_count: count };
+        }
+        const match = (state.collections.Match || []).find((item) => {
+          const me = String(state.currentUser.id);
+          const a = String(item.user1_id);
+          const b = String(item.user2_id);
+          return (a === me && b === targetId) || (b === me && a === targetId);
+        });
+        const matchId = match?.id || pairStableId("match", state.currentUser.id, targetId);
+        currentProfile.team_members = [
+          ...members,
+          {
+            match_id: matchId,
+            user_id: targetId,
+            name: targetProfile.name,
+            photo: targetProfile.photos?.[0] || null,
+            added_from_match: true,
+          },
+        ];
+        currentProfile.team_target = state.scenario?.team?.target_count || currentProfile.team_target || 3;
+        currentProfile.updated_date = nowIso();
+        if (state.currentProfile && String(state.currentProfile.user_id) === String(currentProfile.user_id)) {
+          state.currentProfile = { ...state.currentProfile, ...clone(currentProfile) };
+        }
+        persistSimulatorState(state);
+        const activeCount = 1 + (currentProfile.team_members || []).filter((member) => !member.pending).length;
+        const teamComplete = activeCount >= Number(currentProfile.team_target || 3);
+        return { success: true, status: "added", team_complete: teamComplete, member_count: activeCount };
       }
       if (functionName === "respondToTeamInvite" || functionName === "claimTeamInvites") {
         return { success: true };

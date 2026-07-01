@@ -176,6 +176,10 @@ export default function DiscoverPage() {
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
 
+        // 2b. Kept out of the regular swipe deck (e.g. demo profiles that are
+        // surfaced only through Ruumr Plus). Defaults undefined → shown.
+        if (p.hidden_from_discover === true) return false;
+
         // 3. Gender Matching (Admin bypasses gender filter for review purposes)
         if (!isAdminViewer) {
           const myGender = currentUserProfile.gender || 'male'; 

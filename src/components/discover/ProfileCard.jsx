@@ -442,9 +442,11 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     if (tapX < 60 && e.clientY - rect.top < 60) return;
 
     if (tapX < width / 2) {
-      setCurrentPhotoIndex((prev) => (prev + 1) % media.length);
-    } else {
+      // Left half → previous photo
       setCurrentPhotoIndex((prev) => (prev - 1 + media.length) % media.length);
+    } else {
+      // Right half → next photo
+      setCurrentPhotoIndex((prev) => (prev + 1) % media.length);
     }
   }, [isActive, isExpanded, media.length]);
 

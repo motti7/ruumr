@@ -14,6 +14,7 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
+  Navigation,
   RotateCcw,
   ThumbsDown,
   Trophy,
@@ -37,6 +38,7 @@ import {
   preferencesAreComplete,
 } from "@/lib/apartmentPreferences";
 import { useToast } from "@/components/ui/use-toast";
+import ApartmentIntroModal from "@/components/team/ApartmentIntroModal";
 
 const CONFETTI_STORAGE_KEY = "ruumr_team_apartment_transition_confetti_seen";
 const LIFECYCLE_STORAGE_KEY = "ruumr_apartment_lifecycle";
@@ -79,6 +81,14 @@ function displayAddress(apartment, language) {
   return [neighborhood, displayCity(apartment?.city, language)].filter(Boolean).join(", ");
 }
 
+// Pick the localized variant of an apartment field (e.g. `${base}_en` / `${base}_he`),
+// falling back to the other language so cards never render blank.
+function localizedField(apartment, base, language) {
+  const he = apartment?.[`${base}_he`];
+  const en = apartment?.[`${base}_en`];
+  return (language === "he" ? he || en : en || he) || "";
+}
+
 function lifecycleFrom(discovery) {
   if (!discovery) return APARTMENT_LIFECYCLE.TEAM_BUILDING;
   if (discovery.lifecycle_state) return discovery.lifecycle_state;
@@ -106,6 +116,19 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   const [rejectionReason, setRejectionReason] = useState(REJECTION_REASONS[0]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [introDismissed, setIntroDismissed] = useState(() => {
+    try {
+      return sessionStorage.getItem("ruumr_apartment_intro_seen") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const dismissIntro = () => {
+    try {
+      sessionStorage.setItem("ruumr_apartment_intro_seen", "1");
+    } catch { /* ignore */ }
+    setIntroDismissed(true);
+  };
   const visitTimeInputRef = useRef(null);
 
   useEffect(() => {
@@ -393,13 +416,9 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   }
 
   return (
-    <ApartmentShell discovery={discovery} selectedCityLabel={selectedCityLabel}>
-      <div>
-        <p className="text-sm text-gray-600 leading-6">
-          {t("apartment_found_in_city", { city: selectedCityLabel })}
-        </p>
-        <p className="text-sm text-gray-500 leading-6 mt-1">{t("apartment_preference_prompt")}</p>
-      </div>
+    <>
+      <ApartmentShell discovery={discovery} selectedCityLabel={selectedCityLabel}>
+      <p className="text-sm font-bold text-gray-700">{t("apartment_rate_prompt")}</p>
 
       <div className="space-y-3">
         {apartments.map((apartment, index) => (
@@ -437,7 +456,9 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
           {mySubmittedPreferences ? t("apartment_update_preferences") : t("apartment_submit_preferences")}
         </button>
       </div>
-    </ApartmentShell>
+      </ApartmentShell>
+      {!introDismissed && <ApartmentIntroModal onClose={dismissIntro} />}
+    </>
   );
 }
 
@@ -490,6 +511,11 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
   const isRtl = isRtlLanguage(i18n);
   const textAlignClass = isRtl ? "text-right" : "text-left";
   const priceAlignClass = isRtl ? "text-left" : "text-right";
+  const neighborhood = localizedField(apartment, "neighborhood", i18n.language) || city;
+  const description =
+    localizedField(apartment, "description", i18n.language)
+    || t("apartment_card_description", { bedrooms: apartment.bedrooms });
+  const commute = localizedField(apartment, "commute_note", i18n.language);
 
   return (
     <motion.article
@@ -498,13 +524,13 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
       transition={{ delay: index * 0.05 }}
       className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
     >
-      <img src={apartment.image} alt="" className="w-full h-40 object-cover" />
+      <button type="button" onClick={onDetail} className="block w-full" aria-label={t("apartment_listing_details")}>
+        <img src={apartment.image} alt="" className="w-full h-40 object-cover" />
+      </button>
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className={textAlignClass}>
-            <h3 className="font-extrabold text-gray-900 leading-6">
-              {t("apartment_card_title", { bedrooms: apartment.bedrooms, city })}
-            </h3>
+            <h3 className="font-extrabold text-gray-900 leading-6">{neighborhood}</h3>
             <p className="text-xs font-bold text-gray-500 mt-1">{displayAddress(apartment, i18n.language)}</p>
           </div>
           <div className={`${priceAlignClass} flex-shrink-0`}>
@@ -512,9 +538,13 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
             <p className="text-[11px] font-bold text-gray-400">{t("apartment_price_month")}</p>
           </div>
         </div>
-        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>
-          {t("apartment_card_description", { bedrooms: apartment.bedrooms })}
-        </p>
+        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>{description}</p>
+        {commute && (
+          <div className={`flex items-center gap-1.5 text-xs font-bold text-orange-700 ${textAlignClass}`}>
+            <Navigation className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{commute}</span>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -691,6 +721,11 @@ function ApartmentSummaryCard({ apartment, priceFormatter, language }) {
   const isRtl = String(language).toLowerCase().split("-")[0] === "he";
   const textAlignClass = isRtl ? "text-right" : "text-left";
   const priceAlignClass = isRtl ? "text-left" : "text-right";
+  const neighborhood = localizedField(apartment, "neighborhood", language) || city;
+  const description =
+    localizedField(apartment, "description", language)
+    || t("apartment_card_description", { bedrooms: apartment.bedrooms });
+  const commute = localizedField(apartment, "commute_note", language);
 
   return (
     <article className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
@@ -698,12 +733,18 @@ function ApartmentSummaryCard({ apartment, priceFormatter, language }) {
       <div className="p-4 space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className={textAlignClass}>
-            <h3 className="font-extrabold text-gray-900">{t("apartment_card_title", { bedrooms: apartment.bedrooms, city })}</h3>
+            <h3 className="font-extrabold text-gray-900">{neighborhood}</h3>
             <p className="text-xs font-bold text-gray-500 mt-1">{displayAddress(apartment, language)}</p>
           </div>
           <p className={`text-lg font-extrabold text-[--theme-orange] ${priceAlignClass}`}>{priceFormatter.format(apartment.price || 0)}</p>
         </div>
-        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>{t("apartment_card_description", { bedrooms: apartment.bedrooms })}</p>
+        <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>{description}</p>
+        {commute && (
+          <div className={`flex items-center gap-1.5 text-xs font-bold text-orange-700 ${textAlignClass}`}>
+            <Navigation className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{commute}</span>
+          </div>
+        )}
       </div>
     </article>
   );

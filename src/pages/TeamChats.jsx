@@ -127,7 +127,7 @@ export default function TeamChatsPage() {
           className="w-11 h-11 rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm"
           aria-label={t("back")}
         >
-          <ArrowRight className="w-5 h-5 text-gray-600" />
+          <ArrowRight className={`w-5 h-5 text-gray-600 ${isRtl ? "" : "rotate-180"}`} />
         </button>
         <div className={textAlignClass}>
           <h1 className="text-3xl font-extrabold text-gray-900">{t("team_chats_title")}</h1>

@@ -11,7 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MatchCard from "../components/matches/MatchCard";
 import SwipeableMatchRow from "../components/matches/SwipeableMatchRow";
 import PullToRefresh from "@/components/shared/PullToRefresh";
+import TeamCompleteCelebration from "@/components/team/TeamCompleteCelebration";
 import { requestTeamMember } from "@/api/teamInvites";
+import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function MatchesPage() {
@@ -30,6 +32,7 @@ export default function MatchesPage() {
   const [seenMatchIds, setSeenMatchIds] = useState(() => {
     try {return JSON.parse(localStorage.getItem('roomi_seen_match_ids') || '[]');} catch {return [];}
   });
+  const [celebration, setCelebration] = useState(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -172,22 +175,46 @@ export default function MatchesPage() {
     }
   }, []);
 
+  const handleCelebrationContinue = useCallback(() => {
+    setCelebration(null);
+    setDemoStage(DEMO_STAGES.APARTMENT_SEARCH);
+    navigate(`${createPageUrl('Home')}?simulator_mode=true&demo_stage=${DEMO_STAGES.APARTMENT_SEARCH}`);
+  }, [navigate]);
+
   const handleAddToTeam = useCallback(async (partnerUserId, partnerName) => {
     if (!partnerUserId) return;
     try {
       const res = await requestTeamMember(partnerUserId, partnerName);
       if (res?.status === 'already_member') {
         toast({ title: t("already_in_team", { name: partnerName || t("the_roommate") }) });
-      } else if (res?.status === 'already_pending') {
+        return;
+      }
+      if (res?.status === 'already_pending') {
         toast({ title: t("request_already_pending") });
+        return;
+      }
+      // In demo/simulator the request is approved immediately (no counterparty
+      // to accept), so the teammate joins right away.
+      await loadMatches();
+      if (res?.team_complete) {
+        let members = [];
+        try {
+          const profiles = await Profile.filter({ user_id: user.id });
+          const me = profiles[0];
+          members = [
+            { name: me?.name, photo: me?.photos?.find(Boolean) || null },
+            ...((me?.team_members || []).map((m) => ({ name: m.name, photo: m.photo }))),
+          ];
+        } catch { /* avatars are best-effort */ }
+        setCelebration({ members });
       } else {
-        toast({ title: t("team_request_sent", { name: partnerName || t("the_roommate_short") }), duration: 3500 });
+        toast({ title: t("teammate_added", { name: partnerName || t("the_roommate_short") }), duration: 3000 });
       }
     } catch (e) {
       console.error("Error requesting team member:", e);
       toast({ title: t("team_request_failed"), variant: "destructive" });
     }
-  }, [toast]);
+  }, [toast, t, loadMatches, user]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -337,6 +364,9 @@ export default function MatchesPage() {
           }
       </div>
       </PullToRefresh>
+      {celebration && (
+        <TeamCompleteCelebration members={celebration.members} onContinue={handleCelebrationContinue} />
+      )}
     </div>);
 
 }

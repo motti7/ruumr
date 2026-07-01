@@ -53,7 +53,7 @@ describe('simulatorBackend', () => {
     await expect(base44.appLogs.logUserInApp('Discover')).resolves.toBe(true);
     expect(matches).toHaveLength(1);
     expect(filteredMatches).toHaveLength(1);
-    expect(profiles[0]?.name).toBe('מאיה לוי');
+    expect(profiles[0]?.name).toBe('Maya Levi');
   });
 
   it('upgrades a one-sided Plus match when the other user likes back', async () => {
