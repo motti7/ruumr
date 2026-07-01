@@ -46,6 +46,21 @@ const CITY_LABELS = {
   "הרצליה": { en: "Herzliya", he: "הרצליה" },
 };
 
+const MAP_TILE_LAYERS = {
+  en: {
+    url: "https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=en",
+    attribution: "Map data &copy; Google",
+    maxNativeZoom: 20,
+    subdomains: ["0", "1", "2", "3"],
+  },
+  he: {
+    url: "https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=iw",
+    attribution: "Map data &copy; Google",
+    maxNativeZoom: 20,
+    subdomains: ["0", "1", "2", "3"],
+  },
+};
+
 function mapApartments(discovery) {
   const lifecycle = discovery?.lifecycle_state || "";
   if (lifecycle === "APARTMENT_VIEWING" || lifecycle === "APARTMENT_FOUND") {
@@ -193,6 +208,11 @@ export default function ApartmentMap() {
   const direction = getLanguageDirection(i18n);
   const isRtl = isRtlLanguage(i18n);
   const textAlignClass = isRtl ? "text-right" : "text-left";
+  const mapLanguage = i18n.language === "he" ? "he" : "en";
+  const tileLayer = useMemo(
+    () => MAP_TILE_LAYERS[mapLanguage],
+    [mapLanguage]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -282,13 +302,19 @@ export default function ApartmentMap() {
             <MapContainer
               center={center}
               zoom={14}
+              maxZoom={19}
               scrollWheelZoom
               className="h-full w-full z-0"
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                key={mapLanguage}
+                attribution={tileLayer.attribution}
+                url={tileLayer.url}
+                detectRetina
+                maxNativeZoom={tileLayer.maxNativeZoom}
+                maxZoom={19}
+                subdomains={tileLayer.subdomains}
               />
               <FitMapToMarkers points={[...points, ...teamPoints]} />
               {points.map(({ apartment, index, position }) => {

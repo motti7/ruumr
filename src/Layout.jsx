@@ -18,7 +18,7 @@ import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
-import { DEMO_STAGES, getDemoStage, isDemoApartmentServicesStage, isDemoHousingStage } from "@/lib/demoStage";
+import { DEMO_STAGES, getDemoStage, isDemoHousingStage } from "@/lib/demoStage";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
@@ -64,6 +64,21 @@ function isIosLikeBrowserContext() {
   const platform = navigator.platform || '';
   return /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
+
+const APARTMENT_FLOW_PAGES = new Set([
+  'Home',
+  'GroupTracker',
+  'TeamChats',
+  'GroupChat',
+  'ApartmentMap',
+  'ApartmentDetail',
+  'ApartmentChat',
+]);
+
+const APARTMENT_SERVICES_PAGES = new Set([
+  'ApartmentServices',
+  'ServiceProviderDetail',
+]);
 
 export default function Layout({ children, currentPageName }) {
   const { t, i18n } = useTranslation();
@@ -348,15 +363,23 @@ export default function Layout({ children, currentPageName }) {
   const simulatorMode = isRuumrSimulatorMode();
   const simulatorDemoStage = simulatorMode ? getDemoStage() : "";
   const standardDemoNavActive = simulatorMode && simulatorDemoStage === DEMO_STAGES.TEAM_BUILDING;
+  const simulatorApartmentSearchActive = simulatorMode && simulatorDemoStage === DEMO_STAGES.APARTMENT_SEARCH;
+  const simulatorApartmentServicesActive = simulatorMode && simulatorDemoStage === DEMO_STAGES.APARTMENT_SERVICES;
+  const apartmentRouteActive = APARTMENT_FLOW_PAGES.has(currentPageName);
+  const apartmentServicesRouteActive = APARTMENT_SERVICES_PAGES.has(currentPageName);
 
   const apartmentFlowActive = !standardDemoNavActive && ([
     'APARTMENT_RANKING',
     'APARTMENT_VIEWING',
     'APARTMENT_FOUND',
-  ].includes(apartmentLifecycle) || (simulatorMode && isDemoHousingStage()));
+  ].includes(apartmentLifecycle) || apartmentRouteActive || apartmentServicesRouteActive || simulatorApartmentSearchActive || simulatorApartmentServicesActive || (simulatorMode && isDemoHousingStage()));
   const apartmentServicesActive =
     !standardDemoNavActive &&
-    (apartmentLifecycle === 'APARTMENT_FOUND' || (simulatorMode && isDemoApartmentServicesStage()));
+    (
+      apartmentServicesRouteActive ||
+      simulatorApartmentServicesActive ||
+      (!simulatorMode && apartmentLifecycle === 'APARTMENT_FOUND')
+    );
 
   const navigationItems = (
     apartmentFlowActive
