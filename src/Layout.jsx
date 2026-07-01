@@ -353,7 +353,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
-        {!['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
+        {false && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
