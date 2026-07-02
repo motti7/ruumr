@@ -4,6 +4,7 @@ import { enableSimulatorBackend } from '@/lib/simulatorBackend';
 describe('simulatorBackend', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.history.replaceState({}, '', '/');
     delete window.__ruumrSimulatorBackendEnabled;
     delete window.__ruumrSimulatorState;
   });
@@ -187,5 +188,33 @@ describe('simulatorBackend', () => {
     expect(reset.discovery.visit_scheduled_by_user_id).toBe('');
     expect(reset.discovery.visit_scheduled_at).toBe('');
     expect(reset.discovery.current_apartment).toBeNull();
+  });
+
+  it('resets persisted demo state back to the base team', async () => {
+    const base44 = {
+      auth: {},
+      entities: {},
+      functions: {},
+      analytics: { cleanup: vi.fn(), track: vi.fn() },
+      appLogs: { logUserInApp: vi.fn() },
+    };
+    enableSimulatorBackend(base44);
+
+    await base44.functions.invoke('createTeamInvite', { target_user_id: 'demo-user-eitan' });
+    await base44.entities.Swipe.create({
+      swiper_id: 'demo-user-noam',
+      swiped_id: 'demo-user-tamar',
+      action: 'dislike',
+    });
+    expect(window.__ruumrSimulatorState.currentProfile.team_members.map((member) => member.user_id)).toContain('demo-user-eitan');
+
+    delete window.__ruumrSimulatorBackendEnabled;
+    delete window.__ruumrSimulatorState;
+    window.history.replaceState({}, '', '/Home?simulator_mode=true&demo_stage=1&simulator_reset_state=true');
+    enableSimulatorBackend(base44);
+
+    expect(window.__ruumrSimulatorState.currentProfile.team_members.map((member) => member.user_id)).toEqual(['demo-user-maya']);
+    expect(window.__ruumrSimulatorState.collections.Swipe.some((swipe) => swipe.swiped_id === 'demo-user-tamar')).toBe(false);
+    expect(window.location.search).not.toContain('simulator_reset_state=true');
   });
 });

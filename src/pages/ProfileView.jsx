@@ -19,7 +19,7 @@ import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
-import { loadRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
+import { loadRuumrPlusActivation, saveRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
 import { resolveRuumrPlusInsight } from '@/lib/ruumrPlusInsight';
 
 // Custom Audio Player Component with Fade In
@@ -82,6 +82,23 @@ const AudioPlayer = ({ src }) => {
         </div>
     );
 };
+
+function removeFromRuumrPlusActivation(userId, swipedUserId) {
+  try {
+    const activation = loadRuumrPlusActivation(userId);
+    if (!activation) return;
+    const remaining = (activation.recommendations || []).filter(
+      (recommendation) => String(recommendation?.user_id) !== String(swipedUserId)
+    );
+    saveRuumrPlusActivation(userId, {
+      ...activation,
+      recommendations: remaining,
+      matched_count: remaining.length,
+    });
+  } catch {
+    // Plus cache cleanup should never block the swipe/match flow.
+  }
+}
 
 export default function ProfileViewPage() {
   const { t, i18n } = useTranslation();
@@ -230,8 +247,16 @@ export default function ProfileViewPage() {
           }
         }
       }
+
+      if (isPlusRecommendation) {
+        removeFromRuumrPlusActivation(currentUser.id, swipedId);
+      }
       
       setTimeout(() => {
+        if (isPlusRecommendation) {
+          navigate(createPageUrl('RuumrPlus'), { replace: true });
+          return;
+        }
         navigate(createPageUrl('LikesYou'));
       }, didMatch ? 4000 : 1000);
       

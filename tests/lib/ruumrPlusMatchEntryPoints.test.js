@@ -20,6 +20,13 @@ describe("Ruumr Plus match entry points", () => {
     expect(page).toContain('source: isPlusRecommendation ? "ruumr_plus" : "discover"');
   });
 
+  it("returns Plus profile-view swipes to the Ruumr Plus tab", () => {
+    const page = source("src/pages/ProfileView.jsx");
+
+    expect(page).toContain("navigate(createPageUrl('RuumrPlus'), { replace: true })");
+    expect(page).toContain("removeFromRuumrPlusActivation(currentUser.id, swipedId)");
+  });
+
   it("carries the Plus context through the URL param OR the cached recommendation", () => {
     const page = source("src/pages/ProfileView.jsx");
 
