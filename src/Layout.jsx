@@ -103,6 +103,9 @@ const PROFILE_SIGNAL_SUPPRESSED_PAGES = new Set([
   'RuumrPlusCheckout',
 ]);
 
+const DEMO_PROFILE_SIGNAL_QUESTION_ID = "dishes_sink_reaction_001";
+const profileSignalAnsweredSessionKey = (questionId) => `ruumr_profile_signal_answered:${questionId}`;
+
 export default function Layout({ children, currentPageName }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
@@ -151,6 +154,7 @@ export default function Layout({ children, currentPageName }) {
     new URLSearchParams(location.search).get("profileSignalLang") || i18n.language
   );
   const profileSignalCopy = getProfileSignalCopy(profileSignalLanguage);
+  const profileSignalCtaIsEnglish = profileSignalLanguage === "en";
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -453,10 +457,27 @@ export default function Layout({ children, currentPageName }) {
         return;
       }
 
-      const forceDemoStageOnePrompt = isRuumrSimulatorMode() && isDemoTeamBuildingStage();
-      if (PROFILE_SIGNAL_SUPPRESSED_PAGES.has(currentPageName) || hasProfile !== true) {
+      const simulatorModeActive = isRuumrSimulatorMode();
+      const forceDemoStageOnePrompt = simulatorModeActive && isDemoTeamBuildingStage();
+      const demoQuestion = forceDemoStageOnePrompt ? getProfileSignalQuestion(DEMO_PROFILE_SIGNAL_QUESTION_ID) : null;
+      if (simulatorModeActive && !forceDemoStageOnePrompt) {
+        setProfileSignalQuestion(null);
+        setActiveProfileSignalQuestion(null);
+        setIsCheckingProfileSignal(false);
+        return;
+      }
+
+      try {
+        if (demoQuestion && window.sessionStorage.getItem(profileSignalAnsweredSessionKey(demoQuestion.id)) === "1") {
+          setProfileSignalQuestion(null);
+          setActiveProfileSignalQuestion(null);
+          setIsCheckingProfileSignal(false);
+          return;
+        }
+      } catch (_) {}
+
+      if (PROFILE_SIGNAL_SUPPRESSED_PAGES.has(currentPageName) || (!forceDemoStageOnePrompt && hasProfile !== true)) {
         if (forceDemoStageOnePrompt && !PROFILE_SIGNAL_SUPPRESSED_PAGES.has(currentPageName)) {
-          const demoQuestion = getProfileSignalQuestion("dishes_sink_reaction_001");
           setProfileSignalQuestion(demoQuestion);
         } else {
           setProfileSignalQuestion(null);
@@ -477,8 +498,15 @@ export default function Layout({ children, currentPageName }) {
       try {
         const state = await loadCurrentProfileSignalState();
         if (cancelled) return;
-        const demoQuestion = forceDemoStageOnePrompt ? getProfileSignalQuestion("dishes_sink_reaction_001") : null;
-        const shouldShow = forceDemoStageOnePrompt || (shouldPromptForProfileSignal(state.profile) && Boolean(state.nextQuestion));
+        const answeredQuestionIds = new Set(
+          (state.answers || [])
+            .map((answer) => String(answer?.question_id || "").trim())
+            .filter(Boolean)
+        );
+        const demoQuestionAlreadyAnswered = demoQuestion && answeredQuestionIds.has(demoQuestion.id);
+        const shouldShow = forceDemoStageOnePrompt
+          ? Boolean(demoQuestion) && !demoQuestionAlreadyAnswered
+          : (shouldPromptForProfileSignal(state.profile) && Boolean(state.nextQuestion));
         setProfileSignalQuestion(shouldShow ? demoQuestion || state.nextQuestion : null);
       } catch (error) {
         if (!cancelled) {
@@ -505,6 +533,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const handleProfileSignalAnswer = async (answerId) => {
+    const answeredQuestionId = activeProfileSignalQuestion?.id;
     try {
       await saveProfileSignalAnswer({
         question: activeProfileSignalQuestion,
@@ -514,6 +543,11 @@ export default function Layout({ children, currentPageName }) {
     } catch (error) {
       console.error("Failed to save profile signal answer:", error);
     } finally {
+      try {
+        if (answeredQuestionId) {
+          window.sessionStorage.setItem(profileSignalAnsweredSessionKey(answeredQuestionId), "1");
+        }
+      } catch (_) {}
       setActiveProfileSignalQuestion(null);
       setProfileSignalQuestion(null);
     }
@@ -584,11 +618,11 @@ export default function Layout({ children, currentPageName }) {
                 type="button"
                 onClick={() => setActiveProfileSignalQuestion(profileSignalQuestion)}
                 disabled={isCheckingProfileSignal}
-                className="fixed right-3 z-[70] flex min-h-[42px] items-center gap-2 rounded-full border border-orange-200 bg-white/92 px-4 py-2 text-sm font-extrabold text-[--theme-orange] shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70"
-                style={{ top: 'calc(58px + env(safe-area-inset-top, 0px))' }}
+                className={`fixed z-[70] flex min-h-[46px] items-center gap-2 rounded-full border border-white/70 bg-gradient-to-r from-[--theme-orange] to-[#FF7A45] px-4 py-2 text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(250,56,3,0.38)] ring-2 ring-white/55 backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(250,56,3,0.46)] disabled:opacity-70 ${profileSignalCtaIsEnglish ? 'left-4' : 'right-3'}`}
+                style={{ top: profileSignalCtaIsEnglish ? 'calc(78px + env(safe-area-inset-top, 0px))' : 'calc(58px + env(safe-area-inset-top, 0px))' }}
                 aria-label={profileSignalCopy.improveProfile}
             >
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4 drop-shadow-sm" />
                 {profileSignalCopy.improveProfile}
             </button>
         )}
