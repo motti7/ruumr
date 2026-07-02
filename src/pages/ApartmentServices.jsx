@@ -18,11 +18,9 @@ import {
   Plus,
   ReceiptText,
   Send,
-  ShoppingBasket,
   Sparkles,
   SprayCan,
   Truck,
-  Utensils,
   UsersRound,
   Wifi,
   WalletCards,
@@ -45,7 +43,7 @@ const CATEGORY_ICONS = {
   moving: Truck,
   furniture: PackageCheck,
   cleaning: SprayCan,
-  food: Utensils,
+  repairs: Wrench,
 };
 
 const EXPENSE_CATEGORIES = [
@@ -53,7 +51,8 @@ const EXPENSE_CATEGORIES = [
   { id: "electricity", icon: Zap, color: "bg-yellow-50 text-yellow-700" },
   { id: "water", icon: Droplets, color: "bg-sky-50 text-sky-700" },
   { id: "internet", icon: Wifi, color: "bg-indigo-50 text-indigo-700" },
-  { id: "food", icon: ShoppingBasket, color: "bg-green-50 text-green-700" },
+  { id: "cleaning", icon: SprayCan, color: "bg-green-50 text-green-700" },
+  { id: "repairs", icon: Wrench, color: "bg-rose-50 text-rose-700" },
   { id: "other", icon: Banknote, color: "bg-gray-100 text-gray-700" },
 ];
 
@@ -124,12 +123,9 @@ function useStage3Copy(language) {
         individualService: "אישי",
         hybridService: "אישי או צוותי",
         recommended: "מומלץ עכשיו",
-        dailyDeals: "דילים יומיומיים",
-        dailyDealsBody: "אוכל, סופר ודברים קטנים שמחזירים אתכם לאפליקציה גם אחרי המעבר.",
         planTab: "תוכנית",
         servicesTab: "שירותים",
         walletTab: "קופה",
-        dealsTab: "דילים",
         snapshot: "תמונת מצב",
         openItems: "פתוחים",
         servicesBooked: "שירותים",
@@ -140,7 +136,7 @@ function useStage3Copy(language) {
         householdSplit: "קופה וחלוקת הוצאות",
         splitBody: "הוצאות משותפות מחולקות אוטומטית. כל אחד יכול לסמן ששילם.",
         expenseTracker: "מעקב הוצאות",
-        expenseTrackerBody: "שכירות, חשמל, מים, אינטרנט, אוכל וכל הוצאה משותפת במקום אחד.",
+        expenseTrackerBody: "שכירות, חשמל, מים, אינטרנט, ניקיון, תיקונים וכל עלות מעבר משותפת במקום אחד.",
         yourBalance: "המאזן שלך",
         youOwe: "את/ה חייב/ת",
         youAreOwed: "חייבים לך",
@@ -165,7 +161,8 @@ function useStage3Copy(language) {
         electricity: "חשמל",
         water: "מים",
         internet: "אינטרנט",
-        food: "אוכל",
+        cleaning: "ניקיון",
+        repairs: "תיקונים",
         other: "אחר",
         providers: "שירותים מומלצים",
         viewDetails: "פרטים",
@@ -194,12 +191,9 @@ function useStage3Copy(language) {
         individualService: "Individual",
         hybridService: "Solo or team",
         recommended: "Recommended now",
-        dailyDeals: "Daily Deals",
-        dailyDealsBody: "Food, groceries, and small household wins that keep the app useful after move-in.",
         planTab: "Plan",
         servicesTab: "Services",
         walletTab: "Wallet",
-        dealsTab: "Deals",
         snapshot: "Snapshot",
         openItems: "Open",
         servicesBooked: "Services",
@@ -210,7 +204,7 @@ function useStage3Copy(language) {
         householdSplit: "Household wallet",
         splitBody: "Shared expenses are split automatically. Everyone can mark their part as paid.",
         expenseTracker: "Expense tracker",
-        expenseTrackerBody: "Rent, electricity, water, internet, food, and every shared household cost in one place.",
+        expenseTrackerBody: "Rent, utilities, internet, cleaning, repairs, and every shared move-in cost in one place.",
         yourBalance: "Your balance",
         youOwe: "You owe",
         youAreOwed: "You are owed",
@@ -235,7 +229,8 @@ function useStage3Copy(language) {
         electricity: "Electricity",
         water: "Water",
         internet: "Internet",
-        food: "Food",
+        cleaning: "Cleaning",
+        repairs: "Repairs",
         other: "Other",
         providers: "Recommended services",
         viewDetails: "Details",
@@ -373,14 +368,14 @@ function buildHouseholdExpenses(apartment, demo, discovery, members, savedExpens
       splitUserIds: memberIds,
     },
     {
-      id: "shared-groceries",
-      category: "food",
-      titleEn: "Shared groceries",
-      titleHe: "קניות משותפות",
-      amount: demo.cityKey === "beer_sheva" ? 260 : 360,
+      id: "move-in-cleaning",
+      category: "cleaning",
+      titleEn: "Move-in deep clean",
+      titleHe: "ניקיון יסודי לפני כניסה",
+      amount: demo.cityKey === "beer_sheva" ? 280 : 360,
       payerId: payer(1),
-      dueLabelEn: "This week",
-      dueLabelHe: "השבוע",
+      dueLabelEn: "Before move-in",
+      dueLabelHe: "לפני הכניסה",
       recurring: false,
       splitUserIds: memberIds,
     },
@@ -533,8 +528,8 @@ export default function ApartmentServices() {
   const readyCount = demo.moveInTasks.filter((task) => task.done || serviceState.tasks?.[task.id]).length;
   const readiness = Math.round((readyCount / demo.moveInTasks.length) * 100);
   const pendingTaskCount = Math.max(0, demo.moveInTasks.length - readyCount);
-  const serviceCategories = demo.categories.filter((category) => category.id !== "food");
-  const serviceProviders = demo.providers.filter((provider) => provider.category !== "food");
+  const serviceCategories = demo.categories;
+  const serviceProviders = demo.providers;
   const filteredServiceProviders = categoryFilter === "all"
     ? serviceProviders
     : serviceProviders.filter((provider) => provider.category === categoryFilter);
@@ -654,9 +649,9 @@ export default function ApartmentServices() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] pb-28" dir={direction}>
-      <header className="relative overflow-hidden bg-gray-950 text-white">
-        <img src={apartment.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-gray-950/70 to-gray-950" />
+      <header className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-rose-500 to-emerald-600 text-white">
+        <img src={apartment.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-soft-light" />
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-700/35 via-rose-600/45 to-emerald-800/80" />
         <div className={`relative px-4 pt-5 pb-7 space-y-5 ${textAlignClass}`}>
           <button
             type="button"
@@ -668,21 +663,21 @@ export default function ApartmentServices() {
           </button>
 
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/15 px-3 py-1.5 text-xs font-extrabold">
-              <Sparkles className="w-3.5 h-3.5 text-orange-200" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/18 border border-white/25 px-3 py-1.5 text-xs font-extrabold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-orange-100" />
               {copy.recommended}
             </div>
             <h1 className="text-3xl font-black leading-tight">{copy.title}</h1>
             <p className="text-sm text-white/75 leading-6">{copy.subtitle}</p>
           </div>
 
-          <div className="rounded-2xl bg-white/10 border border-white/15 p-4 backdrop-blur">
+          <div className="rounded-2xl bg-white/18 border border-white/25 p-4 backdrop-blur">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-bold text-white/60 truncate">{displayAddress(apartment, language)}</p>
                 <p className="text-lg font-black truncate">{demo.city[language]}</p>
               </div>
-              <div className="w-[112px] min-h-[86px] rounded-3xl bg-white text-gray-950 flex flex-col items-center justify-center px-3 py-3 flex-shrink-0">
+              <div className="w-[112px] min-h-[86px] rounded-3xl bg-white text-orange-800 flex flex-col items-center justify-center px-3 py-3 flex-shrink-0 shadow-sm">
                 <span className="text-3xl leading-none font-black">{readiness}%</span>
                 <span className="mt-1 text-[12px] leading-tight font-extrabold text-gray-500 text-center max-w-[88px]">
                   {copy.setupScore}
@@ -771,7 +766,7 @@ export default function ApartmentServices() {
               <button
                 type="button"
                 onClick={() => setCategoryFilter("all")}
-                className={`snap-start min-h-11 rounded-full px-4 text-xs font-black whitespace-nowrap ${categoryFilter === "all" ? "bg-gray-950 text-white" : "bg-white border border-gray-100 text-gray-700"}`}
+                className={`snap-start min-h-11 rounded-full px-4 text-xs font-black whitespace-nowrap ${categoryFilter === "all" ? "gradient-orange text-white shadow-sm" : "bg-white border border-gray-100 text-gray-700"}`}
               >
                 {copy.allServices}
               </button>
@@ -782,7 +777,7 @@ export default function ApartmentServices() {
                     key={category.id}
                     type="button"
                     onClick={() => setCategoryFilter(category.id)}
-                    className={`snap-start min-h-11 rounded-full px-4 text-xs font-black whitespace-nowrap inline-flex items-center gap-1 ${categoryFilter === category.id ? "bg-gray-950 text-white" : "bg-white border border-gray-100 text-gray-700"}`}
+	                    className={`snap-start min-h-11 rounded-full px-4 text-xs font-black whitespace-nowrap inline-flex items-center gap-1 ${categoryFilter === category.id ? "gradient-orange text-white shadow-sm" : "bg-white border border-gray-100 text-gray-700"}`}
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {text(category, language)}
@@ -823,10 +818,10 @@ export default function ApartmentServices() {
             </div>
 
             <div className="mt-4 grid grid-cols-3 gap-2">
-              <div className="rounded-2xl bg-gray-950 text-white p-3">
-                <p className="text-[11px] font-extrabold text-white/55">{copy.yourBalance}</p>
-                <p className="text-lg font-black mt-1">{expenseFormatter.format(Math.abs(Math.round(currentBalance)))}</p>
-                <p className="text-[11px] font-bold text-white/55 mt-0.5">
+              <div className="rounded-2xl bg-orange-50 border border-orange-100 p-3">
+                <p className="text-[11px] font-extrabold text-orange-700">{copy.yourBalance}</p>
+                <p className="text-lg font-black text-orange-950 mt-1">{expenseFormatter.format(Math.abs(Math.round(currentBalance)))}</p>
+                <p className="text-[11px] font-bold text-orange-700/75 mt-0.5">
                   {Math.abs(currentBalance) < 1 ? copy.allSettled : currentBalance < 0 ? copy.youOwe : copy.youAreOwed}
                 </p>
               </div>
@@ -864,7 +859,7 @@ export default function ApartmentServices() {
                   setExpenseForm((current) => ({ ...current, payerId: current.payerId || currentMemberId }));
                   setShowExpenseForm((visible) => !visible);
                 }}
-                className="inline-flex items-center gap-1 rounded-full bg-gray-900 text-white px-3 py-2 min-h-11 text-xs font-extrabold"
+	                className="inline-flex items-center gap-1 rounded-full gradient-orange text-white px-3 py-2 min-h-11 text-xs font-extrabold shadow-sm"
               >
                 {showExpenseForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 {showExpenseForm ? copy.close : copy.addExpense}
@@ -975,7 +970,7 @@ export default function ApartmentServices() {
                             <button
                               type="button"
                               onClick={() => toggleMySharePaid(expense)}
-                              className={`min-h-11 w-full sm:w-auto inline-flex items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold ${paid ? "bg-green-600 text-white" : "bg-gray-900 text-white"}`}
+	                              className={`min-h-11 w-full sm:w-auto inline-flex items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold ${paid ? "bg-green-600 text-white" : "gradient-orange text-white"}`}
                             >
                               <CreditCard className="w-3.5 h-3.5" />
                               {paid ? copy.paid : copy.markPaid}
@@ -991,36 +986,6 @@ export default function ApartmentServices() {
           </section>
         )}
 
-        {activeTab === "deals" && (
-          <section className={`rounded-2xl bg-gray-950 text-white p-4 shadow-sm ${textAlignClass}`}>
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
-                <h2 className="text-lg font-black">{copy.dailyDeals}</h2>
-                <p className="text-sm text-white/60 leading-6 mt-1">{copy.dailyDealsBody}</p>
-              </div>
-              <Utensils className="w-6 h-6 text-orange-200 flex-shrink-0" />
-            </div>
-            <div className="space-y-3">
-              {demo.dailyDeals.map((provider) => (
-                <button
-                  key={provider.id}
-                  type="button"
-                  onClick={() => navigate(`${createPageUrl("ServiceProviderDetail")}?providerId=${encodeURIComponent(provider.id)}`)}
-                  className={`w-full rounded-2xl bg-white/10 border border-white/10 p-3 ${textAlignClass} active:bg-white/15`}
-                >
-                  <div className="grid grid-cols-[92px_1fr] gap-3">
-                    <ProviderLogo provider={provider} variant="deal" />
-                    <div className="min-w-0">
-                      <p className="font-black">{providerName(provider, language)}</p>
-                      <p className="text-xs font-bold text-orange-100 mt-1">{providerDeal(provider, language)}</p>
-                      <p className="text-xs text-white/55 leading-5 mt-2">{providerTagline(provider, language)}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );
@@ -1031,12 +996,11 @@ function StageTabs({ activeTab, setActiveTab, copy }) {
     { id: "plan", label: copy.planTab, icon: Check },
     { id: "services", label: copy.servicesTab, icon: PackageCheck },
     { id: "wallet", label: copy.walletTab, icon: WalletCards },
-    { id: "deals", label: copy.dealsTab, icon: Utensils },
   ];
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 py-2 bg-[#f7f7f5]/95 backdrop-blur border-b border-gray-100">
-      <div className="grid grid-cols-4 gap-1 rounded-2xl bg-white border border-gray-100 p-1 shadow-sm">
+      <div className="grid grid-cols-3 gap-1 rounded-2xl bg-white border border-gray-100 p-1 shadow-sm">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -1046,7 +1010,7 @@ function StageTabs({ activeTab, setActiveTab, copy }) {
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`min-h-11 rounded-xl text-[11px] font-black flex flex-col items-center justify-center gap-0.5 ${
-                active ? "bg-gray-950 text-white" : "text-gray-500"
+                active ? "gradient-orange text-white shadow-sm" : "text-gray-500"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -1061,8 +1025,8 @@ function StageTabs({ activeTab, setActiveTab, copy }) {
 
 function StatusTile({ label, value, tone }) {
   const toneClass =
-    tone === "dark"
-      ? "bg-gray-950 text-white"
+	    tone === "dark"
+	      ? "bg-orange-50 text-orange-950"
       : tone === "green"
         ? "bg-green-50 text-green-900"
         : tone === "blue"
@@ -1092,7 +1056,7 @@ function logoPresentation(provider) {
   }
   if (provider.id.startsWith("move-squad")) {
     return {
-      tileClass: "bg-gray-900",
+      tileClass: "bg-emerald-700",
       imageClass: "w-full h-full",
     };
   }
@@ -1100,12 +1064,6 @@ function logoPresentation(provider) {
     return {
       tileClass: "bg-gray-50",
       imageClass: "w-[78%] max-h-[70%]",
-    };
-  }
-  if (provider.id.startsWith("market-basket")) {
-    return {
-      tileClass: "bg-gray-50",
-      imageClass: "w-[72%] max-h-[72%]",
     };
   }
   return {
@@ -1116,8 +1074,8 @@ function logoPresentation(provider) {
 
 function ProviderLogo({ provider, variant = "card" }) {
   const presentation = logoPresentation(provider);
-  const sizeClass = variant === "deal" ? "w-full h-24" : "w-full h-full min-h-[126px]";
-  const tileTone = variant === "deal" && !provider.id.startsWith("room-kit") ? "bg-white/10" : presentation.tileClass;
+  const sizeClass = variant === "compact" ? "w-full h-24" : "w-full h-full min-h-[126px]";
+  const tileTone = variant === "compact" && !provider.id.startsWith("room-kit") ? "bg-orange-50" : presentation.tileClass;
 
   return (
     <div className={`${sizeClass} rounded-xl ${tileTone} overflow-hidden flex items-center justify-center`}>
@@ -1183,7 +1141,7 @@ function ProviderCard({ provider, copy, language, status, onDetails, onPrimary, 
         <button
           type="button"
           onClick={onPrimary}
-          className="min-h-11 rounded-xl bg-gray-900 text-white text-xs font-black flex items-center justify-center gap-1"
+	          className="min-h-11 rounded-xl gradient-orange text-white text-xs font-black flex items-center justify-center gap-1 shadow-sm"
         >
           {provider.type === "individual" ? <Send className="w-4 h-4" /> : <UsersRound className="w-4 h-4" />}
           {primaryLabel}

@@ -17,8 +17,15 @@ import {
   chooseCurrentApartment,
   ensureTeamApartmentDiscovery,
   scheduleApartmentVisit,
+  submitApartmentPreferences,
 } from "@/api/teamApartmentDiscovery";
-import { APARTMENT_LIFECYCLE } from "@/lib/apartmentPreferences";
+import { User } from "@/entities/User";
+import { APARTMENT_LIFECYCLE, APARTMENT_PREFERENCES, estimatedRentPerRoommate, preferencesAreComplete } from "@/lib/apartmentPreferences";
+import {
+  clearApartmentPreferenceDraft,
+  preferencesForApartmentRanking,
+  updateApartmentPreferenceDraft,
+} from "@/lib/apartmentPreferenceDraft";
 import { useToast } from "@/components/ui/use-toast";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
@@ -64,8 +71,9 @@ export default function ApartmentDetail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [state, setState] = useState({ loading: true, discovery: null });
+  const [state, setState] = useState({ loading: true, discovery: null, userId: "" });
   const [visitTime, setVisitTime] = useState("");
+  const [preferences, setPreferences] = useState({});
   const [saving, setSaving] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const visitTimeInputRef = useRef(null);
@@ -78,11 +86,15 @@ export default function ApartmentDetail() {
     let cancelled = false;
     (async () => {
       try {
-        const result = await ensureTeamApartmentDiscovery();
-        if (!cancelled) setState({ loading: false, discovery: result.discovery || null });
+        const [user, result] = await Promise.all([User.me(), ensureTeamApartmentDiscovery()]);
+        const discovery = result.discovery || null;
+        if (!cancelled) {
+          setPreferences(preferencesForApartmentRanking(discovery, user.id));
+          setState({ loading: false, discovery, userId: user.id });
+        }
       } catch (error) {
         console.error("[ruumr] apartment detail load failed", error);
-        if (!cancelled) setState({ loading: false, discovery: null });
+        if (!cancelled) setState({ loading: false, discovery: null, userId: "" });
       }
     })();
     return () => {
@@ -91,7 +103,9 @@ export default function ApartmentDetail() {
   }, []);
 
   const discovery = state.discovery;
+  const apartments = discovery?.suggested_apartments || [];
   const apartment = apartmentFromDiscovery(discovery, apartmentId);
+  const memberCount = discovery?.member_count || discovery?.member_user_ids?.length || 0;
   const isCurrent =
     apartment?.id &&
     [discovery?.current_apartment?.id, discovery?.winning_apartment?.id, discovery?.selected_apartment?.id]
@@ -99,8 +113,16 @@ export default function ApartmentDetail() {
       .map(String)
       .includes(String(apartment.id));
   const lifecycle = discovery?.lifecycle_state || "";
+  const discoveryStatus = discovery?.status || "";
   const scheduledDate = discovery?.visit_time ? new Date(discovery.visit_time) : null;
   const score = discovery?.eligible_apartments?.find((item) => String(item.apartment_id) === String(apartment?.id));
+  const isSuggestedApartment = apartments.some((item) => String(item.id) === String(apartment?.id));
+  const isApartmentRanking =
+    lifecycle === APARTMENT_LIFECYCLE.APARTMENT_RANKING ||
+    ["apartment_ranking", "no_eligible_apartment"].includes(discoveryStatus);
+  const canRateApartment = isSuggestedApartment || Boolean(isCurrent);
+  const selectedPreference = preferences?.[apartment?.id];
+  const rentPerRoommate = estimatedRentPerRoommate(apartment, memberCount);
 
   const priceFormatter = useMemo(
     () =>
@@ -144,7 +166,7 @@ export default function ApartmentDetail() {
   };
 
   const handleChoose = async () => {
-    if (!discovery?.id) return;
+    if (!discovery?.id || !scheduledDate) return;
     setSaving(true);
     try {
       const result = await chooseCurrentApartment({ discoveryId: discovery.id });
@@ -155,6 +177,38 @@ export default function ApartmentDetail() {
     } catch (error) {
       console.error(error);
       toast({ title: t("apartment_choose_error") });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePreference = async (preference) => {
+    if (!discovery?.id || !apartment?.id || !canRateApartment) return;
+    const nextPreferences = updateApartmentPreferenceDraft(discovery, apartment.id, preference);
+    setPreferences(nextPreferences);
+    if (!isApartmentRanking || !preferencesAreComplete(apartments, nextPreferences)) return;
+
+    setSaving(true);
+    try {
+      const result = await submitApartmentPreferences({
+        discoveryId: discovery.id,
+        preferences: nextPreferences,
+      });
+      clearApartmentPreferenceDraft(discovery);
+      const nextDiscovery = result.discovery || discovery;
+      setState({ loading: false, discovery: nextDiscovery, userId: state.userId });
+      setPreferences(preferencesForApartmentRanking(nextDiscovery, state.userId));
+      toast({
+        title:
+          nextDiscovery.status === "apartment_viewing"
+            ? t("apartment_preference_finalized")
+            : nextDiscovery.status === "no_eligible_apartment"
+              ? t("apartment_no_eligible_toast")
+              : t("apartment_preference_saved"),
+      });
+    } catch (error) {
+      console.error(error);
+      toast({ title: t("apartment_preference_error") });
     } finally {
       setSaving(false);
     }
@@ -184,6 +238,7 @@ export default function ApartmentDetail() {
   const images = apartment.images?.length ? apartment.images : [apartment.image].filter(Boolean);
   const amenities = displayAmenities(apartment, i18n.language);
   const canChoose = lifecycle === APARTMENT_LIFECYCLE.APARTMENT_VIEWING && isCurrent;
+  const canChooseAfterVisit = canChoose && Boolean(scheduledDate);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-28" dir={direction}>
@@ -228,6 +283,11 @@ export default function ApartmentDetail() {
             <div className={isRtl ? "text-left" : "text-right"}>
               <p className="text-xl font-extrabold text-[--theme-orange]">{priceFormatter.format(apartment.price || 0)}</p>
               <p className="text-[11px] font-bold text-gray-400">{t("apartment_price_month")}</p>
+              {rentPerRoommate && (
+                <p className="mt-1 rounded-full bg-orange-50 px-2 py-1 text-[11px] font-extrabold text-orange-700">
+                  {t("apartment_price_per_roommate", { price: priceFormatter.format(rentPerRoommate) })}
+                </p>
+              )}
             </div>
           </div>
 
@@ -256,17 +316,44 @@ export default function ApartmentDetail() {
             <UsersRound className="w-5 h-5 text-[--theme-orange]" />
             <h3 className="font-extrabold">{t("apartment_team_fit")}</h3>
           </div>
-          {score ? (
+          {score && (
             <p className="text-sm font-bold text-green-700">
               {t("apartment_happiness_score", { points: score.points, amazingVotes: score.amazing_votes })}
             </p>
-          ) : (
-            <p className="text-sm text-gray-500">{t("apartment_detail_rate_hint")}</p>
           )}
           {displayCommute(apartment, i18n.language) && (
             <p className="text-sm text-gray-500 mt-2">{displayCommute(apartment, i18n.language)}</p>
           )}
         </section>
+
+        {canRateApartment && (
+          <section className={`bg-white rounded-2xl border border-orange-100 p-5 shadow-sm ${textAlignClass}`}>
+            <h3 className="font-extrabold text-gray-900 mb-3">{t("apartment_your_rating")}</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {APARTMENT_PREFERENCES.map((preference) => {
+                const active = selectedPreference === preference;
+                return (
+                  <button
+                    key={preference}
+                    type="button"
+                    onClick={() => handlePreference(preference)}
+                    disabled={saving}
+                    aria-pressed={active}
+                    className={`min-h-12 rounded-xl border px-2 text-xs font-extrabold transition-all active:scale-95 disabled:opacity-60 ${
+                      active
+                        ? preference === "no_way"
+                          ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                          : "bg-[--theme-orange] text-white border-[--theme-orange] shadow-sm"
+                        : "bg-orange-50/70 text-gray-700 border-orange-100 shadow-sm"
+                    }`}
+                  >
+                    {t(`apartment_preference_${preference}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className={`bg-white rounded-2xl border border-gray-100 p-5 shadow-sm ${textAlignClass}`}>
           <div className="flex items-center gap-2 text-gray-900 mb-3">
@@ -309,21 +396,23 @@ export default function ApartmentDetail() {
           )}
         </section>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-[3.5rem_1fr] gap-3">
           <button
             onClick={() => navigate(`${createPageUrl("ApartmentChat")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
-            className="py-3.5 rounded-xl bg-white border border-gray-100 text-gray-900 font-extrabold flex items-center justify-center gap-2"
+            className="min-h-14 rounded-2xl bg-white border border-gray-100 text-gray-900 font-extrabold shadow-sm flex items-center justify-center active:scale-[0.98] transition-transform"
+            aria-label={t("apartment_chat_cta")}
           >
-            <MessageCircle className="w-4 h-4" />
-            {t("apartment_chat_cta")}
+            <MessageCircle className="w-5 h-5" />
           </button>
           <button
             onClick={handleChoose}
-            disabled={!canChoose || saving}
-            className="py-3.5 rounded-xl bg-green-600 text-white font-extrabold disabled:opacity-50 flex items-center justify-center gap-2"
+            disabled={!canChooseAfterVisit || saving}
+            className="min-h-14 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-4 text-sm font-extrabold text-white shadow-lg shadow-green-600/20 disabled:from-emerald-400 disabled:to-green-500 disabled:text-white/95 disabled:shadow-green-600/10 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            {t("apartment_choose_cta")}
+            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/30">
+              <CheckCircle2 className="w-4 h-4" />
+            </span>
+            <span className="min-w-0 leading-5">{t("apartment_choose_cta")}</span>
           </button>
         </div>
       </main>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateApartmentPreferenceOutcome, preferencesAreComplete } from "../../src/lib/apartmentPreferences";
+import { calculateApartmentPreferenceOutcome, estimatedRentPerRoommate, preferencesAreComplete } from "../../src/lib/apartmentPreferences";
 
 const apartments = [
   { id: "apt-a", price: 9000 },
@@ -18,6 +18,12 @@ describe("apartment preference scoring", () => {
       "apt-b": "ok",
       "apt-c": "no_way",
     })).toBe(true);
+  });
+
+  it("estimates rent per roommate from team size or bedroom fallback", () => {
+    expect(estimatedRentPerRoommate({ price: 11840, bedrooms: 3 }, 3)).toBe(3947);
+    expect(estimatedRentPerRoommate({ price: 9000, bedrooms: 3 })).toBe(3000);
+    expect(estimatedRentPerRoommate({ price: 9000 }, 0)).toBeNull();
   });
 
   it("rejects an apartment vetoed by any teammate", () => {

@@ -70,8 +70,8 @@ function logoPresentation(provider) {
   }
   if (provider.id.startsWith("move-squad")) {
     return {
-      heroTileClass: "bg-gray-900",
-      tileClass: "bg-gray-900",
+      heroTileClass: "bg-emerald-700",
+      tileClass: "bg-emerald-700",
       heroImageClass: "w-full h-full",
       imageClass: "w-full h-full",
     };
@@ -84,16 +84,8 @@ function logoPresentation(provider) {
       imageClass: "w-[76%] max-h-[68%]",
     };
   }
-  if (provider.id.startsWith("market-basket")) {
-    return {
-      heroTileClass: "bg-gray-50",
-      tileClass: "bg-gray-50",
-      heroImageClass: "w-[58%] max-h-[58%]",
-      imageClass: "w-[72%] max-h-[72%]",
-    };
-  }
   return {
-    heroTileClass: "bg-gray-900",
+    heroTileClass: "bg-gradient-to-br from-orange-500 to-emerald-600",
     tileClass: "bg-gray-50",
     heroImageClass: "w-[64%] max-h-[62%]",
     imageClass: "w-[80%] max-h-[74%]",
@@ -145,6 +137,7 @@ function useCopy(language) {
         included2: "אפשרות לתיאום עם כל השותפים",
         included3: "מעקב סטטוס בדמו",
         demoNote: "בדמו הזה הפעולה נשמרת מקומית בלבד.",
+        moreServices: "עוד שירותי מעבר",
       }
     : {
         loading: "Loading service...",
@@ -171,6 +164,7 @@ function useCopy(language) {
         included2: "Coordination option for all roommates",
         included3: "Demo status tracking",
         demoNote: "For this demo, actions are stored locally only.",
+        moreServices: "More move-in services",
       };
 }
 
@@ -213,6 +207,12 @@ export default function ServiceProviderDetail() {
   const apartment = apartmentFromDiscovery(state.discovery);
   const provider = findDemoServiceProvider(apartment || {}, providerId);
   const demo = useMemo(() => buildDemoServices(apartment || {}), [apartment]);
+  const relatedProviders = provider
+    ? demo.providers
+        .filter((candidate) => candidate.id !== provider.id)
+        .sort((first, second) => Number(second.category === provider.category) - Number(first.category === provider.category))
+        .slice(0, 3)
+    : [];
 
   const updateDemoState = (updater) => {
     if (!apartment?.id) return;
@@ -285,9 +285,9 @@ export default function ServiceProviderDetail() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] pb-28" dir={direction}>
-      <header className="relative h-[330px] overflow-hidden bg-gray-950 text-white">
+      <header className="relative h-[330px] overflow-hidden bg-gradient-to-br from-orange-500 via-rose-500 to-emerald-600 text-white">
         <ProviderHeroLogo provider={provider} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-gray-950/35 to-gray-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-700/10 via-rose-600/25 to-emerald-800/72" />
         <div className={`relative h-full flex flex-col justify-between p-4 ${textAlignClass}`}>
           <button
             type="button"
@@ -334,7 +334,7 @@ export default function ServiceProviderDetail() {
           <h2 className="font-black text-gray-900 mb-3">{copy.packageTitle}</h2>
           <div className="space-y-2">
             {[copy.included1, copy.included2, copy.included3].map((item) => (
-              <div key={item} className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+              <div key={item} className="flex items-center gap-3 rounded-xl bg-orange-50/70 p-3">
                 <span className="w-7 h-7 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0">
                   <Check className="w-4 h-4" />
                 </span>
@@ -344,14 +344,14 @@ export default function ServiceProviderDetail() {
           </div>
         </section>
 
-        <section className={`rounded-2xl bg-gray-950 text-white p-5 shadow-sm ${textAlignClass}`}>
-          <h2 className="text-xl font-black">{fitTitle}</h2>
-          <p className="text-sm text-white/60 leading-6 mt-2">{copy.demoNote}</p>
+        <section className={`rounded-2xl bg-gradient-to-br from-orange-50 via-white to-green-50 border border-orange-100 p-5 shadow-sm ${textAlignClass}`}>
+          <h2 className="text-xl font-black text-gray-900">{fitTitle}</h2>
+          <p className="text-sm text-gray-500 leading-6 mt-2">{copy.demoNote}</p>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <button
               type="button"
               onClick={() => markProvider("vote")}
-              className="min-h-12 rounded-xl bg-white/10 border border-white/10 text-white text-sm font-black flex items-center justify-center gap-2"
+              className="min-h-12 rounded-xl bg-white border border-orange-100 text-orange-700 text-sm font-black flex items-center justify-center gap-2 shadow-sm"
             >
               <ReceiptText className="w-4 h-4" />
               {status === "vote" ? copy.voted : copy.vote}
@@ -368,18 +368,18 @@ export default function ServiceProviderDetail() {
           <button
             type="button"
             onClick={addSplit}
-            className="mt-2 w-full min-h-12 rounded-xl bg-white text-gray-950 text-sm font-black flex items-center justify-center gap-2"
+            className="mt-2 w-full min-h-12 rounded-xl bg-green-50 text-green-700 border border-green-100 text-sm font-black flex items-center justify-center gap-2"
           >
             <CreditCard className="w-4 h-4" />
             {copy.split}
           </button>
         </section>
 
-        {demo.dailyDeals.length > 0 && (
+        {relatedProviders.length > 0 && (
           <section className={`rounded-2xl bg-white border border-gray-100 p-5 shadow-sm ${textAlignClass}`}>
-            <h2 className="font-black text-gray-900 mb-3">{language === "he" ? "עוד דילים יומיומיים" : "More daily deals"}</h2>
+            <h2 className="font-black text-gray-900 mb-3">{copy.moreServices}</h2>
             <div className="space-y-2">
-              {demo.dailyDeals.filter((deal) => deal.id !== provider.id).slice(0, 2).map((deal) => (
+              {relatedProviders.map((deal) => (
                 <button
                   key={deal.id}
                   type="button"

@@ -38,8 +38,14 @@ import {
 import {
   APARTMENT_LIFECYCLE,
   APARTMENT_PREFERENCES,
+  estimatedRentPerRoommate,
   preferencesAreComplete,
 } from "@/lib/apartmentPreferences";
+import {
+  clearApartmentPreferenceDraft,
+  preferencesForApartmentRanking,
+  updateApartmentPreferenceDraft,
+} from "@/lib/apartmentPreferenceDraft";
 import { useToast } from "@/components/ui/use-toast";
 import ApartmentIntroModal from "@/components/team/ApartmentIntroModal";
 import { Calendar as DateCalendar } from "@/components/ui/calendar";
@@ -209,10 +215,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
         const nextDiscovery = result.discovery || null;
         setDiscovery(nextDiscovery);
         setStatus(result.status || nextDiscovery?.status || null);
-        const mine = nextDiscovery?.preferences?.[String(userId)]?.preferences
-          || nextDiscovery?.rankings?.[String(userId)]?.preferences
-          || nextDiscovery?.rankings?.[String(userId)]?.rankings;
-        setPreferences(mine || {});
+        setPreferences(preferencesForApartmentRanking(nextDiscovery, userId));
         publishLifecycle(nextDiscovery);
       } catch (error) {
         console.error(error);
@@ -288,7 +291,11 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
 
   const handlePreference = (apartmentId, preference) => {
     if (lifecycle !== APARTMENT_LIFECYCLE.APARTMENT_RANKING) return;
-    setPreferences((current) => ({ ...current, [apartmentId]: preference }));
+    setPreferences((current) => {
+      const next = { ...current, [apartmentId]: preference };
+      updateApartmentPreferenceDraft(discovery, apartmentId, preference);
+      return next;
+    });
   };
 
   const handleSubmit = async () => {
@@ -299,6 +306,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
     setIsSaving(true);
     try {
       const result = await submitApartmentPreferences({ discoveryId: discovery.id, preferences });
+      clearApartmentPreferenceDraft(discovery);
       saveDiscoveryResult(result);
       const nextStatus = result.discovery?.status;
       toast({
@@ -322,6 +330,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
     setIsSaving(true);
     try {
       const result = await changeApartmentPreferences({ discoveryId: discovery.id });
+      clearApartmentPreferenceDraft(discovery);
       setPreferences({});
       saveDiscoveryResult(result);
     } catch (error) {
@@ -337,6 +346,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
     setIsSaving(true);
     try {
       const result = await requestMoreApartmentSuggestions({ discoveryId: discovery.id });
+      clearApartmentPreferenceDraft(discovery);
       setPreferences({});
       saveDiscoveryResult(result);
       toast({ title: result.no_more_suggestions ? t("apartment_no_more_toast") : t("apartment_more_options_loaded") });
@@ -389,7 +399,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   };
 
   const handleChooseCurrentApartment = async () => {
-    if (!discovery?.id) return;
+    if (!discovery?.id || !discovery.visit_time) return;
     setIsSaving(true);
     try {
       const result = await chooseCurrentApartment({ discoveryId: discovery.id });
@@ -512,6 +522,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
             onDetail={() => navigate(`${createPageUrl("ApartmentDetail")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
             onChat={() => navigate(`${createPageUrl("ApartmentChat")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
             priceFormatter={priceFormatter}
+            memberCount={memberCount}
           />
         ))}
       </div>
@@ -586,7 +597,7 @@ function ApartmentShell({ discovery, selectedCityLabel, children }) {
   );
 }
 
-function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPreference, onDetail, onChat, priceFormatter }) {
+function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPreference, onDetail, onChat, priceFormatter, memberCount }) {
   const { t, i18n } = useTranslation();
   const city = displayCity(apartment.city, i18n.language);
   const isRtl = isRtlLanguage(i18n);
@@ -597,6 +608,7 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
     localizedField(apartment, "description", i18n.language)
     || t("apartment_card_description", { bedrooms: apartment.bedrooms });
   const commute = localizedField(apartment, "commute_note", i18n.language);
+  const rentPerRoommate = estimatedRentPerRoommate(apartment, memberCount);
 
   return (
     <motion.article
@@ -617,6 +629,11 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
           <div className={`${priceAlignClass} flex-shrink-0`}>
             <p className="text-lg font-extrabold text-[--theme-orange]">{priceFormatter.format(apartment.price || 0)}</p>
             <p className="text-[11px] font-bold text-gray-400">{t("apartment_price_month")}</p>
+            {rentPerRoommate && (
+              <p className="mt-1 rounded-full bg-orange-50 px-2 py-1 text-[11px] font-extrabold text-orange-700">
+                {t("apartment_price_per_roommate", { price: priceFormatter.format(rentPerRoommate) })}
+              </p>
+            )}
           </div>
         </div>
         <p className={`text-sm text-gray-500 leading-6 ${textAlignClass}`}>{description}</p>
@@ -695,6 +712,7 @@ const VisitDateTimePicker = React.forwardRef(function VisitDateTimePicker(
   const setDate = (date) => {
     if (!date) return;
     onChange(combineVisitDateTime(date, selectedTime || "18:00"));
+    setCalendarOpen(false);
   };
 
   const setTime = (time) => {
@@ -906,7 +924,7 @@ function ViewingView({
         </div>
         <button
           onClick={onChoose}
-          disabled={isSaving}
+          disabled={isSaving || !scheduledDate}
           className="w-full py-3.5 rounded-2xl bg-green-600 text-white font-extrabold shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
         >
           <Heart className="w-4 h-4" />

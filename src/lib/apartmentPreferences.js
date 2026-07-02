@@ -17,6 +17,15 @@ export function preferencesAreComplete(apartments = [], preferences = {}) {
   return apartments.every((apartment) => APARTMENT_PREFERENCES.includes(preferences?.[apartment.id]));
 }
 
+export function estimatedRentPerRoommate(apartment, memberCount) {
+  const totalRent = Number(apartment?.price || 0);
+  const splitCount = Number(memberCount || apartment?.bedrooms || 0);
+  if (!Number.isFinite(totalRent) || totalRent <= 0 || !Number.isFinite(splitCount) || splitCount <= 0) {
+    return null;
+  }
+  return Math.round(totalRent / splitCount);
+}
+
 export function calculateApartmentPreferenceOutcome(apartments = [], preferencesByUser = {}) {
   const scores = apartments.map((apartment, index) => ({
     apartment_id: apartment.id,
