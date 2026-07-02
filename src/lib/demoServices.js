@@ -63,22 +63,27 @@ const CATEGORY_META = {
   },
 };
 
-function brandImage({ background, foreground, accent, brand, subtitle, motif = "circle" }) {
+function serviceArtwork({ background, foreground, accent, title, subtitle, motif = "circle" }) {
+  const escapeSvgText = (value) => String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  const safeTitle = escapeSvgText(title);
+  const safeSubtitle = escapeSvgText(subtitle);
   const motifMarkup = motif === "truck"
-    ? `<g opacity="0.2" fill="${accent}"><rect x="322" y="326" width="132" height="62" rx="14"/><rect x="406" y="286" width="76" height="102" rx="14"/><circle cx="362" cy="406" r="22"/><circle cx="452" cy="406" r="22"/></g>`
-    : motif === "house"
-      ? `<path d="M332 304 420 236l88 68v132H358V304Z" fill="${accent}" opacity="0.2"/><path d="M396 436v-72h74v72" fill="${background}" opacity="0.55"/>`
-      : motif === "basket"
-        ? `<g opacity="0.2" fill="none" stroke="${accent}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"><path d="M332 332h178l-22 104H354l-22-104Z"/><path d="M380 332l40-78 40 78"/></g>`
+    ? `<g opacity="0.18" fill="${accent}"><rect x="320" y="332" width="134" height="62" rx="14"/><rect x="404" y="292" width="78" height="102" rx="14"/><circle cx="362" cy="414" r="22"/><circle cx="452" cy="414" r="22"/></g>`
+    : motif === "clean"
+      ? `<g opacity="0.2" fill="none" stroke="${accent}" stroke-width="18" stroke-linecap="round"><path d="M372 236l-54 154"/><path d="M348 314h132"/><path d="M410 246l64 142"/></g>`
+      : motif === "house"
+        ? `<path d="M332 304 420 236l88 68v132H358V304Z" fill="${accent}" opacity="0.2"/><path d="M396 436v-72h74v72" fill="${background}" opacity="0.55"/>`
         : `<circle cx="420" cy="318" r="118" fill="${accent}" opacity="0.2"/><circle cx="420" cy="318" r="62" fill="${accent}" opacity="0.18"/>`;
 
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560">
-      <rect width="560" height="560" rx="0" fill="${background}"/>
-      <path d="M0 0h560v560H0z" fill="${background}"/>
+      <rect width="560" height="560" fill="${background}"/>
       ${motifMarkup}
-      <text x="54" y="252" fill="${foreground}" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900">${brand}</text>
-      <text x="58" y="306" fill="${foreground}" opacity="0.82" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800">${subtitle}</text>
+      <text x="54" y="252" fill="${foreground}" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="900">${safeTitle}</text>
+      <text x="58" y="306" fill="${foreground}" opacity="0.82" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800">${safeSubtitle}</text>
       <rect x="58" y="342" width="184" height="10" rx="5" fill="${accent}" opacity="0.95"/>
     </svg>
   `;
@@ -88,45 +93,46 @@ function brandImage({ background, foreground, accent, brand, subtitle, motif = "
 
 const SERVICE_IMAGES = {
   internet: bezeqLogo,
-  moving: brandImage({
+  moving: serviceArtwork({
     background: "#1f2937",
     foreground: "#ffffff",
     accent: "#fb923c",
-    brand: "Move TLV",
+    title: "Move TLV",
     subtitle: "Student movers",
     motif: "truck",
   }),
   furniture: ikeaLogo,
   supplies: aceLogo,
-  utilities: brandImage({
+  utilities: serviceArtwork({
     background: "#fff7ed",
     foreground: "#9a3412",
     accent: "#fb923c",
-    brand: "Utility",
+    title: "Utility",
     subtitle: "Handoff desk",
     motif: "house",
   }),
-  locksmith: brandImage({
+  locksmith: serviceArtwork({
     background: "#ecfdf5",
     foreground: "#065f46",
     accent: "#34d399",
-    brand: "KeySafe",
+    title: "KeySafe",
     subtitle: "Locks & keys",
   }),
-  handyman: brandImage({
+  handyman: serviceArtwork({
     background: "#f8fafc",
     foreground: "#334155",
     accent: "#fb923c",
-    brand: "FixMate",
+    title: "FixMate",
     subtitle: "Small repairs",
     motif: "house",
   }),
-  cleaning: brandImage({
+  cleaning: serviceArtwork({
     background: "#123c69",
     foreground: "#ffffff",
     accent: "#4dd8c8",
-    brand: "Spetz",
+    title: "Spetz",
     subtitle: "Move-in cleaning",
+    motif: "clean",
   }),
   household: aceLogo,
 };
@@ -203,7 +209,7 @@ const PROVIDER_BLUEPRINTS = [
     category: "moving",
     type: "hybrid",
     image: SERVICE_IMAGES.supplies,
-    nameEn: "Box & packing kit",
+    nameEn: "ACE box & packing kit",
     nameHe: "ערכת אריזה וקרטונים",
     taglineEn: "Boxes, tape, markers, mattress covers, and fragile-item wrap delivered before packing day.",
     taglineHe: "קרטונים, מסקינג טייפ, טושים, כיסוי למזרן וניילון לפיצ'פקעס שבירים לפני יום האריזה.",

@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import aceLogo from "../../src/assets/brand-logos/ace.png";
+import bezeqLogo from "../../src/assets/brand-logos/bezeq.png";
+import ikeaLogo from "../../src/assets/brand-logos/ikea.png";
 import { buildDemoServices, findDemoServiceProvider } from "../../src/lib/demoServices";
 
 describe("demo move-in services", () => {
@@ -47,12 +50,31 @@ describe("demo move-in services", () => {
     );
   });
 
+  it("does not assign real brand logos to unrelated providers", () => {
+    const demo = buildDemoServices({ city_en: "Tel Aviv" });
+    const imageById = Object.fromEntries(demo.providers.map((provider) => [provider.id, provider.image]));
+
+    expect(demo.providers).toHaveLength(9);
+    demo.providers.forEach((provider) => {
+      expect(provider.image).toEqual(expect.any(String));
+    });
+    expect(imageById["fiber-fast-tel_aviv"]).toBe(bezeqLogo);
+    expect(imageById["room-kit-tel_aviv"]).toBe(ikeaLogo);
+    expect(imageById["packing-supplies-tel_aviv"]).toBe(aceLogo);
+    expect(imageById["home-essentials-tel_aviv"]).toBe(aceLogo);
+    expect(imageById["fresh-start-tel_aviv"]).not.toBe(aceLogo);
+    expect(imageById["move-squad-tel_aviv"]).not.toBe(aceLogo);
+    expect(imageById["utility-handoff-tel_aviv"]).not.toBe(bezeqLogo);
+    expect(imageById["key-safe-tel_aviv"]).not.toBe(aceLogo);
+    expect(imageById["fix-mate-tel_aviv"]).not.toBe(aceLogo);
+  });
+
   it("finds the new move-in providers by generated city id", () => {
     const provider = findDemoServiceProvider({ city_en: "Jerusalem" }, "packing-supplies-jerusalem");
 
     expect(provider).toMatchObject({
       category: "moving",
-      nameEn: "Box & packing kit",
+      nameEn: "ACE box & packing kit",
       primaryAction: "hybrid",
     });
   });

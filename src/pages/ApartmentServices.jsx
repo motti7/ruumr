@@ -56,6 +56,15 @@ const EXPENSE_CATEGORIES = [
   { id: "other", icon: Banknote, color: "bg-gray-100 text-gray-700" },
 ];
 
+const STAGE3_HERO_BACKGROUND = {
+  background: [
+    "radial-gradient(circle at 16% 12%, rgba(255, 146, 109, 0.62) 0, rgba(255, 146, 109, 0) 31%)",
+    "radial-gradient(circle at 88% 8%, rgba(79, 211, 184, 0.38) 0, rgba(79, 211, 184, 0) 29%)",
+    "radial-gradient(circle at 50% 108%, rgba(246, 190, 118, 0.32) 0, rgba(246, 190, 118, 0) 36%)",
+    "linear-gradient(135deg, #14070f 0%, #51142b 43%, #082631 100%)",
+  ].join(", "),
+};
+
 function text(value, language, fallback = "") {
   return language === "he" ? value?.he || value?.heText || fallback : value?.en || value?.enText || fallback;
 }
@@ -649,9 +658,10 @@ export default function ApartmentServices() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] pb-28" dir={direction}>
-      <header className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-rose-500 to-emerald-600 text-white">
-        <img src={apartment.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-soft-light" />
-        <div className="absolute inset-0 bg-gradient-to-b from-orange-700/35 via-rose-600/45 to-emerald-800/80" />
+      <header className="relative overflow-hidden text-white" style={STAGE3_HERO_BACKGROUND}>
+        <img src={apartment.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.24] mix-blend-luminosity" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-[#5a1230]/45 to-[#061922]/90" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#f7f7f5]/12 via-transparent to-transparent" />
         <div className={`relative px-4 pt-5 pb-7 space-y-5 ${textAlignClass}`}>
           <button
             type="button"
@@ -1048,15 +1058,15 @@ function logoPresentation(provider) {
       imageClass: "w-[94%] max-h-[78%]",
     };
   }
-  if (provider.id.startsWith("fresh-start")) {
+  if (
+    provider.id.startsWith("move-squad")
+    || provider.id.startsWith("fresh-start")
+    || provider.id.startsWith("utility-handoff")
+    || provider.id.startsWith("key-safe")
+    || provider.id.startsWith("fix-mate")
+  ) {
     return {
-      tileClass: "bg-[#123c69]",
-      imageClass: "w-full h-full",
-    };
-  }
-  if (provider.id.startsWith("move-squad")) {
-    return {
-      tileClass: "bg-emerald-700",
+      tileClass: "bg-gray-50",
       imageClass: "w-full h-full",
     };
   }

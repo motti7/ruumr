@@ -8,7 +8,6 @@ import {
   Loader2,
   ReceiptText,
   Send,
-  ShieldCheck,
   Star,
   UsersRound,
 } from "lucide-react";
@@ -60,18 +59,16 @@ function logoPresentation(provider) {
       imageClass: "w-[92%] max-h-[76%]",
     };
   }
-  if (provider.id.startsWith("fresh-start")) {
+  if (
+    provider.id.startsWith("move-squad")
+    || provider.id.startsWith("fresh-start")
+    || provider.id.startsWith("utility-handoff")
+    || provider.id.startsWith("key-safe")
+    || provider.id.startsWith("fix-mate")
+  ) {
     return {
-      heroTileClass: "bg-[#123c69]",
-      tileClass: "bg-[#123c69]",
-      heroImageClass: "w-full h-full",
-      imageClass: "w-full h-full",
-    };
-  }
-  if (provider.id.startsWith("move-squad")) {
-    return {
-      heroTileClass: "bg-emerald-700",
-      tileClass: "bg-emerald-700",
+      heroTileClass: "bg-gray-50",
+      tileClass: "bg-gray-50",
       heroImageClass: "w-full h-full",
       imageClass: "w-full h-full",
     };
@@ -96,7 +93,7 @@ function ProviderHeroLogo({ provider }) {
   const presentation = logoPresentation(provider);
   return (
     <div className={`absolute inset-0 flex items-center justify-center ${presentation.heroTileClass}`}>
-      <img src={provider.image} alt="" className={`${presentation.heroImageClass} object-contain opacity-90 block`} />
+      <img src={provider.image} alt="" className={`${presentation.heroImageClass} object-contain opacity-90 block -translate-y-3`} />
     </div>
   );
 }
@@ -297,11 +294,7 @@ export default function ServiceProviderDetail() {
           >
             <BackArrowIcon className="w-5 h-5" />
           </button>
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/15 px-3 py-1.5 text-xs font-extrabold mb-3">
-              <ShieldCheck className="w-3.5 h-3.5 text-orange-200" />
-              {copy.trusted}
-            </div>
+          <div className="max-w-[min(100%,34rem)] -translate-y-3">
             <h1 className="text-3xl font-black leading-tight">{providerText(provider, language, "name")}</h1>
             <p className="text-sm text-white/75 leading-6 mt-2">{providerText(provider, language, "tagline")}</p>
           </div>
