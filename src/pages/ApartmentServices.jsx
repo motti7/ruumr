@@ -1113,12 +1113,12 @@ function ProviderCard({ provider, copy, language, status, onDetails, onPrimary, 
       <div className="grid grid-cols-[104px_1fr] gap-3 p-3">
         <ProviderLogo provider={provider} />
         <div className="min-w-0 flex flex-col">
-          <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 space-y-1.5">
             <div className="min-w-0">
               <p className="font-black text-gray-900 leading-5">{providerName(provider, language)}</p>
               <p className="text-xs font-bold text-gray-400 mt-1">{serviceTypeLabel(provider, copy)} · {provider.rating}</p>
             </div>
-            <span className="rounded-full bg-orange-50 text-orange-700 px-2.5 py-1 text-[10px] font-black whitespace-nowrap">
+            <span className="inline-flex w-fit max-w-full rounded-full bg-orange-50 text-orange-700 px-2.5 py-1 text-[10px] leading-tight font-black whitespace-normal">
               {providerDeal(provider, language)}
             </span>
           </div>
