@@ -2,6 +2,8 @@ const DEMO_STAGE_STORAGE_KEY = "ruumr_demo_stage";
 const DEMO_CITY_STORAGE_KEY = "ruumr_demo_city";
 const DEMO_STAGE_QUERY_PARAM = "demo_stage";
 const DEMO_CITY_QUERY_PARAM = "demo_city";
+const SIMULATOR_QUERY_PARAM = "simulator_mode";
+const APARTMENT_INTRO_REQUEST_SESSION_KEY = "ruumr_apartment_intro_requested";
 
 export const DEMO_STAGES = {
   TEAM_BUILDING: "1",
@@ -72,12 +74,30 @@ function writeStorage(key, value) {
   }
 }
 
+function requestApartmentIntroIfEnteringStage2(previousStage, nextStage) {
+  if (typeof window === "undefined") return;
+  if (previousStage !== DEMO_STAGES.TEAM_BUILDING || nextStage !== DEMO_STAGES.APARTMENT_SEARCH) return;
+  try {
+    window.sessionStorage.setItem(APARTMENT_INTRO_REQUEST_SESSION_KEY, String(Date.now()));
+  } catch {
+    // Demo-only prompt; ignore storage failures.
+  }
+}
+
 export function getDemoStage() {
   const queryStage = normalizeStage(readQueryParam(DEMO_STAGE_QUERY_PARAM));
   if (queryStage) {
+    requestApartmentIntroIfEnteringStage2(normalizeStage(readStorage(DEMO_STAGE_STORAGE_KEY)), queryStage);
     writeStorage(DEMO_STAGE_STORAGE_KEY, queryStage);
     return queryStage;
   }
+
+  const simulatorQueryValue = readQueryParam(SIMULATOR_QUERY_PARAM);
+  if (simulatorQueryValue === "true" || simulatorQueryValue === "1") {
+    writeStorage(DEMO_STAGE_STORAGE_KEY, DEMO_STAGES.TEAM_BUILDING);
+    return DEMO_STAGES.TEAM_BUILDING;
+  }
+
   return normalizeStage(readStorage(DEMO_STAGE_STORAGE_KEY));
 }
 
@@ -100,6 +120,10 @@ export function isDemoApartmentStage() {
   return getDemoStage() === DEMO_STAGES.APARTMENT_SEARCH;
 }
 
+export function isDemoTeamBuildingStage() {
+  return getDemoStage() === DEMO_STAGES.TEAM_BUILDING;
+}
+
 export function isDemoApartmentServicesStage() {
   return getDemoStage() === DEMO_STAGES.APARTMENT_SERVICES;
 }
@@ -111,6 +135,7 @@ export function isDemoHousingStage() {
 export function setDemoStage(stage) {
   const normalized = normalizeStage(stage);
   if (!normalized) return "";
+  requestApartmentIntroIfEnteringStage2(normalizeStage(readStorage(DEMO_STAGE_STORAGE_KEY)), normalized);
   writeStorage(DEMO_STAGE_STORAGE_KEY, normalized);
   return normalized;
 }

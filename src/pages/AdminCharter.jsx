@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 // Maps each question id to its i18n catalog key (reusing the charter title keys
 // where the wording matches).
@@ -88,7 +89,7 @@ export default function AdminCharterPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" onClick={() => navigate(createPageUrl("AdminUsers"))}>
-            <ArrowRight className="w-5 h-5" />
+            <BackArrowIcon className="w-5 h-5" />
           </Button>
           <h1 className="text-2xl font-black text-gray-900">{t("admin_charter_title")}</h1>
           <span className="text-gray-500 text-sm">{t("admin_users_answered", { count: rows.length })}</span>

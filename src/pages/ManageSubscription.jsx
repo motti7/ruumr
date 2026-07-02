@@ -7,7 +7,8 @@ import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS } from "@/lib/ruumrPlusEntitlement
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/functions/getSubscriptionStatus";
 import { cancelSubscription } from "@/functions/cancelSubscription";
-import { Sparkles, CheckCircle2, XCircle, Loader2, ChevronLeft, AlertTriangle } from "lucide-react";
+import { Sparkles, CheckCircle2, XCircle, Loader2, AlertTriangle } from "lucide-react";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 const STATUS_LABELS = {
   ACTIVE: { textKey: "sub_status_active", color: "text-emerald-600 bg-emerald-50" },
@@ -77,7 +78,7 @@ export default function ManageSubscriptionPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
         <Link to={createPageUrl("Settings")} className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-gray-500 rotate-180" />
+          <BackArrowIcon className="w-5 h-5 text-gray-500" />
         </Link>
         <h1 className="text-xl font-black text-gray-900">{t("manage_subscription_title")}</h1>
       </div>

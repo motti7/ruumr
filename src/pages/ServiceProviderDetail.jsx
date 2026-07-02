@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  ArrowRight,
   Check,
   Clock3,
   CreditCard,
@@ -17,6 +16,7 @@ import { createPageUrl } from "@/utils";
 import { ensureTeamApartmentDiscovery } from "@/api/teamApartmentDiscovery";
 import { buildDemoServices, findDemoServiceProvider } from "@/lib/demoServices";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 import { useToast } from "@/components/ui/use-toast";
 
 const SERVICE_STATE_KEY = "ruumr_demo_stage3_services";
@@ -295,7 +295,7 @@ export default function ServiceProviderDetail() {
             className="w-11 h-11 rounded-full bg-white/12 backdrop-blur flex items-center justify-center"
             aria-label={copy.back}
           >
-            <ArrowRight className={`w-5 h-5 ${isRtl ? "" : "rotate-180"}`} />
+            <BackArrowIcon className="w-5 h-5" />
           </button>
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/15 px-3 py-1.5 text-xs font-extrabold mb-3">

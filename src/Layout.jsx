@@ -18,11 +18,23 @@ import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
-import { DEMO_STAGES, getDemoStage, isDemoHousingStage } from "@/lib/demoStage";
+import { DEMO_STAGES, getDemoStage, isDemoHousingStage, isDemoTeamBuildingStage } from "@/lib/demoStage";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 import { listIncomingTeamInvites } from "@/api/teamInvites";
+import ProfileSignalDialog from "@/components/profileSignals/ProfileSignalDialog";
+import {
+  loadCurrentProfileSignalState,
+  saveProfileSignalAnswer,
+  shouldPromptForProfileSignal,
+} from "@/api/profileSignals";
+import { PROFILE_SIGNAL_DISMISSED_SESSION_KEY } from "@/lib/profileSignals/config";
+import {
+  getPreferredProfileSignalLanguage,
+  getProfileSignalCopy,
+  getProfileSignalQuestion,
+} from "@/lib/profileSignals/questions";
 
 function FilterHintButton() {
   const { t } = useTranslation();
@@ -80,6 +92,17 @@ const APARTMENT_SERVICES_PAGES = new Set([
   'ServiceProviderDetail',
 ]);
 
+const PROFILE_SIGNAL_SUPPRESSED_PAGES = new Set([
+  'Onboarding',
+  'Chat',
+  'ProfileView',
+  'Charter',
+  'Verification',
+  'Banned',
+  'RuumrPlusPricing',
+  'RuumrPlusCheckout',
+]);
+
 export default function Layout({ children, currentPageName }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
@@ -98,6 +121,9 @@ export default function Layout({ children, currentPageName }) {
   const [likesCount, setLikesCount] = useState(0);
   const [pendingLikerUserIds, setPendingLikerUserIds] = useState([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [profileSignalQuestion, setProfileSignalQuestion] = useState(null);
+  const [activeProfileSignalQuestion, setActiveProfileSignalQuestion] = useState(null);
+  const [isCheckingProfileSignal, setIsCheckingProfileSignal] = useState(false);
   const [apartmentLifecycle, setApartmentLifecycle] = useState(() => {
     try {
       return localStorage.getItem('ruumr_apartment_lifecycle') || '';
@@ -121,6 +147,10 @@ export default function Layout({ children, currentPageName }) {
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
   const direction = getLanguageDirection(i18n);
   const textAlignClass = isRtlLanguage(i18n) ? 'text-right' : 'text-left';
+  const profileSignalLanguage = getPreferredProfileSignalLanguage(
+    new URLSearchParams(location.search).get("profileSignalLang") || i18n.language
+  );
+  const profileSignalCopy = getProfileSignalCopy(profileSignalLanguage);
 
   useEffect(() => {
     matchesCountRef.current = matchesCount;
@@ -406,6 +436,88 @@ export default function Layout({ children, currentPageName }) {
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkProfileSignalPrompt = async () => {
+      const previewQuestionId = new URLSearchParams(location.search).get("profileSignalPreview");
+      const isLocalPreview =
+        typeof window !== "undefined" &&
+        ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+      if (isLocalPreview && previewQuestionId) {
+        const previewQuestion = getProfileSignalQuestion(previewQuestionId);
+        setProfileSignalQuestion(null);
+        setActiveProfileSignalQuestion(previewQuestion);
+        setIsCheckingProfileSignal(false);
+        return;
+      }
+
+      const forceDemoStageOnePrompt = isRuumrSimulatorMode() && isDemoTeamBuildingStage();
+      if (PROFILE_SIGNAL_SUPPRESSED_PAGES.has(currentPageName) || hasProfile !== true) {
+        if (forceDemoStageOnePrompt && !PROFILE_SIGNAL_SUPPRESSED_PAGES.has(currentPageName)) {
+          const demoQuestion = getProfileSignalQuestion("dishes_sink_reaction_001");
+          setProfileSignalQuestion(demoQuestion);
+        } else {
+          setProfileSignalQuestion(null);
+        }
+        setIsCheckingProfileSignal(false);
+        return;
+      }
+
+      try {
+        if (!forceDemoStageOnePrompt && window.sessionStorage.getItem(PROFILE_SIGNAL_DISMISSED_SESSION_KEY) === "1") {
+          setProfileSignalQuestion(null);
+          setIsCheckingProfileSignal(false);
+          return;
+        }
+      } catch (_) {}
+
+      setIsCheckingProfileSignal(true);
+      try {
+        const state = await loadCurrentProfileSignalState();
+        if (cancelled) return;
+        const demoQuestion = forceDemoStageOnePrompt ? getProfileSignalQuestion("dishes_sink_reaction_001") : null;
+        const shouldShow = forceDemoStageOnePrompt || (shouldPromptForProfileSignal(state.profile) && Boolean(state.nextQuestion));
+        setProfileSignalQuestion(shouldShow ? demoQuestion || state.nextQuestion : null);
+      } catch (error) {
+        if (!cancelled) {
+          console.info("Profile signal prompt unavailable:", error);
+          setProfileSignalQuestion(null);
+        }
+      } finally {
+        if (!cancelled) setIsCheckingProfileSignal(false);
+      }
+    };
+
+    void checkProfileSignalPrompt();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPageName, hasProfile, location.search]);
+
+  const dismissProfileSignalPrompt = () => {
+    try {
+      window.sessionStorage.setItem(PROFILE_SIGNAL_DISMISSED_SESSION_KEY, "1");
+    } catch (_) {}
+    setActiveProfileSignalQuestion(null);
+    setProfileSignalQuestion(null);
+  };
+
+  const handleProfileSignalAnswer = async (answerId) => {
+    try {
+      await saveProfileSignalAnswer({
+        question: activeProfileSignalQuestion,
+        answerId,
+        source: "profile_prompt",
+      });
+    } catch (error) {
+      console.error("Failed to save profile signal answer:", error);
+    } finally {
+      setActiveProfileSignalQuestion(null);
+      setProfileSignalQuestion(null);
+    }
+  };
   
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -437,7 +549,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={direction}>
         <DemoStageSwitcher />
-        {!apartmentFlowActive && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
+        {!standardDemoNavActive && !apartmentFlowActive && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -467,6 +579,28 @@ export default function Layout({ children, currentPageName }) {
                 </div>
             </div>
         )}
+        {shouldShowNav && profileSignalQuestion && !activeProfileSignalQuestion && (
+            <button
+                type="button"
+                onClick={() => setActiveProfileSignalQuestion(profileSignalQuestion)}
+                disabled={isCheckingProfileSignal}
+                className="fixed right-3 z-[70] flex min-h-[42px] items-center gap-2 rounded-full border border-orange-200 bg-white/92 px-4 py-2 text-sm font-extrabold text-[--theme-orange] shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70"
+                style={{ top: 'calc(58px + env(safe-area-inset-top, 0px))' }}
+                aria-label={profileSignalCopy.improveProfile}
+            >
+                <Sparkles className="h-4 w-4" />
+                {profileSignalCopy.improveProfile}
+            </button>
+        )}
+        <ProfileSignalDialog
+            open={Boolean(activeProfileSignalQuestion)}
+            question={activeProfileSignalQuestion}
+            source="profile_prompt"
+            dismissible
+            language={profileSignalLanguage}
+            onClose={dismissProfileSignalPrompt}
+            onAnswer={handleProfileSignalAnswer}
+        />
         {/* App chrome (header + bottom nav) must render at all viewport widths.
             Previously the mobile chrome was `sm:hidden` and a separate
             chrome-less block rendered at >=640px, which hid the Settings gear and

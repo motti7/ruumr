@@ -20,10 +20,13 @@ import { Slider } from '@/components/ui/slider';
 import CitySelect from '@/components/shared/CitySelect';
 import CustomSelect from '@/components/shared/CustomSelect';
 import ImageLightbox from '@/components/shared/ImageLightbox';
+import ProfileSignalDialog from '@/components/profileSignals/ProfileSignalDialog';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { getSafeAuthReturnUrl } from '@/lib/auth-return-url';
 import { appParams } from '@/lib/app-params';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
+import { pickCurrentProfileSignalQuestion, saveProfileSignalAnswer } from '@/api/profileSignals';
+import { getPreferredProfileSignalLanguage } from '@/lib/profileSignals/questions';
 import {
   getCachedAppleIdentity,
   resolveAndSyncAppleIdentity,
@@ -104,6 +107,11 @@ export default function OnboardingPage() {
     initialIsAppleUser && !initialAppleSnapshot.displayName
   );
   const [wantsRuumrPromotion, setWantsRuumrPromotion] = useState(false);
+  const [profileSignalQuestion, setProfileSignalQuestion] = useState(null);
+  const [postProfileSignalDestination, setPostProfileSignalDestination] = useState(null);
+  const profileSignalLanguage = getPreferredProfileSignalLanguage(
+    new URLSearchParams(location.search).get("profileSignalLang") || i18n.language
+  );
 
   const fileInputRef = useRef(null);
   const apartmentFileInputRef = useRef(null);
@@ -495,11 +503,23 @@ export default function OnboardingPage() {
         }
       });
 
-      if (shouldVerify) {
-        navigate(createPageUrl('Verification'), { state: { fromOnboarding: true } });
-      } else {
-        navigate(createPageUrl('Discover'));
+      const destination = shouldVerify ?
+      { path: createPageUrl('Verification'), state: { fromOnboarding: true } } :
+      { path: createPageUrl('Discover') };
+
+      try {
+        const nextProfileSignalQuestion = await pickCurrentProfileSignalQuestion();
+        if (nextProfileSignalQuestion) {
+          setPostProfileSignalDestination(destination);
+          setProfileSignalQuestion(nextProfileSignalQuestion);
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (profileSignalError) {
+        console.error("Failed to prepare onboarding profile signal:", profileSignalError);
       }
+
+      navigate(destination.path, destination.state ? { state: destination.state } : undefined);
     } catch (error) {
       console.error("Failed to create profile:", error);
       if (error?.status === 401 || error?.status === 403) {
@@ -513,6 +533,23 @@ export default function OnboardingPage() {
 
   const setFormField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleProfileSignalAnswer = async (answerId) => {
+    const destination = postProfileSignalDestination || { path: createPageUrl('Discover') };
+    try {
+      await saveProfileSignalAnswer({
+        question: profileSignalQuestion,
+        answerId,
+        source: "onboarding",
+      });
+    } catch (profileSignalError) {
+      console.error("Failed to save onboarding profile signal:", profileSignalError);
+    } finally {
+      setProfileSignalQuestion(null);
+      setPostProfileSignalDestination(null);
+      navigate(destination.path, destination.state ? { state: destination.state } : undefined);
+    }
   };
 
   // Image compression utility
@@ -751,6 +788,14 @@ export default function OnboardingPage() {
         }
       `}</style>
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      <ProfileSignalDialog
+        open={Boolean(profileSignalQuestion)}
+        question={profileSignalQuestion}
+        source="onboarding"
+        dismissible={false}
+        language={profileSignalLanguage}
+        onAnswer={handleProfileSignalAnswer}
+      />
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 

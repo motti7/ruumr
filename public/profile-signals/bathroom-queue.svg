@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-label="Morning bathroom queue in a shared apartment">
+  <rect width="900" height="1200" fill="#dfe8ea"/>
+  <rect x="280" y="160" width="340" height="720" rx="18" fill="#f8f5ef"/>
+  <rect x="320" y="220" width="260" height="330" rx="12" fill="#b8cbd1"/>
+  <circle cx="536" cy="600" r="16" fill="#7f7468"/>
+  <rect y="880" width="900" height="320" fill="#c8c6bc"/>
+  <g transform="translate(118 638)">
+    <circle cx="92" cy="58" r="46" fill="#413a37"/>
+    <rect x="48" y="108" width="88" height="188" rx="44" fill="#d7a35e"/>
+    <rect x="118" y="148" width="90" height="34" rx="17" fill="#ffffff"/>
+  </g>
+  <g transform="translate(610 625)">
+    <circle cx="82" cy="62" r="48" fill="#5d514d"/>
+    <rect x="36" y="112" width="92" height="194" rx="46" fill="#879cad"/>
+    <rect x="-26" y="152" width="88" height="34" rx="17" fill="#ffffff"/>
+  </g>
+  <rect x="360" y="690" width="180" height="72" rx="16" fill="#e7dfd0"/>
+  <path d="M378 724h144" stroke="#7d8589" stroke-width="14" stroke-linecap="round"/>
+</svg>

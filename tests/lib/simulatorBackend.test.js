@@ -147,4 +147,45 @@ describe('simulatorBackend', () => {
     expect(seededMessages.some((message) => message.content_en.includes('coffee'))).toBe(true);
     expect(seededMessages.some((message) => message.content_en.includes('check out'))).toBe(true);
   });
+
+  it('clears an old visit booking when demo stage 2 resets to apartment ranking', async () => {
+    window.localStorage.setItem('ruumr_demo_stage', '2');
+    const base44 = {
+      auth: {},
+      entities: {},
+      functions: {},
+      analytics: { cleanup: vi.fn(), track: vi.fn() },
+      appLogs: { logUserInApp: vi.fn() },
+    };
+    enableSimulatorBackend(base44);
+
+    const ensured = await base44.functions.invoke('teamApartmentDiscovery', { action: 'ensure' });
+    const preferences = Object.fromEntries(
+      ensured.discovery.suggested_apartments.map((apartment, index) => [
+        apartment.id,
+        index === 0 ? 'amazing' : 'ok',
+      ])
+    );
+    const ranked = await base44.functions.invoke('teamApartmentDiscovery', {
+      action: 'submit_preferences',
+      discovery_id: ensured.discovery.id,
+      preferences,
+    });
+    const scheduled = await base44.functions.invoke('teamApartmentDiscovery', {
+      action: 'schedule_visit',
+      discovery_id: ranked.discovery.id,
+      visit_time: '2026-07-02T15:00:00.000Z',
+    });
+
+    expect(scheduled.discovery.lifecycle_state).toBe('APARTMENT_VIEWING');
+    expect(scheduled.discovery.visit_time).toBe('2026-07-02T15:00:00.000Z');
+
+    const reset = await base44.functions.invoke('teamApartmentDiscovery', { action: 'ensure' });
+
+    expect(reset.discovery.lifecycle_state).toBe('APARTMENT_RANKING');
+    expect(reset.discovery.visit_time).toBe('');
+    expect(reset.discovery.visit_scheduled_by_user_id).toBe('');
+    expect(reset.discovery.visit_scheduled_at).toBe('');
+    expect(reset.discovery.current_apartment).toBeNull();
+  });
 });

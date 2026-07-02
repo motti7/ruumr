@@ -12,6 +12,28 @@ import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 import { buildMessagePayload } from "@/lib/messagePayload";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
+import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
+import { isDemoHousingStage } from "@/lib/demoStage";
+
+function hasActiveApartmentLifecycle() {
+  try {
+    return ["APARTMENT_RANKING", "APARTMENT_VIEWING", "APARTMENT_FOUND"].includes(
+      window.localStorage?.getItem("ruumr_apartment_lifecycle")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getChatBackUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("from") === "team_chats") return createPageUrl("TeamChats");
+  if (isRuumrSimulatorMode() && (isDemoHousingStage() || hasActiveApartmentLifecycle())) {
+    return createPageUrl("TeamChats");
+  }
+  return createPageUrl("Matches");
+}
 
 export default function ChatPage() {
   const { t, i18n } = useTranslation();
@@ -243,13 +265,11 @@ export default function ChatPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
         <button
-          onClick={() => navigate(createPageUrl("Matches"), { replace: true })}
+          onClick={() => navigate(getChatBackUrl(), { replace: true })}
           className="text-gray-600 p-2 -mr-1"
           aria-label={t("back")}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
+          <BackArrowIcon className="w-6 h-6" />
         </button>
         <div className="flex items-center gap-3 flex-1">
           <img

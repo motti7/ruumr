@@ -5,7 +5,8 @@ import { User } from "@/entities/User";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Send, UsersRound } from "lucide-react";
+import { Send, UsersRound } from "lucide-react";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 import SmartImage from "@/components/shared/SmartImage";
 import VirtualizedMessageList from "@/components/shared/VirtualizedMessageList";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
@@ -16,6 +17,12 @@ import { ensureTeamApartmentDiscovery } from "@/api/teamApartmentDiscovery";
 
 function messageContent(message, language) {
   return language === "he" ? message.content : message.content_en || message.content;
+}
+
+function getGroupChatBackUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("from") === "team_chats") return createPageUrl("TeamChats");
+  return createPageUrl("GroupTracker");
 }
 
 export default function GroupChatPage() {
@@ -193,11 +200,11 @@ export default function GroupChatPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
         <button 
-          onClick={() => navigate(createPageUrl('GroupTracker'))} 
+          onClick={() => navigate(getGroupChatBackUrl(), { replace: true })} 
           className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
           aria-label={t("back")}
         >
-          <ArrowRight className="w-5 h-5 text-gray-600" />
+          <BackArrowIcon className="w-5 h-5 text-gray-600" />
         </button>
           <div className="flex items-center gap-2 flex-1">
           {/* Avatar stack */}

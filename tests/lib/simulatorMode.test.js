@@ -18,6 +18,7 @@ describe('simulatorMode helpers', () => {
     mockState.nativePlatform = false;
     vi.unstubAllEnvs();
     window.localStorage.clear();
+    window.history.replaceState(null, '', '/');
   });
 
   it('does not enable native demo mode in a browser runtime', () => {
@@ -49,5 +50,12 @@ describe('simulatorMode helpers', () => {
 
     expect(isRuumrNativeDemoSession()).toBe(false);
     expect(isRuumrSimulatorMode()).toBe(false);
+  });
+
+  it('enables simulator mode when demo_stage is present', () => {
+    window.history.replaceState(null, '', '/Discover?demo_stage=1');
+
+    expect(isRuumrSimulatorMode()).toBe(true);
+    expect(window.localStorage.getItem('ruumr_simulator_mode')).toBe('true');
   });
 });

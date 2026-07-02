@@ -490,6 +490,7 @@ async function rejectCurrentApartment(base44, user, body) {
         {
             apartment_id: normalized.current_apartment.id,
             reason: String(body.reason || 'other'),
+            note: String(body.note || '').trim(),
             rejected_by_user_id: String(user.id),
             rejected_at: new Date().toISOString(),
         },

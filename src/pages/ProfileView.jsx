@@ -4,7 +4,8 @@ import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
+import { MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 import { SiTiktok } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -360,7 +361,7 @@ export default function ProfileViewPage() {
           className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           aria-label={t("back")}
         >
-          <ArrowRight className="w-6 h-6 text-gray-600" />
+          <BackArrowIcon className="w-6 h-6 text-gray-600" />
         </button>
         <h2 className="font-bold text-gray-900 text-lg">{profile.name}</h2>
       </div>

@@ -3,11 +3,14 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
+import { enUS, he } from "date-fns/locale";
 import {
   AlertCircle,
   BedDouble,
   CalendarDays,
   Check,
+  ChevronDown,
+  Clock,
   ExternalLink,
   Heart,
   Home,
@@ -39,9 +42,20 @@ import {
 } from "@/lib/apartmentPreferences";
 import { useToast } from "@/components/ui/use-toast";
 import ApartmentIntroModal from "@/components/team/ApartmentIntroModal";
+import { Calendar as DateCalendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const CONFETTI_STORAGE_KEY = "ruumr_team_apartment_transition_confetti_seen";
 const LIFECYCLE_STORAGE_KEY = "ruumr_apartment_lifecycle";
+const INTRO_SEEN_SESSION_KEY = "ruumr_apartment_intro_seen";
+const INTRO_REQUEST_SESSION_KEY = "ruumr_apartment_intro_requested";
 const REJECTION_REASONS = [
   "not_available",
   "too_small",
@@ -50,6 +64,7 @@ const REJECTION_REASONS = [
   "bad_condition",
   "other",
 ];
+const VISIT_TIME_OPTIONS = ["17:30", "18:00", "18:30", "19:00", "19:30", "20:00"];
 
 const CITY_LABELS = {
   "תל אביב": { en: "Tel Aviv", he: "תל אביב" },
@@ -89,6 +104,49 @@ function localizedField(apartment, base, language) {
   return (language === "he" ? he || en : en || he) || "";
 }
 
+function padTimePart(value) {
+  return String(value).padStart(2, "0");
+}
+
+function dateToInputDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${padTimePart(date.getMonth() + 1)}-${padTimePart(date.getDate())}`;
+}
+
+function parseLocalDateTime(value) {
+  if (!value) return { date: null, time: "" };
+  const [datePart, timePart = ""] = String(value).split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!year || !month || !day) return { date: null, time: timePart.slice(0, 5) };
+  return {
+    date: new Date(year, month - 1, day),
+    time: timePart.slice(0, 5),
+  };
+}
+
+function combineVisitDateTime(date, time) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime()) || !time) return "";
+  return `${dateToInputDate(date)}T${time}`;
+}
+
+function googleCalendarDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function googleCalendarUrl({ title, details, location, startDate, durationMinutes = 45 }) {
+  if (!(startDate instanceof Date) || Number.isNaN(startDate.getTime())) return "";
+  const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title || "",
+    dates: `${googleCalendarDate(startDate)}/${googleCalendarDate(endDate)}`,
+    details: details || "",
+    location: location || "",
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function lifecycleFrom(discovery) {
   if (!discovery) return APARTMENT_LIFECYCLE.TEAM_BUILDING;
   if (discovery.lifecycle_state) return discovery.lifecycle_state;
@@ -105,6 +163,15 @@ function publishLifecycle(discovery) {
   window.dispatchEvent(new CustomEvent("ruumr-apartment-lifecycle", { detail: { lifecycle } }));
 }
 
+function shouldDismissIntroInitially() {
+  try {
+    if (sessionStorage.getItem(INTRO_REQUEST_SESSION_KEY)) return false;
+    return sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -114,18 +181,15 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   const [preferences, setPreferences] = useState({});
   const [visitTime, setVisitTime] = useState("");
   const [rejectionReason, setRejectionReason] = useState(REJECTION_REASONS[0]);
+  const [rejectionNote, setRejectionNote] = useState("");
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [introDismissed, setIntroDismissed] = useState(() => {
-    try {
-      return sessionStorage.getItem("ruumr_apartment_intro_seen") === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [introDismissed, setIntroDismissed] = useState(shouldDismissIntroInitially);
   const dismissIntro = () => {
     try {
-      sessionStorage.setItem("ruumr_apartment_intro_seen", "1");
+      sessionStorage.setItem(INTRO_SEEN_SESSION_KEY, "1");
+      sessionStorage.removeItem(INTRO_REQUEST_SESSION_KEY);
     } catch { /* ignore */ }
     setIntroDismissed(true);
   };
@@ -177,6 +241,16 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
       confetti({ particleCount: 90, spread: 64, origin: { y: 0.3 } });
     }
   }, [discovery]);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(INTRO_REQUEST_SESSION_KEY)) {
+        setIntroDismissed(false);
+      }
+    } catch {
+      // If storage is unavailable, fall back to the initial in-memory state.
+    }
+  }, []);
 
   const apartments = discovery?.suggested_apartments || [];
   const lifecycle = lifecycleFrom(discovery);
@@ -296,12 +370,15 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
     }
   };
 
-  const handleRejectCurrentApartment = async () => {
+  const handleRejectCurrentApartment = async ({ reason = rejectionReason, note = rejectionNote } = {}) => {
     if (!discovery?.id) return;
     setIsSaving(true);
     try {
-      const result = await rejectCurrentApartment({ discoveryId: discovery.id, reason: rejectionReason });
+      const result = await rejectCurrentApartment({ discoveryId: discovery.id, reason, note });
       saveDiscoveryResult(result);
+      setRejectDialogOpen(false);
+      setRejectionReason(REJECTION_REASONS[0]);
+      setRejectionNote("");
       toast({ title: t("apartment_rejected_saved") });
     } catch (error) {
       console.error(error);
@@ -382,6 +459,10 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
           setVisitTime={setVisitTime}
           rejectionReason={rejectionReason}
           setRejectionReason={setRejectionReason}
+          rejectionNote={rejectionNote}
+          setRejectionNote={setRejectionNote}
+          rejectDialogOpen={rejectDialogOpen}
+          setRejectDialogOpen={setRejectDialogOpen}
           onSchedule={handleScheduleVisit}
           onReject={handleRejectCurrentApartment}
           onChoose={handleChooseCurrentApartment}
@@ -588,6 +669,127 @@ function ApartmentPreferenceCard({ apartment, index, selectedPreference, onPrefe
   );
 }
 
+const VisitDateTimePicker = React.forwardRef(function VisitDateTimePicker(
+  { value, onChange, language },
+  ref
+) {
+  const { t } = useTranslation();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const { date: selectedDate, time: selectedTime } = parseLocalDateTime(value);
+  const isHebrew = String(language || "").toLowerCase().startsWith("he");
+  const today = useMemo(() => {
+    const next = new Date();
+    next.setHours(0, 0, 0, 0);
+    return next;
+  }, []);
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(isHebrew ? "he-IL" : "en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+    [isHebrew]
+  );
+
+  const setDate = (date) => {
+    if (!date) return;
+    onChange(combineVisitDateTime(date, selectedTime || "18:00"));
+  };
+
+  const setTime = (time) => {
+    onChange(combineVisitDateTime(selectedDate || today, time));
+  };
+
+  return (
+    <div className="space-y-3">
+      <input ref={ref} type="hidden" value={value || ""} readOnly />
+      <button
+        type="button"
+        onClick={() => setCalendarOpen((open) => !open)}
+        className="w-full rounded-2xl border border-orange-100 bg-orange-50/70 px-4 py-3 text-left shadow-sm transition active:scale-[0.99]"
+        aria-expanded={calendarOpen}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[--theme-orange] shadow-sm">
+            <CalendarDays className="h-5 w-5" />
+          </div>
+          <div className={`flex-1 ${isHebrew ? "text-right" : "text-left"}`}>
+            <p className="text-[11px] font-extrabold uppercase text-orange-600">
+              {t("apartment_visit_date_label")}
+            </p>
+            <p className="text-base font-extrabold text-gray-900">
+              {selectedDate ? dateFormatter.format(selectedDate) : t("apartment_visit_choose_date")}
+            </p>
+          </div>
+          <ChevronDown className={`h-5 w-5 text-orange-500 transition-transform ${calendarOpen ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+
+      {calendarOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-hidden rounded-3xl border border-orange-100 bg-white p-2 shadow-lg"
+        >
+          <DateCalendar
+            mode="single"
+            selected={selectedDate || undefined}
+            onSelect={setDate}
+            disabled={{ before: today }}
+            locale={isHebrew ? he : enUS}
+            showOutsideDays={false}
+            className="mx-auto"
+            classNames={{
+              months: "flex flex-col",
+              month: "space-y-3",
+              caption: "flex justify-center pt-2 pb-1 relative items-center",
+              caption_label: "text-sm font-extrabold text-gray-900",
+              nav_button: "h-9 w-9 rounded-full border border-orange-100 bg-orange-50 p-0 text-orange-600 opacity-100 hover:bg-orange-100",
+              table: "w-full border-collapse",
+              head_row: "grid grid-cols-7",
+              head_cell: "text-gray-400 rounded-md text-center text-[11px] font-extrabold",
+              row: "grid grid-cols-7 mt-1",
+              cell: "relative p-0 text-center",
+              day: "h-10 w-10 rounded-full p-0 text-sm font-extrabold text-gray-700 hover:bg-orange-50",
+              day_selected: "bg-[--theme-orange] text-white hover:bg-[--theme-orange] focus:bg-[--theme-orange]",
+              day_today: "bg-orange-50 text-[--theme-orange]",
+              day_disabled: "text-gray-300 opacity-50",
+              day_hidden: "invisible",
+            }}
+          />
+        </motion.div>
+      )}
+
+      <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3">
+        <div className={`mb-2 flex items-center gap-2 text-xs font-extrabold text-gray-500 ${isHebrew ? "justify-end" : ""}`}>
+          <Clock className="h-4 w-4 text-[--theme-orange]" />
+          <span>{t("apartment_visit_time_label")}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {VISIT_TIME_OPTIONS.map((time) => {
+            const active = selectedTime === time;
+            return (
+              <button
+                key={time}
+                type="button"
+                onClick={() => setTime(time)}
+                className={`min-h-11 rounded-xl text-sm font-extrabold transition active:scale-95 ${
+                  active
+                    ? "bg-gray-900 text-white shadow-md"
+                    : "bg-white text-gray-700 border border-gray-100"
+                }`}
+              >
+                {time}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+});
+
 function ViewingView({
   discovery,
   priceFormatter,
@@ -597,6 +799,10 @@ function ViewingView({
   setVisitTime,
   rejectionReason,
   setRejectionReason,
+  rejectionNote,
+  setRejectionNote,
+  rejectDialogOpen,
+  setRejectDialogOpen,
   onSchedule,
   onReject,
   onChoose,
@@ -607,6 +813,15 @@ function ViewingView({
   const score = discovery.eligible_apartments?.find((item) => item.apartment_id === apartment?.id);
   const scheduledDate = discovery.visit_time ? new Date(discovery.visit_time) : null;
   const textAlignClass = isRtlLanguage(i18n) ? "text-right" : "text-left";
+  const apartmentAddress = displayAddress(apartment, i18n.language);
+  const calendarUrl = scheduledDate
+    ? googleCalendarUrl({
+      title: t("apartment_calendar_title", { address: apartmentAddress }),
+      details: t("apartment_calendar_details"),
+      location: apartmentAddress,
+      startDate: scheduledDate,
+    })
+    : "";
 
   if (!apartment) return null;
 
@@ -631,24 +846,46 @@ function ViewingView({
 
       <ApartmentSummaryCard apartment={apartment} priceFormatter={priceFormatter} language={i18n.language} />
 
-      <div className="rounded-2xl bg-gray-50 p-4 space-y-3">
-        <div className="flex items-center gap-2 text-gray-800">
-          <CalendarDays className="w-5 h-5 text-[--theme-orange]" />
-          <h3 className="font-extrabold">{t("apartment_schedule_visit")}</h3>
+      <div className="rounded-3xl bg-white border border-orange-100 p-4 space-y-4 shadow-sm">
+        <div className="flex items-center gap-3 text-gray-900">
+          <div className="w-11 h-11 rounded-2xl bg-orange-50 text-[--theme-orange] flex items-center justify-center">
+            <CalendarDays className="w-6 h-6" />
+          </div>
+          <div className={textAlignClass}>
+            <h3 className="font-extrabold text-lg">{t("apartment_schedule_visit")}</h3>
+            {!scheduledDate && (
+              <p className="text-xs font-bold text-gray-500 mt-0.5">{t("apartment_visit_picker_hint")}</p>
+            )}
+          </div>
         </div>
         {scheduledDate ? (
-          <p className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-sm font-bold text-gray-700">
-            {t("apartment_visit_scheduled_for", { time: dateFormatter.format(scheduledDate) })}
-          </p>
+          <div className="space-y-3">
+            <div className={`rounded-2xl bg-green-50 border border-green-100 px-4 py-3 ${textAlignClass}`}>
+              <p className="text-xs font-extrabold text-green-600">{t("apartment_visit_confirmed_label")}</p>
+              <p className="mt-1 text-sm font-extrabold text-green-800">
+                {t("apartment_visit_scheduled_for", { time: dateFormatter.format(scheduledDate) })}
+              </p>
+            </div>
+            {calendarUrl && (
+              <a
+                href={calendarUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-100 bg-orange-50 py-3 text-sm font-extrabold text-[--theme-orange] active:scale-[0.98] transition-transform"
+              >
+                <CalendarDays className="h-4 w-4" />
+                {t("apartment_add_to_google_calendar")}
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            )}
+          </div>
         ) : (
           <>
-            <input
+            <VisitDateTimePicker
               ref={visitTimeInputRef}
-              type="datetime-local"
               value={visitTime}
-              onChange={(event) => setVisitTime(event.target.value)}
-              onInput={(event) => setVisitTime(event.currentTarget.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              onChange={setVisitTime}
+              language={i18n.language}
             />
             <button
               onClick={onSchedule}
@@ -662,7 +899,11 @@ function ViewingView({
         )}
       </div>
 
-      <div className="rounded-2xl bg-gray-50 p-4 space-y-3">
+      <div className={`rounded-3xl bg-white border border-gray-100 p-4 space-y-4 shadow-sm ${textAlignClass}`}>
+        <div>
+          <p className="text-sm font-extrabold text-gray-900">{t("apartment_visit_decision_title")}</p>
+          <p className="mt-1 text-xs font-bold text-gray-500">{t("apartment_visit_decision_body")}</p>
+        </div>
         <button
           onClick={onChoose}
           disabled={isSaving}
@@ -671,29 +912,119 @@ function ViewingView({
           <Heart className="w-4 h-4" />
           {t("apartment_choose_cta")}
         </button>
-        <div className="grid grid-cols-[1fr_auto] gap-2">
-          <select
-            value={rejectionReason}
-            onChange={(event) => setRejectionReason(event.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          >
-            {REJECTION_REASONS.map((reason) => (
-              <option key={reason} value={reason}>
-                {t(`apartment_rejection_reason_${reason}`)}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={onReject}
-            disabled={isSaving}
-            className="px-4 rounded-xl bg-gray-900 text-white font-extrabold active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            <ThumbsDown className="w-4 h-4" />
-            {t("apartment_reject_cta")}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setRejectDialogOpen(true)}
+          disabled={isSaving}
+          className="w-full py-3.5 rounded-2xl bg-gray-900 text-white font-extrabold shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          <ThumbsDown className="w-4 h-4" />
+          {t("apartment_reject_cta")}
+        </button>
       </div>
+
+      <ApartmentRejectionDialog
+        open={rejectDialogOpen}
+        onOpenChange={setRejectDialogOpen}
+        rejectionReason={rejectionReason}
+        setRejectionReason={setRejectionReason}
+        rejectionNote={rejectionNote}
+        setRejectionNote={setRejectionNote}
+        onReject={onReject}
+        isSaving={isSaving}
+      />
     </div>
+  );
+}
+
+function ApartmentRejectionDialog({
+  open,
+  onOpenChange,
+  rejectionReason,
+  setRejectionReason,
+  rejectionNote,
+  setRejectionNote,
+  onReject,
+  isSaving,
+}) {
+  const { t, i18n } = useTranslation();
+  const isRtl = isRtlLanguage(i18n);
+  const textAlignClass = isRtl ? "text-right" : "text-left";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-3xl border-0 p-5">
+        <DialogHeader className={textAlignClass}>
+          <DialogTitle className="text-xl font-extrabold text-gray-900">
+            {t("apartment_rejection_dialog_title")}
+          </DialogTitle>
+          <DialogDescription className="text-sm font-bold leading-6 text-gray-500">
+            {t("apartment_rejection_dialog_body")}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className={`text-xs font-extrabold text-gray-500 ${textAlignClass}`}>
+              {t("apartment_rejection_reason_label")}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {REJECTION_REASONS.map((reason) => {
+                const active = rejectionReason === reason;
+                return (
+                  <button
+                    key={reason}
+                    type="button"
+                    onClick={() => setRejectionReason(reason)}
+                    className={`min-h-11 rounded-xl border px-3 text-xs font-extrabold transition active:scale-95 ${
+                      active
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-100 bg-gray-50 text-gray-700"
+                    }`}
+                  >
+                    {t(`apartment_rejection_reason_${reason}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className={`block space-y-2 ${textAlignClass}`}>
+            <span className="text-xs font-extrabold text-gray-500">
+              {t("apartment_rejection_note_label")}
+            </span>
+            <Textarea
+              value={rejectionNote}
+              onChange={(event) => setRejectionNote(event.target.value)}
+              placeholder={t("apartment_rejection_note_placeholder")}
+              dir={i18n.dir()}
+              className={`min-h-24 resize-none rounded-2xl border-gray-100 bg-gray-50 text-sm font-bold ${textAlignClass}`}
+            />
+          </label>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              disabled={isSaving}
+              className="min-h-12 rounded-2xl border border-gray-100 bg-white text-sm font-extrabold text-gray-700 active:scale-[0.98] transition-transform disabled:opacity-60"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              type="button"
+              onClick={() => onReject({ reason: rejectionReason, note: rejectionNote })}
+              disabled={isSaving}
+              className="min-h-12 rounded-2xl bg-gray-900 text-sm font-extrabold text-white active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+              <ThumbsDown className="w-4 h-4" />
+              {t("apartment_reject_cta")}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

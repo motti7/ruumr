@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-label="Late guests in a shared living room">
+  <rect width="900" height="1200" fill="#d8d7d2"/>
+  <rect y="780" width="900" height="420" fill="#b8b2a7"/>
+  <circle cx="740" cy="170" r="72" fill="#f3d37b"/>
+  <rect x="120" y="340" width="660" height="330" rx="34" fill="#7f8f89"/>
+  <rect x="190" y="610" width="520" height="150" rx="30" fill="#5e6d68"/>
+  <rect x="250" y="810" width="400" height="70" rx="28" fill="#8b7f75"/>
+  <circle cx="245" cy="470" r="52" fill="#4f4039"/>
+  <rect x="198" y="520" width="94" height="178" rx="47" fill="#d98b6f"/>
+  <circle cx="450" cy="455" r="56" fill="#453a37"/>
+  <rect x="400" y="512" width="100" height="185" rx="50" fill="#d2aa65"/>
+  <circle cx="645" cy="472" r="50" fill="#5e514c"/>
+  <rect x="600" y="522" width="90" height="170" rx="45" fill="#8aa1b0"/>
+  <path d="M162 310h576" stroke="#f6f0e6" stroke-width="26" stroke-linecap="round"/>
+  <path d="M650 250c-55 52-124 54-182 6" fill="none" stroke="#f6f0e6" stroke-width="16" stroke-linecap="round"/>
+  <path d="M196 270c34-30 79-30 116 0" fill="none" stroke="#f6f0e6" stroke-width="16" stroke-linecap="round"/>
+</svg>

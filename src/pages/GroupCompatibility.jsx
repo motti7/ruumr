@@ -5,8 +5,9 @@ import { User } from "@/entities/User";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, Puzzle, CheckCircle2, Clock, Users } from "lucide-react";
+import { Puzzle, CheckCircle2, Clock, Users } from "lucide-react";
 import { fetchQuestionnaireMatchSummary } from "@/api/questionnairePreferences";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 const CHARTER_QUESTIONS = [
   { id: "q_smoking", title: "עישון בדירה", emoji: "🚬", option_a: "בכיף, חופשי בסלון", option_b: "רק בחוץ/במרפסת", compromise: "מעשנים רק במרפסת (עם דלת סגורה!)" },
@@ -124,7 +125,7 @@ export default function GroupCompatibilityPage() {
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-1">
           <button onClick={() => navigate(createPageUrl('GroupTracker'))} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <ArrowRight className="w-5 h-5 text-gray-600" />
+            <BackArrowIcon className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
             <Puzzle className="w-6 h-6 text-[--theme-orange]" />

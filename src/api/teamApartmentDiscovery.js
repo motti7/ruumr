@@ -57,12 +57,13 @@ export async function scheduleApartmentVisit({ discoveryId, visitTime }) {
   );
 }
 
-export async function rejectCurrentApartment({ discoveryId, reason }) {
+export async function rejectCurrentApartment({ discoveryId, reason, note = "" }) {
   return unwrap(
     await base44.functions.invoke("teamApartmentDiscovery", {
       action: "reject_current_apartment",
       discovery_id: discoveryId,
       reason,
+      note,
     })
   );
 }

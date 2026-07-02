@@ -1,0 +1,5 @@
+export const PROFILE_SIGNAL_MODEL_VERSION = 1;
+export const PROFILE_SIGNAL_PROMPT_INTERVAL_DAYS = 7;
+export const PROFILE_SIGNAL_IMAGE_REVEAL_SECONDS = 4;
+export const PROFILE_SIGNAL_VIDEO_MAX_REVEAL_SECONDS = 15;
+export const PROFILE_SIGNAL_DISMISSED_SESSION_KEY = "ruumr_profile_signal_dismissed_session";

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import BackArrowIcon from '@/components/shared/BackArrowIcon';
 
 export default function TermsPage() {
     const { t, i18n } = useTranslation();
@@ -16,7 +16,7 @@ export default function TermsPage() {
         <div className="p-6 bg-gray-50 min-h-screen" dir={i18n.dir()}>
             <div className="flex items-center mb-8">
                 <Link to={createPageUrl("Settings")} className="ml-4">
-                    <ArrowRight className="w-6 h-6 text-gray-600" />
+                    <BackArrowIcon className="w-6 h-6 text-gray-600" />
                 </Link>
                 <h1 className="text-3xl font-black text-gray-800">{t("terms_of_use")}</h1>
             </div>

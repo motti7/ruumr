@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  ArrowRight,
   BedDouble,
   CalendarDays,
   CheckCircle2,
@@ -24,6 +23,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
 import GalleryLightbox from "@/components/shared/GalleryLightbox";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 function displayAddress(apartment, language) {
   return language === "he"
@@ -193,7 +193,7 @@ export default function ApartmentDetail() {
           className="w-11 h-11 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center"
           aria-label={t("back")}
         >
-          <ArrowRight className={`w-5 h-5 text-gray-700 ${isRtl ? "" : "rotate-180"}`} />
+          <BackArrowIcon className="w-5 h-5 text-gray-700" />
         </button>
         <div className={`${textAlignClass} flex-1`}>
           <h1 className="text-2xl font-extrabold text-gray-900">{t("apartment_detail_title")}</h1>

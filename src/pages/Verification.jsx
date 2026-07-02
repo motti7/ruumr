@@ -7,9 +7,10 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowRight, RefreshCw, Sparkles, Award } from "lucide-react";
+import { Mail, RefreshCw, Sparkles, Award } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 export default function VerificationPage() {
   const { t, i18n } = useTranslation();
@@ -104,7 +105,7 @@ export default function VerificationPage() {
         {/* Header */}
         <div className="flex items-center mt-4 mb-12 relative z-10">
             <Button variant="ghost" size="icon" onClick={() => fromOnboarding ? navigate(createPageUrl('Onboarding'), { state: { resumeStep: 7 } }) : navigate(-1)}>
-                <ArrowRight className="w-6 h-6 text-gray-800" />
+                <BackArrowIcon className="w-6 h-6 text-gray-800" />
             </Button>
             <div className="w-full h-1 bg-gray-100 rounded-full mr-4 overflow-hidden">
                 <motion.div 

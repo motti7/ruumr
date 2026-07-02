@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 export default function PrivacyPage() {
   const { t, i18n } = useTranslation();
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-sm p-8">
         <div className="flex items-center gap-2 mb-6">
           <Link to={createPageUrl("Home")}>
-            <ChevronRight className="w-6 h-6 text-gray-400" />
+            <BackArrowIcon className="w-6 h-6 text-gray-400" />
           </Link>
           <h1 className="text-2xl font-black text-gray-900">{t("privacy_policy")}</h1>
         </div>

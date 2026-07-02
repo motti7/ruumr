@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import BackArrowIcon from '@/components/shared/BackArrowIcon';
 import { Card, CardContent } from "@/components/ui/card";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import { User } from "@/entities/User";
@@ -87,7 +87,7 @@ export default function PermissionsPage() {
         <div className="p-6 bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}>
             <div className="flex items-center mb-8">
                 <Link to={createPageUrl("Settings")} className="ml-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label={t("back")}>
-                    <ArrowLeft className="w-6 h-6 text-gray-600" />
+                    <BackArrowIcon className="w-6 h-6 text-gray-600" />
                 </Link>
                 <h1 className="text-3xl font-black text-gray-800">{t("manage_permissions")}</h1>
             </div>

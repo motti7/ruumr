@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Loader2, MessageCircle, UsersRound } from "lucide-react";
+import { Loader2, MessageCircle, UsersRound } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
 import SmartImage from "@/components/shared/SmartImage";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 function teammateUserIds(profile) {
   return (profile?.team_members || [])
@@ -127,7 +128,7 @@ export default function TeamChatsPage() {
           className="w-11 h-11 rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm"
           aria-label={t("back")}
         >
-          <ArrowRight className={`w-5 h-5 text-gray-600 ${isRtl ? "" : "rotate-180"}`} />
+          <BackArrowIcon className="w-5 h-5 text-gray-600" />
         </button>
         <div className={textAlignClass}>
           <h1 className="text-3xl font-extrabold text-gray-900">{t("team_chats_title")}</h1>
@@ -136,7 +137,7 @@ export default function TeamChatsPage() {
       </div>
 
       <button
-        onClick={() => navigate(createPageUrl("GroupChat"))}
+        onClick={() => navigate(`${createPageUrl("GroupChat")}?from=team_chats`)}
         className={`w-full rounded-2xl gradient-orange p-4 text-white flex items-center gap-3 ${textAlignClass} shadow-sm active:scale-[0.99] transition-transform`}
       >
         <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -166,7 +167,7 @@ export default function TeamChatsPage() {
                   key={teammate.id}
                   onClick={() => {
                     if (teammate.matchId) {
-                      navigate(`${createPageUrl("Chat")}?matchId=${teammate.matchId}`);
+                      navigate(`${createPageUrl("Chat")}?matchId=${encodeURIComponent(teammate.matchId)}&from=team_chats`);
                     }
                   }}
                   disabled={!teammate.matchId}

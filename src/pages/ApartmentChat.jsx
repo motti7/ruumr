@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, Building2, Loader2, Send } from "lucide-react";
+import { Building2, Loader2, Send } from "lucide-react";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
@@ -168,11 +169,11 @@ export default function ApartmentChat() {
     <div className="flex flex-col h-screen bg-gray-50" dir={direction}>
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3 flex-shrink-0">
         <button
-          onClick={() => navigate(`${createPageUrl("ApartmentDetail")}?apartmentId=${encodeURIComponent(state.apartment.id)}`)}
+          onClick={() => navigate(createPageUrl("TeamChats"), { replace: true })}
           className="min-w-[44px] min-h-[44px] p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
           aria-label={t("back")}
         >
-          <ArrowRight className={`w-5 h-5 text-gray-600 ${isRtl ? "" : "rotate-180"}`} />
+          <BackArrowIcon className="w-5 h-5 text-gray-600" />
         </button>
         <div className="w-10 h-10 rounded-xl bg-orange-50 text-[--theme-orange] flex items-center justify-center">
           <Building2 className="w-5 h-5" />

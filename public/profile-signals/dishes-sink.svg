@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-label="Roommates discovering dirty dishes in the sink">
+  <rect width="900" height="1200" fill="#e8e3da"/>
+  <rect y="720" width="900" height="480" fill="#cfd6d2"/>
+  <rect x="90" y="210" width="720" height="520" rx="28" fill="#f6f1e9"/>
+  <rect x="140" y="270" width="260" height="170" rx="18" fill="#c8d4d9"/>
+  <rect x="500" y="300" width="170" height="310" rx="20" fill="#c7b8aa"/>
+  <rect x="165" y="770" width="570" height="220" rx="38" fill="#7b8a8d"/>
+  <ellipse cx="450" cy="800" rx="185" ry="46" fill="#d8e0dd"/>
+  <path d="M285 720h330v96c0 74-74 122-165 122s-165-48-165-122z" fill="#b6c4c2"/>
+  <path d="M365 672c36 20 96 20 132-2" fill="none" stroke="#5d686c" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="362" cy="840" r="44" fill="#f4eee4"/>
+  <circle cx="444" cy="858" r="46" fill="#ded5c7"/>
+  <circle cx="526" cy="832" r="42" fill="#f7f2ea"/>
+  <rect x="330" y="905" width="250" height="30" rx="15" fill="#8e8f84"/>
+  <g transform="translate(104 518)">
+    <circle cx="104" cy="64" r="46" fill="#6a5a4b"/>
+    <rect x="58" y="112" width="92" height="188" rx="46" fill="#e59072"/>
+    <rect x="28" y="154" width="52" height="160" rx="26" fill="#e59072"/>
+    <rect x="128" y="154" width="52" height="160" rx="26" fill="#e59072"/>
+  </g>
+  <g transform="translate(650 520)">
+    <circle cx="72" cy="60" r="44" fill="#3f4750"/>
+    <rect x="30" y="108" width="88" height="184" rx="44" fill="#7d95a9"/>
+    <path d="M14 168c58 20 94 20 150-4" fill="none" stroke="#7d95a9" stroke-width="46" stroke-linecap="round"/>
+    <path d="M40 24c24-28 78-22 93 16" fill="none" stroke="#30363d" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <path d="M716 515c-25-45-79-47-104-9" fill="none" stroke="#3f4750" stroke-width="10" stroke-linecap="round"/>
+  <path d="M165 475c50 34 104 34 158 0" fill="none" stroke="#6a5a4b" stroke-width="10" stroke-linecap="round"/>
+</svg>

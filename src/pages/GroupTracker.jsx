@@ -15,6 +15,7 @@ import TeamRequestCard from "@/components/team/TeamRequestCard";
 import TeamCompleteCelebration from "@/components/team/TeamCompleteCelebration";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 function publishApartmentRankingLifecycle() {
   try {
@@ -232,7 +233,7 @@ export default function GroupTrackerPage() {
           <h1 className="text-3xl font-bold text-gray-900">{t("my_team")}</h1>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate(createPageUrl('GroupChat'))}
+              onClick={() => navigate(`${createPageUrl('GroupChat')}?from=team`)}
               className="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
             >
               <MessageCircle className="w-4 h-4" />
@@ -478,7 +479,7 @@ export default function GroupTrackerPage() {
                     aria-label={t("back")}
                     className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-95 transition-transform"
                   >
-                    <ChevronLeft className="w-5 h-5 text-gray-600 -scale-x-100" />
+                    <BackArrowIcon className="w-5 h-5 text-gray-600" />
                   </button>
                 )}
                 <h3 className="flex-1 text-xl font-bold text-gray-900 text-right">

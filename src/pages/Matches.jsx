@@ -335,7 +335,7 @@ export default function MatchesPage() {
                   }
                 }}
                 onClickChat={() => {
-                  navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                  navigate(createPageUrl('Chat') + `?matchId=${encodeURIComponent(match.id)}&from=matches`);
                 }}
                 isOpened={seenMatchIds.includes(match.id)}
                 onClickCharter={async () => {
@@ -350,7 +350,7 @@ export default function MatchesPage() {
                 const prefs = await base44.entities.QuestionnairePreference.filter({ user_id: user.id });
                 const completed = prefs.some(p => p.answers && REQUIRED_QUESTIONS.every(q => p.answers[q] === 'a' || p.answers[q] === 'b'));
                 if (completed) {
-                  navigate(createPageUrl('Chat') + `?matchId=${match.id}`);
+                  navigate(createPageUrl('Chat') + `?matchId=${encodeURIComponent(match.id)}&from=matches`);
                 } else {
                   navigate(createPageUrl('Charter') + `?matchId=${match.id}`);
                 }

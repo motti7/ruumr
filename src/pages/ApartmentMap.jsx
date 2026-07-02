@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Building2, Loader2, MapPin, UsersRound } from "lucide-react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { ensureTeamApartmentDiscovery } from "@/api/teamApartmentDiscovery";
+import { createPageUrl } from "@/utils";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { isDemoApartmentServicesStage } from "@/lib/demoStage";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
@@ -60,6 +61,22 @@ const MAP_TILE_LAYERS = {
     subdomains: ["0", "1", "2", "3"],
   },
 };
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function initialsForName(name = "") {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+}
 
 function mapApartments(discovery) {
   const lifecycle = discovery?.lifecycle_state || "";
@@ -148,28 +165,32 @@ function createMarkerIcon(index, active) {
   });
 }
 
-function createTeamMarkerIcon(index) {
+function createTeamPhotoMarkerIcon(location, index) {
+  const name = location?.name || `Teammate ${index + 1}`;
+  const photo = location?.photo || "";
+  const content = photo
+    ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" style="width:100%;height:100%;object-fit:cover;display:block;" />`
+    : `<span style="font-size:12px;font-weight:900;color:white;">${escapeHtml(initialsForName(name))}</span>`;
+
   return L.divIcon({
     className: "",
     html: `
       <div style="
-        width:32px;
-        height:32px;
+        width:38px;
+        height:38px;
         border-radius:999px;
+        overflow:hidden;
         background:#2563EB;
-        color:white;
         display:flex;
         align-items:center;
         justify-content:center;
-        font-weight:900;
-        font-size:12px;
         border:3px solid white;
-        box-shadow:0 10px 22px rgba(37,99,235,.28);
-      ">${index + 1}</div>
+        box-shadow:0 10px 22px rgba(37,99,235,.32);
+      ">${content}</div>
     `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -18],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -20],
   });
 }
 
@@ -203,6 +224,7 @@ function FitMapToMarkers({ points }) {
 
 export default function ApartmentMap() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [discovery, setDiscovery] = useState(null);
   const [loading, setLoading] = useState(true);
   const direction = getLanguageDirection(i18n);
@@ -326,7 +348,12 @@ export default function ApartmentMap() {
                     icon={createMarkerIcon(index, active)}
                   >
                     <Popup>
-                      <div className={`w-48 ${textAlignClass}`}>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`${createPageUrl("ApartmentDetail")}?apartmentId=${encodeURIComponent(apartment.id)}`)}
+                        className={`block w-48 cursor-pointer rounded-md p-0 text-gray-900 ${textAlignClass}`}
+                        aria-label={t("apartment_listing_details")}
+                      >
                         {apartment.image && (
                           <img src={apartment.image} alt="" className="w-full h-20 object-cover rounded-md mb-2" />
                         )}
@@ -336,7 +363,7 @@ export default function ApartmentMap() {
                         <p className="text-xs text-gray-500 m-0 mt-1">
                           {priceFormatter.format(apartment.price || 0)}
                         </p>
-                      </div>
+                      </button>
                     </Popup>
                   </Marker>
                 );
@@ -345,7 +372,7 @@ export default function ApartmentMap() {
                 <Marker
                   key={`${location.user_id || location.name}-${index}`}
                   position={position}
-                  icon={createTeamMarkerIcon(index)}
+                  icon={createTeamPhotoMarkerIcon(location, index)}
                 >
                   <Popup>
                     <div className={`w-44 ${textAlignClass}`}>
@@ -396,8 +423,12 @@ export default function ApartmentMap() {
           <div className="space-y-2">
             {teamPoints.map(({ location, index }) => (
               <div key={`${location.user_id || location.name}-${index}`} className="flex items-center gap-3 rounded-xl bg-blue-50 p-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-extrabold">
-                  {index + 1}
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-blue-600 text-white flex items-center justify-center font-extrabold border-2 border-white shadow-sm flex-shrink-0">
+                  {location.photo ? (
+                    <img src={location.photo} alt={location.name || ""} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{initialsForName(location.name || `${index + 1}`)}</span>
+                  )}
                 </div>
                 <div className={`flex-1 ${textAlignClass}`}>
                   <p className="font-extrabold text-gray-900">{location.name}</p>

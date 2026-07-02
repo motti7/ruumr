@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Profile, Swipe } from "@/entities/all";
 import { User } from "@/entities/User";
-import { Loader2, ArrowRight, ThumbsUp } from "lucide-react";
+import { Loader2, ThumbsUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
 export default function LikesSentPage() {
     const { t, i18n } = useTranslation();
@@ -48,7 +49,7 @@ export default function LikesSentPage() {
         <div className="min-h-screen bg-gray-50 pb-24" dir={i18n.dir()}>
             <div className="sticky top-0 bg-white shadow-sm z-10 p-4 flex items-center gap-3">
                  <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" aria-label={t("back")}>
-                    <ArrowRight className="w-6 h-6 text-gray-600" />
+                    <BackArrowIcon className="w-6 h-6 text-gray-600" />
                 </button>
                 <h1 className="text-2xl font-black text-gray-900">{t("likes_i_sent")}</h1>
             </div>

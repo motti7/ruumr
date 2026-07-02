@@ -7,6 +7,7 @@ export { BannedUser } from "./BannedUser";
 export { PageView } from "./PageView";
 export { Review } from "./Review";
 export { CharterAnswer } from "./CharterAnswer";
+export { ProfileSignalAnswer } from "./ProfileSignalAnswer";
 export { GroupMessage } from "./GroupMessage";
 export { TypingStatus } from "./TypingStatus";
 export { QuestionnairePreference } from "./QuestionnairePreference";

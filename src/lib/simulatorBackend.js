@@ -3,7 +3,7 @@ import {
   buildSimulatorApartmentPhotos,
   buildSimulatorProfilePhotos,
 } from "@/lib/simulatorMode";
-import { DEMO_CITY_OPTIONS, DEMO_STAGES, demoStageParamPresent, getDemoCityKey, isDemoApartmentServicesStage, isDemoHousingStage, setDemoStage } from "@/lib/demoStage";
+import { DEMO_CITY_OPTIONS, DEMO_STAGES, demoStageParamPresent, getDemoCityKey, isDemoApartmentServicesStage, isDemoApartmentStage, isDemoHousingStage, setDemoStage } from "@/lib/demoStage";
 import { normalizeInterestValues } from "@/lib/interests";
 import { APARTMENT_LIFECYCLE, calculateApartmentPreferenceOutcome } from "@/lib/apartmentPreferences";
 import { getDefaultDemoScenario } from "@/demo/demoScenario";
@@ -270,6 +270,42 @@ function scenarioTeammatePreferences(state, discovery) {
   // submitApartmentPreferences fall through to the auto-rank fallback so the
   // teammates still submit and the flow doesn't softlock at "1/3".
   return entries.length ? Object.fromEntries(entries) : null;
+}
+
+function simulatorTeammatePreferences(state, discovery, basePreferences = {}) {
+  const nextPreferences = { ...(basePreferences || {}) };
+  const scenarioGeneratedPreferences = scenarioTeammatePreferences(state, discovery);
+  if (scenarioGeneratedPreferences) {
+    Object.entries(scenarioGeneratedPreferences).forEach(([memberId, record]) => {
+      if (!nextPreferences[memberId]) {
+        nextPreferences[memberId] = record;
+      }
+    });
+  }
+
+  // Auto-rank any team member the scenario didn't cover (e.g. a team built
+  // from arbitrary Plus picks), so submission never stalls waiting on them.
+  if (simulatorAutoRankTeamEnabled()) {
+    const apartmentIds = (discovery?.suggested_apartments || []).map((apartment) => apartment.id);
+    const preferenceOrders = [
+      ["amazing", "ok", "ok"],
+      ["ok", "amazing", "ok"],
+      ["amazing", "amazing", "ok"],
+    ];
+    (discovery?.member_user_ids || []).forEach((memberId, memberIndex) => {
+      const key = String(memberId);
+      if (key === String(state.currentUser.id) || nextPreferences[key]) return;
+      const order = preferenceOrders[memberIndex % preferenceOrders.length];
+      nextPreferences[key] = {
+        user_id: key,
+        preferences: Object.fromEntries(apartmentIds.map((apartmentId, index) => [apartmentId, order[index]])),
+        submitted_at: nowIso(),
+        simulator_generated: true,
+      };
+    });
+  }
+
+  return nextPreferences;
 }
 
 function cloneCollectionRecords(collections = {}) {
@@ -968,6 +1004,7 @@ function createLegacyDemoState() {
     GroupMessage: [groupMessage1, groupMessage2],
     CharterAnswer: [...charterAnswersCurrent, ...charterAnswersMaya],
     QuestionnairePreference: [],
+    ProfileSignalAnswer: [],
     Review: [review],
     PageView: [],
     TypingStatus: [],
@@ -1920,11 +1957,20 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
     const existing = state.collections.TeamApartmentDiscovery.find((item) => item.team_key === key);
     if (existing) {
       const stage2City = stage2DemoCityName();
-      if (isDemoHousingStage() && stage2City && existing.selected_city !== stage2City) {
+      const resetStage2Ranking =
+        isDemoApartmentStage()
+        && (
+          existing.lifecycle_state === APARTMENT_LIFECYCLE.APARTMENT_VIEWING
+          || existing.lifecycle_state === APARTMENT_LIFECYCLE.APARTMENT_FOUND
+          || existing.status === "finalized"
+          || existing.status === "apartment_found"
+        );
+      if ((isDemoHousingStage() && stage2City && existing.selected_city !== stage2City) || resetStage2Ranking) {
+        const selectedCity = stage2City || existing.selected_city || DEMO_CITY_OPTIONS.tel_aviv.he;
         Object.assign(existing, {
-          selected_city: stage2City,
-          common_cities: [stage2City],
-          suggested_apartments: apartmentDiscoverySuggestionsForState(state, { city: stage2City, bedrooms: existing.bedrooms || memberIds.length, teamKey: key, batchIndex: 0 }),
+          selected_city: selectedCity,
+          common_cities: [selectedCity],
+          suggested_apartments: apartmentDiscoverySuggestionsForState(state, { city: selectedCity, bedrooms: existing.bedrooms || memberIds.length, teamKey: key, batchIndex: 0 }),
           suggestion_batch_index: 0,
           preferences: {},
           rankings: {},
@@ -1933,15 +1979,21 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
           rejected_by_veto: [],
           happiness_scores: [],
           ranking_scores: [],
+          current_apartment_index: 0,
           current_apartment: null,
+          selected_apartment_id: "",
           selected_apartment: null,
           winning_apartment_id: "",
           winning_apartment: null,
           rejected_apartments: [],
+          visit_time: "",
+          visit_scheduled_by_user_id: "",
+          visit_scheduled_at: "",
           no_eligible_apartment: false,
           no_more_suggestions: false,
           lifecycle_state: APARTMENT_LIFECYCLE.APARTMENT_RANKING,
           status: "apartment_ranking",
+          team_locations: buildStage2TeamLocations(state, memberIds, selectedCity),
           updated_date: nowIso(),
         });
       }
@@ -1971,10 +2023,15 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
           updated_date: nowIso(),
         });
       }
+      const seededPreferences =
+        existing.lifecycle_state === APARTMENT_LIFECYCLE.APARTMENT_RANKING
+          ? simulatorTeammatePreferences(state, existing, existing.preferences || existing.rankings || {})
+          : existing.preferences || existing.rankings || {};
       const normalized = {
         ...existing,
         lifecycle_state: existing.lifecycle_state || (existing.status === "finalized" ? APARTMENT_LIFECYCLE.APARTMENT_VIEWING : APARTMENT_LIFECYCLE.APARTMENT_RANKING),
-        preferences: existing.preferences || existing.rankings || {},
+        preferences: seededPreferences,
+        rankings: seededPreferences,
         current_apartment: existing.current_apartment || existing.winning_apartment || null,
         eligible_apartments: existing.eligible_apartments || existing.ranking_scores || [],
         happiness_scores: existing.happiness_scores || existing.ranking_scores || [],
@@ -2036,6 +2093,11 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       created_date: nowIso(),
       updated_date: nowIso(),
     };
+    if (discovery.lifecycle_state === APARTMENT_LIFECYCLE.APARTMENT_RANKING) {
+      const seededPreferences = simulatorTeammatePreferences(state, discovery);
+      discovery.preferences = seededPreferences;
+      discovery.rankings = seededPreferences;
+    }
     state.collections.TeamApartmentDiscovery.push(discovery);
     ensureApartmentChatSeeds(state, discovery);
     ensureStage2GroupChatSeeds(state, discovery);
@@ -2067,44 +2129,14 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       throw new Error("Rate all 3 apartments.");
     }
 
-    const nextPreferences = {
+    const nextPreferences = simulatorTeammatePreferences(state, discovery, {
       ...(discovery.preferences || discovery.rankings || {}),
       [String(state.currentUser.id)]: {
         user_id: String(state.currentUser.id),
         preferences: clone(submittedPreferences),
         submitted_at: nowIso(),
       },
-    };
-
-    const scenarioGeneratedPreferences = scenarioTeammatePreferences(state, discovery);
-    if (scenarioGeneratedPreferences) {
-      Object.entries(scenarioGeneratedPreferences).forEach(([memberId, record]) => {
-        if (!nextPreferences[memberId]) {
-          nextPreferences[memberId] = record;
-        }
-      });
-    }
-    // Auto-rank any team member the scenario didn't cover (e.g. a team built
-    // from arbitrary Plus picks), so submission never stalls waiting on them.
-    if (simulatorAutoRankTeamEnabled()) {
-      const apartmentIds = (discovery.suggested_apartments || []).map((apartment) => apartment.id);
-      const preferenceOrders = [
-        ["amazing", "ok", "ok"],
-        ["ok", "amazing", "ok"],
-        ["amazing", "amazing", "ok"],
-      ];
-      (discovery.member_user_ids || []).forEach((memberId, memberIndex) => {
-        const key = String(memberId);
-        if (nextPreferences[key]) return;
-        const order = preferenceOrders[memberIndex % preferenceOrders.length];
-        nextPreferences[key] = {
-          user_id: key,
-          preferences: Object.fromEntries(apartmentIds.map((apartmentId, index) => [apartmentId, order[index]])),
-          submitted_at: nowIso(),
-          simulator_generated: true,
-        };
-      });
-    }
+    });
 
     const allSubmitted = (discovery.member_user_ids || []).every((id) => nextPreferences[String(id)]);
     const outcome = allSubmitted ? calculateApartmentPreferenceOutcome(discovery.suggested_apartments || [], nextPreferences) : null;
@@ -2253,7 +2285,7 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
     return { success: true, discovery: clone(state.collections.TeamApartmentDiscovery[idx]) };
   };
 
-  const rejectCurrentApartment = async ({ discovery_id: discoveryId, reason = "other" }) => {
+  const rejectCurrentApartment = async ({ discovery_id: discoveryId, reason = "other", note = "" }) => {
     state.collections.TeamApartmentDiscovery = state.collections.TeamApartmentDiscovery || [];
     const idx = state.collections.TeamApartmentDiscovery.findIndex((item) => String(item.id) === String(discoveryId));
     if (idx === -1) throw new Error("Discovery not found");
@@ -2271,6 +2303,7 @@ function createSimulatorFunctionsApi(state, existingFunctions = {}) {
       {
         apartment_id: currentApartment.id,
         reason,
+        note: String(note || "").trim(),
         rejected_by_user_id: String(state.currentUser.id),
         rejected_at: nowIso(),
       },
