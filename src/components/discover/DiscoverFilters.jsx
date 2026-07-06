@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin } from "lucide-react";
@@ -18,12 +17,12 @@ const ISRAEL_CITIES = [
 export default function DiscoverFilters({ filters, onChange }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [local, setLocal] = useState({ kosher: 'all', shabbat: 'all', apartmentStatus: 'all', ...filters, maxAge: filters.maxAge ?? 60 });
+  const [local, setLocal] = useState({ kosher: 'all', shabbat: 'all', ...filters, maxAge: filters.maxAge ?? 60 });
   const [cityInput, setCityInput] = useState("");
   const [citySuggestions, setCitySuggestions] = useState([]);
 
   useEffect(() => {
-    const handler = () => { setLocal({ kosher: 'all', shabbat: 'all', apartmentStatus: 'all', ...filters }); setCityInput(""); setOpen(true); };
+    const handler = () => { setLocal({ kosher: 'all', shabbat: 'all', ...filters }); setCityInput(""); setOpen(true); };
     window.addEventListener('openDiscoverFilters', handler);
     return () => window.removeEventListener('openDiscoverFilters', handler);
   }, [filters]);
@@ -34,7 +33,6 @@ export default function DiscoverFilters({ filters, onChange }) {
     local.minAge > 18 || local.maxAge < 50,
     local.kosher && local.kosher !== 'all',
     local.shabbat && local.shabbat !== 'all',
-    local.apartmentStatus && local.apartmentStatus !== 'all',
   ].filter(Boolean).length;
 
   const apply = () => {
@@ -43,7 +41,7 @@ export default function DiscoverFilters({ filters, onChange }) {
   };
 
   const reset = () => {
-    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' };
+    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' };
     setLocal(defaults);
     setCityInput("");
     onChange(defaults);
@@ -79,17 +77,14 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   return (
     <>
-      {/* Bottom Sheet — rendered via portal directly into <body> so it always
-          covers the full viewport (header + nav included) regardless of any
-          transformed/overflow ancestors in the page tree. */}
-      {createPortal(
+      {/* Bottom Sheet */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[300] flex items-end justify-center"
+            className="fixed inset-0 bg-black/50 z-[300] flex items-end justify-center"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -97,13 +92,13 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md flex flex-col"
-              style={{ height: 'min(90vh, 720px)' }}
+              className="bg-white rounded-t-3xl w-full max-w-md p-6"
+              style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex justify-between items-center px-6 pt-6 pb-4 flex-shrink-0">
+              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900">{t("filters")}</h3>
                 <button
                   aria-label={t("close_filters")}
@@ -113,12 +108,6 @@ export default function DiscoverFilters({ filters, onChange }) {
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
-
-              {/* Scrollable content — takes remaining space, footer below is always visible */}
-              <div
-                className="flex-1 min-h-0 overflow-y-auto px-6"
-                style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
-              >
 
               {/* City free-text */}
               <div className="mb-6">
@@ -257,32 +246,8 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </div>
               </div>
 
-              {/* Apartment Status */}
-              <div className="mb-8">
-                <label className="text-sm font-bold text-gray-700 mb-2 block">{t("apartment_status_filter")}</label>
-                <div className="flex bg-gray-100 p-1 rounded-xl">
-                  {[
-                    { v: 'all', l: t('all') },
-                    { v: 'has_apartment', l: t('apartment_status_has') },
-                    { v: 'seeking_apartment', l: t('apartment_status_seeking') },
-                  ].map(opt => (
-                    <button
-                      key={opt.v}
-                      onClick={() => setLocal(prev => ({ ...prev, apartmentStatus: opt.v }))}
-                      className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${local.apartmentStatus === opt.v ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}
-                    >
-                      {opt.l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              </div>
-
-              {/* Actions — fixed at the bottom of the sheet, never scrolled past */}
-              <div
-                className="flex gap-3 px-6 pt-4 flex-shrink-0 border-t border-gray-100"
-                style={{ paddingBottom: 'calc(1rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}
-              >
+              {/* Actions */}
+              <div className="flex gap-3">
                 <button
                   onClick={reset}
                   className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-bold text-sm"
@@ -300,9 +265,7 @@ export default function DiscoverFilters({ filters, onChange }) {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>,
-      document.body
-      )}
+      </AnimatePresence>
     </>
   );
 }
