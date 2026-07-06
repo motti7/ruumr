@@ -85,7 +85,8 @@ export default function DiscoverFilters({ filters, onChange }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[300] flex items-end justify-center"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[300] flex items-end justify-center overflow-y-auto"
+            style={{ WebkitOverflowScrolling: 'touch' }}
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -93,13 +94,12 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md flex flex-col"
-              style={{ maxHeight: '85dvh' }}
+              className="bg-white rounded-t-3xl w-full max-w-md px-6 my-auto"
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex justify-between items-center px-6 pt-6 pb-4 flex-shrink-0">
+              <div className="flex justify-between items-center pt-6 pb-4">
                 <h3 className="text-xl font-bold text-gray-900">{t("filters")}</h3>
                 <button
                   aria-label={t("close_filters")}
@@ -109,12 +109,7 @@ export default function DiscoverFilters({ filters, onChange }) {
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
-
-              {/* Scrollable content */}
-              <div
-                className="overflow-y-auto px-6 flex-1 min-h-0"
-                style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' }}
-              >
+              <div>
 
               {/* City free-text */}
               <div className="mb-6">
@@ -276,8 +271,8 @@ export default function DiscoverFilters({ filters, onChange }) {
 
               {/* Actions */}
               <div
-                className="flex gap-3 px-6 pt-4 flex-shrink-0"
-                style={{ paddingBottom: 'calc(1rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}
+                className="flex gap-3 pt-4"
+                style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' }}
               >
                 <button
                   onClick={reset}
