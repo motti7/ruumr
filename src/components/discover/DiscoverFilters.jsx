@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, MapPin } from "lucide-react";
+import { X, Check, MapPin, Home, Search } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const ISRAEL_CITIES = [
@@ -14,15 +14,17 @@ const ISRAEL_CITIES = [
   "קרית אונו", "גדרה", "מעלה אדומים"
 ];
 
+const DEFAULT_FILTERS = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' };
+
 export default function DiscoverFilters({ filters, onChange }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [local, setLocal] = useState({ kosher: 'all', shabbat: 'all', ...filters, maxAge: filters.maxAge ?? 60 });
+  const [local, setLocal] = useState({ ...DEFAULT_FILTERS, ...filters, maxAge: filters.maxAge ?? 60 });
   const [cityInput, setCityInput] = useState("");
   const [citySuggestions, setCitySuggestions] = useState([]);
 
   useEffect(() => {
-    const handler = () => { setLocal({ kosher: 'all', shabbat: 'all', ...filters }); setCityInput(""); setOpen(true); };
+    const handler = () => { setLocal({ ...DEFAULT_FILTERS, ...filters }); setCityInput(""); setOpen(true); };
     window.addEventListener('openDiscoverFilters', handler);
     return () => window.removeEventListener('openDiscoverFilters', handler);
   }, [filters]);
@@ -33,6 +35,7 @@ export default function DiscoverFilters({ filters, onChange }) {
     local.minAge > 18 || local.maxAge < 50,
     local.kosher && local.kosher !== 'all',
     local.shabbat && local.shabbat !== 'all',
+    local.apartmentStatus && local.apartmentStatus !== 'all',
   ].filter(Boolean).length;
 
   const apply = () => {
@@ -41,10 +44,9 @@ export default function DiscoverFilters({ filters, onChange }) {
   };
 
   const reset = () => {
-    const defaults = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' };
-    setLocal(defaults);
+    setLocal(DEFAULT_FILTERS);
     setCityInput("");
-    onChange(defaults);
+    onChange(DEFAULT_FILTERS);
     setOpen(false);
   };
 
@@ -75,6 +77,12 @@ export default function DiscoverFilters({ filters, onChange }) {
     }
   };
 
+  const apartmentStatusOptions = [
+    { v: 'all', l: t('all'), icon: null },
+    { v: 'has_apartment', l: t('onb_has_apartment_title'), icon: Home },
+    { v: 'seeking_apartment', l: t('onb_seeking_apartment_title'), icon: Search },
+  ];
+
   return (
     <>
       {/* Bottom Sheet */}
@@ -92,7 +100,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md p-6"
+              className="bg-gray-50 rounded-t-3xl w-full max-w-md p-6 max-h-[85vh] overflow-y-auto"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
@@ -110,7 +118,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* City free-text */}
-              <div className="mb-6">
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-1">
                   <MapPin className="w-4 h-4 text-[--theme-orange]" /> {t("desired_area")}
                 </label>
@@ -165,7 +173,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Budget */}
-              <div className="mb-6">
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
                   {t("max_budget")} <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
                 </label>
@@ -186,7 +194,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Kosher */}
-              <div className="mb-6">
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-2 block">{t("onb_kosher_label")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   {[
@@ -206,7 +214,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Shabbat */}
-              <div className="mb-6">
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-2 block">{t("shabbat_observance")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   {[
@@ -226,7 +234,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Age Range */}
-              <div className="mb-8">
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
                   {t("age_range")} <span className="text-[--theme-orange]">{local.minAge}-{local.maxAge}</span>
                 </label>
@@ -246,11 +254,36 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </div>
               </div>
 
+              {/* Apartment Status - prominent selection, placed at the bottom of the filter list */}
+              <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-6">
+                <h4 className="font-bold text-lg mb-3 text-gray-900">{t("apartment_status")}</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {apartmentStatusOptions.map(opt => {
+                    const Icon = opt.icon;
+                    const selected = (local.apartmentStatus || 'all') === opt.v;
+                    return (
+                      <button
+                        key={opt.v}
+                        onClick={() => setLocal(prev => ({ ...prev, apartmentStatus: opt.v }))}
+                        className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-xl border-2 transition-all ${
+                          selected
+                            ? 'border-[--theme-orange] bg-orange-50 text-[--theme-orange] shadow-sm'
+                            : 'border-gray-200 text-gray-500'
+                        }`}
+                      >
+                        {Icon && <Icon className="w-5 h-5" />}
+                        <span className="text-xs font-bold text-center leading-tight">{opt.l}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Actions */}
               <div className="flex gap-3">
                 <button
                   onClick={reset}
-                  className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-bold text-sm"
+                  className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-bold text-sm bg-white"
                 >
                   {t("reset")}
                 </button>

@@ -57,7 +57,7 @@ export default function DiscoverPage() {
   const [actionFeedback, setActionFeedback] = useState(null);
   const [swipeSaveError, setSwipeSaveError] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
-  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all' });
+  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' });
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
   const [seenUserIds, setSeenUserIds] = useState(() => {
     try {
@@ -216,7 +216,7 @@ export default function DiscoverPage() {
       setAllProfiles(availableProfiles);
       // החלה מחדש של פילטרים פעילים
       let displayProfiles = availableProfiles;
-      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all')) {
+      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all') || (filters.apartmentStatus && filters.apartmentStatus !== 'all')) {
         displayProfiles = availableProfiles.filter(p => {
           if (filters.cities.length > 0) {
             const profileCities = [];
@@ -233,6 +233,9 @@ export default function DiscoverPage() {
           if (filters.shabbat && filters.shabbat !== 'all') {
             if (filters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
             if (filters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
+          }
+          if (filters.apartmentStatus && filters.apartmentStatus !== 'all') {
+            if ((p.current_status || 'seeking_apartment') !== filters.apartmentStatus) return false;
           }
           return true;
         });
@@ -440,6 +443,9 @@ export default function DiscoverPage() {
           } else if (newFilters.shabbat === 'against') {
             if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
           }
+        }
+        if (newFilters.apartmentStatus && newFilters.apartmentStatus !== 'all') {
+          if ((p.current_status || 'seeking_apartment') !== newFilters.apartmentStatus) return false;
         }
         return true;
       });
