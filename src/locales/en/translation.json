@@ -291,6 +291,9 @@
   "age_range": "Age range:",
   "reset": "Reset",
   "apply_filters": "Apply filters",
+  "apartment_status_filter": "Apartment status",
+  "apartment_status_has": "Already has an apartment",
+  "apartment_status_seeking": "Still looking for an apartment",
 
   "placeholder_name_age": "Roommate, 24",
   "placeholder_location": "Tel Aviv · Center",

@@ -291,6 +291,9 @@
   "age_range": "טווח גילאים:",
   "reset": "איפוס",
   "apply_filters": "החל פילטרים",
+  "apartment_status_filter": "סטטוס דירה",
+  "apartment_status_has": "יש כבר דירה",
+  "apartment_status_seeking": "מחפשים דירה",
 
   "placeholder_name_age": "שותף/ה, 24",
   "placeholder_location": "תל אביב · מרכז",
