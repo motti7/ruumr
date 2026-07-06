@@ -289,6 +289,8 @@
   "all": "All",
   "for_or_flexible": "For / Flexible",
   "age_range": "Age range:",
+  "has_apartment_filter_label": "Already has an apartment",
+  "has_apartment_yes": "Has apartment",
   "reset": "Reset",
   "apply_filters": "Apply filters",
 
