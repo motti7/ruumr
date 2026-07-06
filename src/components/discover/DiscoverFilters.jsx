@@ -111,7 +111,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               </div>
 
               {/* Scrollable content */}
-              <div className="overflow-y-auto px-6 flex-1">
+              <div className="overflow-y-auto px-6 flex-1 min-h-0">
 
               {/* City free-text */}
               <div className="mb-6">
