@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin } from "lucide-react";
@@ -78,7 +79,10 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   return (
     <>
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet — rendered via portal directly into <body> so it always
+          covers the full viewport (header + nav included) regardless of any
+          transformed/overflow ancestors in the page tree. */}
+      {createPortal(
       <AnimatePresence>
         {open && (
           <motion.div
@@ -291,7 +295,9 @@ export default function DiscoverFilters({ filters, onChange }) {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </>
   );
 }
