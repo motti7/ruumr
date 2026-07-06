@@ -123,20 +123,20 @@ export default function DiscoverFilters({ filters, onChange }) {
                   <MapPin className="w-4 h-4 text-[--theme-orange]" /> {t("desired_area")}
                 </label>
                 <div className="relative">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <input
                       type="text"
                       value={cityInput}
                       onChange={handleCityInputChange}
                       onKeyDown={handleCityKeyDown}
                       placeholder={t("type_city")}
-                      className="flex-1 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:outline-none focus:ring-0 focus:border-[--theme-orange] transition-colors"
+                      className="flex-1 min-w-0 border-2 border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:outline-none focus:ring-0 focus:border-[--theme-orange] transition-colors"
                       dir={i18n.dir()}
                     />
                     <button
                       onClick={() => addCity(cityInput)}
                       disabled={!cityInput.trim()}
-                      className="px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
+                      className="flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full gradient-orange text-white text-sm font-bold disabled:opacity-40"
                     >
                       {t("add")}
                     </button>
