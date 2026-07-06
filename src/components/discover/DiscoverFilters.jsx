@@ -94,7 +94,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md px-6"
+              className="bg-white rounded-t-3xl w-full max-w-md px-6 my-auto"
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
             >
