@@ -2,7 +2,7 @@
 import React, { memo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Puzzle, Trash2, X, Check, Sparkles } from "lucide-react";
+import { MapPin, MessageCircle, Trash2, X, Check, Sparkles } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
@@ -130,7 +130,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
               tabIndex={0}
               aria-label="compatibility checker"
             >
-              <Puzzle className="w-5 h-5" />
+              <MessageCircle className="w-5 h-5" />
             </motion.div>
             {!isOpened && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
