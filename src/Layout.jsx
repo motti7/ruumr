@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, Puzzle, UsersRound, Sparkles, Lock } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, UsersRound, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -315,7 +315,7 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
-    { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: Puzzle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
+    { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
     { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { id: "team", name: t("nav_team"), path: createPageUrl("GroupTracker"), icon: UsersRound }

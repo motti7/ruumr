@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import { Puzzle, AlertCircle } from "lucide-react";
+import { MessageCircle, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import MatchCard from "../components/matches/MatchCard";
 import SwipeableMatchRow from "../components/matches/SwipeableMatchRow";
@@ -218,7 +218,7 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir={i18n.dir()} style={{ height: 'calc(100dvh - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir={i18n.dir()} style={{ height: 'calc(100dvh - 48px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
       <PullToRefresh onRefresh={loadMatches}>
       <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
         <div className="flex items-center justify-between">
@@ -234,7 +234,7 @@ export default function MatchesPage() {
                 animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
                 transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}>
                 
-              <Puzzle className={`w-6 h-6 ${isRefreshing ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
+              <MessageCircle className={`w-6 h-6 ${isRefreshing ? 'text-[--theme-orange]' : 'text-gray-400'}`} />
             </motion.span>
           </motion.button>
         </div>
