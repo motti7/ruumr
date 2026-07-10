@@ -39,26 +39,6 @@ export function isNativeIOSApp() {
   }
 }
 
-export function isNativeAndroidApp() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  try {
-    return (
-      Capacitor.isNativePlatform() &&
-      typeof Capacitor.getPlatform === 'function' &&
-      Capacitor.getPlatform() === 'android'
-    );
-  } catch {
-    return false;
-  }
-}
-
-export function isNativeMobileApp() {
-  return isNativeIOSApp() || isNativeAndroidApp();
-}
-
 export async function detectNativeIOSSimulator() {
   if (typeof window === 'undefined') {
     return false;
