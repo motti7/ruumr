@@ -655,6 +655,7 @@
   "cancel_anytime": "ניתן לבטל בכל עת. החיוב מתחדש מדי חודש.",
   "cancel_anytime_3mo": "החיוב אינו מתחדש אוטומטית",
   "maybe_later_pricing": "אולי מאוחר יותר",
+  "plus_purchase_failed": "הרכישה נכשלה. נסה/י שוב.",
 
   "show_in_discovery": "הופיע בחיפושים",
   "show_in_discovery_sub": "כבה אפשרות זו כדי להפוך לבלתי נראה באופן זמני.",

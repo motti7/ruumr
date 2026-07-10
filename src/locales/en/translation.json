@@ -655,6 +655,7 @@
   "cancel_anytime": "Cancel anytime. Billing renews monthly.",
   "cancel_anytime_3mo": "Billing does not renew automatically",
   "maybe_later_pricing": "Maybe later",
+  "plus_purchase_failed": "The purchase failed. Please try again.",
 
   "show_in_discovery": "Show in discovery",
   "show_in_discovery_sub": "Turn this off to become temporarily invisible.",

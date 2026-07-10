@@ -49,7 +49,6 @@ const PageLoader = () => {
 };
 
 const NATIVE_IOS_PAYMENT_DISABLED_ROUTES = new Set([
-  'RuumrPlusPricing',
   'RuumrPlusCheckout',
   'RuumrPlusThankYou',
   'ManageSubscription',

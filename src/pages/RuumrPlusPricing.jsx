@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
 import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS, RUUMR_PLUS_DURATION_MONTHS, RUUMR_PLUS_ORIGINAL_MONTHLY_ILS } from "@/lib/ruumrPlusEntitlement";
+import { configureRevenueCat, purchasePlusPackage, hasPlusEntitlement } from "@/lib/revenueCat";
+import { activateRevenueCatPlus } from "@/functions/activateRevenueCatPlus";
 import { base44 } from "@/api/base44Client";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { Sparkles, MessageCircle, SlidersHorizontal, ShieldCheck, Check } from "lucide-react";
+
+const isNative = Capacitor.isNativePlatform();
 
 const benefits = [
   { icon: Sparkles, titleKey: "pricing_b1_title", descKey: "pricing_b1_desc" },
@@ -32,6 +37,8 @@ export default function RuumrPlusPricingPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +50,9 @@ export default function RuumrPlusPricingPage() {
         if (isPlusEntitled(user)) {
           navigate(createPageUrl("RuumrPlus"), { replace: true });
           return;
+        }
+        if (isNative) {
+          configureRevenueCat(user.id).catch(() => {});
         }
       } catch (_) {
         // If we cannot resolve the user, still show the paywall.
@@ -57,9 +67,32 @@ export default function RuumrPlusPricingPage() {
     };
   }, [navigate]);
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     trackPlusEvent("plus_subscribe_clicked", "Plus Subscribe Clicked", { price_ils: RUUMR_PLUS_PRICE_ILS });
-    navigate(createPageUrl("RuumrPlusCheckout"));
+
+    if (!isNative) {
+      navigate(createPageUrl("RuumrPlusCheckout"));
+      return;
+    }
+
+    setPurchaseError("");
+    setPurchasing(true);
+    try {
+      const customerInfo = await purchasePlusPackage();
+      if (!hasPlusEntitlement(customerInfo)) {
+        throw new Error("no_entitlement");
+      }
+      await activateRevenueCatPlus({});
+      trackPlusEvent("plus_purchase_completed", "Plus Purchase Completed", { price_ils: RUUMR_PLUS_PRICE_ILS });
+      navigate(createPageUrl("RuumrPlus"), { replace: true });
+    } catch (err) {
+      if (!err?.userCancelled) {
+        console.error("[ruumr] RevenueCat purchase failed:", err);
+        setPurchaseError(t("plus_purchase_failed"));
+      }
+    } finally {
+      setPurchasing(false);
+    }
   };
 
   if (!checked) {
@@ -121,12 +154,17 @@ export default function RuumrPlusPricingPage() {
           })}
         </div>
 
+        {purchaseError && (
+          <p className="text-center text-sm font-bold text-red-600">{purchaseError}</p>
+        )}
+
         <Button
           type="button"
           onClick={handleSubscribe}
-          className="w-full h-12 rounded-full bg-[--theme-orange] text-white font-bold shadow-lg hover:brightness-110"
+          disabled={purchasing}
+          className="w-full h-12 rounded-full bg-[--theme-orange] text-white font-bold shadow-lg hover:brightness-110 disabled:opacity-60"
         >
-          {t("subscribe_now_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })}
+          {purchasing ? t("loading") : t("subscribe_now_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })}
         </Button>
 
         <p className="text-center text-base font-black text-gray-900">
