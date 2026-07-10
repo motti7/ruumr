@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
-import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS } from "@/lib/ruumrPlusEntitlement";
+import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS, RUUMR_PLUS_DURATION_MONTHS, RUUMR_PLUS_ORIGINAL_MONTHLY_ILS } from "@/lib/ruumrPlusEntitlement";
 import { base44 } from "@/api/base44Client";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { Sparkles, MessageCircle, SlidersHorizontal, ShieldCheck, Check } from "lucide-react";
@@ -88,10 +88,17 @@ export default function RuumrPlusPricingPage() {
           <p className="mt-3 text-sm leading-6 text-white/90">
             {t("plus_pricing_tagline")}
           </p>
-          <div className="mt-5 flex items-baseline justify-center gap-1">
-            <span className="text-5xl font-black">{RUUMR_PLUS_PRICE_ILS} ₪</span>
+          <div className="mt-5 flex items-baseline justify-center gap-2">
+            <span className="text-lg font-bold text-white/60 line-through">{RUUMR_PLUS_ORIGINAL_MONTHLY_ILS} ₪</span>
             <span className="text-base font-medium text-white/85">{t("per_month_slash")}</span>
           </div>
+          <div className="mt-1 flex items-baseline justify-center gap-1">
+            <span className="text-5xl font-black">{RUUMR_PLUS_PRICE_ILS} ₪</span>
+            <span className="text-base font-medium text-white/85">{t("per_3_months", { count: RUUMR_PLUS_DURATION_MONTHS })}</span>
+          </div>
+          <p className="mt-2 text-xs font-bold text-white/80">
+            {t("plus_3mo_companion_note", { count: RUUMR_PLUS_DURATION_MONTHS })}
+          </p>
         </div>
 
         <div className="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm space-y-4">
@@ -119,11 +126,11 @@ export default function RuumrPlusPricingPage() {
           onClick={handleSubscribe}
           className="w-full h-12 rounded-full bg-[--theme-orange] text-white font-bold shadow-lg hover:brightness-110"
         >
-          {t("subscribe_now", { price: RUUMR_PLUS_PRICE_ILS })}
+          {t("subscribe_now_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })}
         </Button>
 
         <p className="text-center text-xs text-gray-500">
-          {t("cancel_anytime")}
+          {t("cancel_anytime_3mo", { count: RUUMR_PLUS_DURATION_MONTHS })}
         </p>
 
         <div className="text-center">

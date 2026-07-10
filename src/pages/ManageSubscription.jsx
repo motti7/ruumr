@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
-import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS } from "@/lib/ruumrPlusEntitlement";
+import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS, RUUMR_PLUS_DURATION_MONTHS } from "@/lib/ruumrPlusEntitlement";
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/functions/getSubscriptionStatus";
 import { cancelSubscription } from "@/functions/cancelSubscription";
@@ -91,7 +91,7 @@ export default function ManageSubscriptionPage() {
               <Sparkles className="w-5 h-5" />
               <span className="text-sm font-bold uppercase tracking-wide">Ruumr Plus</span>
             </div>
-            <p className="text-3xl font-black">{RUUMR_PLUS_PRICE_ILS} ₪ <span className="text-base font-medium text-white/80">{t("per_month_suffix")}</span></p>
+            <p className="text-3xl font-black">{RUUMR_PLUS_PRICE_ILS} ₪ <span className="text-base font-medium text-white/80">{t("per_3_months_suffix", { count: RUUMR_PLUS_DURATION_MONTHS })}</span></p>
           </div>
 
           <div className="px-5 py-4 space-y-3">

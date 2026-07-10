@@ -33,3 +33,5 @@ export function isPlusEntitled(user) {
 }
 
 export const RUUMR_PLUS_PRICE_ILS = 25;
+export const RUUMR_PLUS_DURATION_MONTHS = 3;
+export const RUUMR_PLUS_ORIGINAL_MONTHLY_ILS = 50;

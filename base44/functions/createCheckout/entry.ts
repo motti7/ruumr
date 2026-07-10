@@ -29,15 +29,16 @@ Deno.serve(async (req) => {
                     cart: {
                         items: [
                             {
-                                name: "Ruumr Plus - מנוי חודשי",
+                                name: "Ruumr Plus - מנוי ל-3 חודשים",
                                 quantity: 1,
                                 price: "25",
                                 subscriptionInfo: {
                                     subscriptionSettings: {
                                         frequency: "MONTH",
+                                        interval: 3,
                                     },
                                     title: "Ruumr Plus",
-                                    description: "גישה לכל תכונות Plus: התאמות חכמות, שיחות מוקדמות, וסינון לפי הרגלים.",
+                                    description: "25 ₪ לשלושה חודשים: התאמות חכמות מבוססות AI ופתיחת שיחה מיידית עם כל התאמה, כל אורך הדרך למציאת הדירה והשותפים.",
                                 },
                             },
                         ],

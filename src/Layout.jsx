@@ -484,7 +484,7 @@ export default function Layout({ children, currentPageName }) {
                                     markRuumrPlusActivationIntent({ source: "nav" });
                                     navigate(createPageUrl("RuumrPlus"));
                                 } else {
-                                    navigate(createPageUrl("RuumrPlusComingSoon"));
+                                    navigate(createPageUrl("RuumrPlusPricing"));
                                 }
                                 return;
                             }

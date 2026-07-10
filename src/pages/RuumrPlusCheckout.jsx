@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from "@/utils";
-import { RUUMR_PLUS_PRICE_ILS } from "@/lib/ruumrPlusEntitlement";
+import { RUUMR_PLUS_PRICE_ILS, RUUMR_PLUS_DURATION_MONTHS } from "@/lib/ruumrPlusEntitlement";
 import { CreditCard, ChevronRight, Loader2 } from "lucide-react";
 import { createCheckout } from "@/functions/createCheckout";
 
@@ -39,7 +39,7 @@ export default function RuumrPlusCheckoutPage() {
       </div>
       <h1 className="mt-5 text-2xl font-black text-gray-900">{t("complete_plus_signup")}</h1>
       <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">
-        {t("plus_plan_desc", { price: RUUMR_PLUS_PRICE_ILS })}
+        {t("plus_plan_desc_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })}
       </p>
 
       {/* Terms checkbox */}
@@ -75,7 +75,7 @@ export default function RuumrPlusCheckoutPage() {
             {t("preparing_payment")}
           </span>
         ) : (
-          t("continue_to_payment", { price: RUUMR_PLUS_PRICE_ILS })
+          t("continue_to_payment_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })
         )}
       </Button>
 
