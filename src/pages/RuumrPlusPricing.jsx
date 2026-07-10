@@ -129,7 +129,7 @@ export default function RuumrPlusPricingPage() {
           {t("subscribe_now_3mo", { price: RUUMR_PLUS_PRICE_ILS, count: RUUMR_PLUS_DURATION_MONTHS })}
         </Button>
 
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-base font-black text-gray-900">
           {t("cancel_anytime_3mo", { count: RUUMR_PLUS_DURATION_MONTHS })}
         </p>
 

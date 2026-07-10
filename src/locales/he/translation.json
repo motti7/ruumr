@@ -653,7 +653,7 @@
   "subscribe_now": "הירשם/י עכשיו · {{price}} ₪ לחודש",
   "subscribe_now_3mo": "הירשם/י עכשיו · {{price}} ₪ ל-{{count}} חודשים",
   "cancel_anytime": "ניתן לבטל בכל עת. החיוב מתחדש מדי חודש.",
-  "cancel_anytime_3mo": "ניתן לבטל בכל עת. החיוב מתחדש כל {{count}} חודשים.",
+  "cancel_anytime_3mo": "החיוב אינו מתחדש אוטומטית",
   "maybe_later_pricing": "אולי מאוחר יותר",
 
   "show_in_discovery": "הופיע בחיפושים",

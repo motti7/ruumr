@@ -653,7 +653,7 @@
   "subscribe_now": "Subscribe now · {{price}} ₪ per month",
   "subscribe_now_3mo": "Subscribe now · {{price}} ₪ for {{count}} months",
   "cancel_anytime": "Cancel anytime. Billing renews monthly.",
-  "cancel_anytime_3mo": "Cancel anytime. Billing renews every {{count}} months.",
+  "cancel_anytime_3mo": "Billing does not renew automatically",
   "maybe_later_pricing": "Maybe later",
 
   "show_in_discovery": "Show in discovery",
