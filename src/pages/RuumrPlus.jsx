@@ -58,21 +58,6 @@ const featureCards = [
   { icon: ShieldCheck, titleKey: "feat_accurate_profile_title", descKey: "feat_accurate_profile_desc" },
 ];
 
-const quickLinks = [
-  {
-    titleKey: "continue_to_discover",
-    descKey: "quicklink_discover_desc",
-    to: createPageUrl("Discover"),
-    icon: Sparkles,
-  },
-  {
-    titleKey: "edit_profile_title",
-    descKey: "quicklink_profile_desc",
-    to: createPageUrl("Profile"),
-    icon: UsersRound,
-  },
-];
-
 function getRecommendationLocation(profile = {}) {
   // search_area is a stored Hebrew region code — translate it for display
   // (city names stay as-is, matching ProfileCard/ProfileView).
@@ -942,43 +927,6 @@ export default function RuumrPlusPage() {
             );
           })}
         </div>
-
-        <div className="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-black text-gray-900">{t("where_youll_see_plus")}</h2>
-              <p className="mt-1 text-sm text-gray-500">{t("plus_entry_desc")}</p>
-            </div>
-            <div className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-[--theme-orange]">
-              Entry points
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {quickLinks.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.titleKey}
-                  to={item.to}
-                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 transition-colors hover:bg-orange-50/70"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[--theme-orange] shadow-sm">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{t(item.titleKey)}</p>
-                      <p className="text-sm text-gray-500">{t(item.descKey)}</p>
-                    </div>
-                  </div>
-                  <ChevronLeft className="w-5 h-5 text-gray-300" />
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
 
       </div>
       {showQuestionnaire && (
