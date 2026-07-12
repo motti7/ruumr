@@ -49,19 +49,23 @@ const PageLoader = () => {
   );
 };
 
-const NATIVE_IOS_PAYMENT_DISABLED_ROUTES = new Set([
+// Tranzila (web checkout) and Wix subscription management are web-only flows.
+// Any native app (iOS or Android) must go through RevenueCat instead, so both
+// platforms get redirected away from these routes back to the paywall, which
+// already knows how to trigger the native RevenueCat purchase.
+const NATIVE_PAYMENT_DISABLED_ROUTES = new Set([
   'RuumrPlusCheckout',
   'RuumrPlusThankYou',
   'ManageSubscription',
 ]);
 
-const NativeIOSPaymentUnavailableRedirect = ({ children }) => (
-  isNativeIOSApp() ? <Navigate to="/RuumrPlusComingSoon" replace /> : children
+const NativePaymentUnavailableRedirect = ({ children }) => (
+  Capacitor.isNativePlatform() ? <Navigate to="/RuumrPlusPricing" replace /> : children
 );
 
 const wrapNativeIOSPaymentGuard = (currentPageName, element) => (
-  NATIVE_IOS_PAYMENT_DISABLED_ROUTES.has(currentPageName)
-    ? <NativeIOSPaymentUnavailableRedirect>{element}</NativeIOSPaymentUnavailableRedirect>
+  NATIVE_PAYMENT_DISABLED_ROUTES.has(currentPageName)
+    ? <NativePaymentUnavailableRedirect>{element}</NativePaymentUnavailableRedirect>
     : element
 );
 

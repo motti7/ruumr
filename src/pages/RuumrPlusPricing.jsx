@@ -12,8 +12,6 @@ import { base44 } from "@/api/base44Client";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { Sparkles, MessageCircle, SlidersHorizontal, ShieldCheck, Check } from "lucide-react";
 
-const isNative = Capacitor.isNativePlatform();
-
 const benefits = [
   { icon: Sparkles, titleKey: "pricing_b1_title", descKey: "pricing_b1_desc" },
   { icon: MessageCircle, titleKey: "pricing_b2_title", descKey: "pricing_b2_desc" },
@@ -51,7 +49,7 @@ export default function RuumrPlusPricingPage() {
           navigate(createPageUrl("RuumrPlus"), { replace: true });
           return;
         }
-        if (isNative) {
+        if (Capacitor.isNativePlatform()) {
           configureRevenueCat(user.id).catch(() => {});
         }
       } catch (_) {
@@ -70,7 +68,7 @@ export default function RuumrPlusPricingPage() {
   const handleSubscribe = async () => {
     trackPlusEvent("plus_subscribe_clicked", "Plus Subscribe Clicked", { price_ils: RUUMR_PLUS_PRICE_ILS });
 
-    if (!isNative) {
+    if (!Capacitor.isNativePlatform()) {
       navigate(createPageUrl("RuumrPlusCheckout"));
       return;
     }
