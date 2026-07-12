@@ -14,9 +14,16 @@ export default function TranzilaReturnPage() {
       ? "/RuumrPlusThankYou"
       : "/RuumrPlusPricing?paymentFailed=1";
 
-    if (window.top) {
-      window.top.location.href = target;
-    } else {
+    // Try to break out to the top window (out of the Tranzila iframe). In
+    // some sandboxed preview contexts this throws a SecurityError, so fall
+    // back to navigating the current window instead.
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = target;
+      } else {
+        window.location.href = target;
+      }
+    } catch {
       window.location.href = target;
     }
   }, []);
