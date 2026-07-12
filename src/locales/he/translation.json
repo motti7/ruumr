@@ -626,7 +626,7 @@
   "preparing_payment": "מכין את דף התשלום...",
   "continue_to_payment": "המשך לתשלום · {{price}} ₪ לחודש",
   "continue_to_payment_3mo": "המשך לתשלום · {{price}} ₪ לשלושה חודשים",
-  "secure_payment_wix": "תשלום מאובטח באמצעות Wix Payments",
+  "secure_payment_tranzila": "תשלום מאובטח באמצעות Tranzila",
 
   "verifying_payment": "מאמת את התשלום...",
   "verifying_signup": "רגע קטן, מאמתים את ההרשמה שלך",

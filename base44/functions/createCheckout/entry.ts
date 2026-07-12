@@ -1,7 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
-const WIX_API_KEY = Deno.env.get("PAYMENTS_BY_WIX_API_KEY");
-const WIX_SITE_ID = Deno.env.get("PAYMENTS_BY_WIX_SITE_ID");
+const TRANZILA_TERMINAL_NAME = Deno.env.get("TRANZILA_TERMINAL_NAME");
+const TRANZILA_WEBHOOK_SECRET = Deno.env.get("TRANZILA_WEBHOOK_SECRET");
 
 Deno.serve(async (req) => {
     try {
@@ -11,63 +11,19 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const origin = req.headers.get("Origin") || "https://app.ruumrapp.com";
-        const thankYouUrl = `${origin}/RuumrPlusThankYou`;
-        const postFlowUrl = `${origin}/RuumrPlusPricing`;
-
-        // Create checkout session with Wix
-        const response = await fetch(
-            "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": WIX_API_KEY,
-                    "wix-site-id": WIX_SITE_ID,
-                },
-                body: JSON.stringify({
-                    cart: {
-                        items: [
-                            {
-                                name: "Ruumr Plus - מנוי ל-3 חודשים",
-                                quantity: 1,
-                                price: "25",
-                                subscriptionInfo: {
-                                    subscriptionSettings: {
-                                        frequency: "MONTH",
-                                        interval: 3,
-                                        billingCycles: 1,
-                                    },
-                                    title: "Ruumr Plus",
-                                    description: "25 ₪ לשלושה חודשים, חיוב חד-פעמי ללא חידוש אוטומטי: התאמות חכמות מבוססות AI ופתיחת שיחה מיידית עם כל התאמה, כל אורך הדרך למציאת הדירה והשותפים.",
-                                },
-                            },
-                        ],
-                        customerInfo: {
-                            email: user.email,
-                            firstName: user.full_name?.split(" ")[0] || "",
-                            lastName: user.full_name?.split(" ").slice(1).join(" ") || "",
-                        },
-                    },
-                    callbackUrls: {
-                        thankYouPageUrl: thankYouUrl,
-                        postFlowUrl: postFlowUrl,
-                    },
-                }),
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error("Wix API error:", JSON.stringify(data));
-            return Response.json({ error: data.message || "Failed to create checkout" }, { status: 500 });
+        if (!TRANZILA_TERMINAL_NAME || !TRANZILA_WEBHOOK_SECRET) {
+            console.error("Missing TRANZILA_TERMINAL_NAME or TRANZILA_WEBHOOK_SECRET");
+            return Response.json({ error: "Payment provider not configured" }, { status: 500 });
         }
 
-        const checkoutId = data.checkoutSession.id;
-        const redirectUrl = data.checkoutSession.redirectUrl;
+        const origin = req.headers.get("Origin") || "https://app.ruumrapp.com";
+        const checkoutId = crypto.randomUUID();
 
-        // Store pending subscription record so webhook can correlate
+        const successUrl = `${origin}/TranzilaReturn?status=success`;
+        const failUrl = `${origin}/TranzilaReturn?status=fail`;
+        const notifyUrl = `${origin}/functions/tranzilaWebhook?ref=${checkoutId}&secret=${encodeURIComponent(TRANZILA_WEBHOOK_SECRET)}`;
+
+        // Store pending record so the notify webhook can correlate the transaction back to this user
         await base44.asServiceRole.entities.PendingSubscription.create({
             user_id: user.id,
             user_email: user.email,
@@ -75,8 +31,31 @@ Deno.serve(async (req) => {
             status: "pending",
         });
 
-        console.log(`✅ Checkout created for user ${user.id}, checkoutId: ${checkoutId}`);
-        return Response.json({ redirectUrl, checkoutId });
+        const nameParts = String(user.full_name || "").trim().split(" ");
+        const contact = user.full_name || user.email;
+
+        console.log(`✅ Tranzila checkout prepared for user ${user.id}, checkoutId: ${checkoutId}`);
+
+        return Response.json({
+            checkoutId,
+            terminalName: TRANZILA_TERMINAL_NAME,
+            sum: "25",
+            currency: "1",
+            cred_type: "1",
+            tranmode: "A",
+            contact,
+            company: "Ruumr",
+            email: user.email,
+            country: "IL",
+            city: "N/A",
+            address: "N/A",
+            zip: "0000",
+            pdesc: "Ruumr Plus - מנוי לשלושה חודשים",
+            lang: "il",
+            success_url_address: successUrl,
+            fail_url_address: failUrl,
+            notify_url_address: notifyUrl,
+        });
 
     } catch (error) {
         console.error("Error in createCheckout:", error);

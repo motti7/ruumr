@@ -31,6 +31,7 @@ import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
 const GroupTracker = lazy(() => import('./pages/GroupTracker'));
 import RuumrPlusComingSoon from './pages/RuumrPlusComingSoon';
 const RuumrPlusThankYou = lazy(() => import('./pages/RuumrPlusThankYou'));
+const TranzilaReturn = lazy(() => import('./pages/TranzilaReturn'));
 const ManageSubscription = lazy(() => import('./pages/ManageSubscription'));
 const AdminTools = lazy(() => import('./pages/AdminTools'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
@@ -165,6 +166,7 @@ const AuthenticatedApp = () => {
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
           <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPaymentGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
+          <Route path="/TranzilaReturn" element={<Suspense fallback={<PageLoader />}><TranzilaReturn /></Suspense>} />
           <Route path="/ManageSubscription" element={wrapNativeIOSPaymentGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
         </Route>
 

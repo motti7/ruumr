@@ -626,7 +626,7 @@
   "preparing_payment": "Preparing the payment page...",
   "continue_to_payment": "Continue to payment · {{price}} ₪ per month",
   "continue_to_payment_3mo": "Continue to payment · {{price}} ₪ for {{count}} months",
-  "secure_payment_wix": "Secure payment via Wix Payments",
+  "secure_payment_tranzila": "Secure payment via Tranzila",
 
   "verifying_payment": "Verifying your payment...",
   "verifying_signup": "One moment, we're verifying your signup",
