@@ -656,6 +656,8 @@
   "cancel_anytime_3mo": "החיוב אינו מתחדש אוטומטית",
   "maybe_later_pricing": "אולי מאוחר יותר",
   "plus_purchase_failed": "הרכישה נכשלה. נסה/י שוב.",
+  "restore_purchases": "שחזור רכישות",
+  "no_purchases_found": "לא נמצאו רכישות לשחזור.",
 
   "show_in_discovery": "הופיע בחיפושים",
   "show_in_discovery_sub": "כבה אפשרות זו כדי להפוך לבלתי נראה באופן זמני.",
