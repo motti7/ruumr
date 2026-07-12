@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
 import { isPlusEntitled, RUUMR_PLUS_PRICE_ILS, RUUMR_PLUS_DURATION_MONTHS, RUUMR_PLUS_ORIGINAL_MONTHLY_ILS } from "@/lib/ruumrPlusEntitlement";
-import { configureRevenueCat, purchasePlusPackage, hasPlusEntitlement, restorePurchases } from "@/lib/revenueCat";
+import { configureRevenueCat, purchasePlusPackage, hasPlusEntitlement } from "@/lib/revenueCat";
 import { activateRevenueCatPlus } from "@/functions/activateRevenueCatPlus";
 import { base44 } from "@/api/base44Client";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
@@ -39,7 +39,6 @@ export default function RuumrPlusPricingPage() {
   const [checked, setChecked] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState("");
-  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,25 +92,6 @@ export default function RuumrPlusPricingPage() {
       }
     } finally {
       setPurchasing(false);
-    }
-  };
-
-  const handleRestore = async () => {
-    setPurchaseError("");
-    setRestoring(true);
-    try {
-      const customerInfo = await restorePurchases();
-      if (!hasPlusEntitlement(customerInfo)) {
-        setPurchaseError(t("no_purchases_found"));
-        return;
-      }
-      await activateRevenueCatPlus({});
-      navigate(createPageUrl("RuumrPlus"), { replace: true });
-    } catch (err) {
-      console.error("[ruumr] RevenueCat restore failed:", err);
-      setPurchaseError(t("plus_purchase_failed"));
-    } finally {
-      setRestoring(false);
     }
   };
 
@@ -191,20 +171,10 @@ export default function RuumrPlusPricingPage() {
           {t("cancel_anytime_3mo", { count: RUUMR_PLUS_DURATION_MONTHS })}
         </p>
 
-        <div className="text-center space-y-2">
-          <Link to={createPageUrl("Discover")} className="block text-sm font-bold text-gray-500 hover:text-gray-700">
+        <div className="text-center">
+          <Link to={createPageUrl("Discover")} className="text-sm font-bold text-gray-500 hover:text-gray-700">
             {t("maybe_later_pricing")}
           </Link>
-          {isNative && (
-            <button
-              type="button"
-              onClick={handleRestore}
-              disabled={restoring}
-              className="text-sm font-bold text-[--theme-orange] disabled:opacity-60"
-            >
-              {restoring ? t("loading") : t("restore_purchases")}
-            </button>
-          )}
         </div>
       </div>
     </div>
