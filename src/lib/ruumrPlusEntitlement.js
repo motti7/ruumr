@@ -32,6 +32,6 @@ export function isPlusEntitled(user) {
   return Boolean(user?.is_ruumr_plus);
 }
 
-export const RUUMR_PLUS_PRICE_ILS = 25;
+export const RUUMR_PLUS_PRICE_ILS = 24.9;
 export const RUUMR_PLUS_DURATION_MONTHS = 3;
 export const RUUMR_PLUS_ORIGINAL_MONTHLY_ILS = 50;

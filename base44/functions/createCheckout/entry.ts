@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
         return Response.json({
             checkoutId,
             terminalName: TRANZILA_TERMINAL_NAME,
-            sum: "25",
+            sum: "24.90",
             currency: "1",
             cred_type: "1",
             tranmode: "A",
