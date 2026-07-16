@@ -126,6 +126,7 @@ export default function RuumrPlusCheckoutPage() {
           <iframe
             name="tranzila-iframe"
             title="Tranzila Payment"
+            allow="payment"
             className="w-full rounded-2xl border border-gray-200"
             style={{ height: "600px" }}
           />
