@@ -29,6 +29,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { getLanguageDirection, isRtlLanguage } from "@/lib/languageDirection";
 import { DEMO_STAGES, setDemoStage } from "@/lib/demoStage";
+import ApartmentChosenCelebration from "@/components/team/ApartmentChosenCelebration";
 import GalleryLightbox from "@/components/shared/GalleryLightbox";
 import BackArrowIcon from "@/components/shared/BackArrowIcon";
 
@@ -76,6 +77,7 @@ export default function ApartmentDetail() {
   const [preferences, setPreferences] = useState({});
   const [saving, setSaving] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [chosenCelebration, setChosenCelebration] = useState(null);
   const visitTimeInputRef = useRef(null);
   const apartmentId = searchParams.get("apartmentId") || "";
   const direction = getLanguageDirection(i18n);
@@ -170,16 +172,27 @@ export default function ApartmentDetail() {
     setSaving(true);
     try {
       const result = await chooseCurrentApartment({ discoveryId: discovery.id });
-      setState({ loading: false, discovery: result.discovery || discovery });
+      const nextDiscovery = result.discovery || discovery;
+      setState({ loading: false, discovery: nextDiscovery, userId: state.userId });
       setDemoStage(DEMO_STAGES.APARTMENT_SERVICES);
-      toast({ title: t("apartment_chosen_toast") });
-      navigate(createPageUrl("ApartmentServices"));
+      setChosenCelebration({
+        apartment:
+          nextDiscovery.selected_apartment
+          || nextDiscovery.current_apartment
+          || nextDiscovery.winning_apartment
+          || apartment,
+      });
     } catch (error) {
       console.error(error);
       toast({ title: t("apartment_choose_error") });
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleChosenCelebrationContinue = () => {
+    setChosenCelebration(null);
+    navigate(createPageUrl("ApartmentServices"));
   };
 
   const handlePreference = async (preference) => {
@@ -418,6 +431,12 @@ export default function ApartmentDetail() {
       </main>
       {lightboxIndex !== null && (
         <GalleryLightbox images={images} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+      )}
+      {chosenCelebration && (
+        <ApartmentChosenCelebration
+          apartment={chosenCelebration.apartment}
+          onContinue={handleChosenCelebrationContinue}
+        />
       )}
     </div>
   );

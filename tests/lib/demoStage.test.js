@@ -30,4 +30,12 @@ describe("demo stage helpers", () => {
     expect(isDemoTeamBuildingStage()).toBe(true);
     expect(window.localStorage.getItem("ruumr_demo_stage")).toBe("1");
   });
+
+  it("defaults stored simulator mode to team-building stage when no explicit stage exists", () => {
+    window.localStorage.setItem("ruumr_simulator_mode", "true");
+
+    expect(getDemoStage()).toBe(DEMO_STAGES.TEAM_BUILDING);
+    expect(isDemoTeamBuildingStage()).toBe(true);
+    expect(window.localStorage.getItem("ruumr_demo_stage")).toBe("1");
+  });
 });

@@ -27,8 +27,10 @@ const RESET_SESSION_STORAGE_KEYS = [
 const RESET_LOCAL_STORAGE_PREFIXES = [
   "ruumr_apartment_preference_draft:",
   "ruumr_plus_activation:",
-  "ruumr_profile_signal_answered:",
   "ruumr_team_apartment_transition_confetti_seen:",
+];
+const RESET_SESSION_STORAGE_PREFIXES = [
+  "ruumr_profile_signal_answered:",
 ];
 
 function removeStorageKeys(storage, keys = [], prefixes = []) {
@@ -55,6 +57,11 @@ function getWindowStorage(name) {
   }
 }
 
+export function resetDemoRunStorage() {
+  removeStorageKeys(getWindowStorage("localStorage"), RESET_LOCAL_STORAGE_KEYS, RESET_LOCAL_STORAGE_PREFIXES);
+  removeStorageKeys(getWindowStorage("sessionStorage"), RESET_SESSION_STORAGE_KEYS, RESET_SESSION_STORAGE_PREFIXES);
+}
+
 /**
  * Subtle, simulator-only control for jumping between demo stages (1/2/3).
  * Collapses to a small labelled handle (never fully disappears) so it can
@@ -77,8 +84,7 @@ export default function DemoStageSwitcher() {
     window.location.assign(`/Home?simulator_mode=true&demo_stage=${value}`);
   };
   const resetRun = () => {
-    removeStorageKeys(getWindowStorage("localStorage"), RESET_LOCAL_STORAGE_KEYS, RESET_LOCAL_STORAGE_PREFIXES);
-    removeStorageKeys(getWindowStorage("sessionStorage"), RESET_SESSION_STORAGE_KEYS);
+    resetDemoRunStorage();
     window.location.assign(`/Home?simulator_mode=true&demo_stage=${DEMO_STAGES.TEAM_BUILDING}&simulator_reset_state=true`);
   };
   const setCollapse = (value) => {

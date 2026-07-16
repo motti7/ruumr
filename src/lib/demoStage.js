@@ -3,6 +3,7 @@ const DEMO_CITY_STORAGE_KEY = "ruumr_demo_city";
 const DEMO_STAGE_QUERY_PARAM = "demo_stage";
 const DEMO_CITY_QUERY_PARAM = "demo_city";
 const SIMULATOR_QUERY_PARAM = "simulator_mode";
+const SIMULATOR_STORAGE_KEY = "ruumr_simulator_mode";
 const APARTMENT_INTRO_REQUEST_SESSION_KEY = "ruumr_apartment_intro_requested";
 
 export const DEMO_STAGES = {
@@ -74,6 +75,13 @@ function writeStorage(key, value) {
   }
 }
 
+function simulatorModeDefaultActive() {
+  return (
+    import.meta.env.VITE_RUUMR_SIMULATOR_MODE === "true" ||
+    readStorage(SIMULATOR_STORAGE_KEY) === "true"
+  );
+}
+
 function requestApartmentIntroIfEnteringStage2(previousStage, nextStage) {
   if (typeof window === "undefined") return;
   if (previousStage !== DEMO_STAGES.TEAM_BUILDING || nextStage !== DEMO_STAGES.APARTMENT_SEARCH) return;
@@ -98,7 +106,15 @@ export function getDemoStage() {
     return DEMO_STAGES.TEAM_BUILDING;
   }
 
-  return normalizeStage(readStorage(DEMO_STAGE_STORAGE_KEY));
+  const storedStage = normalizeStage(readStorage(DEMO_STAGE_STORAGE_KEY));
+  if (storedStage) return storedStage;
+
+  if (simulatorModeDefaultActive()) {
+    writeStorage(DEMO_STAGE_STORAGE_KEY, DEMO_STAGES.TEAM_BUILDING);
+    return DEMO_STAGES.TEAM_BUILDING;
+  }
+
+  return "";
 }
 
 export function getDemoCityKey() {

@@ -76,6 +76,7 @@ const iosBundleId = 'com.base68c919adff6ac6fafb51bed6.app';
 const env = {
   ...process.env,
   VITE_RUUMR_SIMULATOR_MODE: process.env.VITE_RUUMR_SIMULATOR_MODE || 'true',
+  VITE_RUUMR_NATIVE_DEMO: process.env.VITE_RUUMR_NATIVE_DEMO || 'true',
   VITE_RUUMR_SIMULATOR_AUTO_RANK_TEAM:
     process.env.VITE_RUUMR_SIMULATOR_AUTO_RANK_TEAM || 'true',
 };

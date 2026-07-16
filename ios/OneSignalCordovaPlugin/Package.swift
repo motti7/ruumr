@@ -21,7 +21,8 @@ let pluginTarget: Target = isSimulatorBuild
         ],
         sources: [
             "OneSignalPushSimulator.m"
-        ]
+        ],
+        publicHeadersPath: "."
     )
     : .target(
         name: "OnesignalCordovaPlugin",

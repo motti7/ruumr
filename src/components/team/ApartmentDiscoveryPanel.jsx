@@ -47,6 +47,7 @@ import {
   updateApartmentPreferenceDraft,
 } from "@/lib/apartmentPreferenceDraft";
 import { useToast } from "@/components/ui/use-toast";
+import ApartmentChosenCelebration from "@/components/team/ApartmentChosenCelebration";
 import ApartmentIntroModal from "@/components/team/ApartmentIntroModal";
 import { Calendar as DateCalendar } from "@/components/ui/calendar";
 import {
@@ -191,6 +192,7 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [chosenCelebration, setChosenCelebration] = useState(null);
   const [introDismissed, setIntroDismissed] = useState(shouldDismissIntroInitially);
   const dismissIntro = () => {
     try {
@@ -405,14 +407,25 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
       const result = await chooseCurrentApartment({ discoveryId: discovery.id });
       saveDiscoveryResult(result);
       setDemoStage(DEMO_STAGES.APARTMENT_SERVICES);
-      toast({ title: t("apartment_chosen_toast") });
-      navigate(createPageUrl("ApartmentServices"));
+      setChosenCelebration({
+        apartment:
+          result.discovery?.selected_apartment
+          || result.discovery?.current_apartment
+          || result.discovery?.winning_apartment
+          || discovery.current_apartment
+          || discovery.winning_apartment,
+      });
     } catch (error) {
       console.error(error);
       toast({ title: t("apartment_choose_error") });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleChosenCelebrationContinue = () => {
+    setChosenCelebration(null);
+    navigate(createPageUrl("ApartmentServices"));
   };
 
   if (!isEstablished) return null;
@@ -448,12 +461,20 @@ export default function ApartmentDiscoveryPanel({ userId, isEstablished }) {
 
   if (lifecycle === APARTMENT_LIFECYCLE.APARTMENT_FOUND) {
     return (
-      <ApartmentShell discovery={discovery} selectedCityLabel={selectedCityLabel}>
-        <FoundView
-          apartment={discovery.selected_apartment || discovery.current_apartment || discovery.winning_apartment}
-          priceFormatter={priceFormatter}
-        />
-      </ApartmentShell>
+      <>
+        <ApartmentShell discovery={discovery} selectedCityLabel={selectedCityLabel}>
+          <FoundView
+            apartment={discovery.selected_apartment || discovery.current_apartment || discovery.winning_apartment}
+            priceFormatter={priceFormatter}
+          />
+        </ApartmentShell>
+        {chosenCelebration && (
+          <ApartmentChosenCelebration
+            apartment={chosenCelebration.apartment}
+            onContinue={handleChosenCelebrationContinue}
+          />
+        )}
+      </>
     );
   }
 

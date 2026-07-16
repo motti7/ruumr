@@ -20,15 +20,16 @@ export function isNativeIOSPlusEntitled(user) {
  * @returns {boolean}
  */
 export function isPlusEntitled(user) {
+  if (isRuumrSimulatorMode()) {
+    return !isRuumrSimulatorPlusLocked();
+  }
+
   if (isNativeIOSApp()) {
     // Native iOS uses the same canonical Base44 entitlement flag as the rest of
     // the app. Non-entitled users are routed to the coming-soon screen.
     return isNativeIOSPlusEntitled(user);
   }
 
-  if (isRuumrSimulatorMode()) {
-    return !isRuumrSimulatorPlusLocked();
-  }
   return Boolean(user?.is_ruumr_plus);
 }
 

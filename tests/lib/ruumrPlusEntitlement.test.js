@@ -40,10 +40,8 @@ describe('isPlusEntitled', () => {
     expect(isPlusEntitled({ is_ruumr_plus: true })).toBe(false);
   });
 
-  it('uses the is_ruumr_plus flag inside the native iOS app', () => {
+  it('uses the is_ruumr_plus flag inside the native iOS app outside simulator mode', () => {
     mockNative.isNativeIOSApp.mockReturnValue(true);
-    mockSim.isRuumrSimulatorMode.mockReturnValue(true);
-    mockSim.isRuumrSimulatorPlusLocked.mockReturnValue(false);
 
     expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'admin_grant' })).toBe(true);
     expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'bgu_free' })).toBe(true);
@@ -52,5 +50,16 @@ describe('isPlusEntitled', () => {
     expect(isPlusEntitled({ is_ruumr_plus: true, ruumr_plus_source: 'wix_paid' })).toBe(true);
     expect(isPlusEntitled({ is_ruumr_plus: true })).toBe(true);
     expect(isPlusEntitled({ is_ruumr_plus: false })).toBe(false);
+  });
+
+  it('lets native iOS simulator demo mode use the simulator entitlement toggle', () => {
+    mockNative.isNativeIOSApp.mockReturnValue(true);
+    mockSim.isRuumrSimulatorMode.mockReturnValue(true);
+
+    mockSim.isRuumrSimulatorPlusLocked.mockReturnValue(false);
+    expect(isPlusEntitled({ is_ruumr_plus: false })).toBe(true);
+
+    mockSim.isRuumrSimulatorPlusLocked.mockReturnValue(true);
+    expect(isPlusEntitled({ is_ruumr_plus: true })).toBe(false);
   });
 });

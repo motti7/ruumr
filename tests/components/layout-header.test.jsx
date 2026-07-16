@@ -149,6 +149,36 @@ describe('Bottom Nav Rendering', () => {
     expect(nav.querySelector('a[href="/ApartmentServices"]')).toBeNull();
     expect(nav.querySelector('a[href="/TeamChats"]')).toBeNull();
   });
+
+  it('renders apartment-search nav for simulator demo stage 2', async () => {
+    simulatorState.enabled = true;
+    window.localStorage.setItem('ruumr_demo_stage', '2');
+    const mod = await import('@/Layout');
+    Layout = mod.default;
+
+    const { container } = renderLayout('Home');
+    const nav = container.querySelector('nav');
+
+    expect(nav).not.toBeNull();
+    expect(nav.querySelector('a[href="/ApartmentMap"]')).not.toBeNull();
+    expect(nav.querySelector('a[href="/RuumrPlus"]')).toBeNull();
+    expect(nav.querySelector('a[href="/ApartmentServices"]')).toBeNull();
+  });
+
+  it('renders services nav for simulator demo stage 3', async () => {
+    simulatorState.enabled = true;
+    window.localStorage.setItem('ruumr_demo_stage', '3');
+    const mod = await import('@/Layout');
+    Layout = mod.default;
+
+    const { container } = renderLayout('ApartmentServices');
+    const nav = container.querySelector('nav');
+
+    expect(nav).not.toBeNull();
+    expect(nav.querySelector('a[href="/ApartmentServices"]')).not.toBeNull();
+    expect(nav.querySelector('a[href="/RuumrPlus"]')).toBeNull();
+    expect(nav.querySelector('a[href="/ApartmentMap"]')).toBeNull();
+  });
 });
 
 describe('Conditional Rendering — Content inside <main>', () => {
