@@ -38,6 +38,12 @@ Deno.serve(async (req) => {
       return Response.json({ received: true });
     }
 
+    const entitlementIds = event.entitlement_ids || [];
+    if (Array.isArray(entitlementIds) && entitlementIds.length > 0 && !entitlementIds.includes('ruumr_plus')) {
+      console.log('RevenueCat webhook: ignoring event, no ruumr_plus entitlement', entitlementIds);
+      return Response.json({ received: true });
+    }
+
     const base44 = createClientFromRequest(req);
 
     const eventDateMs = event.event_timestamp_ms || Date.now();

@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     }
 
     const rcData = await rcRes.json();
-    const entitlement = rcData?.subscriber?.entitlements?.['Plus'];
+    const entitlement = rcData?.subscriber?.entitlements?.['ruumr_plus'];
     const isActive = Boolean(entitlement) && (!entitlement.expires_date || new Date(entitlement.expires_date) > new Date());
 
     if (!isActive) {

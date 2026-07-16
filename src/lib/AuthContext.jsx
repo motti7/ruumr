@@ -17,6 +17,8 @@ import {
   registerNativeAuthCallbackHandler,
 } from '@/lib/nativeAuth';
 import { isWebAuthSessionAvailable, signInWithWebAuthSession } from '@/lib/webAuthSession';
+import { configureRevenueCat, getCustomerInfo, hasPlusEntitlement } from '@/lib/revenueCat';
+import { activateRevenueCatPlus } from '@/functions/activateRevenueCatPlus';
 
 const AuthContext = createContext(null);
 
@@ -71,6 +73,24 @@ export const AuthProvider = ({ children }) => {
         (profile) => String(profile.user_id) === String(userId)
       );
       setHasProfile(simProfiles ? simProfiles.length > 0 : null);
+    }
+  };
+
+  // Initializes RevenueCat for native users immediately on login (SDK init +
+  // .logIn via Purchases.configure), then checks the current entitlement so the
+  // UI can unlock instantly even if the async revenueCatWebhook hasn't landed yet.
+  const syncRevenueCatEntitlement = async (loggedInUser) => {
+    if (!isNativePlatform || !loggedInUser?.id) return;
+    try {
+      await configureRevenueCat(loggedInUser.id);
+      const customerInfo = await getCustomerInfo();
+      if (hasPlusEntitlement(customerInfo) && !loggedInUser.is_ruumr_plus) {
+        await activateRevenueCatPlus({});
+        setUser((prev) => (prev ? { ...prev, is_ruumr_plus: true } : prev));
+        console.log('[RevenueCat] Entitlement active on launch, unlocked Plus locally');
+      }
+    } catch (err) {
+      console.error('[RevenueCat] Entitlement sync on launch failed:', err?.message || err);
     }
   };
 
@@ -210,6 +230,7 @@ export const AuthProvider = ({ children }) => {
           $email: currentUser.email || '',
           user_id: currentUser.id,
         });
+        syncRevenueCatEntitlement(currentUser);
       }
 
       setIsLoadingAuth(false);
