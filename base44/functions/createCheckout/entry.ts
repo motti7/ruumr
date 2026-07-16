@@ -18,10 +18,15 @@ Deno.serve(async (req) => {
 
         const origin = req.headers.get("Origin") || "https://app.ruumrapp.com";
         const checkoutId = crypto.randomUUID();
+        // The server-to-server notify webhook must hit the base44.app functions
+        // endpoint directly — custom domains only serve the static frontend and
+        // reject POST requests to /functions/* with "Method Not Allowed".
+        const appId = Deno.env.get("BASE44_APP_ID");
+        const notifyBase = appId ? `https://${appId}.base44.app` : origin;
 
         const successUrl = `${origin}/TranzilaReturn?status=success`;
         const failUrl = `${origin}/TranzilaReturn?status=fail`;
-        const notifyUrl = `${origin}/functions/tranzilaWebhook?ref=${checkoutId}&secret=${encodeURIComponent(TRANZILA_WEBHOOK_SECRET)}`;
+        const notifyUrl = `${notifyBase}/functions/tranzilaWebhook?ref=${checkoutId}&secret=${encodeURIComponent(TRANZILA_WEBHOOK_SECRET)}`;
 
         // Store pending record so the notify webhook can correlate the transaction back to this user
         await base44.asServiceRole.entities.PendingSubscription.create({
