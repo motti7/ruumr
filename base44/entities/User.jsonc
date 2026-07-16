@@ -3,14 +3,6 @@
   "name": "User",
   "title": "User",
   "properties": {
-    "email": {
-      "type": "string",
-      "description": "The email of the user"
-    },
-    "full_name": {
-      "type": "string",
-      "description": "The full name of the user"
-    },
     "role": {
       "type": "string",
       "enum": [
@@ -57,15 +49,17 @@
         "admin_grant",
         "bgu_free",
         "wix_paid",
-        "apple_iap"
+        "apple_iap",
+        "revenuecat"
       ],
       "description": "How Ruumr Plus was granted. Native iOS only unlocks free/admin/IAP sources."
+    },
+    "ruumr_plus_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current Ruumr Plus pass (e.g. 3-month RevenueCat consumable) expires and access should be revoked."
     }
   },
-  "required": [
-    "email",
-    "full_name"
-  ],
   "rls": {
     "create": true,
     "read": {
