@@ -7,7 +7,7 @@ import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, X, UserPlus, Search, Puzzle, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
+import { Plus, X, UserPlus, Search, UsersRound, MessageCircle, Clock, Mail, ChevronLeft } from "lucide-react";
 import { listIncomingTeamInvites, respondToTeamInvite, requestTeamMember, removeTeamMember, reconcileMyTeam } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 import InviteByEmail from "@/components/team/InviteByEmail";
@@ -186,13 +186,6 @@ export default function GroupTrackerPage() {
             >
               <MessageCircle className="w-4 h-4" />
               {t("chat_word")}
-            </button>
-            <button
-              onClick={() => navigate(createPageUrl('GroupCompatibility'))}
-              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-3 py-2 rounded-full text-sm shadow-md active:scale-95 transition-transform"
-            >
-              <Puzzle className="w-4 h-4" />
-              Vibe Check
             </button>
           </div>
         </div>
