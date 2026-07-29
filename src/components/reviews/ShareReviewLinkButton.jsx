@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Share2, Check, X, Copy } from "lucide-react";
+import { Share2, Check, X, Copy, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function copyText(text) {
@@ -47,6 +47,11 @@ export default function ShareReviewLinkButton({ userId }) {
     setShowModal(true);
   };
 
+  const handleWhatsApp = () => {
+    const message = `היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר 🙂\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
   const handleCopy = async () => {
     try {
       await copyText(url);
@@ -91,6 +96,13 @@ export default function ShareReviewLinkButton({ userId }) {
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
+              <button
+                onClick={handleWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white font-bold text-sm mb-3"
+              >
+                <MessageCircle className="w-5 h-5" />
+                שיתוף ב-WhatsApp
+              </button>
               <div className="flex items-center gap-2">
                 <input
                   readOnly
