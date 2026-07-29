@@ -16,6 +16,7 @@ import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
+import ShareReviewLinkButton from '@/components/reviews/ShareReviewLinkButton';
 import { createProfileDefaults } from '@/lib/profileDefaults';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
@@ -542,6 +543,8 @@ export default function ProfilePage() {
       </div>
 
       <div className="p-4 space-y-6">
+
+        <ShareReviewLinkButton userId={profile.user_id} />
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
             <div className="grid grid-cols-2 gap-4">

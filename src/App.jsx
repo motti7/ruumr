@@ -34,6 +34,7 @@ const RuumrPlusThankYou = lazy(() => import('./pages/RuumrPlusThankYou'));
 const TranzilaReturn = lazy(() => import('./pages/TranzilaReturn'));
 const ManageSubscription = lazy(() => import('./pages/ManageSubscription'));
 const AdminTools = lazy(() => import('./pages/AdminTools'));
+const WriteExternalReview = lazy(() => import('./pages/WriteExternalReview'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
 
@@ -141,6 +142,8 @@ const AuthenticatedApp = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Public review link — external, non-registered reviewers land here without logging in */}
+        <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
 
         {/* All protected routes */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

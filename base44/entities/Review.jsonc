@@ -16,6 +16,11 @@
     },
     "reviewer_name": {
       "type": "string"
+    },
+    "is_external": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this review was submitted by someone outside the app via a shared review link, rather than by a logged-in app user."
     }
   },
   "required": [
