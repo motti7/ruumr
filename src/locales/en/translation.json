@@ -717,7 +717,7 @@
 
   "user_fallback": "User",
   "write_review_about": "Write a review about {{name}}",
-  "review_placeholder": "Tell us about your shared-living experience... (optional)",
+  "review_placeholder": "Tell us about your shared-living experience...",
   "sending_short": "Sending...",
   "send_review": "Send review",
   "write_review": "Write a review",
