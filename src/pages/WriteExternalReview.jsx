@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Star, Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { submitExternalReview } from "@/functions/submitExternalReview";
 
 export default function WriteExternalReview() {
@@ -10,8 +10,6 @@ export default function WriteExternalReview() {
   const [targetPhoto, setTargetPhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
   const [text, setText] = useState("");
   const [reviewerName, setReviewerName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,14 +40,13 @@ export default function WriteExternalReview() {
   }, [userId]);
 
   const handleSubmit = async () => {
-    if (rating === 0 || !reviewerName.trim() || isSubmitting) return;
+    if (!text.trim() || !reviewerName.trim() || isSubmitting) return;
     setIsSubmitting(true);
     setError("");
     try {
       await submitExternalReview({
         action: "submit",
         userId,
-        rating,
         text: text.trim(),
         reviewerName: reviewerName.trim(),
       });
@@ -97,24 +94,6 @@ export default function WriteExternalReview() {
           <p className="text-sm text-gray-500 mt-1">הביקורת תוצג בפרופיל שלו/ה באפליקציית רומר</p>
         </div>
 
-        <div className="flex justify-center gap-2 mb-5">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onMouseEnter={() => setHoverRating(star)}
-              onMouseLeave={() => setHoverRating(0)}
-              onClick={() => setRating(star)}
-              aria-label={`${star} כוכבים`}
-            >
-              <Star
-                className="w-9 h-9 transition-colors"
-                fill={(hoverRating || rating) >= star ? "#facc15" : "none"}
-                stroke={(hoverRating || rating) >= star ? "#eab308" : "#d1d5db"}
-              />
-            </button>
-          ))}
-        </div>
-
         <input
           type="text"
           value={reviewerName}
@@ -134,7 +113,7 @@ export default function WriteExternalReview() {
 
         <button
           onClick={handleSubmit}
-          disabled={rating === 0 || !reviewerName.trim() || isSubmitting}
+          disabled={!text.trim() || !reviewerName.trim() || isSubmitting}
           className="w-full mt-4 gradient-orange text-white font-bold rounded-full h-12 disabled:opacity-50"
         >
           {isSubmitting ? "שולח..." : "שליחת ביקורת"}

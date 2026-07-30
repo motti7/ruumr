@@ -20,12 +20,11 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'submit') {
-      const rating = Number(body.rating);
       const text = String(body.text || '').trim();
       const reviewerName = String(body.reviewerName || '').trim().slice(0, 60);
 
-      if (!rating || rating < 1 || rating > 5) {
-        return Response.json({ error: 'Invalid rating' }, { status: 400 });
+      if (!text) {
+        return Response.json({ error: 'Missing review text' }, { status: 400 });
       }
       if (!reviewerName) {
         return Response.json({ error: 'Missing reviewer name' }, { status: 400 });
@@ -39,7 +38,6 @@ export default async function (req: Request): Promise<Response> {
       await base44.asServiceRole.entities.Review.create({
         reviewer_id: `external_${Date.now()}`,
         reviewed_id: userId,
-        rating,
         text: text.slice(0, 1000),
         reviewer_name: reviewerName,
         is_external: true,
