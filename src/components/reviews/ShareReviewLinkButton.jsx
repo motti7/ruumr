@@ -29,14 +29,14 @@ function copyText(text) {
 export default function ShareReviewLinkButton({ userId }) {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/WriteExternalReview?userId=${userId}`;
+  const url = `https://app.ruumrapp.com/WriteExternalReview?userId=${userId}`;
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: "רומר - כתיבת ביקורת",
-          text: "היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר 🙂",
+          text: "היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר",
           url,
         });
         return;
@@ -48,7 +48,7 @@ export default function ShareReviewLinkButton({ userId }) {
   };
 
   const handleWhatsApp = () => {
-    const message = `היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר 🙂\n${url}`;
+    const message = `היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר\n${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
