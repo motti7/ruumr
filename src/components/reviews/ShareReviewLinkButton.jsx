@@ -66,10 +66,10 @@ export default function ShareReviewLinkButton({ userId }) {
     <>
       <button
         onClick={handleShare}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[--theme-orange] text-[--theme-orange] font-bold text-sm"
+        className="w-full flex items-center justify-center gap-2 py-4 rounded-full gradient-orange text-white font-bold text-base shadow-lg shadow-orange-500/30"
       >
-        <Share2 className="w-5 h-5" />
         שתפו קישור לקבלת ביקורת
+        <Share2 className="w-5 h-5" />
       </button>
 
       <AnimatePresence>
