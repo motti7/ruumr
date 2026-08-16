@@ -26,6 +26,14 @@ import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
 import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
+import { resolveRegion } from '@/lib/userRegion';
+
+// Detect the user's country (Israel / UK) on every app launch. The detected
+// region is persisted to localStorage on first connection; later launches keep
+// the stored value so behavior is stable even when the user travels. Runs at
+// module load so it is resolved before the first render on both web and the
+// native WebView (iOS / Android), where Intl returns the device's timezone.
+resolveRegion();
 
 // Lazy-load heavy pages for route-based code splitting
 const GroupTracker = lazy(() => import('./pages/GroupTracker'));
