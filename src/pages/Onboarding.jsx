@@ -36,6 +36,7 @@ import {
 '@/lib/simulatorMode';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { isUKRegion } from '@/lib/userRegion';
+import LanguageToggle from '@/components/shared/LanguageToggle';
 
 const TOTAL_STEPS = 7;
 const STEP_NAMES = {
@@ -764,8 +765,8 @@ export default function OnboardingPage() {
                  <Button variant="ghost" size="icon" onClick={() => step > 1 ? prevStep() : base44.auth.redirectToLogin(getSafeAuthReturnUrl())} className="hover:bg-orange-50 text-gray-500">
                      <ArrowRight className="h-6 w-6" />
                  </Button>
-                 
-                 <div className="w-10" />
+
+                 <LanguageToggle />
              </div>
              <div className="flex gap-1.5">
                  {Array.from({ length: 5 }).map((_, i) =>
