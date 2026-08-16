@@ -854,9 +854,9 @@ export default function OnboardingPage() {
                   step={1}
                   className="py-2" />
                         <div className="flex justify-between text-xs font-medium mt-1" style={{ color: '#B9BFC8' }}>
-                            <span>{t("vibe_lively")}</span>
-                            <span>{t("vibe_balanced")}</span>
                             <span>{t("vibe_quiet")}</span>
+                            <span>{t("vibe_balanced")}</span>
+                            <span>{t("vibe_lively")}</span>
                         </div>
                     </div>
                 </div>
