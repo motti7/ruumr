@@ -22,6 +22,9 @@ i18n
     },
     fallbackLng: 'he',
     supportedLngs: SUPPORTED_LANGUAGES,
+    // Normalize browser language for clean matching: 'en-GB' / 'en-US' resolve
+    // to 'en' so UK visitors land in the English version on first connection.
+    load: 'languageOnly',
     // Persist and restore the user's choice from localStorage under our own key
     // so it does not collide with any other i18next consumers.
     detection: {

@@ -35,6 +35,7 @@ import {
   isRuumrSimulatorMode } from
 '@/lib/simulatorMode';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
+import { isUKRegion } from '@/lib/userRegion';
 
 const TOTAL_STEPS = 7;
 const STEP_NAMES = {
@@ -85,6 +86,7 @@ export default function OnboardingPage() {
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
+  const isUK = isUKRegion();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => (/** @type {any} */
   createProfileDefaults(
@@ -403,10 +405,10 @@ export default function OnboardingPage() {
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
-        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged)
-        return formData.looking_for_gender && formData.religion && formData.kosher_preference && formData.shabbat_preference && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
-        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}return true;case 5: // Interests + About + Looking For
-        return formData.about_me.trim() && formData.looking_for_description.trim();case 6: // Photos
+        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged) — kosher & Shabbat are Israel-only preferences
+        return formData.looking_for_gender && formData.religion && (!isUK ? (formData.kosher_preference && formData.shabbat_preference) : true) && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
+        if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}return true;case 5: // Interests + About + Looking For — typing in "About me" is enough to proceed
+        return formData.about_me.trim();case 6: // Photos
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
         return true;default:return true;}};const nextStep = () => {const currentStep = step;const stepName = STEP_NAMES[currentStep] || `Step ${currentStep}`;trackMixpanel('Registration Step Completed', { step_number: currentStep, step_name: stepName });if (step === 3 && formData.current_status === 'seeking_apartment') {setStep(5); // Skip apartment details
     } else if (step === 5) {setStep(6); // Go to photos
@@ -954,7 +956,8 @@ export default function OnboardingPage() {
                   } />
                     </div>
 
-                    {/* כשרות + שבת */}
+                    {/* כשרות + שבת — Israel-only, hidden for UK users */}
+                    {isUK ? null : (
                     <div className="grid grid-cols-2 gap-4">
                         <CustomSelect
                   label={t("onb_kosher_label")}
@@ -969,6 +972,7 @@ export default function OnboardingPage() {
                   options={[{ v: 'for', l: t('pref_for') }, { v: 'against', l: t('pref_against') }, { v: 'flow', l: t('pref_flexible') }]} />
                 
                     </div>
+                    )}
 
                     {/* חיית מחמד */}
                     <div>
