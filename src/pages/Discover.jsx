@@ -172,7 +172,15 @@ export default function DiscoverPage() {
       const availableProfiles = allProfiles.filter(p => {
         // 1. Filter out self and already swiped
         if (String(p.user_id) === String(user.id) || allSwipedIds.has(String(p.user_id))) return false;
-        
+
+        // Region isolation: users only see profiles from their own country
+        // marketplace. Existing profiles created before region support
+        // default to Israel ('IL') so the entire pre-existing user base is
+        // classified correctly.
+        const myRegion = currentUserProfile.region || 'IL';
+        const theirRegion = p.region || 'IL';
+        if (myRegion !== theirRegion) return false;
+
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
 

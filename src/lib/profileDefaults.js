@@ -14,6 +14,10 @@ export function createProfileDefaults(overrides = {}) {
     location: "",
     search_cities: [],
     search_area: "מרכז",
+    // Country marketplace: IL = Israel, GB = UK. Stamped at the end of
+    // onboarding from the detected region (see userRegion.js) and used to
+    // isolate Discovery so users only see profiles from their own country.
+    region: "IL",
     budget_min: 0,
     budget_max: 3500,
     vibe_level: 3,

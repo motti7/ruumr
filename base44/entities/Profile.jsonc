@@ -28,6 +28,15 @@
     "phone_number": {
       "type": "string"
     },
+    "region": {
+      "type": "string",
+      "enum": [
+        "IL",
+        "GB"
+      ],
+      "default": "IL",
+      "description": "User's country marketplace. IL = Israel, GB = UK. Discovery is isolated by this field so users only see profiles from their own country. Existing profiles created before this field default to IL."
+    },
     "about_me": {
       "type": "string"
     },

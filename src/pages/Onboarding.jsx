@@ -447,6 +447,9 @@ export default function OnboardingPage() {
         song_artist: formData.song_artist || null,
         song_image: formData.song_image || null,
         allow_instagram_promotion: wantsRuumrPromotion,
+        // Stamp the user's country marketplace based on the detected region.
+        // Existing profiles (no region field) are treated as IL downstream.
+        region: isUK ? 'GB' : 'IL',
       };
 
       // If user already has a profile (e.g. navigated back), update instead of create
