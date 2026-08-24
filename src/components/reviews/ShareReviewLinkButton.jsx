@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Share2, Check, X, Copy, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Share2, Check, X, Copy, MessageCircle, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text);
   }
-  // Fallback for environments without the Clipboard API (e.g. native WebViews)
   return new Promise((resolve, reject) => {
     const textarea = document.createElement("textarea");
     textarea.value = text;
@@ -26,29 +26,47 @@ function copyText(text) {
   });
 }
 
+// Two side-by-side share buttons rendered on the Profile page:
+//  - Orange (gradient-orange): share MY public profile link
+//  - Blue (Base44 brand blue): request a review link (existing behavior)
+// Both open the same native-share / fallback modal, parameterized by `mode`.
 export default function ShareReviewLinkButton({ userId }) {
+  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
+  const [mode, setMode] = useState("review"); // "profile" | "review"
   const [copied, setCopied] = useState(false);
-  const url = `https://app.ruumrapp.com/WriteExternalReview?userId=${userId}`;
 
-  const handleShare = async () => {
+  const reviewUrl = `https://app.ruumrapp.com/WriteExternalReview?userId=${userId}`;
+  const profileUrl = `https://app.ruumrapp.com/PublicProfile?userId=${userId}`;
+
+  const isProfile = mode === "profile";
+  const url = isProfile ? profileUrl : reviewUrl;
+  const modalTitle = isProfile ? t("share_profile_link_title") : t("share_review_link_title");
+  const shareText = isProfile
+    ? t("share_profile_share_text")
+    : "היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר :-)";
+  const hint = isProfile ? t("share_profile_share_text") : t("share_review_link_hint");
+
+  const openShare = async (which) => {
+    setMode(which);
+    const u = which === "profile" ? profileUrl : reviewUrl;
+    const title = which === "profile" ? t("share_profile_link_title") : "רומר - כתיבת ביקורת";
+    const text = which === "profile"
+      ? t("share_profile_share_text")
+      : "היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר :-)";
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: "רומר - כתיבת ביקורת",
-          text: "היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר :-)",
-          url,
-        });
+        await navigator.share({ title, text, url: u });
         return;
       } catch (e) {
-        // User cancelled or share failed — fall back to showing the link.
+        // cancelled / failed — fall back to the in-app modal
       }
     }
     setShowModal(true);
   };
 
   const handleWhatsApp = () => {
-    const message = `היי! אשמח שתכתוב/י עליי ביקורת קצרה ברומר :-)\n${url}`;
+    const message = `${shareText}\n${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
@@ -58,19 +76,29 @@ export default function ShareReviewLinkButton({ userId }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) {
-      // Selection remains visible in the input for manual copy.
+      // selection remains in the input for manual copy
     }
   };
 
   return (
     <>
-      <button
-        onClick={handleShare}
-        className="w-full flex items-center justify-center gap-2 py-4 rounded-full gradient-orange text-white font-bold text-base shadow-lg shadow-orange-500/30"
-      >
-        שתפו קישור לקבלת ביקורת
-        <Share2 className="w-5 h-5" />
-      </button>
+      <div className="flex gap-2 w-full">
+        <button
+          onClick={() => openShare("profile")}
+          className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full gradient-orange text-white font-bold text-sm shadow-lg shadow-orange-500/30"
+        >
+          {t("share_my_profile")}
+          <Share2 className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => openShare("review")}
+          className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full text-white font-bold text-sm shadow-lg shadow-blue-500/30"
+          style={{ backgroundColor: "var(--theme-blue)" }}
+        >
+          {t("request_review")}
+          <Star className="w-4 h-4" />
+        </button>
+      </div>
 
       <AnimatePresence>
         {showModal && (
@@ -91,7 +119,7 @@ export default function ShareReviewLinkButton({ userId }) {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900">שתפו את הקישור הזה</h3>
+                <h3 className="text-lg font-bold text-gray-900">{modalTitle}</h3>
                 <button onClick={() => setShowModal(false)} aria-label="סגירה">
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
@@ -112,15 +140,14 @@ export default function ShareReviewLinkButton({ userId }) {
                 />
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 flex items-center gap-1 px-4 py-3 rounded-xl gradient-orange text-white font-bold text-sm"
+                  className="shrink-0 flex items-center gap-1 px-4 py-3 rounded-xl text-white font-bold text-sm"
+                  style={{ backgroundColor: "var(--theme-blue)" }}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   {copied ? "הועתק" : "העתקה"}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-3 text-center">
-                שלחו את הקישור לחבר/ה כדי שיוכלו לכתוב עליכם ביקורת, גם אם אין להם חשבון ברומר.
-              </p>
+              <p className="text-xs text-gray-400 mt-3 text-center">{hint}</p>
             </motion.div>
           </motion.div>
         )}

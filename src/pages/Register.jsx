@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { claimPublicProfileInvite } from "@/functions/claimPublicProfileInvite";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,16 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [providerPending, setProviderPending] = useState(null);
+
+  // Capture the inviter when arriving from a shared public profile link
+  // (?invited_by_user_id=...) so we can connect the two after signup.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const inviter = params.get("invited_by_user_id");
+      if (inviter) localStorage.setItem("ruumr_invited_by_user_id", inviter);
+    } catch (_) {}
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,6 +58,15 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+      }
+      try {
+        const inviterId = localStorage.getItem("ruumr_invited_by_user_id");
+        if (inviterId) {
+          await claimPublicProfileInvite({ invited_by_user_id: inviterId });
+          localStorage.removeItem("ruumr_invited_by_user_id");
+        }
+      } catch (_) {
+        // Best-effort: never block the user from entering the app.
       }
       window.location.href = "/";
     } catch (err) {
