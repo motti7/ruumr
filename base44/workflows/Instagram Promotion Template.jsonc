@@ -1,0 +1,37 @@
+{
+  "name": "Instagram Promotion Template",
+  "description": "",
+  "trigger": {
+    "condition": "${ ((.trigger.data.allow_instagram_promotion == true) and (.trigger.old_data.allow_instagram_promotion != true)) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Profile"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "instagram_promotion_template",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendInstagramTemplate",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "sendInstagramTemplate"
+  }
+}
