@@ -8,7 +8,6 @@ import { queryClientInstance } from '@/lib/query-client'
 import { Capacitor } from '@capacitor/core';
 
 import NavigationTracker from '@/lib/NavigationTracker'
-import OneSignalSetup from '@/components/shared/OneSignalSetup'
 import { detectNativeIOSSimulator, isNativeIOSApp } from '@/lib/nativeEnvironment';
 import { base44 } from '@/api/base44Client';
 import { pagesConfig } from './pages.config'
@@ -142,7 +141,6 @@ const AuthenticatedApp = () => {
   writeBootMarker('authenticated-app-ready');
   return (
     <>
-    <OneSignalSetup userId={user?.id} />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location?.pathname}>
         {/* Public auth routes */}

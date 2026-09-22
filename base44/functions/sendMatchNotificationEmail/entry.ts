@@ -138,10 +138,10 @@ Deno.serve(async (req) => {
     // gets neither email nor push).
     try {
       await sendServerPush(
+        base44,
         user_id,
         `🎉 יש לך התאמה חדשה!`,
-        `ישנה התעניינות הדדית בינך לבין ${match_user_name || 'מישהו'}! זה הזמן לדבר.`,
-        { type: 'match', match_name: match_user_name || 'מישהו' }
+        `ישנה התעניינות הדדית בינך לבין ${match_user_name || 'מישהו'}! זה הזמן לדבר.`
       );
     } catch (e) {
       console.error('❌ Failed to send match push:', e);

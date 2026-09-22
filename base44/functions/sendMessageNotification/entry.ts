@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { sendServerPush } from '../../shared/serverPush.ts';
 
 Deno.serve(async (req) => {
     try {
@@ -84,14 +85,14 @@ Deno.serve(async (req) => {
             return Response.json({ success: true, skipped: true });
         }
 
-        // Send push notification
+        // Send push notification (platform built-in SendPushNotification)
         try {
-            await base44.functions.invoke('sendPushNotification', {
-                user_id: receiver_id,
-                title: `💬 הודעה חדשה מ-${senderName}`,
-                message: content.substring(0, 100),
-                data: { type: 'message', match_id, sender_id }
-            });
+            await sendServerPush(
+                base44,
+                receiver_id,
+                `💬 הודעה חדשה מ-${senderName}`,
+                content.substring(0, 100)
+            );
         } catch (e) {
             console.error(`❌ Failed to send push notification:`, e);
         }

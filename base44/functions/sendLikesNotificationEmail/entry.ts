@@ -122,10 +122,10 @@ Deno.serve(async (req) => {
     // gets neither email nor push).
     try {
       await sendServerPush(
+        base44,
         swiped_id,
         `🏠 יש לך ${likes_count || 2} התעניינויות חדשות!`,
-        `קיבלת התעניינויות מ-${likes_count || 2} אנשים שמעוניינים להיכנס איתך שותפים. כנס לאפליקציה לפרטים נוספים.`,
-        { type: 'likes', count: likes_count || 2 }
+        `קיבלת התעניינויות מ-${likes_count || 2} אנשים שמעוניינים להיכנס איתך שותפים. כנס לאפליקציה לפרטים נוספים.`
       );
     } catch (e) {
       console.error('❌ Failed to send likes push:', e);
