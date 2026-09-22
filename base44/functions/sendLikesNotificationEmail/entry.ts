@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { sendServerPush } from '../../shared/serverPush.ts';
 
 const ORANGE = '#FF5722';
 const ORANGE_DARK = '#E64A19';
@@ -115,6 +116,20 @@ Deno.serve(async (req) => {
       subject: `🏠 יש לך ${likes_count || 2} התעניינויות חדשות ב-Ruumr!`,
       body: html,
     });
+
+    // Also send a mobile push (same trigger/gate as the email — notify_likes
+    // was already checked above, so a user who disabled likes notifications
+    // gets neither email nor push).
+    try {
+      await sendServerPush(
+        swiped_id,
+        `🏠 יש לך ${likes_count || 2} התעניינויות חדשות!`,
+        `קיבלת התעניינויות מ-${likes_count || 2} אנשים שמעוניינים להיכנס איתך שותפים. כנס לאפליקציה לפרטים נוספים.`,
+        { type: 'likes', count: likes_count || 2 }
+      );
+    } catch (e) {
+      console.error('❌ Failed to send likes push:', e);
+    }
 
     console.log(`✅ Likes notification email sent to ${swiped_email}`);
     return Response.json({ success: true });

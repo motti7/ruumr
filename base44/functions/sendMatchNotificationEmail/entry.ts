@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { sendServerPush } from '../../shared/serverPush.ts';
 
 const ORANGE = '#FF5722';
 const ORANGE_DARK = '#E64A19';
@@ -131,6 +132,20 @@ Deno.serve(async (req) => {
       subject: `🤝 יש לך התאמה חדשה ב-Ruumr!`,
       body: html,
     });
+
+    // Also send a mobile push (same trigger/gate as the email — notify_matches
+    // was already checked above, so a user who disabled match notifications
+    // gets neither email nor push).
+    try {
+      await sendServerPush(
+        user_id,
+        `🎉 יש לך התאמה חדשה!`,
+        `ישנה התעניינות הדדית בינך לבין ${match_user_name || 'מישהו'}! זה הזמן לדבר.`,
+        { type: 'match', match_name: match_user_name || 'מישהו' }
+      );
+    } catch (e) {
+      console.error('❌ Failed to send match push:', e);
+    }
 
     console.log(`✅ Match notification email sent to ${user_email}`);
     return Response.json({ success: true });
