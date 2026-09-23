@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, Info, Sparkles, Lock } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, HeartHandshake, Sparkles, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -299,7 +299,7 @@ export default function Layout({ children, currentPageName }) {
     { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
     { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
-    { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: Info }
+    { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);

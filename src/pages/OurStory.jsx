@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import StoryHero from "@/components/ourstory/StoryHero";
 import ProblemSolution from "@/components/ourstory/ProblemSolution";
@@ -13,19 +14,20 @@ export default function OurStory() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="px-4 py-4 space-y-8 pb-8">
+    <div className="px-4 py-4 space-y-9 pb-10">
       <StoryHero />
       <ProblemSolution />
       <SuccessStories />
       <TrustSignals />
       <RoommateChecklist />
       <TeamAndSocial />
-      <button
+      <motion.button
         onClick={() => navigate(createPageUrl("Discover"))}
-        className="w-full py-3.5 rounded-full gradient-orange text-white font-bold shadow-lg active:scale-[0.98] transition-transform"
+        whileTap={{ scale: 0.97 }}
+        className="w-full py-4 rounded-full gradient-orange text-white font-bold text-base shadow-lg"
       >
         {t("our_story_cta_button")}
-      </button>
+      </motion.button>
     </div>
   );
 }
