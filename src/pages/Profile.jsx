@@ -4,6 +4,7 @@ import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
 import { validatePhoto } from "@/functions/validatePhoto";
+import { validateImageDisplayable } from "@/lib/validateImageDisplayable";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -183,6 +184,15 @@ export default function ProfilePage() {
     try {
         let fileUrl;
         let isVideo = file.type.startsWith('video/');
+        // Reject images the app cannot actually render before uploading
+        if (!isVideo) {
+            const displayCheck = await validateImageDisplayable(file);
+            if (!displayCheck.ok) {
+                toast({ title: t("photo_not_displayable"), description: t("photo_not_displayable_desc"), variant: "destructive" });
+                setUploadingIndex(null);
+                return;
+            }
+        }
         if (isVideo) {
             if (file.size > 50 * 1024 * 1024) {
                 throw new Error("Video too large (max 50MB)");
@@ -229,6 +239,12 @@ export default function ProfilePage() {
     if (!file) return;
     setUploadingApartmentIndex(index);
     try {
+        const displayCheck = await validateImageDisplayable(file);
+        if (!displayCheck.ok) {
+            toast({ title: t("photo_not_displayable"), description: t("photo_not_displayable_desc"), variant: "destructive" });
+            setUploadingApartmentIndex(null);
+            return;
+        }
         file = await compressImage(file);
         const { file_url } = await UploadFile({ file });
         const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];

@@ -31,6 +31,8 @@
   "fill_name_before_continue": "Please enter your full name before continuing",
   "photo_upload_failed": "Photo upload failed. Please try again.",
   "photo_rejected": "Photo rejected",
+  "photo_not_displayable": "Image can't be displayed",
+  "photo_not_displayable_desc": "The uploaded file isn't a valid image that can be shown in the app. Please try uploading a different photo in JPG or PNG format.",
 
   "gender_male": "Male",
   "gender_female": "Female",

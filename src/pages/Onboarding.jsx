@@ -8,6 +8,7 @@ import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadFile } from "@/integrations/Core";
 import { validatePhoto } from "@/functions/validatePhoto";
+import { validateImageDisplayable } from "@/lib/validateImageDisplayable";
 import { base44 } from "@/api/base44Client";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { createTeamInvite, claimTeamInvites } from "@/api/teamInvites";
@@ -564,6 +565,18 @@ export default function OnboardingPage() {
     }
 
     try {
+      // Reject images the app cannot actually render before uploading
+      const displayCheck = await validateImageDisplayable(file);
+      if (!displayCheck.ok) {
+        alert(t("photo_not_displayable_desc"));
+        if (isApartment) {
+          setUploadingApartmentPhotos((prev) => { const s = new Set(prev); s.delete(index); return s; });
+        } else {
+          setUploadingPhotos((prev) => { const s = new Set(prev); s.delete(index); return s; });
+        }
+        return;
+      }
+
       // Optimistic preview
       const objectUrl = URL.createObjectURL(file);
       setFormData((prev) => {

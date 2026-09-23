@@ -31,6 +31,8 @@
   "fill_name_before_continue": "נא למלא שם מלא לפני ההמשך",
   "photo_upload_failed": "העלאת התמונה נכשלה. אנא נסה שנית.",
   "photo_rejected": "התמונה נדחתה",
+  "photo_not_displayable": "לא ניתן להציג את התמונה",
+  "photo_not_displayable_desc": "הקובץ שהועלה אינו תמונה תקינה שניתן להציג באפליקציה. נסה/י להעלות תמונה אחרת בפורמט JPG או PNG.",
 
   "gender_male": "זכר",
   "gender_female": "נקבה",
