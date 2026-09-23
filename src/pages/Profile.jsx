@@ -231,19 +231,6 @@ export default function ProfilePage() {
     try {
         file = await compressImage(file);
         const { file_url } = await UploadFile({ file });
-
-        // AI moderation: apartment photos must show an interior living space
-        try {
-            const validation = await validatePhoto({ file_url, photo_type: "apartment" });
-            if (validation && validation.approved === false) {
-                toast({ title: t("photo_rejected"), description: validation.reason, variant: "destructive" });
-                setUploadingApartmentIndex(null);
-                return;
-            }
-        } catch (validationErr) {
-            console.error("Apartment photo validation failed, allowing upload:", validationErr);
-        }
-
         const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];
         newPhotos[index] = file_url;
         setFormData(prev => ({...prev, apartment_photos: newPhotos}));

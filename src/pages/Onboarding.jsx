@@ -577,22 +577,22 @@ export default function OnboardingPage() {
       const compressedFile = await compressImage(file);
       const { file_url } = await UploadFile({ file: compressedFile });
 
-      // AI moderation: person photos must contain a person, apartment photos an interior
-      try {
-        const validation = await validatePhoto({ file_url, photo_type: isApartment ? "apartment" : "person" });
-        if (validation && validation.approved === false) {
-          alert(validation.reason || t("photo_rejected"));
-          // Revert optimistic preview
-          setFormData((prev) => {
-            const key = isApartment ? 'apartment_photos' : 'photos';
-            const newPhotos = [...(prev[key] || [])];
-            newPhotos[index] = null;
-            return { ...prev, [key]: newPhotos };
-          });
-          return;
+      // AI moderation: person photos only (apartment photos are not checked)
+      if (!isApartment) {
+        try {
+          const validation = await validatePhoto({ file_url, photo_type: "person" });
+          if (validation && validation.approved === false) {
+            alert(validation.reason || t("photo_rejected"));
+            setFormData((prev) => {
+              const newPhotos = [...(prev.photos || [])];
+              newPhotos[index] = null;
+              return { ...prev, photos: newPhotos };
+            });
+            return;
+          }
+        } catch (validationErr) {
+          console.error("Photo validation failed, allowing upload:", validationErr);
         }
-      } catch (validationErr) {
-        console.error("Photo validation failed, allowing upload:", validationErr);
       }
 
       // Update with REAL URL
