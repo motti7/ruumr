@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Profile as ProfileEntity } from "@/entities/all";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
+import { validatePhoto } from "@/functions/validatePhoto";
 import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,7 +182,8 @@ export default function ProfilePage() {
     setUploadingIndex(index);
     try {
         let fileUrl;
-        if (file.type.startsWith('video/')) {
+        let isVideo = file.type.startsWith('video/');
+        if (isVideo) {
             if (file.size > 50 * 1024 * 1024) {
                 throw new Error("Video too large (max 50MB)");
             }
@@ -193,6 +195,20 @@ export default function ProfilePage() {
             fileUrl = file_url;
         }
         
+        // AI moderation: profile photos must contain a real person (skip videos)
+        if (!isVideo) {
+            try {
+                const validation = await validatePhoto({ file_url: fileUrl, photo_type: "person" });
+                if (validation && validation.approved === false) {
+                    toast({ title: t("photo_rejected"), description: validation.reason, variant: "destructive" });
+                    setUploadingIndex(null);
+                    return;
+                }
+            } catch (validationErr) {
+                console.error("Photo validation failed, allowing upload:", validationErr);
+            }
+        }
+
         const newPhotos = [...(formData.photos || Array(6).fill(null))];
         newPhotos[index] = fileUrl;
         setFormData(prev => ({...prev, photos: newPhotos}));
@@ -215,6 +231,19 @@ export default function ProfilePage() {
     try {
         file = await compressImage(file);
         const { file_url } = await UploadFile({ file });
+
+        // AI moderation: apartment photos must show an interior living space
+        try {
+            const validation = await validatePhoto({ file_url, photo_type: "apartment" });
+            if (validation && validation.approved === false) {
+                toast({ title: t("photo_rejected"), description: validation.reason, variant: "destructive" });
+                setUploadingApartmentIndex(null);
+                return;
+            }
+        } catch (validationErr) {
+            console.error("Apartment photo validation failed, allowing upload:", validationErr);
+        }
+
         const newPhotos = [...(formData.apartment_photos || Array(4).fill(null))];
         newPhotos[index] = file_url;
         setFormData(prev => ({...prev, apartment_photos: newPhotos}));

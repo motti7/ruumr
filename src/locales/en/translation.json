@@ -30,6 +30,7 @@
   "still_uploading_try_again": "Still uploading photos... please try again in a moment",
   "fill_name_before_continue": "Please enter your full name before continuing",
   "photo_upload_failed": "Photo upload failed. Please try again.",
+  "photo_rejected": "Photo rejected",
 
   "gender_male": "Male",
   "gender_female": "Female",
