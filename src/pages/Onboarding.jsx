@@ -580,7 +580,7 @@ export default function OnboardingPage() {
       // AI moderation: person photos only (apartment photos are not checked)
       if (!isApartment) {
         try {
-          const validation = await validatePhoto({ file_url, photo_type: "person" });
+          const validation = await validatePhoto({ file_url, photo_type: "person", language: i18n.language });
           if (validation && validation.approved === false) {
             alert(validation.reason || t("photo_rejected"));
             setFormData((prev) => {

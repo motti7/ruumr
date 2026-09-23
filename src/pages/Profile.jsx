@@ -198,7 +198,7 @@ export default function ProfilePage() {
         // AI moderation: profile photos must contain a real person (skip videos)
         if (!isVideo) {
             try {
-                const validation = await validatePhoto({ file_url: fileUrl, photo_type: "person" });
+                const validation = await validatePhoto({ file_url: fileUrl, photo_type: "person", language: i18n.language });
                 if (validation && validation.approved === false) {
                     toast({ title: t("photo_rejected"), description: validation.reason, variant: "destructive" });
                     setUploadingIndex(null);
