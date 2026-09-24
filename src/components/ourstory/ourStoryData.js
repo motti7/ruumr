@@ -17,10 +17,8 @@ export const TRUST_ITEMS = [
 
 export const CHECKLIST_POINTS = ["1", "2", "3", "4", "5"];
 
-// Partners on the journey — accelerator & TV logos. Replace placeholder names/logoUrl with real logos.
+// Institutions accompanying us on the journey — real partner logos.
 export const PARTNERS = [
-  { id: "p1", type: "accelerator", nameKey: "our_story_partner_1_name", logoUrl: null },
-  { id: "p2", type: "accelerator", nameKey: "our_story_partner_2_name", logoUrl: null },
-  { id: "p3", type: "tv", nameKey: "our_story_partner_3_name", logoUrl: null },
-  { id: "p4", type: "tv", nameKey: "our_story_partner_4_name", logoUrl: null },
+  { id: "biu", nameKey: "our_story_partner_biu_name", logoUrl: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/e7c870b07_images.jpeg" },
+  { id: "base44", nameKey: "our_story_partner_base44_name", logoUrl: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/da73081a4_images.png" },
 ];
