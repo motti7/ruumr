@@ -15,7 +15,7 @@ export const TRUST_ITEMS = [
   { id: "tv", type: "tv", labelKey: "our_story_trust_4_label", sourceKey: "our_story_trust_4_source", url: "https://www.youtube.com/" },
 ];
 
-export const CHECKLIST_POINTS = ["1", "2", "3", "4", "5"];
+export const CHECKLIST_POINTS = ["1", "2", "3", "4", "5", "6"];
 
 // Institutions accompanying us on the journey — real partner logos.
 export const PARTNERS = [
