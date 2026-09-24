@@ -473,43 +473,45 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
           <>
                         {/* Right column: info button + tags */}
                         <div className="absolute top-12 right-4 z-20 flex flex-col items-end gap-2">
-                           {profile.team_target &&
-                        <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                   <Users className="w-3 h-3" />
-                                   {1 + (profile.team_members?.length || 0)}/{profile.team_target}
-                               </div>
-                        }
-                           {avgRating !== null &&
-                        <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                   <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
-                                   {avgRating.toFixed(1)}
-                               </div>
-                        }
-                           {plusMeta &&
-                        <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                   <Sparkles className="w-3 h-3 text-[--theme-orange]" />
-                                   {Math.round((Number(plusMeta.score) || 0) * 100)}%
-                               </div>
-                        }
-                           {profile.social_link &&
-                        <a
-                        href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                               {(() => {
-                        const l = String(profile.social_link).toLowerCase();
-                        if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
-                        if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
-                        if (l.includes('tiktok')) return <SiTiktok className="w-5 h-5 text-white" />;
-                        if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
-                        if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
-                        return <LinkIcon className="w-5 h-5 text-white" />;
-                        })()}
-                           </a>
-                        }
+                            {profile.team_target &&
+              <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    {1 + (profile.team_members?.length || 0)}/{profile.team_target}
+                                </div>
+              }
+                            {avgRating !== null &&
+              <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Star className="w-3 h-3" fill="#FF5722" stroke="#FF5722" />
+                                    {avgRating.toFixed(1)}
+                                </div>
+              }
+                            {plusMeta &&
+              <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-[--theme-orange]" />
+                                    {Math.round((Number(plusMeta.score) || 0) * 100)}%
+                                </div>
+              }
                         </div>
+
+                        {profile.social_link &&
+            <a
+              href={profile.social_link.startsWith('http') ? profile.social_link : `https://${profile.social_link}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-32 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+              
+                                {(() => {
+                const l = String(profile.social_link).toLowerCase();
+                if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
+                if (l.includes('instagram')) return <Instagram className="w-5 h-5 text-white" />;
+                if (l.includes('tiktok')) return <SiTiktok className="w-5 h-5 text-white" />;
+                if (l.includes('twitter') || l.includes('x.com')) return <Twitter className="w-5 h-5 text-white" />;
+                if (l.includes('linkedin')) return <Linkedin className="w-5 h-5 text-white" />;
+                return <LinkIcon className="w-5 h-5 text-white" />;
+              })()}
+                            </a>
+            }
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
