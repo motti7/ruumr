@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, X, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
+import EmptyDeckState from "../components/discover/EmptyDeckState";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
@@ -598,16 +599,7 @@ export default function DiscoverPage() {
               </ErrorBoundary>
             ))
           ) : (
-            <motion.div
-              key="no-profiles"
-              initial={{ opacity: 1, scale: 1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center h-full text-center px-8"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">{t("thats_all_for_now")}</h2>
-              <p className="text-gray-500 mb-8 leading-relaxed">{t("no_more_profiles_1")}<br/>{t("no_more_profiles_2")}</p>
-              <Button onClick={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} className="gradient-orange text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform shadow-lg">{t("refresh")}</Button>
-            </motion.div>
+            <EmptyDeckState onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} />
           )}
         </AnimatePresence>
       </div>
