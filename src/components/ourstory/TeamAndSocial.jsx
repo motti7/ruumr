@@ -1,13 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Instagram, Music2 } from "lucide-react";
+import { Instagram, Music2, Facebook } from "lucide-react";
 import Reveal from "./Reveal";
 import SectionHeader from "./SectionHeader";
 
-// TODO: replace with the official Ruumr social links.
 const SOCIALS = [
-  { key: "instagram", url: "https://www.instagram.com/ruumr.app", Icon: Instagram, label: "Instagram" },
-  { key: "tiktok", url: "https://www.tiktok.com/@ruumr", Icon: Music2, label: "TikTok" },
+  { key: "instagram", url: "https://www.instagram.com/ruumrapp/", Icon: Instagram, label: "Instagram" },
+  { key: "tiktok", url: "https://www.tiktok.com/@ruumrapp?_r=1&_t=ZS-9A0Jg8cREkT", Icon: Music2, label: "TikTok" },
+  { key: "facebook", url: "https://www.facebook.com/share/19GE6VEZVT/", Icon: Facebook, label: "Facebook" },
 ];
 
 export default function TeamAndSocial() {
