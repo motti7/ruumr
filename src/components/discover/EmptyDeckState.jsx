@@ -24,33 +24,38 @@ export default function EmptyDeckState({ onRefresh }) {
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         className="relative mb-5"
       >
-        <motion.div
-          animate={{ rotate: [-2, 2, -2] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="h-36 w-36 overflow-hidden rounded-full shadow-xl ring-4 ring-orange-100 sm:h-40 sm:w-40"
-        >
-          <img
-            src={MASCOT_URL}
-            alt="Ruumr mascot"
-            className="h-full w-full object-cover"
-            loading="eager"
+        {/* Blue glitter ring around Joss (app's secondary blue #1c53d4) */}
+        <div className="rounded-full p-[3px] shadow-xl" style={{ background: "conic-gradient(from 0deg, #1c53d4, #4f7ff0, #1c53d4, #1334a8, #1c53d4)" }}>
+          <div className="rounded-full bg-white p-[2px]">
+            <motion.div
+              animate={{ rotate: [-2, 2, -2] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="h-36 w-36 overflow-hidden rounded-full sm:h-40 sm:w-40"
+            >
+              <img
+                src={MASCOT_URL}
+                alt="Joss the Ruumr mascot"
+                className="h-full w-full object-cover"
+                loading="eager"
+              />
+            </motion.div>
+          </div>
+        </div>
+        {/* Blue glitter sparkles around the mascot */}
+        {[
+          { pos: "absolute -right-1 top-2", size: 10, delay: 0.3 },
+          { pos: "absolute -left-2 bottom-3", size: 8, delay: 1 },
+          { pos: "absolute right-3 -bottom-1", size: 6, delay: 1.6 },
+          { pos: "absolute -top-1 left-6", size: 7, delay: 0.8 },
+        ].map((sp, i) => (
+          <motion.span
+            key={i}
+            className={`${sp.pos} block rounded-full`}
+            style={{ width: sp.size, height: sp.size, backgroundColor: "#4f7ff0", boxShadow: "0 0 6px 1px rgba(79,127,240,0.8)" }}
+            animate={{ opacity: [0, 1, 0], scale: [0.4, 1.1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, delay: sp.delay }}
           />
-        </motion.div>
-        {/* Playful floating sparkles around the mascot */}
-        <motion.span
-          className="absolute -right-1 top-2 text-2xl"
-          animate={{ opacity: [0, 1, 0], scale: [0.6, 1, 0.6] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-        >
-          ✨
-        </motion.span>
-        <motion.span
-          className="absolute -left-2 bottom-3 text-xl"
-          animate={{ opacity: [0, 1, 0], scale: [0.6, 1, 0.6] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-        >
-          ✨
-        </motion.span>
+        ))}
       </motion.div>
 
       <motion.h2
