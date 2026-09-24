@@ -33,13 +33,13 @@ function SuccessCard({ story, index }) {
       ref={ref}
       variants={cardVar(index)}
       whileHover={{ y: -8, transition: { duration: 0.25 } }}
-      className="relative bg-gradient-to-br from-white to-orange-50/40 dark:from-gray-800 dark:to-gray-800/60 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-xl"
+      className="relative bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-800 dark:to-gray-800/60 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-xl"
     >
-      <div className="absolute top-0 inset-x-0 h-1.5 gradient-orange rounded-b-full opacity-90" />
-      <Quote className="w-20 h-20 text-orange-100/70 dark:text-orange-500/10 absolute -top-3 -end-3 rotate-180" aria-hidden="true" />
+      <div className="absolute top-0 inset-x-0 h-1.5 rounded-b-full opacity-90" style={{ background: "linear-gradient(135deg, var(--theme-blue), #4f7df0)" }} />
+      <Quote className="w-20 h-20 text-blue-100/70 dark:text-blue-500/10 absolute -top-3 -end-3 rotate-180" aria-hidden="true" />
       <motion.div style={{ y: drift }} className="relative">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 rounded-full gradient-orange text-white flex items-center justify-center text-lg font-bold flex-shrink-0 ring-2 ring-orange-100 dark:ring-orange-500/20 shadow-sm">
+          <div className="w-12 h-12 rounded-full text-white flex items-center justify-center text-lg font-bold flex-shrink-0 ring-2 ring-blue-100 dark:ring-blue-500/20 shadow-sm" style={{ backgroundColor: "var(--theme-blue)" }}>
             {t(story.nameKey).charAt(0)}
           </div>
           <div className="min-w-0">
@@ -49,7 +49,7 @@ function SuccessCard({ story, index }) {
               {t(story.cityKey)}
             </p>
           </div>
-          <Heart className="w-4 h-4 text-[--theme-orange] ms-auto" fill="currentColor" />
+          <Heart className="w-4 h-4 ms-auto" fill="currentColor" style={{ color: "var(--theme-blue)" }} />
         </div>
         <blockquote className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed bg-white/60 dark:bg-gray-900/30 rounded-xl p-3">
           “{t(story.quoteKey)}”

@@ -6,7 +6,6 @@ import { createPageUrl } from "@/utils";
 import FoundersPanel from "@/components/ourstory/FoundersPanel";
 import SuccessStories from "@/components/ourstory/SuccessStories";
 import Partners from "@/components/ourstory/Partners";
-import TrustSignals from "@/components/ourstory/TrustSignals";
 import RoommateChecklist from "@/components/ourstory/RoommateChecklist";
 import TeamAndSocial from "@/components/ourstory/TeamAndSocial";
 
@@ -18,7 +17,6 @@ export default function OurStory() {
       <FoundersPanel />
       <Partners />
       <SuccessStories />
-      <TrustSignals />
       <RoommateChecklist />
       <TeamAndSocial />
       <motion.button
