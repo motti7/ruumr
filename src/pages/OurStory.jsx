@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
-import StoryHero from "@/components/ourstory/StoryHero";
-import FoundersStory from "@/components/ourstory/FoundersStory";
+import FoundersPanel from "@/components/ourstory/FoundersPanel";
 import SuccessStories from "@/components/ourstory/SuccessStories";
 import TrustSignals from "@/components/ourstory/TrustSignals";
 import RoommateChecklist from "@/components/ourstory/RoommateChecklist";
@@ -15,8 +14,7 @@ export default function OurStory() {
   const navigate = useNavigate();
   return (
     <div className="px-4 py-4 space-y-9 pb-10">
-      <StoryHero />
-      <FoundersStory />
+      <FoundersPanel />
       <SuccessStories />
       <TrustSignals />
       <RoommateChecklist />
