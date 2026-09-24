@@ -16,3 +16,11 @@ export const TRUST_ITEMS = [
 ];
 
 export const CHECKLIST_POINTS = ["1", "2", "3", "4", "5"];
+
+// Partners on the journey — accelerator & TV logos. Replace placeholder names/logoUrl with real logos.
+export const PARTNERS = [
+  { id: "p1", type: "accelerator", nameKey: "our_story_partner_1_name", logoUrl: null },
+  { id: "p2", type: "accelerator", nameKey: "our_story_partner_2_name", logoUrl: null },
+  { id: "p3", type: "tv", nameKey: "our_story_partner_3_name", logoUrl: null },
+  { id: "p4", type: "tv", nameKey: "our_story_partner_4_name", logoUrl: null },
+];

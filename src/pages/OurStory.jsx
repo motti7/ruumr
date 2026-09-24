@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import FoundersPanel from "@/components/ourstory/FoundersPanel";
 import SuccessStories from "@/components/ourstory/SuccessStories";
+import Partners from "@/components/ourstory/Partners";
 import TrustSignals from "@/components/ourstory/TrustSignals";
 import RoommateChecklist from "@/components/ourstory/RoommateChecklist";
 import TeamAndSocial from "@/components/ourstory/TeamAndSocial";
@@ -15,6 +16,7 @@ export default function OurStory() {
   return (
     <div className="px-4 py-4 space-y-9 pb-10">
       <FoundersPanel />
+      <Partners />
       <SuccessStories />
       <TrustSignals />
       <RoommateChecklist />
