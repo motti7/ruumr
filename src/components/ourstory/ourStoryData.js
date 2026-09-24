@@ -4,7 +4,7 @@
 export const SUCCESS_STORIES = [
   { id: "1", nameKey: "our_story_success_1_name", quoteKey: "our_story_success_1_quote", cityKey: "our_story_success_1_city" },
   { id: "2", nameKey: "our_story_success_2_name", quoteKey: "our_story_success_2_quote", cityKey: "our_story_success_2_city" },
-  { id: "3", nameKey: "our_story_success_3_name", quoteKey: "our_story_success_3_quote", cityKey: "our_story_success_3_city" },
+  { id: "3", nameKey: "our_story_success_3_name", quoteKey: "our_story_success_3_quote", cityKey: "our_story_success_3_city", photoUrl: "https://media.base44.com/images/public/68c919adff6ac6fafb51bed6/808344f01_63cbb8e3-70f7-424a-a806-40613d0ca635.jpeg" },
 ];
 
 // type drives the icon. tv renders a "watch on TV" CTA linking to url.

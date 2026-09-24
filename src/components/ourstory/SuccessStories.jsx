@@ -39,9 +39,18 @@ function SuccessCard({ story, index }) {
       <Quote className="w-20 h-20 text-blue-100/70 dark:text-blue-500/10 absolute -top-3 -end-3 rotate-180" aria-hidden="true" />
       <motion.div style={{ y: drift }} className="relative">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 rounded-full text-white flex items-center justify-center text-lg font-bold flex-shrink-0 ring-2 ring-blue-100 dark:ring-blue-500/20 shadow-sm" style={{ backgroundColor: "var(--theme-blue)" }}>
-            {t(story.nameKey).charAt(0)}
-          </div>
+          {story.photoUrl ? (
+            <img
+              src={story.photoUrl}
+              alt={t(story.nameKey)}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0 ring-2 ring-blue-100 dark:ring-blue-500/20 shadow-sm"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full text-white flex items-center justify-center text-lg font-bold flex-shrink-0 ring-2 ring-blue-100 dark:ring-blue-500/20 shadow-sm" style={{ backgroundColor: "var(--theme-blue)" }}>
+              {t(story.nameKey).charAt(0)}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="font-bold text-gray-900 dark:text-white text-sm truncate">{t(story.nameKey)}</p>
             <p className="flex items-center gap-1 text-xs text-gray-400">
