@@ -10,10 +10,17 @@ const container = {
   show: { transition: { staggerChildren: 0.15 } },
 };
 
-const cardVar = {
-  hidden: { opacity: 0, y: 48, scale: 0.94 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-};
+const cardVar = (i) => ({
+  hidden: { opacity: 0, y: 56, x: i % 2 === 0 ? -32 : 32, scale: 0.9, rotate: i % 2 === 0 ? -2.5 : 2.5 },
+  show: {
+    opacity: 1,
+    y: 0,
+    x: 0,
+    scale: 1,
+    rotate: 0,
+    transition: { type: "spring", stiffness: 130, damping: 15, mass: 0.7 },
+  },
+});
 
 export default function SuccessStories() {
   const { t } = useTranslation();
@@ -27,10 +34,10 @@ export default function SuccessStories() {
         viewport={{ once: true, amount: 0.15 }}
         className="space-y-3"
       >
-        {SUCCESS_STORIES.map((s) => (
+        {SUCCESS_STORIES.map((s, i) => (
           <motion.figure
             key={s.id}
-            variants={cardVar}
+            variants={cardVar(i)}
             whileHover={{ y: -6, transition: { duration: 0.2 } }}
             className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden transition-shadow hover:shadow-md"
           >
