@@ -24,8 +24,8 @@ export default function EmptyDeckState({ onRefresh }) {
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         className="relative mb-5"
       >
-        {/* Blue glitter ring around Joss (app's secondary blue #1c53d4) */}
-        <div className="rounded-full p-[3px] shadow-xl" style={{ background: "conic-gradient(from 0deg, #1c53d4, #4f7ff0, #1c53d4, #1334a8, #1c53d4)" }}>
+        {/* Soft orange ring around Joss (app's theme orange) */}
+        <div className="rounded-full p-[3px] shadow-xl" style={{ background: "conic-gradient(from 0deg, #FF7043, #FFAB91, #FF5722, #FFAB91, #FF7043)" }}>
           <div className="rounded-full bg-white p-[2px]">
             <motion.div
               animate={{ rotate: [-2, 2, -2] }}
@@ -41,7 +41,7 @@ export default function EmptyDeckState({ onRefresh }) {
             </motion.div>
           </div>
         </div>
-        {/* Blue glitter sparkles around the mascot */}
+        {/* Soft orange sparkles around the mascot */}
         {[
           { pos: "absolute -right-1 top-2", size: 10, delay: 0.3 },
           { pos: "absolute -left-2 bottom-3", size: 8, delay: 1 },
@@ -51,7 +51,7 @@ export default function EmptyDeckState({ onRefresh }) {
           <motion.span
             key={i}
             className={`${sp.pos} block rounded-full`}
-            style={{ width: sp.size, height: sp.size, backgroundColor: "#4f7ff0", boxShadow: "0 0 6px 1px rgba(79,127,240,0.8)" }}
+            style={{ width: sp.size, height: sp.size, backgroundColor: "#FF8A65", boxShadow: "0 0 6px 1px rgba(255,138,101,0.8)" }}
             animate={{ opacity: [0, 1, 0], scale: [0.4, 1.1, 0.4] }}
             transition={{ duration: 2, repeat: Infinity, delay: sp.delay }}
           />
