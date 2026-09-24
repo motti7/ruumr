@@ -2,7 +2,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
-import SectionHeader from "./SectionHeader";
 import { CHECKLIST_POINTS } from "./ourStoryData";
 
 const JOSS_IMAGE =
@@ -12,28 +11,23 @@ export default function RoommateChecklist() {
   const { t } = useTranslation();
   return (
     <section>
-      <SectionHeader title={t("our_story_checklist_title")} subtitle={t("our_story_checklist_subtitle")} />
-
-      {/* Joss introduces his tips — mascot + speech bubble */}
       <Reveal>
-        <div className="flex items-end gap-3 mb-4">
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
+        <div className="flex items-center gap-3 mb-4">
+          <motion.img
+            src={JOSS_IMAGE}
+            alt="Joss"
+            className="flex-shrink-0 w-16 h-16 rounded-2xl object-cover shadow-sm ring-2 ring-orange-200"
+            animate={{ y: [0, -4, 0] }}
             transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative flex-shrink-0 w-[84px] h-[84px]"
-          >
-            <div className="w-full h-full rounded-2xl overflow-hidden shadow-md ring-2 ring-orange-200 bg-orange-50">
-              <img src={JOSS_IMAGE} alt={t("our_story_checklist_joss_name")} className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-white text-[10px] font-extrabold text-[--theme-orange] px-2 py-0.5 rounded-full shadow-sm border border-orange-100 whitespace-nowrap">
-              {t("our_story_checklist_joss_name")}
-            </span>
-          </motion.div>
-
-          <div className="relative flex-1 bg-white dark:bg-gray-800 rounded-2xl rounded-br-sm p-3.5 shadow-sm border border-gray-100 dark:border-gray-700">
-            <span className="absolute -bottom-2 right-3 w-3.5 h-3.5 bg-white dark:bg-gray-800 border-b border-r border-gray-100 dark:border-gray-700 rotate-45" />
-            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-relaxed">
-              {t("our_story_checklist_joss_intro")}
+            loading="lazy"
+          />
+          <div>
+            <div className="w-8 h-1.5 rounded-full bg-[--theme-orange] mb-2" />
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white leading-tight">
+              {t("our_story_checklist_title")}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              {t("our_story_checklist_subtitle")}
             </p>
           </div>
         </div>
