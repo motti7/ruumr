@@ -21,7 +21,10 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
   const handleConfirmDeletion = async () => {
     setIsDeleting(true);
     try {
-      await base44.functions.invoke("deleteAccount", {});
+      const deletion = await base44.functions.invoke("deleteAccount", {});
+      if (deletion?.data?.success !== true) {
+        throw new Error("Account deletion was not confirmed");
+      }
       showToast(t("account_deleted_success"), "success");
       setTimeout(async () => {
         await clearClientUserData();
