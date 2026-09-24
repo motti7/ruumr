@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Instagram, Music2, Facebook } from "lucide-react";
+import { Instagram, Music2, Facebook, Linkedin } from "lucide-react";
 import Reveal from "./Reveal";
 import SectionHeader from "./SectionHeader";
 
@@ -8,6 +8,7 @@ const SOCIALS = [
   { key: "instagram", url: "https://www.instagram.com/ruumrapp/", Icon: Instagram, label: "Instagram" },
   { key: "tiktok", url: "https://www.tiktok.com/@ruumrapp?_r=1&_t=ZS-9A0Jg8cREkT", Icon: Music2, label: "TikTok" },
   { key: "facebook", url: "https://www.facebook.com/share/19GE6VEZVT/", Icon: Facebook, label: "Facebook" },
+  { key: "linkedin", url: "https://www.linkedin.com/company/ruumrapp/posts/?viewAsMember=true", Icon: Linkedin, label: "LinkedIn" },
 ];
 
 export default function TeamAndSocial() {
