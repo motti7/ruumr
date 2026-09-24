@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Frown, Lightbulb } from "lucide-react";
 import Reveal from "./Reveal";
 
 const PORTRAITS = [
@@ -54,33 +53,14 @@ export default function FoundersPanel() {
             <p className="text-white/85 text-[14px] leading-relaxed max-w-xs mx-auto">{t("our_story_hero_tagline")}</p>
           </div>
 
-          {/* founders story: the app story through the problem & solution we suffered from */}
+          {/* the story — one flowing narrative, not a problem/solution pitch */}
           <div className="border-t border-white/15 pt-4">
             <span className="inline-block text-[11px] font-bold tracking-wider uppercase bg-white/20 rounded-full px-3 py-1 mb-2">
               {t("our_story_origin_eyebrow")}
             </span>
-            <h2 className="text-xl font-extrabold leading-tight mb-2">{t("our_story_origin_title")}</h2>
-            <p className="text-white/85 text-[14px] leading-relaxed mb-4">{t("our_story_origin_text")}</p>
-
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-[--theme-orange] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Frown className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white mb-0.5 text-sm">{t("our_story_problem_title")}</h3>
-                <p className="text-[13px] text-white/80 leading-relaxed">{t("our_story_problem_text")}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-[--theme-orange] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Lightbulb className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white mb-0.5 text-sm">{t("our_story_solution_title")}</h3>
-                <p className="text-[13px] text-white/80 leading-relaxed">{t("our_story_solution_text")}</p>
-              </div>
-            </div>
+            <h2 className="text-xl font-extrabold leading-tight mb-3">{t("our_story_origin_title")}</h2>
+            <p className="text-white/90 text-[14px] leading-relaxed mb-3">{t("our_story_origin_text")}</p>
+            <p className="text-white/85 text-[14px] leading-relaxed">{t("our_story_origin_text_2")}</p>
           </div>
         </div>
       </section>
