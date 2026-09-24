@@ -16,11 +16,24 @@ const cardVar = (i) => ({
   },
 });
 
+function renderPartnerTitle(t) {
+  const raw = t("our_story_partners_title");
+  const idx = raw.indexOf("Ruumr");
+  if (idx === -1) return raw;
+  return (
+    <>
+      {raw.slice(0, idx)}
+      <span className="text-[--theme-orange]">Ruumr</span>
+      {raw.slice(idx + 5)}
+    </>
+  );
+}
+
 export default function Partners() {
   const { t } = useTranslation();
   return (
     <section className="pt-6">
-      <SectionHeader title={t("our_story_partners_title")} subtitle={t("our_story_partners_subtitle")} />
+      <SectionHeader title={renderPartnerTitle(t)} subtitle={t("our_story_partners_subtitle")} />
       <motion.div
         variants={container}
         initial="hidden"
