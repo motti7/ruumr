@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import StoryHero from "@/components/ourstory/StoryHero";
-import ProblemSolution from "@/components/ourstory/ProblemSolution";
+import FoundersStory from "@/components/ourstory/FoundersStory";
 import SuccessStories from "@/components/ourstory/SuccessStories";
 import TrustSignals from "@/components/ourstory/TrustSignals";
 import RoommateChecklist from "@/components/ourstory/RoommateChecklist";
@@ -16,7 +16,7 @@ export default function OurStory() {
   return (
     <div className="px-4 py-4 space-y-9 pb-10">
       <StoryHero />
-      <ProblemSolution />
+      <FoundersStory />
       <SuccessStories />
       <TrustSignals />
       <RoommateChecklist />
