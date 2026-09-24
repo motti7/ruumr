@@ -41,7 +41,7 @@ export default function WriteReviewModal({ reviewedUserId, reviewedName, onClose
           animate={{ y: 0 }}
           exit={{ y: 300 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white rounded-t-3xl w-full max-w-md p-6 border-t-4 border-[--theme-orange]"
+          className="bg-white rounded-t-3xl w-full max-w-md p-6 border-t-4 border-[--theme-blue]"
           style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
           dir={i18n.dir()}
           onClick={(e) => e.stopPropagation()}
