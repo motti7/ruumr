@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import FoundersPanel from "@/components/ourstory/FoundersPanel";
 import SuccessStories from "@/components/ourstory/SuccessStories";
+import TvInterview from "@/components/ourstory/TvInterview";
 import Partners from "@/components/ourstory/Partners";
 import RoommateChecklist from "@/components/ourstory/RoommateChecklist";
 import TeamAndSocial from "@/components/ourstory/TeamAndSocial";
@@ -17,6 +18,7 @@ export default function OurStory() {
       <FoundersPanel />
       <Partners />
       <SuccessStories />
+      <TvInterview />
       <RoommateChecklist />
       <TeamAndSocial />
       <motion.button
