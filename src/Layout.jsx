@@ -1,3 +1,4 @@
+import { safetyRequest, blockedUserIds } from '@/api/userSafety';
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -184,11 +185,12 @@ export default function Layout({ children, currentPageName }) {
           const [likesSwipes, mySwipes, allMessages, allProfiles] = await Promise.all([
             b44.entities.Swipe.filter({ swiped_id: user.id, action: 'like' }),
             b44.entities.Swipe.filter({ swiper_id: user.id }),
-            b44.entities.Message.filter({ is_read: false }),
+            safetyRequest('unread').then(data => data.records),
             b44.entities.Profile.list('-created_date', 500),
           ]);
           // Only count likes from users who still have a visible profile
-          const visibleUserIds = new Set(allProfiles.filter(p => p.is_visible !== false).map(p => p.user_id));
+          const blocked = await blockedUserIds();
+          const visibleUserIds = new Set(allProfiles.filter(p => p.is_visible !== false && !blocked.has(p.user_id)).map(p => p.user_id));
           const alreadySwiped = new Set(mySwipes.map(s => s.swiped_id));
           const pendingLikerIds = likesSwipes
             .map(l => l.swiper_id)

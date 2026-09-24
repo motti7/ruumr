@@ -1,3 +1,4 @@
+import { blockedUserIds, safetyRequest } from '@/api/userSafety';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Match, Profile } from "@/entities/all";
@@ -49,7 +50,8 @@ export default function MatchesPage() {
 
       const userMatches = await Match.filter({ user1_id: userData.id, status: 'active' });
       const userMatches2 = await Match.filter({ user2_id: userData.id, status: 'active' });
-      const allMatches = [...userMatches, ...userMatches2];
+      const blocked = await blockedUserIds();
+      const allMatches = [...userMatches, ...userMatches2].filter(m => !blocked.has(m.user1_id) && !blocked.has(m.user2_id));
 
       if (allMatches.length === 0) {
         setMatches([]);
@@ -81,7 +83,7 @@ export default function MatchesPage() {
           const otherUserId = match.user1_id === userData.id ? match.user2_id : match.user1_id;
           let unreadCount = 0;
           try {
-            const allMessages = await base44.entities.Message.filter({ match_id: match.id });
+            const allMessages = await safetyRequest('messages', { match_id: match.id }).then(data => data.records);
             unreadCount = allMessages.filter(m => m.sender_id !== userData.id && !m.is_read).length;
           } catch (e) {
             console.warn('Failed to load messages for match', match.id, e);
@@ -118,6 +120,13 @@ export default function MatchesPage() {
     setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (location.state?.blockResult) {
+      toast({ title: t(location.state.blockResult === 'pending' ? 'safety_block_pending' : 'safety_block_done') });
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state?.blockResult]);
+
   // Load matches on mount AND when location changes (back/forward navigation)
   useEffect(() => {
     retryRef.current = 0;
@@ -131,7 +140,7 @@ export default function MatchesPage() {
   // Real-time subscription: reload when a new match is created
   useEffect(() => {
     const unsub = base44.entities.Match.subscribe((event) => {
-      if (event.type === 'create') {
+      if (['create', 'update', 'delete'].includes(event.type)) {
         loadMatches();
       }
     });

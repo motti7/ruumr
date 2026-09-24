@@ -1,3 +1,5 @@
+import ReportProfileButton from '@/components/safety/ReportProfileButton';
+import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Profile, Swipe, Match } from "@/entities/all";
@@ -124,6 +126,10 @@ export default function ProfileViewPage() {
       // Always load current user so swipe actions always work
       const user = await User.me();
       setCurrentUser(user);
+      if ((await blockedUserIds()).has(userId)) {
+        navigate(createPageUrl('Discover'), { replace: true });
+        return;
+      }
 
       const [profilesResult, myProfilesResult] = await Promise.all([
         Profile.filter({ user_id: userId }),
@@ -361,7 +367,8 @@ export default function ProfileViewPage() {
         >
           <ArrowRight className="w-6 h-6 text-gray-600" />
         </button>
-        <h2 className="font-bold text-gray-900 text-lg">{profile.name}</h2>
+        <h2 className="font-bold text-gray-900 text-lg flex-1">{profile.name}</h2>
+        {currentUser?.id !== profile.user_id && <ReportProfileButton key={profile.id} profileId={profile.id} />}
       </div>
 
       <div className="relative">
@@ -617,3 +624,4 @@ export default function ProfileViewPage() {
     </div>
   );
 }
+

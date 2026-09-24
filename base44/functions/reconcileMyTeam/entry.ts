@@ -1,3 +1,4 @@
+import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 async function getProfile(sr, userId) {
@@ -30,6 +31,7 @@ async function rosterUserIds(sr, selfId, profile) {
 }
 
 async function ensureMatch(sr, uc, selfId, a, b, profA, profB) {
+    if (await isBlocked(sr, a, b)) return null;
     // Look for an existing match between the pair in both directions. A mutual
     // match created by handleSwipe is written through the user-context client and
     // is not always visible to the asServiceRole view — so a service-role-only
@@ -85,6 +87,7 @@ async function writeRoster(sr, uc, selfId, memberIds) {
             if (other === id || linked.has(String(other))) continue;
             const oProf = profiles[other];
             const match = await ensureMatch(sr, uc, selfId, id, other, prof, oProf);
+            if (!match) continue;
             members.push({
                 user_id: other,
                 match_id: match.id,
@@ -134,3 +137,4 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
+

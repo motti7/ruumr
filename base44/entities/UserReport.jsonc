@@ -1,0 +1,70 @@
+{
+  "name": "UserReport",
+  "type": "object",
+  "properties": {
+    "reporter_id": {
+      "type": "string"
+    },
+    "reported_user_id": {
+      "type": "string"
+    },
+    "profile_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "harassment",
+        "fake_profile",
+        "inappropriate_content",
+        "spam",
+        "other"
+      ]
+    },
+    "details": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "profile_snapshot": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_review",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "new"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reporter_id",
+    "reported_user_id",
+    "profile_id",
+    "reason"
+  ],
+  "rls": {
+    "create": false,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
+

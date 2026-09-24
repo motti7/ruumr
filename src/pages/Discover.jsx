@@ -1,3 +1,4 @@
+import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -139,7 +140,8 @@ export default function DiscoverPage() {
         const simulatorState = getSimulatorBackendState();
         allProfiles = simulatorState?.collections?.Profile ? [...simulatorState.collections.Profile] : [];
       }
-      allProfiles = sortProfilesByCreatedDateDesc(allProfiles);
+      const blocked = await blockedUserIds();
+      allProfiles = sortProfilesByCreatedDateDesc(allProfiles.filter(p => !blocked.has(p.user_id)));
 
       let userSwipes = [];
       try {

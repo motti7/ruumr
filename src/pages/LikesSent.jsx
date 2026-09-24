@@ -1,3 +1,4 @@
+import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Profile, Swipe } from "@/entities/all";
@@ -25,8 +26,9 @@ export default function LikesSentPage() {
                     Profile.list("-created_date", 500),
                 ]);
 
+                const blocked = await blockedUserIds();
                 const swipedIds = new Set(myLikes.map(l => l.swiped_id));
-                const matched = allProfiles.filter(p => swipedIds.has(p.user_id));
+                const matched = allProfiles.filter(p => !blocked.has(p.user_id) && swipedIds.has(p.user_id));
                 setProfiles(matched);
             } catch (e) {
                 console.error(e);

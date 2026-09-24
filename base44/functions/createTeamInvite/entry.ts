@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { isBlocked } from '../../shared/userSafety.ts';
 
 const APP_URL = 'https://app.ruumrapp.com';
 const TEAM_URL = `${APP_URL}/GroupTracker`;
@@ -138,6 +139,9 @@ Deno.serve(async (req) => {
         }
 
         const existingUser = await findUserByEmail(sr, inviteeEmail);
+        if (existingUser && await isBlocked(sr, inviter.id, existingUser.id)) {
+            return Response.json({ error: 'Cannot contact this user' }, { status: 403 });
+        }
 
         if (existingUser && existingUser.id !== inviter.id) {
             // Already on the inviter's team → nothing to request.
@@ -235,3 +239,4 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
+

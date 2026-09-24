@@ -1,3 +1,4 @@
+import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const APP_URL = 'https://app.ruumrapp.com';
@@ -61,6 +62,7 @@ async function rosterUserIds(sr, selfId, profile) {
 }
 
 async function ensureMatch(sr, a, b, profA, profB) {
+    if (await isBlocked(sr, a, b)) return null;
     const f1 = await sr.Match.filter({ user1_id: a, user2_id: b });
     const f2 = await sr.Match.filter({ user1_id: b, user2_id: a });
     const existing = f1[0] || f2[0];
@@ -90,6 +92,7 @@ async function writeRoster(sr, memberIds) {
             if (other === id) continue;
             const oProf = profiles[other];
             const match = await ensureMatch(sr, id, other, prof, oProf);
+            if (!match) continue;
             matchEntries.push({
                 user_id: other,
                 match_id: match.id,
@@ -157,3 +160,4 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
+

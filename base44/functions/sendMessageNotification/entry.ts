@@ -1,3 +1,4 @@
+import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { sendServerPush } from '../../shared/serverPush.ts';
 
@@ -36,6 +37,9 @@ Deno.serve(async (req) => {
         }
 
         const match = matches[0];
+        if (match.status === 'blocked' || await isBlocked(base44.asServiceRole.entities, match.user1_id, match.user2_id)) {
+            return Response.json({ success: true, skipped: true });
+        }
         const receiver_id = match.user1_id === sender_id ? match.user2_id : match.user1_id;
 
         // Denormalize the match participants onto the messages so the Message

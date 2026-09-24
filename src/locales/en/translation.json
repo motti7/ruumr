@@ -1,31 +1,24 @@
 {
   "language_toggle_aria": "Switch language",
-
   "nav_discover": "Discover",
   "nav_matches": "Matches",
   "nav_likes": "Likes",
   "nav_team": "Team",
-
   "filters": "Filters",
   "settings": "Settings",
   "my_profile": "My profile",
-
   "new_match_notification": "You have a new match! - ruumr",
-
   "photo_error_title": "Oops! There's a problem with your photos",
   "photo_error_body": "Some of your profile photos didn't upload properly and can't be displayed. Please re-upload them so everyone can see you.",
   "photo_error_fix_button": "Fix photos",
   "remind_me_later": "Remind me later",
-
   "team_request_one": "You have a new team request",
   "team_request_many": "You have {{count}} new team requests",
   "team_request_tap_hint": "Tap to approve or decline",
   "team_request_view": "View",
-
   "loading": "Loading...",
   "continue": "Continue",
   "optional": "(Optional)",
-
   "wait_for_uploads": "Please wait for the photo uploads to finish",
   "still_uploading_try_again": "Still uploading photos... please try again in a moment",
   "fill_name_before_continue": "Please enter your full name before continuing",
@@ -33,34 +26,27 @@
   "photo_rejected": "Photo rejected",
   "photo_not_displayable": "Image can't be displayed",
   "photo_not_displayable_desc": "The uploaded file isn't a valid image that can be shown in the app. Please try uploading a different photo in JPG or PNG format.",
-
   "gender_male": "Male",
   "gender_female": "Female",
   "gender_other": "Other",
-
   "vibe_lively": "Lively & social",
   "vibe_balanced": "Balanced",
   "vibe_quiet": "Quiet & homey",
-
   "looking_for_male": "Male",
   "looking_for_female": "Female",
   "looking_for_any": "Any",
-
   "religion_secular": "Secular",
   "religion_traditional": "Traditional",
   "religion_national_religious": "National-religious",
   "religion_religious": "Religious",
   "religion_haredi": "Haredi",
-
   "pref_for": "For",
   "pref_against": "Against",
   "pref_flexible": "Flexible",
-
   "pet_none": "None",
   "pet_dog": "Dog",
   "pet_cat": "Cat",
   "pet_other": "Other",
-
   "onb_step1_title": "Let's get to know you!",
   "onb_step1_subtitle": "Tell us a little about yourself",
   "onb_name_label": "Name",
@@ -69,7 +55,6 @@
   "onb_age_label": "Age",
   "onb_gender_label": "Gender",
   "onb_vibe_label": "What's your vibe?",
-
   "onb_seeking_apartment_title": "Looking for an apartment",
   "onb_seeking_apartment_desc": "I don't have an apartment yet — looking to join one or find a place together",
   "onb_has_apartment_title": "I have an apartment",
@@ -77,7 +62,6 @@
   "onb_where_label": "Where?",
   "onb_multiple_cities_hint": "You can select multiple cities",
   "onb_budget_label": "Budget per roommate",
-
   "onb_step3_title": "Preferences",
   "onb_looking_for_label": "I'm looking for",
   "onb_religion_label": "Religious affiliation",
@@ -85,24 +69,20 @@
   "onb_shabbat_label": "Keeps Shabbat",
   "onb_pet_label": "A pet joining you?",
   "onb_pet_other_placeholder": "Which animal?",
-
   "onb_step4_title": "Apartment details",
   "onb_your_apartment": "Your apartment",
   "onb_existing_roommates": "Existing roommates",
   "onb_total_rent": "Rent (total)",
   "onb_apartment_photos_label": "Photos (minimum 3)",
   "onb_apartment_photo_alt": "Apartment {{number}}",
-
   "onb_step5_title": "Interests",
   "onb_interests_subtitle": "Pick what interests you",
   "onb_about_me_label": "About me",
   "onb_about_me_placeholder": "Hobbies, occupation...",
   "onb_looking_for_desc_label": "What I'm looking for",
   "onb_looking_for_desc_placeholder": "What kind of roommate...",
-
   "onb_step6_title": "My photos",
   "onb_photos_subtitle": "A picture is worth a thousand words (and 2 photos are worth a match!)",
-
   "onb_profile_ready": "Your profile is ready!",
   "onb_social_link_label": "Social media link",
   "onb_paste_link_placeholder": "Paste a link here",
@@ -114,7 +94,6 @@
   "onb_verify_desc": "Verified profiles get 3x more interest! The process takes less than 2 minutes.",
   "onb_verify_now_button": "Verify now (recommended)",
   "onb_maybe_later": "Maybe later",
-
   "interest_gym": "Gym",
   "interest_tennis": "Tennis",
   "interest_pilates": "Pilates / Yoga",
@@ -136,55 +115,46 @@
   "interest_fashion": "Fashion",
   "interest_clean_home": "A tidy home",
   "interest_morning_coffee": "Morning coffee",
-
   "hp_placeholder_preference": "Select a preference",
   "hp_placeholder_level": "Select a level",
-
   "hp_smoking_label": "Smoking in the apartment",
   "hp_smoking_against": "No, preferably not",
   "hp_smoking_flow": "Flexible",
   "hp_smoking_for": "Yes, no problem",
-
   "hp_pet_label": "Pets in the apartment",
   "hp_pet_against": "Preferably not",
   "hp_pet_flow": "Flexible",
   "hp_pet_for": "Happily",
-
   "hp_cleanliness_label": "Cleanliness & order",
   "hp_cleanliness_1": "Fine with mess",
   "hp_cleanliness_2": "Pretty relaxed",
   "hp_cleanliness_3": "Balanced",
   "hp_cleanliness_4": "Tidy",
   "hp_cleanliness_5": "Meticulous",
-
   "hp_shopping_label": "Household shopping",
   "hp_shopping_1": "Spontaneous",
   "hp_shopping_2": "Plans a little",
   "hp_shopping_3": "Balanced",
   "hp_shopping_4": "Likes to plan",
   "hp_shopping_5": "Very organized",
-
   "hp_ac_label": "AC temperature",
   "hp_ac_1": "Cool",
   "hp_ac_2": "Leans cool",
   "hp_ac_3": "Balanced",
   "hp_ac_4": "Leans warm",
   "hp_ac_5": "Warm",
-
   "hp_dishes_label": "Dishes in the sink",
   "hp_dishes_1": "No big deal",
   "hp_dishes_2": "Once in a while",
   "hp_dishes_3": "Balanced",
   "hp_dishes_4": "Prefer to wash quickly",
   "hp_dishes_5": "Right away",
-
   "hp_friends_label": "Friends & parties",
   "hp_friends_1": "Quiet at home",
   "hp_friends_2": "Friends now and then",
   "hp_friends_3": "Balanced",
   "hp_friends_4": "Loves hosting",
   "hp_friends_5": "Parties & gatherings",
-
   "photos_failed_retry": "Some photos didn't upload properly. Please try uploading them again.",
   "profile_saved": "Profile saved successfully ✓",
   "profile_save_error": "Error saving profile. Please try again.",
@@ -240,7 +210,6 @@
   "area_shfela": "Shfela",
   "area_jerusalem": "Jerusalem area",
   "preferred_cities": "Preferred cities",
-
   "swipe_save_failed": "We couldn't save your choice. The profile was restored so you can try again.",
   "searching_roommates": "Finding roommates...",
   "just_a_second": "This will only take a second",
@@ -252,7 +221,6 @@
   "no_more_profiles_1": "You've gone through all the profiles.",
   "no_more_profiles_2": "Try changing your search preferences or come back later.",
   "refresh": "Refresh",
-
   "full_details_of": "Full details of {{name}}",
   "close_details": "Close details",
   "match_percent": "{{percent}}% match",
@@ -283,7 +251,6 @@
   "unmute": "Unmute",
   "more_details": "More details",
   "swipe_for_more": "Swipe up for more",
-
   "close_filters": "Close filters",
   "desired_area": "Desired area",
   "type_city": "Type a city...",
@@ -294,7 +261,6 @@
   "age_range": "Age range:",
   "reset": "Reset",
   "apply_filters": "Apply filters",
-
   "placeholder_name_age": "Roommate, 24",
   "placeholder_location": "Tel Aviv · Center",
   "placeholder_blurb_1": "Looking for an apartment in the center",
@@ -303,7 +269,6 @@
   "complete_profile_desc": "To see real roommates and start swiping, you first need to create a profile.",
   "complete_profile": "Complete profile",
   "you_and_x_matched": "You and {{name}} matched!",
-
   "matches_load_error": "Error loading matches. Please try again.",
   "the_roommate": "your roommate",
   "the_roommate_short": "a roommate",
@@ -316,7 +281,6 @@
   "no_matches_yet": "No matches yet",
   "no_matches_desc": "When you match with someone, it'll show up here.",
   "find_roommates": "Find roommates",
-
   "plus_match": "Ruumr Plus match",
   "mutual_match": "Mutual match",
   "match_single": "Match",
@@ -330,7 +294,6 @@
   "add_to_team": "Add to team",
   "to_team": "Team",
   "delete": "Delete",
-
   "likes_load_error": "Error loading likes. Please try again.",
   "likes_i_sent": "Likes I sent",
   "new_like_singular": "new like",
@@ -340,13 +303,11 @@
   "back": "Back",
   "no_sent_likes": "You haven't sent any likes yet",
   "go_discover_start_swiping": "Head to Discover and start swiping!",
-
   "someone": "Someone",
   "wants_you_in_team": "{{name}} wants you on their team",
   "team_mutual_add_hint": "If you approve, you'll each be added to the other's team",
   "approve": "Approve",
   "decline": "Decline",
-
   "now": "now",
   "minutes_count": "{{count}} minutes",
   "hours_count": "{{count}} hours",
@@ -409,14 +370,12 @@
   "live_results": "Live results",
   "where_youll_see_plus": "Where you'll see Plus",
   "plus_entry_desc": "These are the screens where Ruumr Plus is already wired into the app.",
-
   "swipe_save_error_alert": "Error saving the swipe. Please try again.",
   "profile_not_found": "Profile not found",
   "write_review_about_partnership": "Write a review about the partnership",
   "budget_word": "Budget",
   "pet_word": "Pet",
   "home_habits_desc_light": "This info helps paint a picture of daily life in the apartment.",
-
   "team_request_sent_member": "Request sent to {{name}} 🤝 — they'll join your team after approval",
   "loading_your_team": "Loading your team...",
   "my_team": "My team",
@@ -438,7 +397,6 @@
   "add_someone_matched": "Add someone you've already matched with",
   "invite_friend_hint": "Have a friend already on your team? Invite them",
   "no_matches_to_add": "No matches available to add",
-
   "notifications": "Notifications",
   "new_likes_setting": "New likes",
   "matches_messages_setting": "New matches and messages",
@@ -451,12 +409,10 @@
   "logout": "Log out",
   "open_delete_account_dialog": "Open delete account dialog",
   "delete_account": "Delete account",
-
   "typing": "Typing...",
   "read": "Read",
   "sent": "Sent",
   "type_message": "Type a message...",
-
   "verify_email_subject": "Your ruumr verification code",
   "verify_email_body": "Hi, your ruumr verification code is: {{code}}",
   "email_send_error": "Error sending the email, please try again.",
@@ -471,7 +427,6 @@
   "didnt_get_code": "Didn't get a code / change email",
   "account_verified": "Account verified!",
   "welcome_to_community": "Welcome to the official community.",
-
   "loading_group_chat": "Loading group chat...",
   "no_team_yet": "No team yet",
   "add_team_for_chat": "Add roommates to your team to start a group chat",
@@ -481,7 +436,6 @@
   "send_first_team_message": "Send the first message to the team!",
   "write_team_message": "Write a message to the team...",
   "send_message": "Send message",
-
   "compat_not_started": "Not started yet",
   "compat_waiting_you": "Waiting for your answers",
   "compat_waiting_partner": "Waiting for your roommate",
@@ -502,7 +456,6 @@
   "x_not_filled": "⏳ {{name}} hasn't filled it out yet",
   "start_action": "Start",
   "compat_tip": "💡 To see results, both you and your roommates need to fill out the questionnaire",
-
   "your_match": "your match",
   "questionnaire_waiting": "The questionnaire is waiting for you!",
   "partner_filled_questionnaire": "{{name}} already filled out the apartment questionnaire — now it's your turn.",
@@ -510,7 +463,6 @@
   "charter_save_failed": "We couldn't save your answers. Please try again.",
   "what_do_you_prefer": "What do you prefer?",
   "retry": "Try again",
-
   "fill_questionnaire_once": "Fill out the preferences questionnaire once",
   "answers_used_for_all": "Your answers will be used for all your matches.",
   "start_questionnaire": "Start questionnaire",
@@ -521,14 +473,12 @@
   "edit_action": "Edit",
   "agreements": "Agree on",
   "topics_to_discuss": "Topics to discuss",
-
   "match_questionnaire_title": "Compatibility questionnaire",
   "answers_saved_for_all": "Your answers are saved and used across all your matches.",
   "continue_to_chat": "Continue to chat",
   "partnership_charter": "Roommate charter 🤝",
   "choose_who_to_check": "Choose who you'd like to check compatibility with",
   "need_match_first": "You need to match with someone first",
-
   "charter_level_1": "The red lines",
   "charter_level_2": "Cleanliness & order",
   "charter_level_3": "Life itself",
@@ -564,7 +514,6 @@
   "cq_hosting_a": "Open house",
   "cq_hosting_b": "Need quiet and coordination",
   "cq_hosting_c": "Coordinate in advance and keep quiet after 23:00.",
-
   "account_deleted_success": "Your account and data were deleted successfully.",
   "delete_error": "An error occurred while deleting your data. Please try again or contact support.",
   "delete_account_title": "Delete account",
@@ -576,7 +525,6 @@
   "delete_item_login": "The login details linked to your account",
   "delete_my_account": "Delete my account",
   "deleting": "Deleting...",
-
   "something_went_wrong": "Something went wrong, please try again",
   "invite_sent_to": "Invitation sent to {{name}} 🎉",
   "invite_explainer": "If {{name}} is already on Ruumr we'll ask for approval; if not, we'll send an invitation to join.",
@@ -585,15 +533,12 @@
   "friend_name": "Friend's name",
   "email_address": "Email address",
   "send_invite": "Send invitation",
-
   "select_cities": "Select cities...",
   "no_city_found": "No city found.",
-
   "coming_to_you": "is on its way",
   "coming_soon_desc": "We're working on a smart feature to help you find the most compatible roommates — habit-based matches, early conversations, and precise filtering.",
   "arriving_soon": "Coming very soon",
   "back_to_browsing": "Back to browsing",
-
   "sub_status_active": "Active",
   "sub_status_canceled": "Canceled (active until end of month)",
   "sub_status_ended": "Ended",
@@ -617,7 +562,6 @@
   "yes_cancel_renewal": "Yes, cancel renewal",
   "no_go_back": "No, go back",
   "back_to_plus": "Back to Ruumr Plus",
-
   "checkout_create_error": "We couldn't create the payment page. Please try again.",
   "generic_error_retry": "An error occurred. Please try again.",
   "complete_plus_signup": "Complete your Plus signup",
@@ -630,7 +574,6 @@
   "continue_to_payment": "Continue to payment · {{price}} ₪ per month",
   "continue_to_payment_3mo": "Continue to payment · {{price}} ₪ for {{count}} months",
   "secure_payment_tranzila": "Secure payment via Tranzila",
-
   "verifying_payment": "Verifying your payment...",
   "verifying_signup": "One moment, we're verifying your signup",
   "welcome_to_plus": "Welcome to Plus! 🎉",
@@ -639,7 +582,6 @@
   "payment_received": "Payment received!",
   "signup_confirmation_pending": "Signup confirmation is on the way — it may take a few more moments. You can already enter the app.",
   "continue_to_app": "Continue to the app",
-
   "pricing_b1_title": "Smart matches",
   "pricing_b1_desc": "Ranking matches by routine, apartment, budget, and shared habits.",
   "pricing_b2_title": "Early conversations",
@@ -659,19 +601,16 @@
   "cancel_anytime_3mo": "Billing does not renew automatically",
   "maybe_later_pricing": "Maybe later",
   "plus_purchase_failed": "The purchase failed. Please try again.",
-
   "show_in_discovery": "Show in discovery",
   "show_in_discovery_sub": "Turn this off to become temporarily invisible.",
   "show_active_status": "Show 'active now' status",
   "show_active_status_sub": "People will be able to see when you're online in the app.",
-
   "help_q1": "How does the matching process work?",
   "help_a1": "When two users \"like\" each other (swipe right), a match is created. You can find all your matches on the \"Matches\" page and start chatting.",
   "help_q2": "How do I edit my profile?",
   "help_a2": "You can edit your profile details from the \"Profile\" page. Tap the \"Edit\" button and make the changes you want. Note that your age cannot be changed.",
   "help_q3": "What do I do about inappropriate behavior?",
   "help_a3": "We take our users' safety seriously. If you encounter inappropriate behavior, please report it to us immediately via the \"Contact us\" button.",
-
   "terms_intro": "Welcome to Roomi. Using the app constitutes acceptance of these terms.",
   "terms_h1": "1. Use of the app",
   "terms_p1": "The app is intended for finding roommates only. Any other use is prohibited. Users must be over the age of 18.",
@@ -680,7 +619,6 @@
   "terms_h3": "3. Privacy",
   "terms_p3": "We respect your privacy. Personal information will not be shared with third parties without your consent, except as required by law.",
   "terms_updated": "The terms of use were last updated on {{date}}.",
-
   "privacy_policy": "Privacy policy",
   "privacy_updated": "Last updated: 12/20/2025",
   "privacy_intro": "At Roomi, your privacy matters to us. This policy explains how we collect, use, and protect your personal information.",
@@ -694,7 +632,6 @@
   "privacy_p4": "You can request to delete your account and all information related to it at any time through the Settings page in the app.",
   "privacy_h5": "5. Contact",
   "privacy_p5": "For any privacy-related question, you can contact us through the \"Contact us\" page or on WhatsApp: 054-8523140.",
-
   "explain_deletion_reason": "Please explain the reason for deletion",
   "confirm_permanent_deletion": "Are you sure you want to permanently delete your account? This action is irreversible.",
   "delete_account_error": "Error deleting the account. Please try again.",
@@ -717,7 +654,6 @@
   "dd_after_4": "Deletion is final and cannot be undone",
   "sending_request": "Sending request...",
   "send_deletion_request": "Send deletion request",
-
   "user_fallback": "User",
   "write_review_about": "Write a review about {{name}}",
   "review_placeholder": "Tell us about your shared-living experience...",
@@ -741,7 +677,6 @@
   "error_boundary_msg": "We ran into a problem displaying this profile. Try again or skip to the next profile.",
   "attempt_number": "🔁 Attempt #{{count}}",
   "skip_to_next": "Skip to next profile",
-
   "unknown_error": "unknown",
   "admin_load_users_failed": "Loading users failed: {{error}}",
   "admin_ios_plus_enabled": "iOS app Plus access enabled for {{name}}",
@@ -766,12 +701,10 @@
   "admin_username": "Username",
   "answer_a": "A",
   "answer_b": "B",
-
   "banner_offer_badge": "⏰ Offer for the first fifty",
   "banner_title": "Ruumr Plus is here!",
   "banner_description": "AI that finds your perfect roommates in one tap — and opens an instant chat. Just ₪25 until the beginning of the next academic year!",
   "banner_cta": "✨ Discover more",
-
   "sim_insight_complementary": "One already has the apartment",
   "sim_insight_same_city": "Same city",
   "sim_insight_budget_fit": "Matching budget",
@@ -779,7 +712,6 @@
   "sim_insight_shared_interests": "Shared interests",
   "sim_insight_lifestyle": "Similar habits",
   "sim_insight_default": "Looks like a good match for a first conversation",
-
   "share_my_profile": "Share my profile",
   "request_review": "Request a review",
   "share_profile_link_title": "Share my profile",
@@ -803,5 +735,23 @@
   "public_join_cta_title": "Want a roommate too?",
   "public_join_cta_subtitle": "Join Ruumr and we'll match you with great roommates",
   "public_join_button": "Join Ruumr",
-  "public_age_suffix": "{{age}} years old"
+  "public_age_suffix": "{{age}} years old",
+  "safety_report_profile": "Report profile",
+  "safety_report_description": "Your report will be reviewed by our team. Your identity will not be shown to the reported user.",
+  "safety_report_sent": "Report sent. Thank you for helping keep the community safe.",
+  "safety_reason": "Reason",
+  "safety_reason_harassment": "Harassment or abusive behavior",
+  "safety_reason_fake_profile": "Fake profile or impersonation",
+  "safety_reason_inappropriate_content": "Inappropriate content",
+  "safety_reason_spam": "Spam or advertising",
+  "safety_reason_other": "Other",
+  "safety_details": "Additional details (optional)",
+  "safety_send_report": "Send report",
+  "safety_request_failed": "The request could not be completed. Please try again.",
+  "safety_block": "Block user",
+  "safety_block_warning": "Blocking prevents private messages between you and permanently deletes the conversation and messages for both of you. It cannot be undone in the app. Reports already submitted are kept separately.",
+  "safety_confirm_block": "Block and delete conversation",
+  "safety_block_done": "User blocked and conversation deleted.",
+  "safety_block_pending": "User blocked. Message deletion will finish automatically.",
+  "safety_chat_unavailable": "This conversation is unavailable."
 }

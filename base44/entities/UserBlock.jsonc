@@ -1,0 +1,49 @@
+{
+  "name": "UserBlock",
+  "type": "object",
+  "properties": {
+    "pair_key": {
+      "type": "string"
+    },
+    "blocker_id": {
+      "type": "string"
+    },
+    "blocked_id": {
+      "type": "string"
+    },
+    "match_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cleanup_pending": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "pair_key",
+    "blocker_id",
+    "blocked_id"
+  ],
+  "rls": {
+    "create": false,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
+
