@@ -1,4 +1,5 @@
 import BlockChatButton from '@/components/safety/BlockChatButton';
+import ReportProfileButton from '@/components/safety/ReportProfileButton';
 import { safetyRequest } from '@/api/userSafety';
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -295,6 +296,7 @@ export default function ChatPage() {
             </AnimatePresence>
           </div>
         </div>
+        <ReportProfileButton profileId={otherProfile?.id} />
         <BlockChatButton matchId={match?.id} onBlocked={result => {
           setMessages([]);
           navigate(createPageUrl('Matches'), { replace: true, state: { blockResult: result.cleanup_pending ? 'pending' : 'done' } });
@@ -359,4 +361,3 @@ export default function ChatPage() {
     </div>
   );
 }
-
