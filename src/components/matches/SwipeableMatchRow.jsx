@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useMotionValue, animate } from "framer-motion";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 const ACTION_WIDTH = 88;
 
@@ -15,7 +15,7 @@ const ACTION_WIDTH = 88;
 export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
   const { t } = useTranslation();
   const x = useMotionValue(0);
-  const [openSide, setOpenSide] = useState(null); // 'delete' | 'add' | null
+  const [openSide, setOpenSide] = useState(null); // 'delete' | null
 
   const settle = (target, side) => {
     animate(x, target, { type: "spring", stiffness: 500, damping: 42 });
@@ -27,26 +27,11 @@ export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
   const handleDragEnd = (_e, info) => {
     const { offset, velocity } = info;
     if (offset.x < -ACTION_WIDTH / 2 || velocity.x < -500) settle(-ACTION_WIDTH, "delete");
-    else if (offset.x > ACTION_WIDTH / 2 || velocity.x > 500) settle(ACTION_WIDTH, "add");
     else close();
   };
 
   return (
     <div className="relative rounded-2xl shadow-md overflow-hidden">
-      {/* Add to team — left side, revealed on swipe right */}
-      <button
-        type="button"
-        onClick={() => { onAddToTeam?.(); close(); }}
-        tabIndex={openSide === "add" ? 0 : -1}
-        aria-hidden={openSide !== "add"}
-        className="absolute inset-y-0 left-0 flex flex-col items-center justify-center gap-1 gradient-orange text-white"
-        style={{ width: ACTION_WIDTH }}
-        aria-label={t("add_to_team")}
-      >
-        <UserPlus className="w-5 h-5" />
-        <span className="text-[11px] font-bold leading-none">{t("to_team")}</span>
-      </button>
-
       {/* Delete — right side, revealed on swipe left */}
       <button
         type="button"
@@ -65,7 +50,7 @@ export default function SwipeableMatchRow({ onDelete, onAddToTeam, children }) {
       <motion.div
         drag="x"
         dragDirectionLock
-        dragConstraints={{ left: -ACTION_WIDTH, right: ACTION_WIDTH }}
+        dragConstraints={{ left: -ACTION_WIDTH, right: 0 }}
         dragElastic={0.08}
         dragMomentum={false}
         onDragEnd={handleDragEnd}
