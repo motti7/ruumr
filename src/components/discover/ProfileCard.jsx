@@ -727,9 +727,14 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
             onClick={handleExpandOpen}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 touch-manipulation"
             aria-label={t("more_details")}>
-
+                            <motion.div
+                              animate={{ y: [0, -6, 0] }}
+                              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                              className="flex flex-col items-center gap-0.5"
+                            >
                             <ArrowUp className="w-5 h-5 text-white drop-shadow" strokeWidth={2.5} />
                             <span className="text-white text-xs font-medium drop-shadow" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>{t("swipe_for_more")}</span>
+                            </motion.div>
                         </button>
           }
 
@@ -764,4 +769,3 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
 });
 
 export default ProfileCard;
-

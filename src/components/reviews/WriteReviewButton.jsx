@@ -51,7 +51,7 @@ export default function WriteReviewButton() {
         className="header-glow relative min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label={t("write_review")}
       >
-        <Star className="w-6 h-6 text-yellow-400" fill="none" />
+        <Star className="w-6 h-6 text-[--theme-blue]" fill="none" />
       </button>
 
       <AnimatePresence>
@@ -68,13 +68,13 @@ export default function WriteReviewButton() {
               animate={{ y: 0 }}
               exit={{ y: 300 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-t-3xl w-full max-w-md p-6 border-t-4 border-[--theme-orange]"
+              className="bg-white rounded-t-3xl w-full max-w-md p-6 border-t-4 border-[--theme-blue]"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
               dir={i18n.dir()}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-5">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400" fill="#facc15" /> {t("write_review")}</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t("write_review")}</h3>
                 <button onClick={() => setShowPicker(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
 
