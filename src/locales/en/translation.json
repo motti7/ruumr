@@ -873,6 +873,7 @@
   "safety_details": "Additional details (optional)",
   "safety_send_report": "Send report",
   "safety_request_failed": "The request could not be completed. Please try again.",
+  "safety_actions_menu": "User actions",
   "safety_block": "Block user",
   "safety_block_warning": "Blocking prevents private messages between you and permanently deletes the conversation and messages for both of you. It cannot be undone in the app. Reports already submitted are kept separately.",
   "safety_confirm_block": "Block and delete conversation",
