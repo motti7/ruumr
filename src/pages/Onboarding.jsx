@@ -1218,33 +1218,6 @@ export default function OnboardingPage() {
                             </button>
                         </div>
 
-                        {/* Invite a friend already on your team (optional) */}
-                        <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-3" dir={i18n.dir()}>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-gray-800 text-base font-bold">{t("onb_team_friend_label")}</span>
-                                <span className="text-sm text-gray-400">{t("optional")}</span>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-3">
-                                {t("onb_team_invite_hint")}
-                            </p>
-                            {pendingInvites.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                    {pendingInvites.map((inv, i) => (
-                                        <div key={`${inv.email}-${i}`} className="flex items-center gap-1.5 bg-orange-50 text-[#FA3803] text-xs font-bold px-3 py-1.5 rounded-full">
-                                            <span>{inv.name}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setPendingInvites(prev => prev.filter((_, idx) => idx !== i))}
-                                                className="text-orange-400"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <InviteByEmail compact onCollect={(inv) => setPendingInvites(prev => [...prev, inv])} />
-                        </div>
                     </div>
 
                     {/* BOTTOM SECTION: Verification - pushed to bottom, visually distinct */}
