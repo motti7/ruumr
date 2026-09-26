@@ -308,11 +308,12 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
     if (!audio) return;
 
     if (!isActive || !profile.song_preview_url) {
-      // Not our turn — pause and reset if we were playing this song
-      if (!audio.paused && audio.src === profile.song_preview_url) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
+      // No song for this card (or card not active) — stop whatever is
+      // currently playing on the shared audio element. Without this, the
+      // previous profile's song keeps playing (and loops forever) once we
+      // move on to a profile that has no song of its own.
+      audio.pause();
+      audio.currentTime = 0;
       return;
     }
 
@@ -338,8 +339,13 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      audio.pause();
-      audio.currentTime = 0;
+      // Only stop the audio if our song is still the one loaded on the
+      // shared element — a newer card may have already switched it to its
+      // own song, and pausing here would cut off that card's playback.
+      if (audio.src === profile.song_preview_url) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
     };
   }, [isActive, profile.song_preview_url]);
 
