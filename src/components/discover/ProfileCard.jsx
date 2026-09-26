@@ -264,7 +264,8 @@ const ProfileDetail = ({ profile, onClose }) => {
 };
 
 const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwipe, onSwipeIntent, isActive }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isLtr = i18n.dir() === 'ltr';
   const interestLabel = (v) => { const k = getInterestLabelKey(v); return k ? t(k) : getInterestLabel(v); };
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -522,7 +523,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
               })()}
                             </a>
             }
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pb-36 pointer-events-none">
+                        <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 ${isLtr ? 'pb-44' : 'pb-36'} pointer-events-none`}>
                             <div className="flex items-center gap-2 mb-2">
                                 <h2 className="text-4xl font-bold text-white">{profile.name}, {profile.age}</h2>
                                 {profile.is_verified &&
