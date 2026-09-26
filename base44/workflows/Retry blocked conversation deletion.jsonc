@@ -1,6 +1,6 @@
 {
   "name": "Retry blocked conversation deletion",
-  "description": "Retry incomplete deletion of blocked private conversations every ten minutes. Runs as the workflow creator, who must be an app administrator.",
+  "description": "Retry incomplete deletion of blocked private conversations once per hour. Runs as the workflow creator, who must be an app administrator.",
   "trigger": {
     "condition": null,
     "config": {
@@ -10,8 +10,8 @@
       "cron_expression": null,
       "one_time_date": null,
       "timezone": "Asia/Jerusalem",
-      "interval_value": 10,
-      "interval_unit": "minutes",
+      "interval_value": 1,
+      "interval_unit": "hours",
       "interval_anchor": "2026-09-26T00:00:00",
       "ends_type": "never",
       "ends_on_date": null,
