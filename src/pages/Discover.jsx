@@ -24,6 +24,7 @@ import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { useOptionalAuth } from "@/lib/AuthContext";
+import { getDiscoverFilters, setDiscoverFilters, getDefaultDiscoverFilters } from "@/lib/discoverFiltersSession";
 
 const sortProfilesByCreatedDateDesc = (records = []) => {
   return [...records].sort((left, right) => {
@@ -59,7 +60,7 @@ export default function DiscoverPage() {
   const [actionFeedback, setActionFeedback] = useState(null);
   const [swipeSaveError, setSwipeSaveError] = useState(null);
   const [showCharterSelector, setShowCharterSelector] = useState(false);
-  const [filters, setFilters] = useState({ cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' });
+  const [filters, setFilters] = useState(() => getDiscoverFilters() ?? getDefaultDiscoverFilters());
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
   const [seenUserIds, setSeenUserIds] = useState(() => {
     try {
@@ -425,6 +426,7 @@ export default function DiscoverPage() {
   const applyFilters = (newFiltersArg) => {
     const newFilters = newFiltersArg || filters;
     setFilters(newFilters);
+    setDiscoverFilters(newFilters);
     setAllProfiles(currentAll => {
       const filtered = currentAll.filter(p => {
         if (newFilters.cities.length > 0) {
