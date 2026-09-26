@@ -1292,10 +1292,10 @@ export default function OnboardingPage() {
       
       {/* Fixed bottom continue button */}
       {step < 7 &&
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white max-w-md mx-auto px-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
         <Button
           onClick={nextStep}
-          className={`w-3/4 max-w-xs h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
+          className={`w-full h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
           disabled={!canProceed() || isSubmitting}>
           {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : t('continue')}
         </Button>
