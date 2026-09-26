@@ -1,13 +1,4 @@
 {
   "name": "cleanupUserBlocks",
-  "entry": "entry.ts",
-  "automations": [{
-    "name": "Retry blocked conversation deletion",
-    "type": "scheduled",
-    "schedule_mode": "recurring",
-    "schedule_type": "cron",
-    "cron_expression": "*/10 * * * *",
-    "is_active": true
-  }]
+  "entry": "entry.ts"
 }
-
