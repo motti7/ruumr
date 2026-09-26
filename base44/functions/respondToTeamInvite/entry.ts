@@ -1,3 +1,4 @@
+import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const APP_URL = 'https://app.ruumrapp.com';
@@ -64,6 +65,7 @@ async function rosterUserIds(sr, selfId, profile) {
 }
 
 async function ensureMatch(sr, uc, selfId, a, b, profA, profB) {
+    if (await isBlocked(sr, a, b)) return null;
     // Look for an existing match between the pair in both directions. A mutual
     // match created by handleSwipe is written through the user-context client and
     // is not always visible to the asServiceRole view — so a service-role-only
@@ -104,6 +106,7 @@ async function writeRoster(sr, uc, selfId, memberIds) {
             if (other === id) continue;
             const oProf = profiles[other];
             const match = await ensureMatch(sr, uc, selfId, id, other, prof, oProf);
+            if (!match) continue;
             matchEntries.push({
                 user_id: other,
                 match_id: match.id,
@@ -218,6 +221,7 @@ Deno.serve(async (req) => {
             { name: inviterName },
             { name: inviteeName },
         );
+        if (!match) return Response.json({ error: 'Cannot open this conversation' }, { status: 403 });
 
         await sr.TeamInvite.update(invite.id, {
             status: 'accepted',
@@ -250,3 +254,4 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
+

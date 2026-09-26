@@ -6,6 +6,7 @@ import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Lin
 import { SiTiktok } from "react-icons/si";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
+import ReportProfileButton from '@/components/safety/ReportProfileButton';
 import { base44 } from '@/api/base44Client';
 import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
@@ -59,6 +60,9 @@ const ProfileDetail = ({ profile, onClose }) => {
             </button>
             
             <div className="p-6 pt-24 text-white space-y-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-end"><div className="rounded-full bg-white">
+                    <ReportProfileButton key={profile.id} profileId={profile.id} />
+                </div></div>
                 <div className="text-center">
                     <h3 className="text-3xl font-bold" id="profile-header">{profile.name}, {profile.age}</h3>
                     {plusMeta &&

@@ -125,7 +125,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
             <motion.div
               whileTap={{ scale: 0.85 }}
               onClick={handleCharterClick}
-              className="text-white bg-[--theme-orange] dark:bg-orange-500 p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="text-white bg-[--theme-blue] p-3 rounded-full hover:brightness-110 transition-all shadow-md min-w-[44px] min-h-[44px] flex items-center justify-center"
               role="button"
               tabIndex={0}
               aria-label="compatibility checker"

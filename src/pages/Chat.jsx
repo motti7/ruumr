@@ -1,3 +1,5 @@
+import UserActionsMenu from '@/components/safety/UserActionsMenu';
+import { safetyRequest } from '@/api/userSafety';
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Match, Profile, Message } from "@/entities/all";
@@ -21,6 +23,7 @@ export default function ChatPage() {
   const [otherProfile, setOtherProfile] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [sendError, setSendError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [isEditingQuestionnaire, setIsEditingQuestionnaire] = useState(false);
@@ -51,7 +54,7 @@ export default function ChatPage() {
     return () => {
       clearTimeout(typingTimeoutRef.current);
       if (typingStatusIdRef.current) {
-        base44.entities.TypingStatus.delete(typingStatusIdRef.current).catch(() => {});
+        safetyRequest('stop_typing', { typing_id: typingStatusIdRef.current }).catch(() => {});
       }
     };
   }, []);
@@ -78,13 +81,14 @@ export default function ChatPage() {
       const allMatches = [...matchesAs1, ...matchesAs2];
       const matchData = allMatches.find(m => m.id === matchId);
       if (!matchData) { setIsLoading(false); navigate(createPageUrl("Matches")); return; }
+      await safetyRequest('chat_status', { match_id: matchId });
       setMatch(matchData);
 
       const otherUserId = matchData.user1_id === userData.id ? matchData.user2_id : matchData.user1_id;
 
       const [profiles, matchMessages] = await Promise.all([
         Profile.filter({ user_id: otherUserId }),
-        Message.filter({ match_id: matchId }, "created_date"),
+        safetyRequest('messages', { match_id: matchId }).then(data => data.records),
       ]);
 
       if (profiles.length > 0) setOtherProfile(profiles[0]);
@@ -93,23 +97,26 @@ export default function ChatPage() {
       // Mark unread messages as read
       matchMessages.forEach(msg => {
         if (msg.sender_id !== userData.id && !msg.is_read) {
-          Message.update(msg.id, { is_read: true }).catch(() => {});
+          safetyRequest('mark_read', { message_id: msg.id }).catch(() => {});
         }
       });
 
       // Subscribe to messages in real-time
       const unsubMsg = base44.entities.Message.subscribe((event) => {
+        if (event.type === 'delete') setMessages(prev => prev.filter(m => m.id !== event.id));
         if (event.data?.match_id === matchId) {
           if (event.type === 'create') {
             const newMsg = event.data;
             setMessages(prev => {
               if (prev.find(m => m.id === newMsg.id)) return prev;
               if (newMsg.sender_id !== userRef.current?.id && !newMsg.is_read) {
-                Message.update(newMsg.id, { is_read: true }).catch(() => {});
+                safetyRequest('mark_read', { message_id: newMsg.id }).catch(() => {});
                 newMsg.is_read = true;
               }
               return [...prev, newMsg];
             });
+          } else if (event.type === 'delete') {
+            setMessages(prev => prev.filter(m => m.id !== event.id));
           } else if (event.type === 'update') {
             setMessages(prev => prev.map(m => m.id === event.id ? { ...m, ...event.data } : m));
           }
@@ -119,20 +126,29 @@ export default function ChatPage() {
       // Polling fallback — in case subscription misses messages due to RLS
       const pollInterval = setInterval(async () => {
         try {
-          const latest = await Message.filter({ match_id: matchId }, "created_date");
-          setMessages(prev => {
-            const existingIds = new Set(prev.map(m => m.id));
-            const newOnes = latest.filter(m => !existingIds.has(m.id));
-            if (newOnes.length === 0) return prev;
-            newOnes.forEach(m => {
-              if (m.sender_id !== userRef.current?.id && !m.is_read) {
-                Message.update(m.id, { is_read: true }).catch(() => {});
-              }
-            });
-            return [...prev, ...newOnes];
+          const latest = await safetyRequest('messages', { match_id: matchId }).then(data => data.records);
+          latest.forEach(m => {
+            if (m.sender_id !== userRef.current?.id && !m.is_read) {
+              safetyRequest('mark_read', { message_id: m.id }).catch(() => {});
+            }
           });
-        } catch {}
+          // Replace the snapshot so deletions and read receipts also propagate.
+          setMessages(latest);
+        } catch (error) {
+          const status = error?.response?.status ?? error?.status;
+          if (status === 403 || status === 404) {
+            setMessages([]);
+            navigate(createPageUrl('Matches'), { replace: true });
+          }
+        }
       }, 5000);
+
+      const unsubMatch = base44.entities.Match.subscribe(event => {
+        if (event.id === matchId && (event.type === 'delete' || event.data?.status === 'blocked')) {
+          setMessages([]);
+          navigate(createPageUrl('Matches'), { replace: true });
+        }
+      });
 
       // Subscribe to typing status
       const unsubTyping = base44.entities.TypingStatus.subscribe((event) => {
@@ -146,7 +162,7 @@ export default function ChatPage() {
       });
 
       setIsLoading(false);
-      return () => { unsubMsg(); unsubTyping(); clearInterval(pollInterval); };
+      return () => { unsubMatch(); unsubMsg(); unsubTyping(); clearInterval(pollInterval); };
     } catch (error) {
       console.error("Error loading chat:", error);
       setIsLoading(false);
@@ -163,7 +179,7 @@ export default function ChatPage() {
     // Send typing indicator
     if (!typingStatusIdRef.current) {
       try {
-        const created = await base44.entities.TypingStatus.create({ match_id: matchId, user_id: userData.id });
+        const { record: created } = await safetyRequest('typing', { match_id: matchId });
         typingStatusIdRef.current = created.id;
       } catch {}
     }
@@ -173,7 +189,7 @@ export default function ChatPage() {
     typingTimeoutRef.current = setTimeout(async () => {
       if (typingStatusIdRef.current) {
         try {
-          await base44.entities.TypingStatus.delete(typingStatusIdRef.current);
+          await safetyRequest('stop_typing', { typing_id: typingStatusIdRef.current });
         } catch {}
         typingStatusIdRef.current = null;
       }
@@ -182,7 +198,7 @@ export default function ChatPage() {
 
   // Optimistic mutation for sending messages
   const messageMutation = /** @type {any} */ (useMutationWithOptimistic(
-    (messageData) => Message.create(messageData),
+    async (messageData) => (await safetyRequest('send', { match_id: messageData.match_id, content: messageData.content })).record,
     {
       queryKey: ['chat', matchIdRef.current],
       updateFn: (oldMessages = [], newMessage) => [...oldMessages, newMessage],
@@ -196,11 +212,12 @@ export default function ChatPage() {
     // Clear typing status
     clearTimeout(typingTimeoutRef.current);
     if (typingStatusIdRef.current) {
-      base44.entities.TypingStatus.delete(typingStatusIdRef.current).catch(() => {});
+      safetyRequest('stop_typing', { typing_id: typingStatusIdRef.current }).catch(() => {});
       typingStatusIdRef.current = null;
     }
 
     setNewMessage("");
+    setSendError(false);
 
     try {
       const sentMsg = await messageMutation.mutateAsync(
@@ -214,7 +231,8 @@ export default function ChatPage() {
         });
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      setNewMessage(messageContent);
+      setSendError(true);
     }
   };
 
@@ -277,8 +295,17 @@ export default function ChatPage() {
             </AnimatePresence>
           </div>
         </div>
+        <UserActionsMenu
+          profileId={otherProfile?.id}
+          matchId={match?.id}
+          onBlocked={result => {
+            setMessages([]);
+            navigate(createPageUrl('Matches'), { replace: true, state: { blockResult: result.cleanup_pending ? 'pending' : 'done' } });
+          }}
+        />
       </div>
 
+      {sendError && <p role="alert" className="p-3 text-red-600">{t('safety_request_failed')}</p>}
       {/* Messages + Charter Results */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         <VirtualizedMessageList

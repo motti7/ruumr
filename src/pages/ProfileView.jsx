@@ -1,3 +1,5 @@
+import UserActionsMenu from '@/components/safety/UserActionsMenu';
+import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Profile, Swipe, Match } from "@/entities/all";
@@ -95,6 +97,7 @@ export default function ProfileViewPage() {
   const [showActions, setShowActions] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
+  const [exMatchId, setExMatchId] = useState(null);
   const [plusMatch, setPlusMatch] = useState(null);
   // Whether this profile should be liked through the Ruumr Plus match flow.
   // Derived from the fromPlus=true param OR the cached Plus recommendations, so
@@ -124,6 +127,10 @@ export default function ProfileViewPage() {
       // Always load current user so swipe actions always work
       const user = await User.me();
       setCurrentUser(user);
+      if ((await blockedUserIds()).has(userId)) {
+        navigate(createPageUrl('Discover'), { replace: true });
+        return;
+      }
 
       const [profilesResult, myProfilesResult] = await Promise.all([
         Profile.filter({ user_id: userId }),
@@ -162,7 +169,11 @@ export default function ProfileViewPage() {
           Match.filter({ user1_id: user.id, user2_id: userId }),
           Match.filter({ user2_id: user.id, user1_id: userId }),
         ]);
-        if (m1.length > 0 || m2.length > 0) setIsExMatch(true);
+        const exMatch = m1[0] || m2[0];
+        if (exMatch) {
+          setIsExMatch(true);
+          setExMatchId(exMatch.id);
+        }
       } catch(e) {}
 
       // Show like/reject actions when arriving from Likes or Ruumr Plus, and not yet swiped.
@@ -361,7 +372,15 @@ export default function ProfileViewPage() {
         >
           <ArrowRight className="w-6 h-6 text-gray-600" />
         </button>
-        <h2 className="font-bold text-gray-900 text-lg">{profile.name}</h2>
+        <h2 className="font-bold text-gray-900 text-lg flex-1">{profile.name}</h2>
+        {currentUser?.id !== profile.user_id && (
+          <UserActionsMenu
+            key={profile.id}
+            profileId={profile.id}
+            matchId={exMatchId}
+            onBlocked={() => navigate(createPageUrl('Matches'), { replace: true })}
+          />
+        )}
       </div>
 
       <div className="relative">

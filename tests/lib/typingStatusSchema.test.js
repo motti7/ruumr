@@ -16,20 +16,14 @@ describe('TypingStatus entity schema', () => {
     schema = JSON.parse(raw);
   });
 
-  it('restricts create, update, and delete to the record owner via user_id and created_by', () => {
-    const ownerOnly = {
-      $and: [
-        { 'data.user_id': '{{user.id}}' },
-        { created_by: '{{user.email}}' },
-      ],
-    };
-    expect(schema.rls.create).toEqual(ownerOnly);
-    expect(schema.rls.update).toEqual(ownerOnly);
-    expect(schema.rls.delete).toEqual(ownerOnly);
+  it('requires server block checks before creating or modifying typing signals', () => {
+    expect(schema.rls.create).toBe(false);
+    expect(schema.rls.update).toEqual({ user_condition: { role: 'admin' } });
   });
 
-  it('allows all users to read typing status signals (permissive by functional necessity)', () => {
-    expect(schema.rls.read).toBe(true);
+  it('does not expose typing signals to every user', () => {
+    expect(schema.rls.read).not.toBe(true);
+    expect(schema.rls.read.$or).toContainEqual({ 'data.user_id': '{{user.id}}' });
   });
 
   it('requires match_id and user_id', () => {
@@ -37,3 +31,4 @@ describe('TypingStatus entity schema', () => {
     expect(schema.required).toContain('user_id');
   });
 });
+

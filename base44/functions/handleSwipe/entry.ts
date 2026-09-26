@@ -1,3 +1,4 @@
+import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
@@ -29,6 +30,7 @@ Deno.serve(async (req) => {
         }
 
         const sr = base44.asServiceRole.entities;
+        if (await isBlocked(sr, swiper_id, swiped_id)) return Response.json({ match: false });
 
         // Use the user-context client for Swipe + Match operations the caller is a
         // party to. The service-role view of these entities lags behind writes in
