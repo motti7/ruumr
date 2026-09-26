@@ -28,10 +28,14 @@ export default function DataDeletionPage() {
     setIsSubmitting(true);
     try {
       const user = await User.me();
-      await base44.functions.invoke("deleteAccount", {});
+      const deletion = await base44.functions.invoke("deleteAccount", {});
+      if (deletion?.data?.success !== true) {
+        throw new Error("Account deletion was not confirmed");
+      }
       
       // Send email to admin to delete the user's login credentials
-      await base44.integrations.Core.SendEmail({
+      try {
+        await base44.integrations.Core.SendEmail({
         to: "moti.yeheskel@gmail.com",
         subject: `מחיקת פרטי כניסה - ${user.email}`,
         body: `
@@ -47,7 +51,12 @@ export default function DataDeletionPage() {
           
           יש למחוק את פרטי הכניסה של משתמש זה.
         `
-      });
+        });
+      } catch {
+        // The server has confirmed deletion; a notification failure must not
+        // turn this into a misleading account-deletion failure.
+        console.warn("Post-deletion admin notification could not be sent");
+      }
 
       setSubmitted(true);
       
