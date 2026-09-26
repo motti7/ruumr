@@ -739,7 +739,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div id="onboarding-root" className="min-h-screen bg-white flex flex-col items-center justify-center p-6" dir={i18n.dir()} style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
+    <div id="onboarding-root" className="h-[100dvh] overflow-hidden bg-white flex flex-col items-center justify-center p-6" dir={i18n.dir()} style={{ fontFamily: "'Inter', sans-serif", paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'); #onboarding-root, #onboarding-root * { font-family: 'Inter', sans-serif !important; }
         #onboarding-root input[type=number]::-webkit-inner-spin-button,
         #onboarding-root input[type=number]::-webkit-outer-spin-button {
@@ -1292,7 +1292,7 @@ export default function OnboardingPage() {
       
       {/* Fixed bottom continue button */}
       {step < 7 &&
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-8 pt-3 bg-white max-w-md mx-auto px-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-center pb-8 pt-3 bg-white px-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
         <Button
           onClick={nextStep}
           className={`w-full h-11 rounded-full text-base font-semibold transition-all transform active:scale-95 ${canProceed() ? 'bg-transparent border border-[--theme-orange] text-[--theme-orange] hover:bg-orange-50' : 'bg-transparent border border-gray-300 text-gray-400'}`}
