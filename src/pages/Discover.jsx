@@ -1,5 +1,5 @@
 import { blockedUserIds } from '@/api/userSafety';
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Profile, Swipe } from "@/entities/all";
@@ -10,7 +10,7 @@ import LockedProfilePreview from "../components/discover/LockedProfilePreview";
 import ActionButtons from "../components/discover/ActionButtons";
 import MatchAnimation from "../components/discover/MatchAnimation";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Heart, X, Puzzle } from "lucide-react";
@@ -25,6 +25,42 @@ import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { getDiscoverFilters, setDiscoverFilters, getDefaultDiscoverFilters } from "@/lib/discoverFiltersSession";
+import '../components/scrapingPilot/discover-tabs.css';
+
+const RoomsPreview = lazy(() => import('./ScrapingPilot'));
+
+export default function DiscoverPage() {
+  const [params, setParams] = useSearchParams();
+  const rooms = params.get('view') === 'rooms';
+  const [openedRooms, setOpenedRooms] = useState(rooms);
+  const select = (value) => {
+    if (value === 'rooms') setOpenedRooms(true);
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      if (value === 'rooms') next.set('view', 'rooms'); else next.delete('view');
+      return next;
+    }, { replace: true });
+  };
+  const keyboard = (event) => {
+    let value;
+    if (['ArrowLeft','ArrowRight'].includes(event.key)) value = rooms ? 'people' : 'rooms';
+    else if (event.key === 'Home') value = 'people';
+    else if (event.key === 'End') value = 'rooms';
+    else return;
+    event.preventDefault(); select(value);
+    document.getElementById(`discover-${value}-tab`)?.focus();
+  };
+  return <div className="discover-with-rooms" dir="rtl">
+    <div className="discover-mode-bar"><div role="tablist" aria-label="שותפים וחדרים" onKeyDown={keyboard}>
+      <button id="discover-people-tab" role="tab" aria-selected={!rooms} aria-controls="discover-people-panel" tabIndex={rooms ? -1 : 0} onClick={() => select('people')}>שותפים</button>
+      <button id="discover-rooms-tab" role="tab" aria-selected={rooms} aria-controls="discover-rooms-panel" tabIndex={rooms ? 0 : -1} onClick={() => select('rooms')}>חדרים <span>ניסוי</span></button>
+    </div></div>
+    <section id="discover-people-panel" role="tabpanel" aria-labelledby="discover-people-tab" hidden={rooms}><DiscoverPeoplePage /></section>
+    <section id="discover-rooms-panel" className="discover-rooms-panel" role="tabpanel" aria-labelledby="discover-rooms-tab" hidden={!rooms}>
+      {(openedRooms || rooms) && <Suspense fallback={<p className="p-8 text-center">טוען חדרים…</p>}><RoomsPreview embedded /></Suspense>}
+    </section>
+  </div>;
+}
 
 const sortProfilesByCreatedDateDesc = (records = []) => {
   return [...records].sort((left, right) => {
@@ -41,7 +77,7 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
   });
 };
 
-export default function DiscoverPage() {
+function DiscoverPeoplePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { setHasProfile } = useOptionalAuth();
@@ -497,7 +533,7 @@ export default function DiscoverPage() {
         <div
           className="absolute left-0 right-0"
           style={{
-            top: 'calc(48px + env(safe-area-inset-top, 0px))',
+            top: 'calc(100px + env(safe-area-inset-top, 0px))',
             bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
           }}
         >
@@ -584,7 +620,7 @@ export default function DiscoverPage() {
       <div
         className="absolute left-0 right-0"
         style={{
-          top: 'calc(48px + env(safe-area-inset-top, 0px))',
+          top: 'calc(100px + env(safe-area-inset-top, 0px))',
           bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
         }}
       >

@@ -41,6 +41,7 @@ const RuumrPlusThankYou = lazy(() => import('./pages/RuumrPlusThankYou'));
 const TranzilaReturn = lazy(() => import('./pages/TranzilaReturn'));
 const ManageSubscription = lazy(() => import('./pages/ManageSubscription'));
 const AdminTools = lazy(() => import('./pages/AdminTools'));
+const ScrapingPilot = lazy(() => import('./pages/ScrapingPilot'));
 const WriteExternalReview = lazy(() => import('./pages/WriteExternalReview'));
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
@@ -179,6 +180,7 @@ const AuthenticatedApp = () => {
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
+          <Route path="/ScrapingPilot" element={<Suspense fallback={<PageLoader />}><ScrapingPilot /></Suspense>} />
           <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
           <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPaymentGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
           <Route path="/TranzilaReturn" element={<Suspense fallback={<PageLoader />}><TranzilaReturn /></Suspense>} />

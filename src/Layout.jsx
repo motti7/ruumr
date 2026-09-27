@@ -401,7 +401,7 @@ export default function Layout({ children, currentPageName }) {
             כתיבת ביקורת ב-Matches. הם לעולם לא מופיעים יחד, כך שהקבוצה מכילה
             לכל היותר שני כפתורים ושום כפתור אחר לא זז בין הטאבים. */}
         <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
-            {currentPageName === 'Discover' && (
+            {currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') !== 'rooms' && (
                 <FilterHintButton />
             )}
             {currentPageName === 'Matches' && (

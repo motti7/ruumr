@@ -1,0 +1,23 @@
+{
+  "name": "ScrapingPilotPost",
+  "type": "object",
+  "properties": {
+    "source_key": {"type":"string"},
+    "source_url": {"type":"string"},
+    "source_text": {"type":"string"},
+    "group_city": {"type":"string"},
+    "posted_at_text": {"type":"string"},
+    "bucket": {"type":"string","enum":["rooms","leads"]},
+    "result_json": {"type":"string"},
+    "review_status": {"type":"string","enum":["pending"],"default":"pending"},
+    "processing_label": {"type":"string"},
+    "saved_by": {"type":"string"}
+  },
+  "required": ["source_key","source_url","source_text","bucket","result_json"],
+  "rls": {
+    "read": {"user_condition":{"role":"admin"}},
+    "create": false,
+    "update": false,
+    "delete": {"user_condition":{"role":"admin"}}
+  }
+}
