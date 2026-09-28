@@ -19,10 +19,10 @@ test('publication requires photos, phone, consent and valid sublet dates',()=>{
   assert.equal(validateRoom({...room(),rental_type:'sublet',end_date:'2026-11-01'}).end_date,'2026-11-01');
 });
 test('closing is scoped to authenticated ownership',async()=>{
-  let filter,updates=0;
-  const handler=createHandler(()=>client({id:'a'},{filter:async q=>{filter=q;return [];},update:async()=>updates++}));
+  let requested,updates=0;
+  const handler=createHandler(()=>client({id:'a'},{get:async id=>{requested=id;return {id,owner_id:'someone-else'};},update:async()=>updates++}));
   assert.equal((await handler(req({action:'close',id:'someone-elses-room'}))).status,404);
-  assert.deepEqual(filter,{id:'someone-elses-room',owner_id:'a'});assert.equal(updates,0);
+  assert.equal(requested,'someone-elses-room');assert.equal(updates,0);
 });
 test('feed excludes blocked owners in both directions and hides owner identifiers',async()=>{
   const handler=createHandler(()=>client({id:'me'},{filter:async()=>[{id:'a',owner_id:'blocked'},{id:'b',owner_id:'blocker'},{id:'c',owner_id:'me',created_by:'private@example.test'}]},[{blocker_id:'me',blocked_id:'blocked'},{blocker_id:'blocker',blocked_id:'me'}]));
@@ -33,4 +33,11 @@ test('guests can only list published room fields and cannot close or create',asy
   const data=await (await handler(req({action:'list'}))).json();
   assert.deepEqual(query,{status:'published'});assert.deepEqual(data.records,[{id:'one',title:'Room',is_owner:false}]);
   for(const action of ['create','close'])assert.equal((await handler(req({action,room:room(),id:'one'}))).status,401);
+});
+
+test('owner can close their own room and missing rooms return 404',async()=>{
+ let updated;const entity={get:async id=>({id,owner_id:'a'}),update:async(id,data)=>{updated={id,...data};}};
+ const handler=createHandler(()=>client({id:'a'},entity));
+ assert.equal((await handler(req({action:'close',id:'mine'}))).status,200);assert.deepEqual(updated,{id:'mine',status:'closed'});
+ entity.get=async()=>{throw new Error('missing');};assert.equal((await handler(req({action:'close',id:'missing'}))).status,404);
 });
