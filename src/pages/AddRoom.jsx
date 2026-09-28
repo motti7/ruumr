@@ -2,6 +2,7 @@ import React, {useEffect,useRef,useState} from 'react';
 import {Link,useNavigate} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import {roomRequest} from '@/components/rooms/RoomListings';
+import {useTypewriterPlaceholder} from '@/hooks/useTypewriterPlaceholder';
 import '@/components/rooms/rooms.css';
 
 export default function AddRoom(){
@@ -10,6 +11,7 @@ export default function AddRoom(){
   const [room,setRoom]=useState({title:'',city:'',address:'',price:'',entry_date:'',end_date:'',rental_type:'regular',roommates:'0',furniture:'',description:'',phone:'',photos:[],owner_confirmation:false});
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[uploading,setUploading]=useState(false);
   const set=(key,value)=>setRoom(old=>({...old,[key]:value}));
+  const titlePlaceholder=useTypewriterPlaceholder(!room.title);
   async function upload(event){
     const files=Array.from(event.target.files||[]);event.target.value='';
     if(!files.length)return;
@@ -25,7 +27,7 @@ export default function AddRoom(){
   const input=(key,label,type='text',extra={})=><label>{label}<input required name={key} type={type} value={room[key]} onChange={e=>set(key,e.target.value)} {...extra}/></label>;
   return <section className="rr" dir="rtl"><Link to="/Discover?view=rooms">← חזרה לחדרים</Link><h1>הוספת חדר</h1><p>מפרסמים חדר בדירת שותפים. אין צורך ליצור פרופיל שותף או להעלות תמונה אישית.</p>
     <form onSubmit={submit}><fieldset disabled={busy||uploading}><div className="rr-grid">
-      {input('title','כותרת המודעה','text',{maxLength:100,placeholder:'חדר מואר בדירת שותפים'})}
+      <label>כותרת המודעה<input required name="title" type="text" maxLength={100} value={room.title} onChange={e=>set('title',e.target.value)} placeholder={titlePlaceholder}/></label>
       <label>עיר<select required value={room.city} onChange={e=>set('city',e.target.value)}><option value="">בחירת עיר</option>{['תל אביב','ירושלים','חיפה','באר שבע'].map(c=><option key={c}>{c}</option>)}</select></label>
       {input('address','רחוב / שכונה','text',{maxLength:160})}{input('price','מחיר חודשי לחדר (₪)','number',{min:1,max:100000,step:1})}
       <label>סוג שכירות<select value={room.rental_type} onChange={e=>set('rental_type',e.target.value)}><option value="regular">שכירות רגילה</option><option value="sublet">סאבלט</option></select></label>
