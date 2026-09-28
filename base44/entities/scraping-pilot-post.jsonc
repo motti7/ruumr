@@ -4,6 +4,8 @@
   "properties": {
     "source_key": {"type":"string"},
     "source_url": {"type":"string"},
+    "photos_json": {"type":"string"},
+    "phones_json": {"type":"string"},
     "source_text": {"type":"string"},
     "group_city": {"type":"string"},
     "posted_at_text": {"type":"string"},

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import Workspace from '@/components/scrapingPilot/Workspace';
+import { pilotRequest } from '@/components/scrapingPilot/request';
 
 async function invoke(body) {
-  const response = await base44.functions.invoke('scrapingPilot', body);
-  if (response.data?.error) throw new Error(response.data.error);
-  return response.data;
+  return pilotRequest((name, data) => base44.functions.invoke(name, data), body);
 }
 export default function ScrapingPilot({ embedded = false }) {
   const [access,setAccess] = useState('loading');

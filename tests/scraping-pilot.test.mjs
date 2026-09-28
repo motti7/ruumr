@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler } from '../base44/functions/scrapingPilot/handler.js';
-import { bucketFor, sourceUrl, normalizePost, validateExtraction, postKey } from '../base44/functions/scrapingPilot/logic.js';
+import { bucketFor, sourceUrl, normalizePost, validateExtraction, postKey, extractPhotos, extractPhones } from '../base44/functions/scrapingPilot/logic.js';
 const result = () => ({kind:'room_offer',city:'חיפה',cityBasis:'post',rentalType:'regular_with_early_sublet',address:'',rooms:[{label:'חדר',monthlyRentIls:1200,priceEvidence:'1200 לחודש'}],entryText:'15/10',endText:'',existingRoommates:null,totalOccupants:4,furnitureText:'',shabbatPolicy:'unknown',kosherPolicy:'unknown',billsText:'',freeText:'',reason:'חדר מוצע',warnings:[],evidence:[]});
 test('whole apartments and irrelevant ads are excluded even in target cities',()=>{
   for(const kind of ['whole_apartment','advertisement'])assert.equal(bucketFor({...result(),kind}),'excluded');
@@ -33,9 +33,9 @@ test('only public Facebook post URLs are clickable; tokens and query params stri
   assert.equal(sourceUrl('https://facebook.com/groups/123/posts/456/?locale=he_IL'),'https://www.facebook.com/groups/123/posts/456/');
   for(const url of ['javascript:alert(1)','https://evil.test/groups/123/posts/456/','https://facebook.com.evil.test/groups/123/posts/456/','https://user:secret@facebook.com/groups/123/posts/456/','https://facebook.com/login','http://facebook.com/groups/123/posts/456/'])assert.equal(sourceUrl(url),'');
 });
-test('normalization ignores author profile, image URLs and unrelated data, and bounds text',()=>{
+test('normalization ignores author profile and invalid attachments, and bounds text',()=>{
   const p=normalizePost({text:' פוסט ',user:{name:'Private'},attachments:['x'],groupCity:'נשר'});
-  assert.deepEqual(Object.keys(p),['text','sourceUrl','groupCity','postedAt','demo']);assert.equal(p.groupCity,'');
+  assert.deepEqual(Object.keys(p),['text','sourceUrl','groupCity','postedAt','photos','phones','demo']);assert.equal(p.groupCity,'');
   assert.throws(()=>normalizePost({text:'a'.repeat(12001)}));
 });
 test('repeat source URLs use same storage key, different posts do not collide',async()=>{
@@ -71,4 +71,30 @@ test('admin save updates an existing source and retains leads as pending review'
   const handler=createHandler(()=>({auth:{me:async()=>({id:'admin1',role:'admin'})},asServiceRole:{entities:{ScrapingPilotPost:entity}}}),()=>undefined);
   const response=await handler(request({action:'save',post:{text:'1200 לחודש',url:'https://facebook.com/groups/1/posts/2/'},result:{...result(),kind:'room_seeker'}}));
   assert.equal(response.status,200);assert.equal(saved.bucket,'leads');assert.equal(saved.review_status,'pending');assert.equal(saved.id,'existing');
+});
+
+import { pilotRequest } from '../src/components/scrapingPilot/request.js';
+test('photo import preserves typed photos only and survives repeated normalization',()=>{
+  const url='https://scontent.example.fbcdn.net/room.jpg?image=example';
+  const post=normalizePost({text:'חדר',attachments:[{__typename:'Photo',image:{uri:url}},{__typename:'Photo',thumbnail:url},{__typename:'Video',thumbnail:url},{__typename:'Photo',image:{uri:'https://evil.test/x.jpg'}},{url:'https://facebook.com/media/set'}]});
+  assert.deepEqual(post.photos,[url]);assert.deepEqual(normalizePost(post).photos,[url]);
+  assert.deepEqual(extractPhotos({photos:['http://x.fbcdn.net/x','https://fbcdn.net.evil.test/x','https://user:pass@x.fbcdn.net/x']}),[]);
+});
+test('phone extraction normalizes explicit local numbers and never fills missing digits',()=>{
+  assert.deepEqual(extractPhones('דוגמה 050-000-0000 וגם +972 50 000 0000'),['0500000000']);
+  assert.deepEqual(extractPhones('050123456 או 050123456789 ומחיר 1500'),[]);
+});
+test('request surfaces malformed responses and timeouts without retrying',async()=>{
+  await assert.rejects(pilotRequest(async()=>({data:{}}),{action:'analyze'}),/ללא תוצאת/);
+  let calls=0;
+  await assert.rejects(pilotRequest(()=>{calls++;return new Promise(()=>{});},{action:'analyze'},5),/לא התקבלה/);
+  assert.equal(calls,1);
+  assert.deepEqual(await pilotRequest(async()=>({data:{result:{},bucket:'rooms'}}),{action:'analyze'}),{result:{},bucket:'rooms'});
+});
+test('provider and validation failures identify the failed stage without exposing post text',async()=>{
+  for(const stage of ['provider','validation']){
+    const client={auth:{me:async()=>({role:'admin'})},asServiceRole:{entities:{}},integrations:{Core:{InvokeLLM:async()=>{if(stage==='provider')throw new Error('secret provider body');return {};}}}};
+    const response=await createHandler(()=>client,()=>undefined)(request({action:'analyze',provider:'base44',post:{text:'private post'}}));
+    assert.equal(response.status,500);const data=await response.json();assert.equal(data.stage,stage);assert.ok(!JSON.stringify(data).includes('private post'));assert.ok(!JSON.stringify(data).includes('secret provider body'));
+  }
 });

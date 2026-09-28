@@ -43,7 +43,7 @@ export function normalizePost(p) {
   return { text, sourceUrl: sourceUrl(p?.sourceUrl || p?.url),
     groupCity: CITIES.includes(p?.groupCity) ? p.groupCity : '',
     postedAt: typeof (p?.postedAt || p?.time) === 'string' ? String(p.postedAt || p.time).slice(0,40) : '',
-    demo: p?.demo === true };
+    photos: extractPhotos(p), phones: extractPhones(text), demo: p?.demo === true };
 }
 export function validateExtraction(value, text) {
   const check = (v, schema) => {
@@ -74,4 +74,24 @@ export function bucketFor(result) {
 export async function postKey(post) {
   const bytes = new TextEncoder().encode(post.sourceUrl || `${post.groupCity}\n${post.text}`);
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Photo attachment fields observed in the Apify groups collector output.
+export function photoUrl(value) {
+  try {
+    const u = new URL(value);
+    return typeof value === 'string' && value.length <= 3000 && u.protocol === 'https:' &&
+      u.hostname.endsWith('.fbcdn.net') && !u.username && !u.password && !u.port ? u.href : '';
+  } catch { return ''; }
+}
+export function extractPhotos(post) {
+  const attachments = Array.isArray(post?.attachments) ? post.attachments : [];
+  const candidates = attachments.filter(a => a?.__typename === 'Photo' && a.is_playable !== true)
+    .map(a => a.image?.uri || a.thumbnail);
+  const normalized = Array.isArray(post?.photos) ? post.photos : [];
+  return [...new Set([...normalized, ...candidates].map(photoUrl).filter(Boolean))].slice(0,20);
+}
+export function extractPhones(text) {
+  const matches = String(text || '').match(/(?<![\d+])(?:0|\+972[ -]?)(?:5\d|7\d|[23489])(?:[ -]?\d){7}(?![ -]?\d)/g) || [];
+  return [...new Set(matches.map(n => n.replace(/[ -]/g,'').replace(/^\+972/,'0')))].slice(0,10);
 }
