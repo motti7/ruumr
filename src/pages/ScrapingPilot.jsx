@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import RoomListings from '@/components/rooms/RoomListings';
 import Workspace from '@/components/scrapingPilot/Workspace';
 import { pilotRequest } from '@/components/scrapingPilot/request';
 
@@ -22,6 +23,7 @@ export default function ScrapingPilot({ embedded = false }) {
     })();
     return()=>{cancelled=true;};
   },[]);
+  if(embedded && access==='denied')return <RoomListings/>;
   if(access!=='admin')return <div dir="rtl" style={{padding:40,textAlign:'center'}}>{access==='loading'?'טוען חדרים…':embedded?'אנחנו מכינים כאן את החדרים החדשים. תצוגת הניסוי הגולמית זמינה כרגע למנהל האפליקציה.':'מעבדת המודעות זמינה למנהל האפליקציה בלבד.'}</div>;
-  return <>{serviceWarning&&<p role="status" dir="rtl" style={{padding:16,margin:0,background:'#fff2d5'}}>{serviceWarning}</p>}<Workspace invoke={invoke} openaiReady={openaiReady} embedded={embedded}/></>;
+  return <>{embedded&&<RoomListings/>}{serviceWarning&&<p role="status" dir="rtl" style={{padding:16,margin:0,background:'#fff2d5'}}>{serviceWarning}</p>}<Workspace invoke={invoke} openaiReady={openaiReady} embedded={embedded}/></>;
 }

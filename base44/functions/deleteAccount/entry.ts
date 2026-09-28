@@ -26,6 +26,14 @@ Deno.serve(async (req) => {
 
         console.log(`🗑️ Starting full account deletion for user ${userEmail} (${userId})`);
 
+        // Room listings belong to the account, independently of any roommate profile.
+        // Do not complete account deletion while its public contact listings remain.
+        for (;;) {
+            const rooms = await sr.RoomListing.filter({ owner_id: userId }, '-created_date', 100);
+            if (!rooms.length) break;
+            for (const room of rooms) await sr.RoomListing.delete(room.id);
+        }
+
         // Sync deletion to Ruumr Plus
         try {
             await base44.functions.invoke('ruumrPlusBridge', { action: 'profile.delete_current' });

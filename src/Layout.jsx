@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, HeartHandshake, Sparkles, Lock } from "lucide-react";
+import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, HeartHandshake, Sparkles, Plus, Lock } from "lucide-react";
 import WriteReviewButton from "./components/reviews/WriteReviewButton";
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -91,7 +91,7 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
   // Authenticated users without a Profile get locked bottom-nav tabs (they can
   // still reach Settings in the header so account deletion stays accessible).
-  const { hasProfile } = useOptionalAuth();
+  const { hasProfile, isAuthenticated } = useOptionalAuth();
   const tabsLocked = hasProfile === false;
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
@@ -296,10 +296,11 @@ export default function Layout({ children, currentPageName }) {
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
+  const isRoomsContext = currentPageName === 'Rooms' || currentPageName === 'AddRoom' || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') === 'rooms');
   const navigationItems = [
-    { id: "discover", name: t("nav_discover"), path: createPageUrl("Discover"), icon: Home },
+    { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : createPageUrl("Discover"), icon: Home },
     { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    isRoomsContext ? { id: "add-room", name: "הוספת חדר", path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
@@ -430,9 +431,11 @@ export default function Layout({ children, currentPageName }) {
                             (item.id === "discover" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
                         const isPlusItem = item.id === "plus";
+                        const isAddRoom = item.id === "add-room";
+                        const itemLocked = tabsLocked && !isAddRoom && !(item.id === "discover" && isRoomsContext);
                         const hasMessageBadge = (item.messageBadge || 0) > 0;
                         const handleClick = (e) => {
-                            if (tabsLocked) {
+                            if (itemLocked) {
                                 // No Profile yet: tabs are non-functional. Keep the
                                 // user on Discover, where the "complete profile" CTA lives.
                                 e.preventDefault();
@@ -461,11 +464,11 @@ export default function Layout({ children, currentPageName }) {
                             }
                         };
                         return (
-                        <Link key={item.id} to={item.path} onClick={handleClick} className="flex-1 select-none">
+                        <Link key={item.id} aria-label={item.name} to={item.path} onClick={handleClick} className="flex-1 select-none">
                             <motion.div
                             whileTap={{ scale: 0.9 }}
-                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${tabsLocked ? 'opacity-40' : ''} ${
-                                isPlusItem
+                            className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${itemLocked ? 'opacity-40' : ''} ${
+                                (isPlusItem || isAddRoom)
                                     ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
                                         isActive
                                             ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
@@ -496,7 +499,7 @@ export default function Layout({ children, currentPageName }) {
                                     {item.messageBadge}
                                 </span>
                             )}
-                            {tabsLocked && !isPlusItem && (
+                            {itemLocked && !isPlusItem && (
                                 <span className="absolute -top-1 right-2 w-[14px] h-[14px] bg-gray-400 text-white flex items-center justify-center rounded-full border border-white shadow-sm" aria-hidden="true">
                                     <Lock className="w-2 h-2" strokeWidth={3} />
                                 </span>

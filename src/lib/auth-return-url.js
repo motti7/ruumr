@@ -1,3 +1,4 @@
+import {roomAuthDestination} from './room-auth';
 import { Capacitor } from '@capacitor/core';
 import { NATIVE_AUTH_CALLBACK_URL } from '@/lib/nativeAuth';
 
@@ -14,6 +15,7 @@ export function getSafeAuthReturnUrl(fallbackPath = '/') {
 
   try {
     const url = new URL(window.location.href);
+    if(roomAuthDestination()==='/AddRoom')return new URL('/AddRoom',url.origin).toString();
     url.searchParams.delete('from_url');
 
     if (url.pathname.toLowerCase() === '/login') {
