@@ -32,9 +32,9 @@ export function createHandler(createClient) { return async req=>{
       return Response.json({id:record.id});
     }
     if(body.action==='close'){
-      const rows=await entity.filter({id:body.id,owner_id:user.id},'-created_date',1);
-      if(!rows.length)return Response.json({error:'המודעה לא נמצאה בחשבון שלך.'},{status:404});
-      await entity.update(rows[0].id,{status:'closed'});return Response.json({ok:true});
+      let rec;try{rec=await entity.get(body.id);}catch{return Response.json({error:'המודעה לא נמצאה בחשבון שלך.'},{status:404});}
+      if(!rec||rec.owner_id!==user.id)return Response.json({error:'המודעה לא נמצאה בחשבון שלך.'},{status:404});
+      await entity.update(body.id,{status:'closed'});return Response.json({ok:true});
     }
     if(body.action==='list'){
       const records=await entity.filter({status:'published'},'-created_date',100);
