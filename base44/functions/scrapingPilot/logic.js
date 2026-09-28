@@ -45,7 +45,7 @@ export function normalizePost(p) {
     postedAt: typeof (p?.postedAt || p?.time) === 'string' ? String(p.postedAt || p.time).slice(0,40) : '',
     photos: extractPhotos(p), phones: extractPhones(text), demo: p?.demo === true };
 }
-export function validateExtraction(value, text) {
+export function validateExtraction(value, text, evidenceRequired = true) {
   const check = (v, schema) => {
     const type = v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v;
     if (![schema.type].flat().includes(type)) throw new Error('AI returned an invalid field type');
@@ -59,6 +59,7 @@ export function validateExtraction(value, text) {
     if (type === 'number' && (!Number.isFinite(v) || v < 0)) throw new Error('AI returned an invalid number');
   };
   check(value, extractionSchema);
+  if (!evidenceRequired) return value;
   for (const e of value.evidence) if (!e.quote || !text.includes(e.quote)) throw new Error('AI evidence is not present in the post');
   for (const r of value.rooms) if (r.monthlyRentIls !== null && (!r.priceEvidence || !text.includes(r.priceEvidence))) throw new Error('AI price has no source evidence');
   for (const key of ['existingRoommates','totalOccupants']) if (value[key] !== null && (!Number.isInteger(value[key]) || value[key] > 100)) throw new Error('Invalid occupant count');

@@ -98,3 +98,14 @@ test('provider and validation failures identify the failed stage without exposin
     assert.equal(response.status,500);const data=await response.json();assert.equal(data.stage,stage);assert.ok(!JSON.stringify(data).includes('private post'));assert.ok(!JSON.stringify(data).includes('secret provider body'));
   }
 });
+
+test('unverified but structured AI output is review-only and cannot be saved',async()=>{
+  const bad={...result(),evidence:[{field:'city',quote:'fabricated quote'}]};
+  let writes=0;
+  const client={auth:{me:async()=>({role:'admin'})},asServiceRole:{entities:{ScrapingPilotPost:{create:()=>{writes++;}}}},integrations:{Core:{InvokeLLM:async()=>bad}}};
+  const handler=createHandler(()=>client,()=>undefined);
+  const response=await handler(request({action:'analyze',provider:'base44',post:{text:'1200 לחודש'}}));
+  const data=await response.json();assert.equal(response.status,200);assert.equal(data.bucket,'review');assert.ok(data.validationError);
+  const saved=await handler(request({action:'save',post:{text:'1200 לחודש',url:'https://facebook.com/groups/1/posts/2/'},result:data.result}));
+  assert.equal(saved.status,500);assert.equal(writes,0);
+});

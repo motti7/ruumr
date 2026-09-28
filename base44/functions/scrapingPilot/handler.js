@@ -57,7 +57,10 @@ return async req => {
       result = JSON.parse(output); usage = responseData.usage;
     }
     stage = 'validation';
-    validateExtraction(result, post.text);
+    validateExtraction(result, post.text, false);
+    try { validateExtraction(result, post.text); } catch {
+      return Response.json({ result, bucket: 'review', validationError: 'חלק מהציטוטים או הערכים לא עברו אימות מול הפוסט. זו תוצאת AI לא מאומתת; אין לשמור או לפרסם אותה.', provider, model: provider === 'openai' ? MODEL : 'Base44 managed model', usage });
+    }
     return Response.json({ result, bucket: bucketFor(result), provider, model: provider === 'openai' ? MODEL : 'Base44 managed model', usage, promptVersion: 'room-pilot-v1' });
   } catch {
     // Do not expose provider response bodies, source posts, or secrets in logs.
