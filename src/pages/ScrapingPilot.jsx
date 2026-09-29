@@ -1,3 +1,4 @@
+import {roomText as rt, roomDirection, useRoomLocale} from '@/lib/room-i18n';
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import RoomListings from '@/components/rooms/RoomListings';
@@ -8,6 +9,7 @@ async function invoke(body) {
   return pilotRequest((name, data) => base44.functions.invoke(name, data), body);
 }
 export default function ScrapingPilot({ embedded = false }) {
+  useRoomLocale();
   const [access,setAccess] = useState('loading');
   const [openaiReady,setOpenaiReady] = useState(false);
   const [serviceWarning,setServiceWarning] = useState('');
@@ -19,11 +21,11 @@ export default function ScrapingPilot({ embedded = false }) {
       if(me?.role!=='admin'){setAccess('denied');return;}
       setAccess('admin');
       try{const status=await invoke({action:'status'});if(!cancelled)setOpenaiReady(status.openaiReady);}
-      catch{if(!cancelled)setServiceWarning('המסך מוכן; פונקציית העיבוד טרם זמינה בענף. יש לבדוק בצ׳אט Base44 ש־scrapingPilot נפרסה.');}
+      catch{if(!cancelled)setServiceWarning(rt("המסך מוכן; פונקציית העיבוד טרם זמינה בענף. יש לבדוק בצ׳אט Base44 ש־scrapingPilot נפרסה."));}
     })();
     return()=>{cancelled=true;};
   },[]);
   if(embedded && access==='denied')return <RoomListings/>;
-  if(access!=='admin')return <div dir="rtl" style={{padding:40,textAlign:'center'}}>{access==='loading'?'טוען חדרים…':embedded?'אנחנו מכינים כאן את החדרים החדשים. תצוגת הניסוי הגולמית זמינה כרגע למנהל האפליקציה.':'מעבדת המודעות זמינה למנהל האפליקציה בלבד.'}</div>;
-  return <>{embedded&&<RoomListings/>}{serviceWarning&&<p role="status" dir="rtl" style={{padding:16,margin:0,background:'#fff2d5'}}>{serviceWarning}</p>}<Workspace invoke={invoke} openaiReady={openaiReady} embedded={embedded}/></>;
+  if(access!=='admin')return <div dir={roomDirection()} style={{padding:40,textAlign:'center'}}>{access==='loading'?rt("טוען חדרים…"):embedded?rt("אנחנו מכינים כאן את החדרים החדשים. תצוגת הניסוי הגולמית זמינה כרגע למנהל האפליקציה."):rt("מעבדת המודעות זמינה למנהל האפליקציה בלבד.")}</div>;
+  return <>{embedded&&<RoomListings/>}{serviceWarning&&<p role="status" dir={roomDirection()} style={{padding:16,margin:0,background:'#fff2d5'}}>{rt(serviceWarning)}</p>}<Workspace invoke={invoke} openaiReady={openaiReady} embedded={embedded}/></>;
 }

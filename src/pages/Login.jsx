@@ -1,3 +1,4 @@
+import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
 import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
 import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
@@ -12,6 +13,7 @@ import { Apple } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
+  useRoomLocale();
   const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +58,7 @@ export default function Login() {
     <AuthLayout
       icon={LogIn}
       title="Welcome back"
-      subtitle={roomAuthDestination()==='/AddRoom'?'התחברות לפרסום חדר — ללא פרופיל שותף':'Log in to your account'}
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('התחברות לפרסום חדר — ללא פרופיל שותף'):'Log in to your account'}
       footer={
         <>
           Don't have an account?{" "}
@@ -66,7 +68,7 @@ export default function Login() {
         </>
       }
     >
-      <Link to="/Rooms" className="block text-center mb-4">צפייה בחדרים ללא הרשמה</Link>
+      <Link to="/Rooms" className="block text-center mb-4">{rt("צפייה בחדרים ללא הרשמה")}</Link>
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"

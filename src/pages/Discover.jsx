@@ -1,3 +1,4 @@
+import {roomText as rt, roomDirection, useRoomLocale} from '@/lib/room-i18n';
 import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +31,7 @@ import '../components/scrapingPilot/discover-tabs.css';
 const RoomsPreview = lazy(() => import('./ScrapingPilot'));
 
 export default function DiscoverPage() {
+  useRoomLocale();
   const [params, setParams] = useSearchParams();
   const rooms = params.get('view') === 'rooms';
   const [openedRooms, setOpenedRooms] = useState(rooms);
@@ -50,14 +52,14 @@ export default function DiscoverPage() {
     event.preventDefault(); select(value);
     document.getElementById(`discover-${value}-tab`)?.focus();
   };
-  return <div className="discover-with-rooms" dir="rtl">
-    <div className="discover-mode-bar"><div role="tablist" aria-label="שותפים וחדרים" onKeyDown={keyboard}>
-      <button id="discover-people-tab" role="tab" aria-selected={!rooms} aria-controls="discover-people-panel" tabIndex={rooms ? -1 : 0} onClick={() => select('people')}>שותפים</button>
-      <button id="discover-rooms-tab" role="tab" aria-selected={rooms} aria-controls="discover-rooms-panel" tabIndex={rooms ? 0 : -1} onClick={() => select('rooms')}>חדרים <span>ניסוי</span></button>
+  return <div className="discover-with-rooms" dir={roomDirection()}>
+    <div className="discover-mode-bar"><div role="tablist" aria-label={rt("שותפים וחדרים")} onKeyDown={keyboard}>
+      <button id="discover-people-tab" role="tab" aria-selected={!rooms} aria-controls="discover-people-panel" tabIndex={rooms ? -1 : 0} onClick={() => select('people')}>{rt("שותפים")}</button>
+      <button id="discover-rooms-tab" role="tab" aria-selected={rooms} aria-controls="discover-rooms-panel" tabIndex={rooms ? 0 : -1} onClick={() => select('rooms')}>{rt("חדרים")} <span>{rt("ניסוי")}</span></button>
     </div></div>
     <section id="discover-people-panel" role="tabpanel" aria-labelledby="discover-people-tab" hidden={rooms}><DiscoverPeoplePage /></section>
     <section id="discover-rooms-panel" className="discover-rooms-panel" role="tabpanel" aria-labelledby="discover-rooms-tab" hidden={!rooms}>
-      {(openedRooms || rooms) && <Suspense fallback={<p className="p-8 text-center">טוען חדרים…</p>}><RoomsPreview embedded /></Suspense>}
+      {(openedRooms || rooms) && <Suspense fallback={<p className="p-8 text-center">{rt("טוען חדרים…")}</p>}><RoomsPreview embedded /></Suspense>}
     </section>
   </div>;
 }

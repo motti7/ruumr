@@ -1,3 +1,4 @@
+import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
 import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
 import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Register() {
+  useRoomLocale();
   const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -165,7 +167,7 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle={roomAuthDestination()==='/AddRoom'?'הרשמה קצרה לפרסום חדר — ללא שאלון או פרופיל שותף':'Sign up to get started'}
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('הרשמה קצרה לפרסום חדר — ללא שאלון או פרופיל שותף'):'Sign up to get started'}
       footer={
         <>
           Already have an account?{" "}
@@ -175,7 +177,7 @@ export default function Register() {
         </>
       }
     >
-      <Link to="/Rooms" className="block text-center mb-4">צפייה בחדרים ללא הרשמה</Link>
+      <Link to="/Rooms" className="block text-center mb-4">{rt("צפייה בחדרים ללא הרשמה")}</Link>
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"

@@ -1,3 +1,4 @@
+import {roomText as rt,useRoomLocale} from '@/lib/room-i18n';
 import { useEffect, useRef, useState } from 'react';
 
 const EXAMPLES = [
@@ -16,6 +17,7 @@ const HOLD_AFTER_TYPE = 1500; // ms to hold a full phrase before erasing
 const HOLD_AFTER_ERASE = 250; // ms after fully erased before next phrase
 
 export function useTypewriterPlaceholder(active = true) {
+  const language=useRoomLocale();
   const [text, setText] = useState('');
   const idxRef = useRef(0);          // index of current example phrase
   const charRef = useRef(0);        // number of chars currently shown
@@ -30,7 +32,7 @@ export function useTypewriterPlaceholder(active = true) {
     }
 
     const tick = () => {
-      const phrase = EXAMPLES[idxRef.current % EXAMPLES.length];
+      const phrase = rt(EXAMPLES[idxRef.current % EXAMPLES.length]);
       const mode = modeRef.current;
 
       if (mode === 'typing') {
@@ -69,7 +71,7 @@ export function useTypewriterPlaceholder(active = true) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [active]);
+  }, [active, language]);
 
   return text;
 }

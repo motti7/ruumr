@@ -1,3 +1,4 @@
+import {roomText as rt} from '@/lib/room-i18n';
 import { safetyRequest, blockedUserIds } from '@/api/userSafety';
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -300,7 +301,7 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : createPageUrl("Discover"), icon: Home },
     { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
-    isRoomsContext ? { id: "add-room", name: "הוספת חדר", path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
+    isRoomsContext ? { id: "add-room", name: rt("הוספת חדר"), path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
