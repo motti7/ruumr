@@ -1,7 +1,8 @@
 import {useRoomLocale} from '@/lib/room-i18n';
+import {resolveRegion} from '@/lib/userRegion';
 import { useEffect, useRef, useState } from 'react';
 
-const EXAMPLES_HE = [
+const EXAMPLES_ISRAEL_HE = [
   'חדר מואר בדירת שותפים',
   'חדר מרווח עם מרפסת בפלורנטין',
   'חדר שקט בדירה בשכונת נווה עוזר',
@@ -11,7 +12,17 @@ const EXAMPLES_HE = [
   'חדר פינתי בדירת שותפים ביפו',
 ];
 
-const EXAMPLES_EN = [
+const EXAMPLES_ISRAEL_EN = [
+  'Bright room in a shared apartment',
+  'Spacious room with a balcony in Florentin',
+  'Quiet room in an apartment in Neve Ozar',
+  'Huge room in an air-conditioned apartment in Beer Sheva',
+  'Room in a penthouse in central Tel Aviv',
+  'Pleasant room with a garden window in Carmel',
+  'Corner room in a shared apartment in Jaffa',
+];
+
+const EXAMPLES_DUBLIN_EN = [
   'Bright room in a shared apartment',
   'Spacious room with a balcony in Drumcondra',
   'Quiet room in a flat in Rathmines',
@@ -21,6 +32,11 @@ const EXAMPLES_EN = [
   'Corner room in a flatshare in Stoneybatter',
 ];
 
+function pickExamples(region, language) {
+  if (region === 'IE') return EXAMPLES_DUBLIN_EN;
+  return language === 'he' ? EXAMPLES_ISRAEL_HE : EXAMPLES_ISRAEL_EN;
+}
+
 const TYPE_SPEED = 80;   // ms per keystroke while typing
 const ERASE_SPEED = 40;  // ms per keystroke while erasing
 const HOLD_AFTER_TYPE = 1500; // ms to hold a full phrase before erasing
@@ -29,6 +45,7 @@ const HOLD_AFTER_ERASE = 250; // ms after fully erased before next phrase
 export function useTypewriterPlaceholder(active = true) {
   const language=useRoomLocale();
   const [text, setText] = useState('');
+  const region = resolveRegion();
   const idxRef = useRef(0);          // index of current example phrase
   const charRef = useRef(0);        // number of chars currently shown
   const modeRef = useRef('typing'); // 'typing' | 'holding' | 'erasing' | 'paused'
@@ -41,7 +58,7 @@ export function useTypewriterPlaceholder(active = true) {
       return;
     }
 
-    const examples = language === 'he' ? EXAMPLES_HE : EXAMPLES_EN;
+    const examples = pickExamples(region, language);
     const tick = () => {
       const phrase = examples[idxRef.current % examples.length];
       const mode = modeRef.current;
@@ -82,7 +99,7 @@ export function useTypewriterPlaceholder(active = true) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [active, language]);
+  }, [active, language, region]);
 
   return text;
 }
