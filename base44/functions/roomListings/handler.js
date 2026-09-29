@@ -26,9 +26,13 @@ export function createHandler(createClient) { return async req=>{
     const raw=await req.text();if(raw.length>40000)return Response.json({error:'הבקשה גדולה מדי.'},{status:413});
     const body=JSON.parse(raw), entity=sr.RoomListing;
     if(body.action!=='list'&&!user)return Response.json({error:'יש להתחבר כדי להמשיך.'},{status:401});
-    if(body.action==='create'){
+    if(body.action==='create'||body.action==='update'){
       let data;try{data=validateRoom(body.room||{});}catch(e){return Response.json({error:e.message},{status:400});}
-      const record=await entity.create({...data,owner_id:user.id,status:'published'});
+      const publisher=(await sr.RoomPublisher.filter({user_id:user.id},'id',1))[0];
+      if(!publisher)return Response.json({error:'hub.publisher_required'},{status:400});
+      data.publisher_name=publisher.display_name;data.publisher_photo=publisher.photo||'';data.publisher_type=publisher.publisher_type;
+      let record;
+      if(body.action==='update'){const existing=await entity.get(body.id);if(existing.owner_id!==user.id||existing.status!=='published')return Response.json({error:'hub.unavailable'},{status:403});record=await entity.update(body.id,data);}else record=await entity.create({...data,owner_id:user.id,status:'published'});
       return Response.json({id:record.id});
     }
     if(body.action==='close'){
@@ -37,11 +41,12 @@ export function createHandler(createClient) { return async req=>{
       await entity.update(body.id,{status:'closed'});return Response.json({ok:true});
     }
     if(body.action==='list'){
-      const records=await entity.filter({status:'published'},'-created_date',100);
+      let records;
+      if(body.room_id){let record;try{record=await entity.get(body.room_id);}catch{return Response.json({records:[]});}records=record.status==='published'?[record]:[];}else records=await entity.filter({status:'published'},'-created_date',100);
       const [outgoing,incoming]=user ? await Promise.all([sr.UserBlock.filter({blocker_id:user.id}),sr.UserBlock.filter({blocked_id:user.id})]) : [[],[]];
       const blocked=new Set([...outgoing.map(r=>r.blocked_id),...incoming.map(r=>r.blocker_id)]);
       return Response.json({records:records.filter(r=>!blocked.has(r.owner_id)).map(r=>{
-        const fields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos'];
+        const fields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos','publisher_name','publisher_photo','publisher_type'];
         return {...Object.fromEntries(fields.filter(k=>r[k]!==undefined).map(k=>[k,r[k]])),is_owner:!!user && r.owner_id===user.id};
       })});
     }

@@ -15,7 +15,7 @@ export function getSafeAuthReturnUrl(fallbackPath = '/') {
 
   try {
     const url = new URL(window.location.href);
-    if(roomAuthDestination()==='/AddRoom')return new URL('/AddRoom',url.origin).toString();
+    if(roomAuthDestination()!=='/')return new URL(roomAuthDestination(),url.origin).toString();
     url.searchParams.delete('from_url');
 
     if (url.pathname.toLowerCase() === '/login') {

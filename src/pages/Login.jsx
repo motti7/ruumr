@@ -1,6 +1,6 @@
 import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
 import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
   useRoomLocale();
+  useEffect(()=>{rememberRoomAuth();},[]);
   const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,11 +59,11 @@ export default function Login() {
     <AuthLayout
       icon={LogIn}
       title="Welcome back"
-      subtitle={roomAuthDestination()==='/AddRoom'?rt('התחברות לפרסום חדר — ללא פרופיל שותף'):'Log in to your account'}
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('hub.publisher_signup'):'Log in to your account'}
       footer={
         <>
           Don't have an account?{" "}
-          <Link to={roomAuthDestination()==='/AddRoom'?'/register?next=AddRoom':'/register'} className="text-primary font-medium hover:underline">
+          <Link to={roomAuthDestination()==='/AddRoom'?'/register?next=AddRoom':roomAuthDestination()!=='/'?'/register?next=Partner':'/register'} className="text-primary font-medium hover:underline">
             Create one
           </Link>
         </>

@@ -1,0 +1,36 @@
+{
+  "name": "RoomPublisher",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "photo": {
+      "type": "string"
+    },
+    "publisher_type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "departing"
+      ]
+    }
+  },
+  "rls": {
+    "create": false,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": false,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

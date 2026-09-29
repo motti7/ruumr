@@ -1,3 +1,4 @@
+import {roomHub} from '@/api/roomHub';
 import {roomText as rt} from '@/lib/room-i18n';
 import { safetyRequest, blockedUserIds } from '@/api/userSafety';
 import React from "react";
@@ -5,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, ThumbsUp, MessageCircle, HeartHandshake, Sparkles, Plus, Lock } from "lucide-react";
-import WriteReviewButton from "./components/reviews/WriteReviewButton";
+import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock } from "lucide-react";
+
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
 import { motion } from "framer-motion";
@@ -21,29 +22,6 @@ import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
-
-function FilterHintButton() {
-  const { t } = useTranslation();
-  return (
-    <button
-      onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
-      aria-label={t("filters")}
-      className="header-glow select-none min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
-    >
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ pointerEvents: 'none' }}>
-        {/* Line 1 */}
-        <line x1="3" y1="7" x2="23" y2="7" stroke="#1c53d4" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="9" cy="7" r="3" fill="#1c53d4"/>
-        {/* Line 2 */}
-        <line x1="3" y1="13" x2="23" y2="13" stroke="#1c53d4" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="17" cy="13" r="3" fill="#1c53d4"/>
-        {/* Line 3 */}
-        <line x1="3" y1="19" x2="23" y2="19" stroke="#1c53d4" strokeWidth="2.2" strokeLinecap="round"/>
-        <circle cx="11" cy="19" r="3" fill="#1c53d4"/>
-      </svg>
-    </button>
-  );
-}
 
 function isDesktopBrowserContext() {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -93,7 +71,9 @@ export default function Layout({ children, currentPageName }) {
   // Authenticated users without a Profile get locked bottom-nav tabs (they can
   // still reach Settings in the header so account deletion stays accessible).
   const { hasProfile, isAuthenticated } = useOptionalAuth();
-  const tabsLocked = hasProfile === false;
+  const tabsLocked = !isAuthenticated;
+  const [offerUnread,setOfferUnread]=useState(0);
+  useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,30000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -297,16 +277,16 @@ export default function Layout({ children, currentPageName }) {
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
-  const isRoomsContext = currentPageName === 'Rooms' || currentPageName === 'AddRoom' || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') === 'rooms');
+  const isRoomsContext = currentPageName === 'Rooms' || currentPageName === 'AddRoom' || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') !== 'people');
   const navigationItems = [
-    { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : createPageUrl("Discover"), icon: Home },
-    { id: "matches", name: t("nav_matches"), path: createPageUrl("Matches"), icon: MessageCircle, badgeCount: unseenMatchesCount, messageBadge: unreadMessagesCount },
+    { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
+    { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount + offerUnread, messageBadge: unreadMessagesCount },
     isRoomsContext ? { id: "add-room", name: rt("הוספת חדר"), path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    { id: "likes", name: t("nav_likes"), path: createPageUrl("LikesYou"), icon: ThumbsUp, badgeCount: unseenLikesCount },
+    isRoomsContext ? { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles, compact:true } : { id:"spacer",spacer:true },
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
 
-  const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'RoomChat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
   
   // Check for bad photos (blob URLs) and prompt user
@@ -403,13 +383,9 @@ export default function Layout({ children, currentPageName }) {
             כתיבת ביקורת ב-Matches. הם לעולם לא מופיעים יחד, כך שהקבוצה מכילה
             לכל היותר שני כפתורים ושום כפתור אחר לא זז בין הטאבים. */}
         <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
-            {currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') !== 'rooms' && (
-                <FilterHintButton />
-            )}
-            {currentPageName === 'Matches' && (
-                <WriteReviewButton />
-            )}
-            <Link to={createPageUrl("Profile")} aria-label={t("my_profile")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
+            
+            {hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>}
+            <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
         </div>
@@ -428,19 +404,20 @@ export default function Layout({ children, currentPageName }) {
                 <nav className="fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
+                        if(item.spacer)return <div key="spacer" className="flex-1" aria-hidden="true"/>;
                         const isActive = location.pathname === item.path ||
                             (item.id === "discover" && (location.pathname === '/' || currentPageName === 'Discover'));
                         const Icon = item.icon;
                         const isPlusItem = item.id === "plus";
                         const isAddRoom = item.id === "add-room";
-                        const itemLocked = tabsLocked && !isAddRoom && !(item.id === "discover" && isRoomsContext);
+                        const itemLocked = tabsLocked && item.id === "matches";
                         const hasMessageBadge = (item.messageBadge || 0) > 0;
                         const handleClick = (e) => {
                             if (itemLocked) {
                                 // No Profile yet: tabs are non-functional. Keep the
                                 // user on Discover, where the "complete profile" CTA lives.
                                 e.preventDefault();
-                                navigate(createPageUrl("Discover"));
+                                navigate("/login");
                                 return;
                             }
 
@@ -471,7 +448,7 @@ export default function Layout({ children, currentPageName }) {
                             className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${itemLocked ? 'opacity-40' : ''} ${
                                 (isPlusItem || isAddRoom)
                                     ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
-                                        isActive
+                                        (isActive || isAddRoom || (isPlusItem && !item.compact))
                                             ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
                                             : 'bg-orange-50 text-[--theme-orange] border border-orange-200'
                                       }`

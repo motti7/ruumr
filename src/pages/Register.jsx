@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/AuthContext";
 
 export default function Register() {
   useRoomLocale();
+  useEffect(()=>{rememberRoomAuth();},[]);
   const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -107,7 +108,7 @@ export default function Register() {
     }
   };
 
-  if (!isLoadingAuth && !isLoadingPublicSettings && isAuthenticated && roomAuthDestination()==='/AddRoom') return <Navigate to="/AddRoom" replace/>;
+  if (!isLoadingAuth && !isLoadingPublicSettings && isAuthenticated && roomAuthDestination()!=='/') return <Navigate to={roomAuthDestination()} replace/>;
 
   if (showOtp) {
     return (
@@ -167,11 +168,11 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle={roomAuthDestination()==='/AddRoom'?rt('הרשמה קצרה לפרסום חדר — ללא שאלון או פרופיל שותף'):'Sign up to get started'}
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('hub.publisher_signup'):'Sign up to get started'}
       footer={
         <>
           Already have an account?{" "}
-          <Link to={roomAuthDestination()==='/AddRoom'?'/login?next=AddRoom':'/login'} className="text-primary font-medium hover:underline">
+          <Link to={roomAuthDestination()==='/AddRoom'?'/login?next=AddRoom':roomAuthDestination()!=='/'?'/login?next=Partner':'/login'} className="text-primary font-medium hover:underline">
             Log in
           </Link>
         </>

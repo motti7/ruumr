@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHandler,validateRoom} from '../base44/functions/roomListings/handler.js';
 const room=()=>({title:'חדר בדיקה',city:'חיפה',address:'רחוב לדוגמה',price:1500,roommates:2,entry_date:'2026-10-01',end_date:'',rental_type:'regular',furniture:'',description:'מודעת בדיקה מומצאת',phone:'050-000-0000',photos:['https://example.test/room.jpg'],owner_confirmation:true});
 const req=body=>new Request('https://test.invalid',{method:'POST',body:JSON.stringify(body)});
-const client=(user,entity,blocks=[])=>({auth:{me:async()=>user},asServiceRole:{entities:{BannedUser:{filter:async()=>[]},RoomListing:entity,UserBlock:{filter:async q=>blocks.filter(b=>Object.entries(q).every(([k,v])=>b[k]===v))}}}});
+const client=(user,entity,blocks=[])=>({auth:{me:async()=>user},asServiceRole:{entities:{RoomPublisher:{filter:async()=>[{display_name:'Test publisher',publisher_type:'owner'}]},BannedUser:{filter:async()=>[]},RoomListing:entity,UserBlock:{filter:async q=>blocks.filter(b=>Object.entries(q).every(([k,v])=>b[k]===v))}}}});
 test('room creation never needs Profile and ignores forged owner/status fields',async()=>{
   let saved;const handler=createHandler(()=>client({id:'owner',email:'owner@example.test'},{create:async data=>{saved=data;return {id:'room'};}}));
   const response=await handler(req({action:'create',room:{...room(),owner_id:'victim',status:'closed'}}));

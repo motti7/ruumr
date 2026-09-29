@@ -54,6 +54,19 @@
         "published",
         "closed"
       ]
+    },
+    "publisher_name": {
+      "type": "string"
+    },
+    "publisher_photo": {
+      "type": "string"
+    },
+    "publisher_type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "departing"
+      ]
     }
   },
   "required": [
