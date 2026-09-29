@@ -29,3 +29,5 @@ Node tests cover authorization, roommate-only saves, ownership, opt-out, closed/
 Deployment must include all new entities and roomHub together with the updated roomListings, userSafety and shared cleanup code. Verify actual branch function registration in Base44. Live phone push, delivered email, native signup return, multi-account chat and real account deletion require dedicated test accounts; never use real user records for destructive validation. Local mocks do not establish live delivery or live platform permissions.
 
 All new UI requires Hebrew/English resources and RTL/LTR support. User-authored content is not automatically translated.
+
+Live branch verification: Base44 confirmed roomHub account/inbox and anonymous roomListings list return 200; new entity registration and function imports are present. Browser checks confirmed the publisher setup redirect, bilingual setup fields, Inbox tabs and Rooms default selection. Editor preview occasionally returned 429; read-only roomHub requests now retry once and inactive-tab polling is paused. No real publisher, listing or conversation was created for this verification.

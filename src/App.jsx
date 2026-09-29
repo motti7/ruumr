@@ -167,7 +167,7 @@ const AuthenticatedApp = () => {
         <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
 <Route path="/SavedRooms" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="SavedRooms"><SavedRooms/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
 <Route path="/Inbox" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="Inbox"><Inbox/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
-<Route path="/RoomChat" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomChat"><RoomChat/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
+<Route path="/RoomChat" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomChat"><RoomChat/></LayoutWrapper></Suspense>:<Navigate to={"/login?next=RoomChat&offerId="+encodeURIComponent(new URLSearchParams(location.search).get("offerId")||"")} replace/>}/>
 {/* All protected routes */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
 

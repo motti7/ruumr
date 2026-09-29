@@ -7,5 +7,5 @@ import '@/components/scrapingPilot/discover-tabs.css';
 export default function Rooms(){
   useRoomLocale();
   
-  return <div dir={roomDirection()}><div className="discover-mode-bar"><div role="tablist" aria-label={rt("שותפים וחדרים")}><Link role="tab" aria-selected={false} className="rr-add" to="/Discover?view=people">{rt("שותפים")}</Link><span role="tab" aria-selected={true} className="rr-add" aria-current="page">{rt("חדרים")}</span></div></div><div style={{paddingTop:52}}><RoomListings/></div></div>;
+  return <div dir={roomDirection()}><div className="discover-mode-bar"><div role="tablist" aria-label={rt("שותפים וחדרים")}><Link role="tab" aria-selected={false} className="" to="/Discover?view=people">{rt("שותפים")}</Link><span role="tab" aria-selected={true} className="" aria-current="page">{rt("חדרים")}</span></div></div><div style={{paddingTop:52}}><RoomListings/></div></div>;
 }

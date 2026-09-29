@@ -16,9 +16,9 @@ export function createHubHandler(createClient,notify=async()=>{},cleanup=async()
   const b=JSON.parse(raw),action=b.action;
   if(!user?.id)fail('hub.login',401);
   if((await sr.BannedUser.filter({email:user.email},'id',1)).length)fail('hub.unavailable',403);
-  const profiles=await sr.Profile.filter({user_id:user.id},'id',1);
-  const publisher=(await sr.RoomPublisher.filter({user_id:user.id},'id',1))[0];
-  const preference=(await sr.RoomPreference.filter({user_id:user.id},'id',1))[0];
+  const profiles=['account','save','saved','preference'].includes(action)?await sr.Profile.filter({user_id:user.id},'id',1):[];
+  const publisher=['account','publisher','candidates','offer'].includes(action)?(await sr.RoomPublisher.filter({user_id:user.id},'id',1))[0]:null;
+  const preference=['account','preference'].includes(action)?(await sr.RoomPreference.filter({user_id:user.id},'id',1))[0]:null;
   if(action==='account')return Response.json({publisher:publicPublisher(publisher),has_profile:!!profiles.length,accept_offers:preference?.accept_offers!==false,rooms:(await rows(sr.RoomListing,{owner_id:user.id})).map(publicRoom)});
   if(action==='publisher'){
    const name=typeof b.display_name==='string'?b.display_name.trim():'';
@@ -26,6 +26,7 @@ export function createHubHandler(createClient,notify=async()=>{},cleanup=async()
    if(b.photo && (typeof b.photo!=='string'||b.photo.length>3000||!/^https:\/\//.test(b.photo)))fail('hub.invalid');
    const data={user_id:user.id,display_name:name,publisher_type:b.publisher_type,photo:b.photo||''};
    if(publisher)await sr.RoomPublisher.update(publisher.id,data);else await sr.RoomPublisher.create(data);
+   for(const r of await rows(sr.RoomListing,{owner_id:user.id,status:'published'}))await sr.RoomListing.update(r.id,{publisher_name:data.display_name,publisher_photo:data.photo,publisher_type:data.publisher_type});
    return Response.json({ok:true});
   }
   if(action==='preference'){
@@ -109,5 +110,5 @@ export function createHubHandler(createClient,notify=async()=>{},cleanup=async()
    return Response.json({record});
   }
   fail('hub.invalid');
- }catch(e){return Response.json({error:e.status?e.message:'hub.failed'},{status:e.status||500});}
+ }catch(e){const status=Number(e.status??e.response?.status)||500;return Response.json({error:String(e.message||'').startsWith('hub.')?e.message:'hub.failed'},{status});}
 };}

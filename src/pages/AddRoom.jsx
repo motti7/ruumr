@@ -46,6 +46,6 @@ export default function AddRoom(){
     <div className="rr-photos">{room.photos.map((url,i)=><div key={url}><img src={url} alt={rt("תמונת החדר ")+(i+1)}/><button type="button" onClick={()=>set('photos',room.photos.filter((_,j)=>j!==i))}>{rt("הסרת תמונה ")}{i+1}</button></div>)}</div>
     <label className="rr-confirm"><input type="checkbox" required checked={room.owner_confirmation} onChange={e=>set('owner_confirmation',e.target.checked)}/>{rt("אני בעל הדירה או מורשה לפרסם אותה, ומאשר להציג את התמונות ופרטי הקשר במודעה.")}</label>
     <button className="rr-primary" type="submit" disabled={!room.photos.length}>{rt("פרסום החדר")}</button></fieldset>
-    {uploading&&<p role="status">{rt("מעלה תמונות…")}</p>}{busy&&<p role="status">{rt("מפרסם את החדר…")}</p>}{error&&<p role="alert" className="rr-error">{rt(error)}</p>}</form>
+    {uploading&&<p role="status">{rt("מעלה תמונות…")}</p>}{busy&&<p role="status">{rt("מפרסם את החדר…")}</p>}{error&&<><p role="alert" className="rr-error">{rt(error)}</p>{!ready&&<button type="button" onClick={()=>window.location.reload()}>{rt("hub.retry")}</button>}</>}</form>
   </section>;
 }

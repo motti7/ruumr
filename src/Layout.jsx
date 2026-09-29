@@ -73,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
   const { hasProfile, isAuthenticated } = useOptionalAuth();
   const tabsLocked = !isAuthenticated;
   const [offerUnread,setOfferUnread]=useState(0);
-  useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,30000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
+  useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>document.hidden?Promise.resolve():roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,60000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -99,6 +99,7 @@ export default function Layout({ children, currentPageName }) {
     };
 
   const checkNotifications = async () => {
+      if(document.hidden)return;
       try {
         const notificationsSupported = typeof Notification !== 'undefined';
         const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
@@ -196,7 +197,7 @@ export default function Layout({ children, currentPageName }) {
     };
 
     checkNotifications();
-    const interval = setInterval(checkNotifications, 30000); // Poll every 30s
+    const interval = setInterval(checkNotifications, 60000); // Poll every 30s
 
     // Real-time subscription to Match entity — immediately re-check when a new match is created
     let unsubMatch = null;
@@ -277,7 +278,7 @@ export default function Layout({ children, currentPageName }) {
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
-  const isRoomsContext = currentPageName === 'Rooms' || currentPageName === 'AddRoom' || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') !== 'people');
+  const isRoomsContext = ['Rooms','AddRoom','RoomAccount','SavedRooms'].includes(currentPageName) || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') !== 'people');
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
     { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount + offerUnread, messageBadge: unreadMessagesCount },

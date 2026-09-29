@@ -289,5 +289,7 @@
   "hub.reason_inappropriate_content": "Inappropriate content",
   "hub.reason_spam": "Spam",
   "hub.reason_other": "Other",
-  "hub.filters": "Filters"
+  "hub.filters": "Filters",
+  "hub.retry": "Try again",
+  "hub.list_room": "+ List a room"
 }

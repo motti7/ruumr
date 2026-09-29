@@ -289,5 +289,7 @@
   "hub.reason_inappropriate_content": "תוכן לא הולם",
   "hub.reason_spam": "ספאם",
   "hub.reason_other": "אחר",
-  "hub.filters": "מסננים"
+  "hub.filters": "מסננים",
+  "hub.retry": "ניסיון נוסף",
+  "hub.list_room": "+ פרסום חדר"
 }

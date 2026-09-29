@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 
 // Root screens that should exit the app (or go to home) on back press
-const ROOT_PATHS = ['/', '/Discover', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker'];
+const ROOT_PATHS = ['/', '/Discover', '/Inbox', '/Rooms', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker'];
 
 /**
  * Native Android back handler bridge
