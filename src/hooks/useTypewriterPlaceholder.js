@@ -1,7 +1,7 @@
-import {roomText as rt,useRoomLocale} from '@/lib/room-i18n';
+import {useRoomLocale} from '@/lib/room-i18n';
 import { useEffect, useRef, useState } from 'react';
 
-const EXAMPLES = [
+const EXAMPLES_HE = [
   'חדר מואר בדירת שותפים',
   'חדר מרווח עם מרפסת בפלורנטין',
   'חדר שקט בדירה בשכונת נווה עוזר',
@@ -9,6 +9,16 @@ const EXAMPLES = [
   'חדר בדירת גג בלב תל אביב',
   'חדר נעים עם חלון לגינה בכרמל',
   'חדר פינתי בדירת שותפים ביפו',
+];
+
+const EXAMPLES_EN = [
+  'Bright room in a shared apartment',
+  'Spacious room with a balcony in Drumcondra',
+  'Quiet room in a flat in Rathmines',
+  'Large room with heating in Phibsborough',
+  'Cosy room in a top-floor flat in Smithfield',
+  'Pleasant room with a garden view in Ranelagh',
+  'Corner room in a flatshare in Stoneybatter',
 ];
 
 const TYPE_SPEED = 80;   // ms per keystroke while typing
@@ -31,8 +41,9 @@ export function useTypewriterPlaceholder(active = true) {
       return;
     }
 
+    const examples = language === 'he' ? EXAMPLES_HE : EXAMPLES_EN;
     const tick = () => {
-      const phrase = rt(EXAMPLES[idxRef.current % EXAMPLES.length]);
+      const phrase = examples[idxRef.current % examples.length];
       const mode = modeRef.current;
 
       if (mode === 'typing') {
