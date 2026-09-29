@@ -11,7 +11,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const TAB_ROOTS = ['/Discover', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker', '/'];
+const TAB_ROOTS = ['/Discover', '/Inbox', '/Rooms', '/Matches', '/RuumrPlus', '/LikesYou', '/GroupTracker', '/'];
 
 // Enhanced tab state: { stack: [], scrollPositions: {}, routeDepths: {} }
 const tabStates = {};

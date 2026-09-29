@@ -1,0 +1,95 @@
+{
+  "name": "RoomListing",
+  "type": "object",
+  "properties": {
+    "owner_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "entry_date": {
+      "type": "string"
+    },
+    "end_date": {
+      "type": "string"
+    },
+    "rental_type": {
+      "type": "string",
+      "enum": [
+        "regular",
+        "sublet"
+      ]
+    },
+    "roommates": {
+      "type": "number"
+    },
+    "furniture": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "published",
+        "closed"
+      ]
+    },
+    "publisher_name": {
+      "type": "string"
+    },
+    "publisher_photo": {
+      "type": "string"
+    },
+    "publisher_type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "departing"
+      ]
+    }
+  },
+  "required": [
+    "owner_id",
+    "title",
+    "city",
+    "price",
+    "phone",
+    "photos",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

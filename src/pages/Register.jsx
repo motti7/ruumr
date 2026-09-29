@@ -1,5 +1,7 @@
+import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
+import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { claimPublicProfileInvite } from "@/functions/claimPublicProfileInvite";
 import { Button } from "@/components/ui/button";
@@ -13,7 +15,9 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Register() {
-  const { loginWithProvider } = useAuth();
+  useRoomLocale();
+  useEffect(()=>{rememberRoomAuth();},[]);
+  const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -68,7 +72,7 @@ export default function Register() {
       } catch (_) {
         // Best-effort: never block the user from entering the app.
       }
-      window.location.href = "/";
+      window.location.href = roomAuthDestination();
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
@@ -95,6 +99,7 @@ export default function Register() {
     setError("");
     setProviderPending(provider);
     try {
+      rememberRoomAuth();
       await loginWithProvider(provider);
     } catch (err) {
       setError(err?.message || "Sign-in failed. Please try again.");
@@ -102,6 +107,8 @@ export default function Register() {
       setProviderPending(null);
     }
   };
+
+  if (!isLoadingAuth && !isLoadingPublicSettings && isAuthenticated && roomAuthDestination()!=='/') return <Navigate to={roomAuthDestination()} replace/>;
 
   if (showOtp) {
     return (
@@ -161,16 +168,17 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle="Sign up to get started"
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('hub.publisher_signup'):'Sign up to get started'}
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="text-primary font-medium hover:underline">
+          <Link to={roomAuthDestination()==='/AddRoom'?'/login?next=AddRoom':roomAuthDestination()!=='/'?'/login?next=Partner':'/login'} className="text-primary font-medium hover:underline">
             Log in
           </Link>
         </>
       }
     >
+      <Link to="/Rooms" className="block text-center mb-4">{rt("צפייה בחדרים ללא הרשמה")}</Link>
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"

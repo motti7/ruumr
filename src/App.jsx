@@ -41,6 +41,13 @@ const RuumrPlusThankYou = lazy(() => import('./pages/RuumrPlusThankYou'));
 const TranzilaReturn = lazy(() => import('./pages/TranzilaReturn'));
 const ManageSubscription = lazy(() => import('./pages/ManageSubscription'));
 const AdminTools = lazy(() => import('./pages/AdminTools'));
+const Rooms = lazy(() => import('./pages/Rooms'));
+const RoomAccount = lazy(() => import('./pages/RoomAccount'));
+const SavedRooms = lazy(() => import('./pages/SavedRooms'));
+const Inbox = lazy(() => import('./pages/Inbox'));
+const RoomChat = lazy(() => import('./pages/RoomChat'));
+const AddRoom = lazy(() => import('./pages/AddRoom'));
+const ScrapingPilot = lazy(() => import('./pages/ScrapingPilot'));
 const WriteExternalReview = lazy(() => import('./pages/WriteExternalReview'));
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
@@ -78,9 +85,9 @@ const wrapNativeIOSPaymentGuard = (currentPageName, element) => (
     : element
 );
 
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : null;
+const { Pages, Layout } = pagesConfig;
+
+
 const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
@@ -124,7 +131,7 @@ const AuthenticatedApp = () => {
 
   // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered') {
+    if (authError.type === 'user_not_registered' && !['/','/Rooms','/Discover','/login','/register'].includes(location.pathname)) {
       writeBootMarker('authenticated-app-user-not-registered');
       return <UserNotRegisteredError />;
     }
@@ -153,16 +160,18 @@ const AuthenticatedApp = () => {
         <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
         <Route path="/PublicProfile" element={<Suspense fallback={<PageLoader />}><PublicProfile /></Suspense>} />
 
-        {/* All protected routes */}
+        <Route path="/Rooms" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms /></LayoutWrapper></Suspense>} />
+        <Route path="/Discover" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Discover">{<Pages.Discover/>}</LayoutWrapper></Suspense>} />
+        <Route path="/" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms/></LayoutWrapper></Suspense>} />
+        <Route path="/LikesYou" element={<Navigate to="/Inbox?tab=likes" replace/>}/><Route path="/Matches" element={<Navigate to="/Inbox" replace/>}/><Route path="/AddRoom" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="AddRoom"><AddRoom/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
+        <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
+<Route path="/SavedRooms" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="SavedRooms"><SavedRooms/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
+<Route path="/Inbox" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="Inbox"><Inbox/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
+<Route path="/RoomChat" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomChat"><RoomChat/></LayoutWrapper></Suspense>:<Navigate to={"/login?next=RoomChat&offerId="+encodeURIComponent(new URLSearchParams(location.search).get("offerId")||"")} replace/>}/>
+{/* All protected routes */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-          <Route path="/" element={
-            <PageTransition>
-              <LayoutWrapper currentPageName={mainPageKey}>
-                {MainPage ? <MainPage /> : null}
-              </LayoutWrapper>
-            </PageTransition>
-          } />
-          {Object.entries(Pages).map(([path, Page]) => (
+
+          {Object.entries(Pages).filter(([path])=>!["Discover","Rooms","AddRoom","Matches","LikesYou"].includes(path)).map(([path, Page]) => (
             <Route
               key={path}
               path={`/${path}`}
@@ -179,6 +188,7 @@ const AuthenticatedApp = () => {
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
+           <Route path="/ScrapingPilot" element={<Suspense fallback={<PageLoader />}><ScrapingPilot /></Suspense>} />
           <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
           <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPaymentGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
           <Route path="/TranzilaReturn" element={<Suspense fallback={<PageLoader />}><TranzilaReturn /></Suspense>} />

@@ -2,6 +2,8 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+import roomsHe from './locales/he/rooms.json';
+import roomsEn from './locales/en/rooms.json';
 import he from './locales/he/translation.json';
 import en from './locales/en/translation.json';
 
@@ -17,8 +19,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      he: { translation: he },
-      en: { translation: en },
+      he: { translation: he, rooms: roomsHe },
+      en: { translation: en, rooms: roomsEn },
     },
     fallbackLng: 'he',
     supportedLngs: SUPPORTED_LANGUAGES,

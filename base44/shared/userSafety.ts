@@ -20,8 +20,7 @@ export async function isBlocked(sr, a, b) {
 }
 
 export async function requireOpenChat(sr, matchId, userId) {
-  const rows = await sr.Match.filter({ id: matchId }, 'id', 1);
-  const match = rows[0];
+  let match;try{match=await sr.Match.get(matchId);}catch(e){if(Number(e?.status??e?.response?.status)!==404)throw e;}
   if (!match || ![match.user1_id, match.user2_id].includes(userId)) {
     throw safetyError('Chat unavailable', 404);
   }
@@ -69,6 +68,9 @@ export async function cleanupBlock(sr, block) {
     await drain(sr.TypingStatus, { match_id: matchId });
     await remove(sr.Match, matchId);
   }
+  // Room conversations share the same global block but never become roommate matches.
+  const offers=[...await allRows(sr.RoomOffer,{owner_id:block.blocker_id,recipient_id:block.blocked_id}),...await allRows(sr.RoomOffer,{owner_id:block.blocked_id,recipient_id:block.blocker_id})];
+  for(const offer of offers){await drain(sr.RoomOfferMessage,{offer_id:offer.id});await remove(sr.RoomOffer,offer.id);}
   await sr.UserBlock.update(block.id, { cleanup_pending: false });
 }
 

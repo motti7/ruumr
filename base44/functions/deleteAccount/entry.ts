@@ -1,3 +1,4 @@
+import {allRows,drain} from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -25,6 +26,20 @@ Deno.serve(async (req) => {
         const sr = base44.asServiceRole.entities;
 
         console.log(`🗑️ Starting full account deletion for user ${userEmail} (${userId})`);
+
+        // Account deletion also removes room-only account data and both sides of room chats.
+        const offers=[...await allRows(sr.RoomOffer,{owner_id:userId}),...await allRows(sr.RoomOffer,{recipient_id:userId})];
+        for(const offer of offers){await drain(sr.RoomOfferMessage,{offer_id:offer.id});await sr.RoomOffer.delete(offer.id);}
+        await drain(sr.RoomPublisher,{user_id:userId});
+        await drain(sr.RoomPreference,{user_id:userId});
+        await drain(sr.SavedRoom,{user_id:userId});
+        // Room listings belong to the account, independently of any roommate profile.
+        // Do not complete account deletion while its public contact listings remain.
+        for (;;) {
+            const rooms = await sr.RoomListing.filter({ owner_id: userId }, '-created_date', 100);
+            if (!rooms.length) break;
+            for (const room of rooms) { await drain(sr.SavedRoom,{room_id:room.id}); await sr.RoomListing.delete(room.id); }
+        }
 
         // Sync deletion to Ruumr Plus
         try {
