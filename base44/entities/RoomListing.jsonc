@@ -27,7 +27,9 @@
       "type": "string",
       "enum": [
         "regular",
-        "sublet"
+        "sublet",
+        "unknown",
+        "regular_with_early_sublet"
       ]
     },
     "roommates": {
@@ -67,13 +69,59 @@
         "owner",
         "departing"
       ]
+    },
+    "source_kind": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "content_key": {
+      "type": "string"
+    },
+    "source_posted_at": {
+      "type": "string"
+    },
+    "imported_at": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "entry_text": {
+      "type": "string"
+    },
+    "end_text": {
+      "type": "string"
+    },
+    "bills_text": {
+      "type": "string"
+    },
+    "shabbat_policy": {
+      "type": "string"
+    },
+    "kosher_policy": {
+      "type": "string"
+    },
+    "price_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      }
     }
   },
   "required": [
     "owner_id",
     "title",
     "city",
-    "price",
     "phone",
     "photos",
     "status"
