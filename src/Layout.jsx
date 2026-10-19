@@ -284,7 +284,7 @@ export default function Layout({ children, currentPageName }) {
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
     { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount + offerUnread, messageBadge: unreadMessagesCount },
     isRoomsContext ? { id: "add-room", name: rt("הוספת חדר"), path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
-    isRoomsContext ? { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles, compact:true } : { id:"spacer",spacer:true },
+    isRoomsContext ? { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles } : null,
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
 
@@ -450,9 +450,9 @@ export default function Layout({ children, currentPageName }) {
                             <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${itemLocked ? 'opacity-40' : ''} ${
-                                (isPlusItem || isAddRoom)
+                                isAddRoom
                                     ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
-                                        (isActive || isAddRoom || (isPlusItem && !item.compact))
+                                        (isActive || isAddRoom)
                                             ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
                                             : 'bg-orange-50 text-[--theme-orange] border border-orange-200'
                                       }`
@@ -465,11 +465,12 @@ export default function Layout({ children, currentPageName }) {
                                 <div className={`rounded-full p-1 border-2 ${isActive ? 'border-[--theme-orange]' : 'border-gray-300'}`}>
                                     <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
                                 </div>
+                            ) : isPlusItem ? (
+                                <span className="ruumr-plus-shimmer inline-flex items-center justify-center">
+                                    <Icon className="w-7 h-7" fill="none" />
+                                </span>
                             ) : (
-                                <div className={isPlusItem ? 'flex items-center gap-1.5' : ''}>
-                                    <Icon className={`${isPlusItem ? 'w-5 h-5' : 'w-7 h-7'}`} fill="none" />
-                                    {isPlusItem && <span className="text-[10px] font-bold leading-none">Plus</span>}
-                                </div>
+                                <Icon className="w-7 h-7" fill="none" />
                             )}
                             {item.badgeCount > 0 && (
                                 <span className="absolute -top-1 right-3 min-w-[16px] h-[16px] bg-[--theme-orange] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white px-0.5 shadow-sm">

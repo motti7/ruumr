@@ -295,6 +295,30 @@ a:focus-visible {
   border-radius: 2px;
 }
 
+/* ── Ruumr Plus nav icon — animated orange shimmer highlight ──────── */
+.ruumr-plus-shimmer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  padding: 2px;
+}
+.ruumr-plus-shimmer::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -160%;
+  width: 70%;
+  height: 220%;
+  background: linear-gradient(90deg, transparent, rgba(255, 87, 34, 0.6), transparent);
+  transform: rotate(18deg);
+  animation: ruumr-plus-sweep 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes ruumr-plus-sweep {
+  0% { left: -160%; }
+  55%, 100% { left: 260%; }
+}
+
 /* ── Pseudo-Element Overlays for Sub-44px Interactive Elements ───── */
 /* Invisible 44x44px tap areas for small icons/buttons */
 .music-player-mute::after {
