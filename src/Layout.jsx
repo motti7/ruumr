@@ -466,7 +466,7 @@ export default function Layout({ children, currentPageName }) {
                                     <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
                                 </div>
                             ) : isPlusItem ? (
-                                <span className="ruumr-plus-shimmer inline-flex items-center justify-center">
+                                <span className={`${currentPageName === 'RuumrPlus' ? '' : 'ruumr-plus-shimmer'} inline-flex items-center justify-center`}>
                                     <Icon className="w-7 h-7" fill="none" />
                                 </span>
                             ) : (
