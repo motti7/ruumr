@@ -279,6 +279,7 @@ export default function Layout({ children, currentPageName }) {
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
   const isRoomsContext = ['Rooms','AddRoom','RoomAccount','SavedRooms'].includes(currentPageName) || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') !== 'people');
+  const isPartnersTab = currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') === 'people';
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
     { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount + offerUnread, messageBadge: unreadMessagesCount },
@@ -387,7 +388,7 @@ export default function Layout({ children, currentPageName }) {
             
             {isRoomsContext
                 ? (hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>)
-                : (hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
+                : (isPartnersTab && hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
             <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>
