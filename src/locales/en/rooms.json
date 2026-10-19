@@ -312,6 +312,7 @@
   "feed.bills": "Bills",
   "feed.import_title": "Room import — preview",
   "feed.import_hint": "Apify file: up to 60 posts. Only room offers with photos and a phone appear in the feed.",
+  "feed.paste": "Or paste JSON content",
   "feed.file": "Choose JSON file",
   "feed.start": "Process and add to feed",
   "feed.stop": "Stop after current post",
