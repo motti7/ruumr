@@ -6,7 +6,7 @@ export async function rows(entity,query){
 async function get(entity,id){if(typeof id!=='string'||!id)return null;try{return await entity.get(id);}catch(e){if(Number(e?.status??e?.response?.status)===404)return null;throw e;}}
 async function blocked(sr,a,b){return (await sr.UserBlock.filter({pair_key:pair(a,b)},'id',1)).length>0;}
 const publicPublisher=p=>p?{display_name:p.display_name,photo:p.photo||'',publisher_type:p.publisher_type}:null;
-const roomFields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos','status'];
+const roomFields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos','status','source_kind','source_posted_at','created_date','entry_text','end_text','bills_text','shabbat_policy','kosher_policy','price_options'];
 const publicRoom=r=>Object.fromEntries(roomFields.filter(k=>r[k]!==undefined).map(k=>[k,r[k]]));
 export function createHubHandler(createClient,notify=async()=>{},cleanup=async()=>{throw new Error('Deferred cleanup');}){return async req=>{
  if(req.method!=='POST')return Response.json({error:'Method not allowed'},{status:405});
