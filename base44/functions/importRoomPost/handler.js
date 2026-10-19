@@ -43,14 +43,17 @@ export function createImportHandler(createClient){return async req=>{
  const text=await req.text();if(text.length>180000)throw new Error('feed.invalid_post');
  const b=JSON.parse(text),sr=client.asServiceRole.entities,p=prepare(b.post),key=await postKey(p),contentKey=await fingerprint(p.text);
  if(!p.text||!p.phones.length||!p.photos.length)return Response.json({status:'filtered',reason:'feed.missing_contact_media'});
+ stage='lookup_room';
  const existing=await sr.RoomListing.filter({source_key:key},'id',1);
  if(existing.length)return Response.json({status:'duplicate',id:existing[0].id});
  const same=await sr.RoomListing.filter({content_key:contentKey},'id',1);
  if(same.length)return Response.json({status:'duplicate',id:same[0].id});
+ stage='lookup_pilot';
  const previous=(await sr.ScrapingPilotPost.filter({source_key:key},'id',1))[0];
  let result;
  if(previous?.result_json){try{result=JSON.parse(previous.result_json);validateExtraction(result,p.text);}catch{result=null;}}
  if(!result){
+ stage='ai';
  result=await client.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
  stage='feed.review';validateExtraction(result,p.text);
  const data={source_key:key,source_url:p.sourceUrl,source_text:p.text,group_city:p.groupCity,photos_json:JSON.stringify(p.photos),phones_json:JSON.stringify(p.phones),posted_at_text:p.postedAt,bucket:bucketFor(result)==='rooms'?'rooms':'leads',result_json:JSON.stringify(result),review_status:'pending',processing_label:'base44_feed_v1',saved_by:user.id};
@@ -67,5 +70,5 @@ export function createImportHandler(createClient){return async req=>{
  stage='feed.save_failed';
  const record=await sr.RoomListing.create(listingData(p,result,photos,key,contentKey));
  return Response.json({status:'published',id:record.id,photos:photos.length});
- }catch(e){return Response.json({error:String(e.message).startsWith('feed.')?e.message:stage},{status:500});}
+ }catch(e){const message=String(e.message||'');return Response.json({error:message.startsWith('feed.')?message:stage.startsWith('feed.')?stage:'feed.processing_failed',diagnostic:{stage,status:Number(e.status||e.response?.status)||500,message:message.slice(0,300)}},{status:500});}
 };}
