@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
-import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock } from "lucide-react";
+import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock, SlidersHorizontal } from "lucide-react";
 
 import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
@@ -385,7 +385,9 @@ export default function Layout({ children, currentPageName }) {
             לכל היותר שני כפתורים ושום כפתור אחר לא זז בין הטאבים. */}
         <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
             
-            {hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>}
+            {isRoomsContext
+                ? (hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>)
+                : (hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
             <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
             </Link>

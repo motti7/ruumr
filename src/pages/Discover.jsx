@@ -64,7 +64,7 @@ export default function DiscoverPage() {
     <div className="discover-mode-bar"><div role="tablist" aria-label={rt("שותפים וחדרים")} onKeyDown={keyboard}>
       <button id="discover-people-tab" role="tab" aria-selected={!rooms} aria-controls="discover-people-panel" tabIndex={rooms ? -1 : 0} onClick={() => select('people')}>{rt("שותפים")}</button>
       <button id="discover-rooms-tab" role="tab" aria-selected={rooms} aria-controls="discover-rooms-panel" tabIndex={rooms ? 0 : -1} onClick={() => select('rooms')}>{rt("חדרים")} <span>{rt("ניסוי")}</span></button>
-    </div>{!rooms&&hasProfile&&!publisherMode&&<button className="rh-filter" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))}>☷</button>}</div>
+    </div></div>
     <section id="discover-people-panel" role="tabpanel" aria-labelledby="discover-people-tab" hidden={rooms}>{!rooms && (isAuthenticated ? publisherMode ? <PublisherDiscover/> : <><div className="rh-mode-link">{publisher&&<Link to="/Discover?view=people&mode=publisher">{rt('hub.offer_mode')}</Link>}</div><DiscoverPeoplePage/></> : <div className="rr" style={{paddingTop:80}}><p>{rt('hub.partner_gate')}</p><Link className="rr-add" to="/register?next=Partner">{rt('hub.create_partner')}</Link><Link to="/login?next=Partner">{rt('hub.sign_in')}</Link></div>)}</section>
     <section id="discover-rooms-panel" className="discover-rooms-panel" role="tabpanel" aria-labelledby="discover-rooms-tab" hidden={!rooms}>
       {(openedRooms || rooms) && <Suspense fallback={<p className="p-8 text-center">{rt("טוען חדרים…")}</p>}><RoomsPreview embedded /></Suspense>}
