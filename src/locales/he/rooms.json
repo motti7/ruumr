@@ -291,5 +291,6 @@
   "hub.reason_other": "אחר",
   "hub.filters": "מסננים",
   "hub.retry": "ניסיון נוסף",
-  "hub.list_room": "+ פרסום חדר"
+  "hub.list_room": "+ פרסום חדר",
+  "hub.back_to_rooms": "חזרה לחדרים"
 }

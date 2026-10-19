@@ -291,5 +291,6 @@
   "hub.reason_other": "Other",
   "hub.filters": "Filters",
   "hub.retry": "Try again",
-  "hub.list_room": "+ List a room"
+  "hub.list_room": "+ List a room",
+  "hub.back_to_rooms": "Back to rooms"
 }
