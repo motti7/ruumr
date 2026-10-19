@@ -1,4 +1,4 @@
-import {normalizePost,postKey,instructions,extractionSchema,validateExtraction,bucketFor} from '../scrapingPilot/logic.js';
+import {normalizePost,postKey,instructions,extractionSchema,validateExtraction,bucketFor} from './logic.js';
 const GROUPS={'462353464298357':'ירושלים','7298031916930520':'תל אביב','725098167503643':'חיפה','167457006612972':'באר שבע'};
 export function prepare(raw){
  const id=String(raw.facebookUrl||raw.inputUrl||raw.url||'').match(/facebook\.com\/groups\/(\d+)/)?.[1];
