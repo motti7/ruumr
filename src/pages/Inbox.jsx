@@ -22,18 +22,13 @@ export default function Inbox(){
       </div>
       {tab==='likes'&&hasProfile?<LikesYou/>:(
         <>
-          <section className="rr">
-            <h2>{rt('hub.offers')}</h2>
-            {error&&<p role="alert">{rt('hub.failed')}</p>}
-            {offers.length===0&&<p>{rt('hub.no_offers')}</p>}
-            {offers.map(o=>(
-              <Link className="rr-card rh-offer-row" key={o.id} to={'/RoomChat?offerId='+encodeURIComponent(o.id)}>
-                <strong>{user?.id===o.owner_id?o.recipient_name:o.publisher_snapshot?.display_name}</strong>
-                <span>{o.room_snapshot?.title}</span>
-                {(user?.id===o.owner_id?!o.owner_read:!o.recipient_read)&&<span>{rt('hub.new')}</span>}
-              </Link>
-            ))}
-          </section>
+          {offers.map(o=>(
+            <Link className="rr-card rh-offer-row" key={o.id} to={'/RoomChat?offerId='+encodeURIComponent(o.id)}>
+              <strong>{user?.id===o.owner_id?o.recipient_name:o.publisher_snapshot?.display_name}</strong>
+              <span>{o.room_snapshot?.title}</span>
+              {(user?.id===o.owner_id?!o.owner_read:!o.recipient_read)&&<span>{rt('hub.new')}</span>}
+            </Link>
+          ))}
           {hasProfile&&<Matches embedded/>}
         </>
       )}
