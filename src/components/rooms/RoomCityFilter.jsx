@@ -31,7 +31,7 @@ export default function RoomCityFilter({ rows, selected, onSelect }) {
             role="tab"
             aria-selected={active}
             onClick={() => onSelect(it.value)}
-            className={'rcity-pill no-tap-expand' + (active ? ' is-active' : '')}
+            className={'rcity-pill' + (active ? ' is-active' : '')}
           >
             <span className="rcity-name">{it.label}</span>
             <span className="rcity-count">{counts[it.value] || 0}</span>
