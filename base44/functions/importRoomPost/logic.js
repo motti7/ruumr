@@ -60,7 +60,7 @@ export function validateExtraction(value, text, evidenceRequired = true) {
   };
   check(value, extractionSchema);
   if (!evidenceRequired) return value;
-  for (const e of value.evidence) if (!e.quote || !text.includes(e.quote)) throw new Error('AI evidence is not present in the post');
+  for (const e of value.evidence) if (!e.quote || !text.includes(e.quote)) throw new Error('AI evidence mismatch: '+e.field+' '+JSON.stringify(e.quote).slice(0,180));
   for (const r of value.rooms) if (r.monthlyRentIls !== null && (!r.priceEvidence || !text.includes(r.priceEvidence))) throw new Error('AI price has no source evidence');
   for (const key of ['existingRoommates','totalOccupants']) if (value[key] !== null && (!Number.isInteger(value[key]) || value[key] > 100)) throw new Error('Invalid occupant count');
   for (const key of ['shabbatPolicy','kosherPolicy']) if (value[key] !== 'unknown' && !value.evidence.some(e => e.field === key)) throw new Error('Household policy has no evidence');
