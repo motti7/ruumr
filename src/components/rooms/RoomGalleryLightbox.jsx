@@ -38,6 +38,8 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
 
   if (!count) return null;
 
+  const iconCenter = { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -53,7 +55,7 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           aria-label={t('close')}
         >
-          <X className="w-6 h-6 text-white shrink-0" />
+          <X className="w-6 h-6 text-white shrink-0" style={iconCenter} />
         </button>
 
         <motion.img
@@ -76,7 +78,7 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
               onClick={(e) => { e.stopPropagation(); go(rtl ? 1 : -1); }}
               aria-label={rtl ? t('feed.next_photo') : t('feed.prev_photo')}
             >
-              <ChevronLeft className="w-7 h-7 text-white shrink-0" />
+              <ChevronLeft className="w-7 h-7 text-white shrink-0" style={iconCenter} />
             </button>
             <button
               type="button"
@@ -84,7 +86,7 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
               onClick={(e) => { e.stopPropagation(); go(rtl ? -1 : 1); }}
               aria-label={rtl ? t('feed.prev_photo') : t('feed.next_photo')}
             >
-              <ChevronRight className="w-7 h-7 text-white shrink-0" />
+              <ChevronRight className="w-7 h-7 text-white shrink-0" style={iconCenter} />
             </button>
 
             <div
