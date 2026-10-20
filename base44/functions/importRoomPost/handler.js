@@ -75,5 +75,5 @@ export function createImportHandler(createClient){return async req=>{
  stage='feed.save_failed';
  const record=await sr.RoomListing.create(listingData(p,result,photos,key,contentKey));
  return Response.json({status:'published',id:record.id,photos:photos.length});
- }catch(e){const message=String(e.message||'');return Response.json({error:message.startsWith('feed.')?message:stage.startsWith('feed.')?stage:'feed.processing_failed',diagnostic:{stage,status:Number(e.status||e.response?.status)||500,message:message.slice(0,300)}},{status:500});}
+ }catch(e){const message=String(e.message||'');return Response.json({error:message.startsWith('feed.')?message:stage.startsWith('feed.')?stage:'feed.processing_failed',diagnostic:{stage,status:Number(e.status||e.response?.status)||500}},{status:500});}
 };}
