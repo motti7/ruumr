@@ -334,5 +334,6 @@
   "feed.save_failed": "שמירת החדר נכשלה; אפשר לנסות שוב.",
   "feed.retry_load": "רענון החדרים",
   "feed.import_result": "פוסט {{number}}: {{status}}",
+  "feed.roommates_one": "שותף קיים אחד",
   "feed.photo_failed": "התמונה אינה זמינה"
 }
