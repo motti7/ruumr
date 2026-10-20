@@ -12,7 +12,7 @@ export async function fingerprint(text){return postKey({text:contentText(text),g
 export async function hostPhoto(url,client){
  const u=new URL(url);
  if(u.protocol!=='https:'||!u.hostname.endsWith('.fbcdn.net')||u.username||u.password||u.port)throw new Error('feed.media_failed');
- const response=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000)});
+ const response=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(15000)});
  const mime=(response.headers.get('content-type')||'').split(';')[0];
  if(!response.ok)throw new Error('Photo source HTTP '+response.status);
  if(!['image/jpeg','image/png','image/webp'].includes(mime))throw new Error('Photo source format '+mime);
