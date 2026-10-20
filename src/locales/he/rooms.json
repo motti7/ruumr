@@ -347,5 +347,12 @@
   "feed.photo_failed": "התמונה אינה זמינה",
   "feed.photos_label": "תמונות החדר",
   "feed.prev_photo": "תמונה קודמת",
-  "feed.next_photo": "תמונה הבאה"
-}
+  "feed.next_photo": "תמונה הבאה",
+  "feed.filter_cities": "סינון לפי עיר",
+  "feed.city_all": "הכל",
+  "feed.city_tel_aviv": "תל אביב",
+  "feed.city_jerusalem": "ירושלים",
+  "feed.city_haifa": "חיפה",
+  "feed.city_beer_sheva": "באר שבע",
+  "feed.empty_city": "אין חדרים בעיר זו כרגע. אפשר לבחור עיר אחרת או לפרסם חדר."
+  }

@@ -347,5 +347,12 @@
   "feed.photo_failed": "Image unavailable",
   "feed.photos_label": "Room photos",
   "feed.prev_photo": "Previous photo",
-  "feed.next_photo": "Next photo"
-}
+  "feed.next_photo": "Next photo",
+  "feed.filter_cities": "Filter by city",
+  "feed.city_all": "All",
+  "feed.city_tel_aviv": "Tel Aviv",
+  "feed.city_jerusalem": "Jerusalem",
+  "feed.city_haifa": "Haifa",
+  "feed.city_beer_sheva": "Be'er Sheva",
+  "feed.empty_city": "No rooms in this city right now. Try another city or list a room."
+  }
