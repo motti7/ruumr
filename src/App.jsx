@@ -297,7 +297,7 @@ function App() {
                 letterSpacing: "0.5px",
               }}
             >
-              find your perfect place
+              find your place
             </span>
           </div>
         </div>
