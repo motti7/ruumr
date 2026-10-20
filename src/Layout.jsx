@@ -16,6 +16,7 @@ import { User as UserEntity } from "@/entities/User";
 import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
+import useRuumrPlusShimmer from "@/hooks/useRuumrPlusShimmer";
 import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
@@ -72,6 +73,7 @@ export default function Layout({ children, currentPageName }) {
   // still reach Settings in the header so account deletion stays accessible).
   const { hasProfile, isAuthenticated } = useOptionalAuth();
   const tabsLocked = !isAuthenticated;
+  const { active: shimmerActive, variant: shimmerVariant } = useRuumrPlusShimmer();
   const [offerUnread,setOfferUnread]=useState(0);
   useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>document.hidden?Promise.resolve():roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,60000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
@@ -466,7 +468,7 @@ export default function Layout({ children, currentPageName }) {
                                     <img src={item.customIcon} className="w-7 h-7 object-contain" style={{ filter: isActive ? 'invert(40%) sepia(90%) saturate(500%) hue-rotate(340deg) brightness(90%)' : 'invert(0%)' }} alt={item.name} />
                                 </div>
                             ) : isPlusItem ? (
-                                <span className={`${currentPageName === 'RuumrPlus' ? '' : 'ruumr-plus-shimmer'} inline-flex items-center justify-center`}>
+                                <span className={`ruumr-plus-shimmer ${shimmerActive && currentPageName !== 'RuumrPlus' ? `is-shimmering sweep-var-${shimmerVariant}` : ''} inline-flex items-center justify-center`}>
                                     <Icon className="w-7 h-7" fill="none" />
                                 </span>
                             ) : (
