@@ -49,11 +49,11 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
       >
         <button
           type="button"
-          className="absolute top-4 right-4 w-[44px] h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 z-10"
+          className="no-tap-expand absolute top-4 right-4 w-[44px] h-[44px] p-0 m-0 bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 z-10 border-0"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           aria-label={t('close')}
         >
-          <X className="w-6 h-6 text-white" />
+          <X className="w-6 h-6 text-white shrink-0" />
         </button>
 
         <motion.img
@@ -72,19 +72,19 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
           <>
             <button
               type="button"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0"
+              className="no-tap-expand absolute left-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] p-0 m-0 bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 border-0"
               onClick={(e) => { e.stopPropagation(); go(rtl ? 1 : -1); }}
               aria-label={rtl ? t('feed.next_photo') : t('feed.prev_photo')}
             >
-              <ChevronLeft className="w-7 h-7 text-white" />
+              <ChevronLeft className="w-7 h-7 text-white shrink-0" />
             </button>
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0"
+              className="no-tap-expand absolute right-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] p-0 m-0 bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 border-0"
               onClick={(e) => { e.stopPropagation(); go(rtl ? -1 : 1); }}
               aria-label={rtl ? t('feed.prev_photo') : t('feed.next_photo')}
             >
-              <ChevronRight className="w-7 h-7 text-white" />
+              <ChevronRight className="w-7 h-7 text-white shrink-0" />
             </button>
 
             <div

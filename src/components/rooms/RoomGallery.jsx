@@ -78,11 +78,11 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
 
         <button
           type="button"
-          className="rf-expand"
+          className="rf-expand no-tap-expand"
           aria-label={rt('feed.photos_label')}
           onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
         >
-          <Maximize2 className="w-4 h-4" />
+          <Maximize2 className="w-4 h-4 shrink-0" />
         </button>
 
         {count > 1 && (
