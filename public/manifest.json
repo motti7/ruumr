@@ -1,7 +1,7 @@
 {
   "name": "RuumrApp",
   "short_name": "Ruumr",
-  "description": "Find your perfect roommates",
+  "description": "Find your perfect place",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#E8420A",

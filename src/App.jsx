@@ -297,7 +297,7 @@ function App() {
                 letterSpacing: "0.5px",
               }}
             >
-              find your perfect roommates
+              find your perfect place
             </span>
           </div>
         </div>
