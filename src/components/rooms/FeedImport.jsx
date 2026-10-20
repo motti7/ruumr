@@ -11,7 +11,7 @@ export default function FeedImport({onComplete}){
  let result;
  if(text&&seen.has(text))result={status:'duplicate'};else{
  try{const response=await base44.functions.invoke('importRoomPost',{post:p});result=response.data;if(result.error)result={status:'error',reason:result.error};else if(result.status!=='error')seen.add(text);}
- catch(e){result={status:'error',reason:e.response?.data?.error||'feed.processing_failed',diagnostic:e.response?.data?.diagnostic};}
+ catch(e){result={status:'error',reason:e.response?.data?.error||'feed.processing_failed'};}
  }
  setResults(old=>[...old,{...result,index}]);if(result.status==='published')onComplete?.();
  }}finally{setBusy(false);onComplete?.();}
@@ -20,5 +20,5 @@ export default function FeedImport({onComplete}){
  return <details className="rf-import"><summary>{rt('feed.import_title')}</summary><p>{rt('feed.import_hint')}</p><label>{rt('feed.file')}<input type="file" accept=".json,application/json" disabled={busy} onChange={load}/></label>
  <label>{rt('feed.paste')}<textarea disabled={busy} onChange={e=>pasteJson(e.target.value)} rows={3}/></label>{posts.length>0&&<p>{rt('feed.ready',{count:num(posts.length)})}</p>}<button className="rr-primary" disabled={busy||!posts.length} onClick={run}>{rt('feed.start')}</button>{busy&&<button onClick={()=>{stop.current=true;}}>{rt('feed.stop')}</button>}
  <p role="status">{rt('feed.progress',{done:num(results.length),total:num(posts.length)})}</p>{error&&<p role="alert">{rt(error)}</p>}
- <ol>{results.map(x=><li key={x.index}>{rt('feed.import_result',{number:num(x.index+1),status:rt('feed.'+x.status)})}{x.reason?' — '+rt(x.reason):''}{x.diagnostic&&<code dir="ltr">{JSON.stringify(x.diagnostic)}</code>}</li>)}</ol></details>;
+ <ol>{results.map(x=><li key={x.index}>{rt('feed.import_result',{number:num(x.index+1),status:rt('feed.'+x.status)})}{x.reason?' — '+rt(x.reason):''}</li>)}</ol></details>;
 }
