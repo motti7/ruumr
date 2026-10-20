@@ -13,7 +13,6 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
     el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
   }, [count]);
 
-  // Track active slide while scrolling/swiping
   const handleScroll = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -29,10 +28,24 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
     return () => el.removeEventListener('scroll', onScroll);
   }, [handleScroll]);
 
+  // Instagram-style tap navigation: a tap on the right half advances,
+  // a tap on the left half goes back. Horizontal swipes still scroll natively
+  // because they produce movement and no click event fires.
+  const handleClick = useCallback((event) => {
+    if (count <= 1) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const isRight = x > rect.width / 2;
+    // In RTL layouts the visual order is mirrored, so flip the direction.
+    const rtl = document.documentElement.dir === 'rtl';
+    const nextIndex = isRight ? active + 1 : active - 1;
+    goTo(rtl ? (isRight ? active - 1 : active + 1) : nextIndex);
+  }, [active, count, goTo]);
+
   if (!count) return null;
 
   return (
-    <div className="rf-gallery" role="group" aria-label={rt('feed.photos_label')}>
+    <div className="rf-gallery" role="group" aria-label={rt('feed.photos_label')} onClick={handleClick}>
       <div className="rf-scroller" ref={scrollerRef}>
         {photos.map((url, i) => (
           <div className="rf-slide" key={url + i}>
@@ -43,6 +56,7 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
                 src={url}
                 alt={rt('feed.photo', { number: (i + 1).toLocaleString(roomLocale()) })}
                 loading={i === 0 ? 'eager' : 'lazy'}
+                draggable={false}
                 onError={() => onFail && onFail(url)}
               />
             )}
@@ -51,27 +65,11 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
       </div>
 
       {count > 1 && (
-        <>
-          <button
-            type="button"
-            className="rf-nav rf-nav-prev"
-            aria-label={rt('feed.prev_photo')}
-            onClick={() => goTo(active - 1)}
-            disabled={active === 0}
-          />
-          <button
-            type="button"
-            className="rf-nav rf-nav-next"
-            aria-label={rt('feed.next_photo')}
-            onClick={() => goTo(active + 1)}
-            disabled={active === count - 1}
-          />
-          <div className="rf-dots" aria-hidden="true">
-            {photos.map((url, i) => (
-              <span key={url + i} className={i === active ? 'rf-dot is-active' : 'rf-dot'} />
-            ))}
-          </div>
-        </>
+        <div className="rf-dots" aria-hidden="true">
+          {photos.map((url, i) => (
+            <span key={url + i} className={i === active ? 'rf-dot is-active' : 'rf-dot'} />
+          ))}
+        </div>
       )}
     </div>
   );
