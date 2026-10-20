@@ -56,6 +56,9 @@ export function createImportHandler(createClient){return async req=>{
  const text=await req.text();if(text.length>180000)throw new Error('feed.invalid_post');
  const b=JSON.parse(text),sr=client.asServiceRole.entities,p=prepare(b.post),key=await sourceKey(p),contentKey=await fingerprint(p.text);
  if(!p.text||!p.phones.length||!p.photos.length)return Response.json({status:'filtered',reason:'feed.missing_contact_media'});
+ const publishedAt=Date.parse(p.postedAt),now=Date.now();
+ if(!Number.isFinite(publishedAt)||publishedAt>now+300000)throw new Error('feed.invalid_post');
+ if(now-publishedAt>=14*86400000)return Response.json({status:'filtered',reason:'feed.expired'});
  stage='lookup_room';
  const existing=await sr.RoomListing.filter({source_key:key},'id',1);
  if(existing.length)return Response.json({status:'duplicate',id:existing[0].id});

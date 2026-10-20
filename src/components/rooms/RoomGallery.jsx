@@ -1,9 +1,12 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { Maximize2 } from 'lucide-react';
 import { roomText as rt, roomLocale } from '@/lib/room-i18n';
+import RoomGalleryLightbox from './RoomGalleryLightbox';
 
 export default function RoomGallery({ photos = [], failed = {}, onFail }) {
   const scrollerRef = useRef(null);
   const [active, setActive] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const count = photos.length;
 
   const goTo = useCallback((index) => {
@@ -49,33 +52,55 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
 
   if (!count) return null;
 
-  return (
-    <div className="rf-gallery" role="group" aria-label={rt('feed.photos_label')} onClick={handleClick}>
-      <div className="rf-scroller" ref={scrollerRef}>
-        {photos.map((url, i) => (
-          <div className="rf-slide" key={url + i}>
-            {failed[url] ? (
-              <p>{rt('feed.photo_failed')}</p>
-            ) : (
-              <img
-                src={url}
-                alt={rt('feed.photo', { number: (i + 1).toLocaleString(roomLocale()) })}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                draggable={false}
-                onError={() => onFail && onFail(url)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
+  const goodPhotos = photos.filter((url) => !failed[url]);
+  const lightboxStart = Math.max(0, goodPhotos.indexOf(photos[active]));
 
-      {count > 1 && (
-        <div className="rf-dots" aria-hidden="true">
+  return (
+    <>
+      <div className="rf-gallery" role="group" aria-label={rt('feed.photos_label')} onClick={handleClick}>
+        <div className="rf-scroller" ref={scrollerRef}>
           {photos.map((url, i) => (
-            <span key={url + i} className={i === active ? 'rf-dot is-active' : 'rf-dot'} />
+            <div className="rf-slide" key={url + i}>
+              {failed[url] ? (
+                <p>{rt('feed.photo_failed')}</p>
+              ) : (
+                <img
+                  src={url}
+                  alt={rt('feed.photo', { number: (i + 1).toLocaleString(roomLocale()) })}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  draggable={false}
+                  onError={() => onFail && onFail(url)}
+                />
+              )}
+            </div>
           ))}
         </div>
+
+        <button
+          type="button"
+          className="rf-expand"
+          aria-label={rt('feed.photos_label')}
+          onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+
+        {count > 1 && (
+          <div className="rf-dots" aria-hidden="true">
+            {photos.map((url, i) => (
+              <span key={url + i} className={i === active ? 'rf-dot is-active' : 'rf-dot'} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {lightboxOpen && goodPhotos.length > 0 && (
+        <RoomGalleryLightbox
+          photos={goodPhotos}
+          startIndex={lightboxStart}
+          onClose={() => setLightboxOpen(false)}
+        />
       )}
-    </div>
+    </>
   );
 }
