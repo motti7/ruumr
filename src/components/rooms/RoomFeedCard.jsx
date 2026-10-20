@@ -2,6 +2,7 @@ import React,{useState} from 'react';
 import {Phone,MapPin,CalendarDays} from 'lucide-react';
 import SaveRoomButton from './SaveRoomButton';
 import ShareRoomButton from './ShareRoomButton';
+import RoomWhatsAppButton from './RoomWhatsAppButton';
 import RoomGallery from './RoomGallery';
 import {roomText as rt,useRoomLocale,roomLocale,roomDate} from '@/lib/room-i18n';
 export default function RoomFeedCard({room:r,saved=false,footer}){
@@ -14,6 +15,6 @@ export default function RoomFeedCard({room:r,saved=false,footer}){
  {posted&&<p className="rf-date"><CalendarDays size={14}/>{rt('feed.posted',{date:roomDate(posted)})}</p>}
  <div className="rf-tags">{r.rental_type&&r.rental_type!=='unknown'&&<span>{rt('feed.'+r.rental_type)}</span>}{(r.entry_text||r.entry_date)&&<span className="rf-entry">{rt('feed.entry',{value:r.entry_text||roomDate(r.entry_date)})}</span>}{(r.end_text||r.end_date)&&<span>{rt('feed.end',{value:r.end_text||roomDate(r.end_date)})}</span>}{Number.isInteger(r.roommates)&&<span>{rt('feed.roommates',{count:r.roommates})}</span>}{r.furniture&&<span>{r.furniture}</span>}{r.shabbat_policy==='observant'&&<span>{rt('feed.shabbat')}</span>}{r.kosher_policy==='kosher'&&<span>{rt('feed.kosher')}</span>}</div>
  {(r.description||r.bills_text||r.price_options?.length>1)&&<details className="rf-details"><summary>{rt('feed.more')}</summary>{r.price_options?.length>1&&<ul>{r.price_options.map((x,i)=><li key={i}>{x.label} · ₪{x.amount.toLocaleString(roomLocale())}</li>)}</ul>}<p className="rr-description">{r.description}</p>{r.bills_text&&<p>{rt('feed.bills')}: {r.bills_text}</p>}</details>}
- <div className="rf-actions"><a href={'tel:'+r.phone} className="rr-add rr-primary"><Phone size={17}/>{rt('feed.call')} <bdi>{r.phone}</bdi></a><SaveRoomButton roomId={r.id} initialSaved={saved}/><ShareRoomButton room={r}/></div>
+ <div className="rf-actions"><a href={'tel:'+r.phone} className="rr-add rr-primary"><Phone size={17}/>{rt('feed.call')} <bdi>{r.phone}</bdi></a><RoomWhatsAppButton room={r}/><SaveRoomButton roomId={r.id} initialSaved={saved}/><ShareRoomButton room={r}/></div>
  {footer}</div></article>;
 }
