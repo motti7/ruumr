@@ -50,6 +50,7 @@ const AddRoom = lazy(() => import('./pages/AddRoom'));
 const ScrapingPilot = lazy(() => import('./pages/ScrapingPilot'));
 const WriteExternalReview = lazy(() => import('./pages/WriteExternalReview'));
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
+const RoomDetail = lazy(() => import('./pages/RoomDetail'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
 
@@ -159,6 +160,7 @@ const AuthenticatedApp = () => {
         {/* Public review link — external, non-registered reviewers land here without logging in */}
         <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
         <Route path="/PublicProfile" element={<Suspense fallback={<PageLoader />}><PublicProfile /></Suspense>} />
+        <Route path="/Room/:id" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="RoomDetail"><RoomDetail /></LayoutWrapper></Suspense>} />
 
         <Route path="/Rooms" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms /></LayoutWrapper></Suspense>} />
         <Route path="/Discover" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Discover">{<Pages.Discover/>}</LayoutWrapper></Suspense>} />
