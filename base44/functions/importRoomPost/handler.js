@@ -47,14 +47,18 @@ export function listingData(p,r,photos,key,contentKey){
  if(r.existingRoommates!==null)data.roommates=r.existingRoommates;
  return data;
 }
-export function createImportHandler(createClient){return async req=>{
+export function createImportHandler(createClient,{authorizeMachine=async()=>false}={}){return async req=>{
  if(req.method!=='POST')return Response.json({error:'feed.invalid_post'},{status:405});
- const client=createClient(req),user=await client.auth.me().catch(()=>null);
- if(user?.role!=='admin')return Response.json({error:'hub.unavailable'},{status:403});
+ const client=createClient(req),machine=await authorizeMachine(req);
+ const user=machine?null:await client.auth.me().catch(()=>null);
+ if(!machine&&user?.role!=='admin')return Response.json({error:'hub.unavailable'},{status:403});
+ const integrationClient=machine?client.asServiceRole:client;
  let stage='feed.processing_failed';
  try{
  const text=await req.text();if(text.length>180000)throw new Error('feed.invalid_post');
- const b=JSON.parse(text),sr=client.asServiceRole.entities,p=prepare(b.post),key=await sourceKey(p),contentKey=await fingerprint(p.text);
+ const b=JSON.parse(text);
+ if(b.action==='check')return Response.json({status:'ready'});
+ const sr=client.asServiceRole.entities,p=prepare(b.post),key=await sourceKey(p),contentKey=await fingerprint(p.text);
  if(!p.text||!p.phones.length||!p.photos.length)return Response.json({status:'filtered',reason:'feed.missing_contact_media'});
  const publishedAt=Date.parse(p.postedAt),now=Date.now();
  if(!Number.isFinite(publishedAt)||publishedAt>now+300000)throw new Error('feed.invalid_post');
@@ -68,12 +72,12 @@ export function createImportHandler(createClient){return async req=>{
  const same=await sr.RoomListing.filter({content_key:contentKey},'id',1);
  if(same.length)return duplicateResponse(sr.RoomListing,same[0],p);
  stage='ai';
- const result=await client.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
+ const result=await integrationClient.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
  stage='feed.review';validateExtraction(result,p.text);
  const bucket=bucketFor(result);
  if(bucket!=='rooms')return Response.json({status:'filtered',reason:bucket==='leads'?'feed.seeker':bucket==='review'?'feed.review':'feed.irrelevant'});
  stage='feed.media_failed';
- const photos=[],mediaErrors=[];for(const url of p.photos.slice(0,8)){try{photos.push(await hostPhoto(url,client));}catch(e){mediaErrors.push(String(e.message||'Photo transfer failed').slice(0,180));}}
+ const photos=[],mediaErrors=[];for(const url of p.photos.slice(0,8)){try{photos.push(await hostPhoto(url,integrationClient));}catch(e){mediaErrors.push(String(e.message||'Photo transfer failed').slice(0,180));}}
  if(!photos.length)throw new Error(mediaErrors[0]||stage);
  // Recheck after AI/media work to avoid duplicates from sequential retries.
  const again=await sr.RoomListing.filter({content_key:contentKey},'id',1);
