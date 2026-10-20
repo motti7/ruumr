@@ -7,7 +7,7 @@ export default function FeedImport({onComplete}){
  function pasteJson(value){setError('');setResults([]);try{if(value.length>2000000)throw Error();const rows=JSON.parse(value);if(!Array.isArray(rows)||rows.length>60)throw Error();setPosts(rows);}catch{setPosts([]);setError('feed.file_error');}}
  async function run(){setBusy(true);stop.current=false;setResults([]);const seen=new Set();
  try{for(let index=0;index<posts.length&&!stop.current;index++){
- const p=posts[index];const text=String(p.text||'').normalize('NFKC').toLowerCase().replace(/[\p{P}\p{S}\s]+/gu,' ').trim();
+ const p=posts[index];const text=String(p.sourceUrl||p.url||''); // Reposts with different URLs must reach the server to refresh publication time.
  let result;
  if(text&&seen.has(text))result={status:'duplicate'};else{
  try{const response=await base44.functions.invoke('importRoomPost',{post:p});result=response.data;if(result.error)result={status:'error',reason:result.error};else if(result.status!=='error')seen.add(text);}
