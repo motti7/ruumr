@@ -14,7 +14,8 @@ export async function hostPhoto(url,client){
  if(u.protocol!=='https:'||!u.hostname.endsWith('.fbcdn.net')||u.username||u.password||u.port)throw new Error('feed.media_failed');
  const response=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000)});
  const mime=(response.headers.get('content-type')||'').split(';')[0];
- if(!response.ok||!['image/jpeg','image/png','image/webp'].includes(mime))throw new Error('feed.media_failed');
+ if(!response.ok)throw new Error('Photo source HTTP '+response.status);
+ if(!['image/jpeg','image/png','image/webp'].includes(mime))throw new Error('Photo source format '+mime);
  const reader=response.body.getReader(),chunks=[];let size=0;
  try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>8000000)throw new Error('feed.media_failed');chunks.push(value);}}finally{await reader.cancel().catch(()=>{});}
  const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[mime];
@@ -66,8 +67,8 @@ export function createImportHandler(createClient){return async req=>{
  const bucket=bucketFor(result);
  if(bucket!=='rooms')return Response.json({status:'filtered',reason:bucket==='leads'?'feed.seeker':bucket==='review'?'feed.review':'feed.irrelevant'});
  stage='feed.media_failed';
- const photos=[];for(const url of p.photos.slice(0,8)){try{photos.push(await hostPhoto(url,client));}catch{/* Never display temporary or broken source media. */}}
- if(!photos.length)throw new Error(stage);
+ const photos=[],mediaErrors=[];for(const url of p.photos.slice(0,8)){try{photos.push(await hostPhoto(url,client));}catch(e){mediaErrors.push(String(e.message||'Photo transfer failed').slice(0,180));}}
+ if(!photos.length)throw new Error(mediaErrors[0]||stage);
  // Recheck after AI/media work to avoid duplicates from sequential retries.
  const again=await sr.RoomListing.filter({content_key:contentKey},'id',1);
  if(again.length)return Response.json({status:'duplicate',id:again[0].id});
