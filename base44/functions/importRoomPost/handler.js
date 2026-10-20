@@ -8,6 +8,18 @@ export function prepare(raw){
  return p;
 }
 export function contentText(text){return text.normalize('NFKC').toLowerCase().replace(/[\p{P}\p{S}\s]+/gu,' ').trim();}
+export async function sourceKey(post){
+ const id=post.sourceUrl.match(/\/(?:posts|permalink)\/(\d+)/)?.[1];
+ if(!id)throw new Error('feed.invalid_post');
+ return postKey({sourceUrl:'facebook:post:'+id});
+}
+export async function duplicateResponse(entity,record,p){
+ // Only an actually newer publication of identical content refreshes the card.
+ if(record.status==='published'&&Number.isFinite(Date.parse(p.postedAt))&&Date.parse(p.postedAt)>Date.parse(record.source_posted_at||'')){
+ await entity.update(record.id,{source_posted_at:p.postedAt,source_url:p.sourceUrl});
+ }
+ return Response.json({status:'duplicate',id:record.id});
+}
 export async function fingerprint(text){return postKey({text:contentText(text),groupCity:''});}
 export async function hostPhoto(url,client){
  const u=new URL(url);
@@ -42,28 +54,19 @@ export function createImportHandler(createClient){return async req=>{
  let stage='feed.processing_failed';
  try{
  const text=await req.text();if(text.length>180000)throw new Error('feed.invalid_post');
- const b=JSON.parse(text),sr=client.asServiceRole.entities,p=prepare(b.post),key=await postKey(p),contentKey=await fingerprint(p.text);
+ const b=JSON.parse(text),sr=client.asServiceRole.entities,p=prepare(b.post),key=await sourceKey(p),contentKey=await fingerprint(p.text);
  if(!p.text||!p.phones.length||!p.photos.length)return Response.json({status:'filtered',reason:'feed.missing_contact_media'});
  stage='lookup_room';
  const existing=await sr.RoomListing.filter({source_key:key},'id',1);
  if(existing.length)return Response.json({status:'duplicate',id:existing[0].id});
+ // Compatibility with the already-imported URL-based keys.
+ const legacy=await sr.RoomListing.filter({source_key:await postKey(p)},'id',1);
+ if(legacy.length)return Response.json({status:'duplicate',id:legacy[0].id});
  const same=await sr.RoomListing.filter({content_key:contentKey},'id',1);
- if(same.length)return Response.json({status:'duplicate',id:same[0].id});
- stage='lookup_pilot';
- let previous,cacheAvailable=true;
- try{previous=(await sr.ScrapingPilotPost.filter({source_key:key},'id',1))[0];}
- catch(e){if(Number(e.status||e.response?.status)===404&&String(e.message||'').includes('Entity schema ScrapingPilotPost not found'))cacheAvailable=false;else throw e;}
- let result;
- if(previous?.result_json){try{result=JSON.parse(previous.result_json);validateExtraction(result,p.text);}catch{result=null;}}
- if(!result){
+ if(same.length)return duplicateResponse(sr.RoomListing,same[0],p);
  stage='ai';
- result=await client.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
+ const result=await client.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
  stage='feed.review';validateExtraction(result,p.text);
- const data={source_key:key,source_url:p.sourceUrl,source_text:p.text,group_city:p.groupCity,photos_json:JSON.stringify(p.photos),phones_json:JSON.stringify(p.phones),posted_at_text:p.postedAt,bucket:bucketFor(result)==='rooms'?'rooms':'leads',result_json:JSON.stringify(result),review_status:'pending',processing_label:'base44_feed_v1',saved_by:user.id};
- if(cacheAvailable&&(bucketFor(result)==='rooms'||bucketFor(result)==='leads')){
- if(previous)await sr.ScrapingPilotPost.update(previous.id,data);else await sr.ScrapingPilotPost.create(data);
- }
- }
  const bucket=bucketFor(result);
  if(bucket!=='rooms')return Response.json({status:'filtered',reason:bucket==='leads'?'feed.seeker':bucket==='review'?'feed.review':'feed.irrelevant'});
  stage='feed.media_failed';
@@ -71,7 +74,7 @@ export function createImportHandler(createClient){return async req=>{
  if(!photos.length)throw new Error(mediaErrors[0]||stage);
  // Recheck after AI/media work to avoid duplicates from sequential retries.
  const again=await sr.RoomListing.filter({content_key:contentKey},'id',1);
- if(again.length)return Response.json({status:'duplicate',id:again[0].id});
+ if(again.length)return duplicateResponse(sr.RoomListing,again[0],p);
  stage='feed.save_failed';
  const record=await sr.RoomListing.create(listingData(p,result,photos,key,contentKey));
  return Response.json({status:'published',id:record.id,photos:photos.length});
