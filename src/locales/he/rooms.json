@@ -343,6 +343,7 @@
   "feed.retry_load": "רענון החדרים",
   "feed.import_result": "פוסט {{number}}: {{status}}",
   "feed.roommates_one": "שותף קיים אחד",
+  "feed.expired": "עברו שבועיים מפרסום הפוסט; המודעה לא יובאה.",
   "feed.photo_failed": "התמונה אינה זמינה",
   "feed.photos_label": "תמונות החדר",
   "feed.prev_photo": "תמונה קודמת",
