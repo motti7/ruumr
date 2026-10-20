@@ -334,5 +334,6 @@
   "feed.save_failed": "Could not save room; you can try again.",
   "feed.retry_load": "Refresh rooms",
   "feed.import_result": "Post {{number}}: {{status}}",
+  "feed.roommates_one": "1 existing roommate",
   "feed.photo_failed": "Image unavailable"
 }
