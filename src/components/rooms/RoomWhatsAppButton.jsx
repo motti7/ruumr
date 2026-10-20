@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle } from 'lucide-react';
-import { roomText as rt, roomDirection } from '@/lib/room-i18n';
+import { roomText as rt } from '@/lib/room-i18n';
 import { base44 } from '@/api/base44Client';
 
 // Module-level cache so every RoomWhatsAppButton in a feed shares one fetch
@@ -67,7 +66,7 @@ export default function RoomWhatsAppButton({ room }) {
       onClick={handleClick}
       aria-label={rt('feed.whatsapp')}
     >
-      <MessageCircle size={17} />{rt('feed.whatsapp')}
+      {rt('feed.whatsapp')}
     </button>
   );
 }
