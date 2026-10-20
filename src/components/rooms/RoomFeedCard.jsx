@@ -1,12 +1,13 @@
 import React,{useState} from 'react';
 import {Share2,Phone,MapPin,CalendarDays} from 'lucide-react';
 import SaveRoomButton from './SaveRoomButton';
+import RoomGallery from './RoomGallery';
 import {roomText as rt,useRoomLocale,roomLocale,roomDate} from '@/lib/room-i18n';
 export default function RoomFeedCard({room:r,saved=false,onShare,footer}){
  useRoomLocale();const [bad,setBad]=useState({});
  const posted=r.source_posted_at||(r.source_kind==='facebook'?'':r.created_date);
  return <article className="rr-card rf-card">
- <div className="rr-gallery">{(r.photos||[]).map((url,i)=><div className="rf-slide" key={url}>{bad[url]?<p>{rt('feed.photo_failed')}</p>:<img src={url} alt={rt('feed.photo',{number:(i+1).toLocaleString(roomLocale())})} loading="lazy" onError={()=>setBad(x=>({...x,[url]:true}))}/>}</div>)}</div>
+ <RoomGallery photos={r.photos||[]} failed={bad} onFail={(url)=>setBad(x=>({...x,[url]:true}))}/>
  <div className="rf-content"><div className="rf-heading"><div><p className="rf-city"><MapPin size={15}/>{rt(r.city)}</p><h2>{r.title}</h2></div><strong className="rf-price">{Number.isFinite(r.price)?<>{r.price_options?.length>1&&rt('feed.from')}₪{r.price.toLocaleString(roomLocale())}<small>{rt(' לחודש')}</small></>:rt('feed.price_unknown')}</strong></div>
  {r.publisher_name&&<div className="rh-publisher">{r.publisher_photo&&<img className="rh-avatar" src={r.publisher_photo} alt={r.publisher_name}/>}<span>{r.publisher_name} · {rt(r.publisher_type==='departing'?'hub.departing':'hub.owner')}</span></div>}
  {posted&&<p className="rf-date"><CalendarDays size={14}/>{rt('feed.posted',{date:roomDate(posted)})}</p>}

@@ -335,5 +335,8 @@
   "feed.retry_load": "Refresh rooms",
   "feed.import_result": "Post {{number}}: {{status}}",
   "feed.roommates_one": "1 existing roommate",
-  "feed.photo_failed": "Image unavailable"
+  "feed.photo_failed": "Image unavailable",
+  "feed.photos_label": "Room photos",
+  "feed.prev_photo": "Previous photo",
+  "feed.next_photo": "Next photo"
 }
