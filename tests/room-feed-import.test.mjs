@@ -1,5 +1,13 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {prepare,fingerprint,listingData,createImportHandler} from '../base44/functions/importRoomPost/handler.js';
+test('Missing optional branch cache permits AI; other cache failures stop processing',async()=>{
+ for(const [status,message,expected] of [[404,'Entity schema ScrapingPilotPost not found in app',true],[403,'Forbidden',false],[500,'Service unavailable',false]]){
+ let called=false;
+ const h=createImportHandler(()=>({auth:{me:async()=>({role:'admin'})},asServiceRole:{entities:{RoomListing:{filter:async()=>[]},ScrapingPilotPost:{filter:async()=>{throw Object.assign(new Error(message),{status});}}}},integrations:{Core:{InvokeLLM:async()=>{called=true;throw Error('test AI boundary');}}}}));
+ await h(new Request('https://example.com',{method:'POST',body:JSON.stringify({post})}));
+ assert.equal(called,expected);
+ }
+});
 const post={facebookUrl:'https://www.facebook.com/groups/462353464298357/',url:'https://www.facebook.com/groups/462353464298357/posts/123/',text:'חדר 0501234567',photos:['https://scontent.fbcdn.net/a.jpg'],time:'2026-10-19T10:00:00Z'};
 test('Only selected groups, source post URLs and real inputs',()=>{assert.equal(prepare(post).groupCity,'ירושלים');assert.throws(()=>prepare({...post,facebookUrl:'https://www.facebook.com/groups/111/'}));assert.throws(()=>prepare({...post,url:'https://example.com/'}));assert.throws(()=>prepare({...post,demo:true}));});
 test('Dedup ignores whitespace punctuation but not room numbers',async()=>{assert.equal(await fingerprint('חדר יפה! 2500'),await fingerprint('חדר  יפה 2500'));assert.notEqual(await fingerprint('חדר 2500'),await fingerprint('חדר 2600'));});
