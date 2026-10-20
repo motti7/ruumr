@@ -297,6 +297,7 @@
   "hub.retry": "ניסיון נוסף",
   "hub.list_room": "+ פרסום חדר",
   "hub.back_to_rooms": "חזרה לחדרים",
+  "hub.back_to_saved": "חזרה לחדרים השמורים",
   "feed.subtitle": "חדרים שמצאנו בשבילך, עם תמונות ודרך לפנות",
   "feed.posted": "פורסם ב־{{date}}",
   "feed.entry": "כניסה: {{value}}",
