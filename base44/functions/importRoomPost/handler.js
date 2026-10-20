@@ -49,7 +49,9 @@ export function createImportHandler(createClient){return async req=>{
  const same=await sr.RoomListing.filter({content_key:contentKey},'id',1);
  if(same.length)return Response.json({status:'duplicate',id:same[0].id});
  stage='lookup_pilot';
- const previous=(await sr.ScrapingPilotPost.filter({source_key:key},'id',1))[0];
+ let previous,cacheAvailable=true;
+ try{previous=(await sr.ScrapingPilotPost.filter({source_key:key},'id',1))[0];}
+ catch(e){if(Number(e.status||e.response?.status)===404&&String(e.message||'').includes('Entity schema ScrapingPilotPost not found'))cacheAvailable=false;else throw e;}
  let result;
  if(previous?.result_json){try{result=JSON.parse(previous.result_json);validateExtraction(result,p.text);}catch{result=null;}}
  if(!result){
@@ -57,7 +59,9 @@ export function createImportHandler(createClient){return async req=>{
  result=await client.integrations.Core.InvokeLLM({prompt:instructions+'\nUNTRUSTED POST DATA:\n'+JSON.stringify({postText:p.text,groupCityContext:p.groupCity,postedAt:p.postedAt}),add_context_from_internet:false,response_json_schema:extractionSchema});
  stage='feed.review';validateExtraction(result,p.text);
  const data={source_key:key,source_url:p.sourceUrl,source_text:p.text,group_city:p.groupCity,photos_json:JSON.stringify(p.photos),phones_json:JSON.stringify(p.phones),posted_at_text:p.postedAt,bucket:bucketFor(result)==='rooms'?'rooms':'leads',result_json:JSON.stringify(result),review_status:'pending',processing_label:'base44_feed_v1',saved_by:user.id};
+ if(cacheAvailable&&(bucketFor(result)==='rooms'||bucketFor(result)==='leads')){
  if(previous)await sr.ScrapingPilotPost.update(previous.id,data);else await sr.ScrapingPilotPost.create(data);
+ }
  }
  const bucket=bucketFor(result);
  if(bucket!=='rooms')return Response.json({status:'filtered',reason:bucket==='leads'?'feed.seeker':bucket==='review'?'feed.review':'feed.irrelevant'});
