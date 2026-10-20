@@ -10,13 +10,18 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
     const el = scrollerRef.current;
     if (!el) return;
     const clamped = Math.max(0, Math.min(count - 1, index));
-    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
+    const target = el.children[clamped];
+    if (target && target.scrollIntoView) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    } else {
+      el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
+    }
   }, [count]);
 
   const handleScroll = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    const idx = Math.round(Math.abs(el.scrollLeft) / el.clientWidth);
     if (idx !== active) setActive(idx);
   }, [active]);
 
