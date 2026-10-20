@@ -343,6 +343,7 @@
   "feed.retry_load": "Refresh rooms",
   "feed.import_result": "Post {{number}}: {{status}}",
   "feed.roommates_one": "1 existing roommate",
+  "feed.expired": "The post is at least 14 days old; it was not imported.",
   "feed.photo_failed": "Image unavailable",
   "feed.photos_label": "Room photos",
   "feed.prev_photo": "Previous photo",
