@@ -21,8 +21,7 @@ export default function RoomListings(){
  async function close(id){setClosing(id);setError('');try{await roomRequest({action:'close',id});setRows(old=>old.filter(r=>r.id!==id));}catch{setError('הסרת המודעה מהתצוגה נכשלה. נסה שוב.');}finally{setClosing(null);}}
  const visible=city==='all'?rows:rows.filter(r=>r.city===city);
  const sorted=[...visible].sort((a,b)=>String(b.source_posted_at||b.created_date||'').localeCompare(String(a.source_posted_at||a.created_date||'')));
- return <section className="rr rf-feed" dir={roomDirection()}><header className="rf-intro">{roomId&&<Link to="/SavedRooms" className="rr-add" style={{marginBottom:8}}>{rt('hub.back_to_saved')}</Link>}{!roomId&&<><h1>{rt('חדרים בדירות שותפים')}</h1><Link className="rr-add" to={isAuthenticated?'/AddRoom':'/register?next=AddRoom'}>{rt('hub.list_room')}</Link></>}
-  {!roomId&&<p className="rf-subtitle">{rt('feed.updated_daily')}</p>}</header>
+ return <section className="rr rf-feed" dir={roomDirection()}><header className="rf-intro">{roomId&&<Link to="/SavedRooms" className="rr-add" style={{marginBottom:8}}>{rt('hub.back_to_saved')}</Link>}{!roomId&&<><h1>{rt('חדרים בדירות שותפים')}</h1><Link className="rr-add" to={isAuthenticated?'/AddRoom':'/register?next=AddRoom'}>{rt('hub.list_room')}</Link></>}</header>
 
  {!roomId&&<RoomCityFilter selected={city} onSelect={setCity}/>}
  {shareLink&&<p role="status">{rt('hub.share_link')} <a href={shareLink}>{shareLink}</a></p>}{loading&&<p role="status">{rt('טוען חדרים…')}</p>}{error&&<p role="alert">{rt(error)} <button onClick={()=>setRevision(x=>x+1)}>{rt('feed.retry_load')}</button></p>}{!loading&&!error&&!visible.length&&<p>{city==='all'?rt('עדיין אין חדרים שפורסמו כאן. אפשר להוסיף את החדר הראשון.'):rt('feed.empty_city')}</p>}
