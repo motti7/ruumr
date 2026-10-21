@@ -1,0 +1,143 @@
+{
+  "name": "RoomListing",
+  "type": "object",
+  "properties": {
+    "owner_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "entry_date": {
+      "type": "string"
+    },
+    "end_date": {
+      "type": "string"
+    },
+    "rental_type": {
+      "type": "string",
+      "enum": [
+        "regular",
+        "sublet",
+        "unknown",
+        "regular_with_early_sublet"
+      ]
+    },
+    "roommates": {
+      "type": "number"
+    },
+    "furniture": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "published",
+        "closed"
+      ]
+    },
+    "publisher_name": {
+      "type": "string"
+    },
+    "publisher_photo": {
+      "type": "string"
+    },
+    "publisher_type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "departing"
+      ]
+    },
+    "source_kind": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "content_key": {
+      "type": "string"
+    },
+    "source_posted_at": {
+      "type": "string"
+    },
+    "imported_at": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "entry_text": {
+      "type": "string"
+    },
+    "end_text": {
+      "type": "string"
+    },
+    "bills_text": {
+      "type": "string"
+    },
+    "shabbat_policy": {
+      "type": "string"
+    },
+    "kosher_policy": {
+      "type": "string"
+    },
+    "price_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "owner_id",
+    "title",
+    "city",
+    "phone",
+    "photos",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
