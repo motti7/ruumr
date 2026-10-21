@@ -10,14 +10,8 @@ const CITIES = [
   { value: 'באר שבע', key: 'beer_sheva' },
 ];
 
-export default function RoomCityFilter({ rows, selected, onSelect }) {
+export default function RoomCityFilter({ selected, onSelect }) {
   const dir = roomDirection();
-  const counts = React.useMemo(() => {
-    const map = { all: rows.length };
-    for (const r of rows) if (r.city) map[r.city] = (map[r.city] || 0) + 1;
-    return map;
-  }, [rows]);
-
   const items = [{ value: 'all', label: rt('feed.city_all') }, ...CITIES.map(c => ({ value: c.value, label: rt('feed.city_' + c.key) }))];
 
   return (
@@ -34,7 +28,6 @@ export default function RoomCityFilter({ rows, selected, onSelect }) {
             className={'rcity-pill' + (active ? ' is-active' : '')}
           >
             <span className="rcity-name">{it.label}</span>
-            <span className="rcity-count">{counts[it.value] || 0}</span>
           </button>
         );
       })}

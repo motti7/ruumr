@@ -13,4 +13,6 @@
 .rcity-pill.is-active{background:linear-gradient(135deg,var(--theme-orange),var(--theme-orange-dark));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(255,87,34,.32)}
 .rcity-pill.is-active .rcity-count{background:rgba(255,255,255,.28);color:#fff}
 .rcity-pill:active{transform:scale(.96)}
+.rf-updated{margin:2px 0 0;color:#a39b90;font-size:12px;font-weight:600;letter-spacing:.1px;display:inline-flex;align-items:center;gap:6px}
+.rf-updated::before{content:"";width:7px;height:7px;border-radius:50%;background:#25d366;box-shadow:0 0 0 3px rgba(37,211,102,.18)}
 .rcity-pill:focus-visible{outline:2px solid var(--theme-orange);outline-offset:2px}
