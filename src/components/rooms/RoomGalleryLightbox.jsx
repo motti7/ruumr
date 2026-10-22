@@ -51,11 +51,11 @@ export default function RoomGalleryLightbox({ photos = [], startIndex = 0, onClo
       >
         <button
           type="button"
-          className="no-tap-expand absolute top-4 right-4 w-[44px] h-[44px] p-0 m-0 bg-black/70 rounded-full hover:bg-black/85 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 z-10 border-0 shadow-lg"
+          className="no-tap-expand absolute top-4 right-4 w-[44px] h-[44px] p-0 m-0 bg-white rounded-full hover:bg-gray-100 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 z-[20] border-0 shadow-xl"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           aria-label={t('close')}
         >
-          <X className="w-6 h-6 text-white shrink-0" style={iconCenter} />
+          <X className="w-6 h-6 text-gray-900 shrink-0" style={iconCenter} />
         </button>
 
         <motion.img
