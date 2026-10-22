@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {machineAuthorized} from '../base44/functions/importRoomPost/machine-auth.js';
 import {createImportHandler} from '../base44/functions/importRoomPost/handler.js';
-const secret='a'.repeat(64),version='branch:test';
-const request=(key=secret,v=version)=>new Request('https://example.test',{method:'POST',headers:{'X-Ruumr-Import-Key':key,'Base44-Functions-Version':v},body:JSON.stringify({action:'check'})});
-test('Machine import fails closed for missing/short/wrong key and wrong branch',async()=>{
+const secret='a'.repeat(64),version='israel-room-feed-v1';
+const request=(key=secret,v=version)=>new Request('https://example.test',{method:'POST',headers:{'X-Ruumr-Import-Key':key,'X-Ruumr-Import-Target':v},body:JSON.stringify({action:'check'})});
+test('Machine import fails closed for missing/short/wrong key and wrong target',async()=>{
  for(const [key,expected,v] of [[secret,undefined,version],[secret,'short',version],['b'.repeat(64),secret,version],[secret,secret,'main']]){
  assert.equal(await machineAuthorized(request(key,v),expected,version),false);
  }
