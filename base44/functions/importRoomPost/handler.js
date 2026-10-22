@@ -62,7 +62,7 @@ export function createImportHandler(createClient,{authorizeMachine=async()=>fals
  if(!p.text||!p.phones.length||!p.photos.length)return Response.json({status:'filtered',reason:'feed.missing_contact_media'});
  const publishedAt=Date.parse(p.postedAt),now=Date.now();
  if(!Number.isFinite(publishedAt)||publishedAt>now+300000)throw new Error('feed.invalid_post');
- if(now-publishedAt>=14*86400000)return Response.json({status:'filtered',reason:'feed.expired'});
+ if(now-publishedAt>=21*86400000)return Response.json({status:'filtered',reason:'feed.expired'});
  stage='lookup_room';
  const existing=await sr.RoomListing.filter({source_key:key},'id',1);
  if(existing.length)return Response.json({status:'duplicate',id:existing[0].id});
