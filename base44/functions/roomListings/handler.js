@@ -45,7 +45,7 @@ export function createHandler(createClient) { return async req=>{
       if(body.room_id){let record;try{record=await entity.get(body.room_id);}catch{return Response.json({records:[]});}records=record.status==='published'?[record]:[];}else records=await entity.filter({status:'published'},'-created_date',100);
       const [outgoing,incoming]=user ? await Promise.all([sr.UserBlock.filter({blocker_id:user.id}),sr.UserBlock.filter({blocked_id:user.id})]) : [[],[]];
       const blocked=new Set([...outgoing.map(r=>r.blocked_id),...incoming.map(r=>r.blocker_id)]);
-      return Response.json({records:records.filter(r=>!blocked.has(r.owner_id)).map(r=>{
+      return Response.json({records:records.filter(r=>!blocked.has(r.owner_id) && !(r.source_kind==='facebook' && String(r.owner_id||'').startsWith('facebook:') && Date.parse(r.source_posted_at)<=Date.now()-21*86400000)).map(r=>{
         const fields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos','publisher_name','publisher_photo','publisher_type','source_kind','source_posted_at','created_date','entry_text','end_text','bills_text','shabbat_policy','kosher_policy','price_options'];
         return {...Object.fromEntries(fields.filter(k=>r[k]!==undefined).map(k=>[k,r[k]])),is_owner:!!user && r.owner_id===user.id};
       })});
