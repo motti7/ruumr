@@ -1,6 +1,6 @@
 {
-  "name": "Delete expired Facebook rooms",
   "description": "Delete imported Facebook room listings 21 days after their original publication. Runs once daily as the administrator who created the workflow. Native user listings are excluded.",
+  "name": "Delete expired Facebook rooms",
   "trigger": {
     "condition": null,
     "config": {
