@@ -1,5 +1,5 @@
 {
-  "description": "Delete imported Facebook room listings 21 days after their original publication. Runs hourly as the administrator who created the workflow. Native user listings are excluded.",
+  "description": "Delete imported Facebook room listings 21 days after their original publication. Runs once daily as the administrator who created the workflow. Native user listings are excluded.",
   "name": "Delete expired Facebook rooms",
   "trigger": {
     "condition": null,
@@ -10,7 +10,7 @@
       "cron_expression": null,
       "one_time_date": null,
       "timezone": "Asia/Jerusalem",
-      "interval_value": 1,
+      "interval_value": 24,
       "interval_unit": "hours",
       "interval_anchor": "2026-10-22T00:00:00Z",
       "ends_type": "never",
