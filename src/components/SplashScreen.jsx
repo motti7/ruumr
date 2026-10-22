@@ -50,7 +50,7 @@ export default function SplashScreen({ onDone }) {
                   letterSpacing: "0.5px",
                 }}
               >
-                find your perfect roommates
+                find your place
               </span>
             </div>
           </motion.div>

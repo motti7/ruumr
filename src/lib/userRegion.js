@@ -13,6 +13,7 @@ const REGION_STORAGE_KEY = 'ruumr_region';
 export const REGIONS = {
   ISRAEL: 'IL',
   UK: 'GB',
+  IRELAND: 'IE',
 };
 
 export function detectRegion() {
@@ -20,6 +21,7 @@ export function detectRegion() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz === 'Asia/Jerusalem') return REGIONS.ISRAEL;
     if (tz === 'Europe/London') return REGIONS.UK;
+    if (tz === 'Europe/Dublin') return REGIONS.IRELAND;
   } catch {
     // Timezone API unavailable; fall back below.
   }
@@ -31,6 +33,7 @@ export function getStoredRegion() {
     const v = window.localStorage.getItem(REGION_STORAGE_KEY);
     if (v === REGIONS.UK) return REGIONS.UK;
     if (v === REGIONS.ISRAEL) return REGIONS.ISRAEL;
+    if (v === REGIONS.IRELAND) return REGIONS.IRELAND;
   } catch {
     // Storage unavailable; fall back to detection.
   }
@@ -59,6 +62,10 @@ export function resolveRegion() {
 
 export function isUKRegion() {
   return resolveRegion() === REGIONS.UK;
+}
+
+export function isIrelandRegion() {
+  return resolveRegion() === REGIONS.IRELAND;
 }
 
 export function isIsraelRegion() {

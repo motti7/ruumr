@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
+import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
+import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,8 @@ import { Apple } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
+  useRoomLocale();
+  useEffect(()=>{rememberRoomAuth();},[]);
   const { loginWithProvider, isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +23,7 @@ export default function Login() {
   const [providerPending, setProviderPending] = useState(null);
 
   if (!isLoadingAuth && !isLoadingPublicSettings && isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={roomAuthDestination()} replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -28,7 +32,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      window.location.href = roomAuthDestination();
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -42,6 +46,7 @@ export default function Login() {
     setError("");
     setProviderPending(provider);
     try {
+      rememberRoomAuth();
       await loginWithProvider(provider);
     } catch (err) {
       setError(err?.message || "Sign-in failed. Please try again.");
@@ -54,16 +59,17 @@ export default function Login() {
     <AuthLayout
       icon={LogIn}
       title="Welcome back"
-      subtitle="Log in to your account"
+      subtitle={roomAuthDestination()==='/AddRoom'?rt('hub.publisher_signup'):'Log in to your account'}
       footer={
         <>
           Don't have an account?{" "}
-          <Link to="/register" className="text-primary font-medium hover:underline">
+          <Link to={roomAuthDestination()==='/AddRoom'?'/register?next=AddRoom':roomAuthDestination()!=='/'?'/register?next=Partner':'/register'} className="text-primary font-medium hover:underline">
             Create one
           </Link>
         </>
       }
     >
+      <Link to="/Rooms" className="block text-center mb-4">{rt("צפייה בחדרים ללא הרשמה")}</Link>
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-3"

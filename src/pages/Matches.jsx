@@ -15,7 +15,7 @@ import PullToRefresh from "@/components/shared/PullToRefresh";
 import { requestTeamMember } from "@/api/teamInvites";
 import { useToast } from "@/components/ui/use-toast";
 
-export default function MatchesPage() {
+export default function MatchesPage({embedded=false}) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -227,7 +227,7 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir={i18n.dir()} style={{ height: 'calc(100dvh - 48px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24" dir={i18n.dir()} style={embedded?undefined:{ height: 'calc(100dvh - 48px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', overflow: 'hidden' }}>
       <PullToRefresh onRefresh={loadMatches}>
       <div className="bg-gray-50 dark:bg-gray-900 p-4 pb-2">
         <div className="flex items-center justify-between">

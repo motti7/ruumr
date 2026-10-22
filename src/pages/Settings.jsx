@@ -40,11 +40,13 @@ export default function SettingsPage() {
   const [notifyLikes, setNotifyLikes] = useState(true);
   const [notifyMatches, setNotifyMatches] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       try {
         const userData = await User.me();
+        setIsAdmin(userData.role === 'admin');
         setNotifyLikes(userData.notify_likes !== false);
         setNotifyMatches(userData.notify_matches !== false);
       } catch (e) {
@@ -87,6 +89,9 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-4">
+          {isAdmin && <div className="bg-white p-4 rounded-xl border border-orange-200">
+            <SettingsItem icon={<Shield className="w-5 h-5 text-orange-500"/>} title="מעבדת מודעות — ניסוי סקרייפינג" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("ScrapingPilot")} />
+          </div>}
           <div className="bg-white p-4 rounded-xl border border-gray-200">
               <p className="font-bold text-lg mb-2 text-gray-800">{t("notifications")}</p>
               <div className="divide-y divide-gray-100">

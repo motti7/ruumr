@@ -295,6 +295,53 @@ a:focus-visible {
   border-radius: 2px;
 }
 
+/* ── Ruumr Plus nav icon — orange shimmer highlight ─────────────────── */
+/* The sweep is fired by useRuumrPlusShimmer on a single session-wide
+   timer (one sweep per minute), so the cadence is continuous across page
+   navigations instead of restarting on every mount. */
+.ruumr-plus-shimmer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  padding: 2px;
+}
+.ruumr-plus-shimmer::before {
+  content: "";
+  position: absolute;
+  width: 70%;
+  height: 220%;
+  background: linear-gradient(90deg, transparent, rgba(255, 87, 34, 0.6), transparent);
+  pointer-events: none;
+  opacity: 0;
+}
+.ruumr-plus-shimmer.is-shimmering::before {
+  animation: ruumr-plus-sweep-1 0.85s ease-in-out forwards;
+}
+.ruumr-plus-shimmer.sweep-var-1.is-shimmering::before {
+  animation-name: ruumr-plus-sweep-2;
+}
+.ruumr-plus-shimmer.sweep-var-2.is-shimmering::before {
+  animation-name: ruumr-plus-sweep-3;
+}
+@keyframes ruumr-plus-sweep-1 {
+  0%   { left: -160%; top: -60%;  transform: rotate(18deg);  opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { left: 260%;  top: -60%;  transform: rotate(18deg);  opacity: 0; }
+  100% { left: 260%;  transform: rotate(18deg);  opacity: 0; }
+}
+@keyframes ruumr-plus-sweep-2 {
+  0%   { left: 260%;  top: 120%; transform: rotate(-25deg); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { left: -160%; top: 120%; transform: rotate(-25deg); opacity: 0; }
+  100% { left: -160%; transform: rotate(-25deg); opacity: 0; }
+}
+@keyframes ruumr-plus-sweep-3 {
+  0%   { left: 15%;  top: -160%; transform: rotate(80deg); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { left: 15%;  top: 260%;  transform: rotate(80deg); opacity: 0; }
+  100% { left: 15%;  top: 260%;  transform: rotate(80deg); opacity: 0; }
+}
+
 /* ── Pseudo-Element Overlays for Sub-44px Interactive Elements ───── */
 /* Invisible 44x44px tap areas for small icons/buttons */
 .music-player-mute::after {

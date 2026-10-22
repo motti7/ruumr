@@ -23,8 +23,7 @@ Deno.serve(async req => {
         (body.details != null && (typeof body.details !== 'string' || body.details.length > 2000))) {
         throw safetyError('Invalid report');
       }
-      const profiles = await sr.Profile.filter({ id: body.profile_id }, 'id', 1);
-      const profile = profiles[0];
+      const profile = await sr.Profile.get(body.profile_id);
       if (!profile?.user_id || profile.user_id === user.id) throw safetyError('Invalid profile');
       const existing = await sr.UserReport.filter({ reporter_id: user.id, profile_id: profile.id, status: 'new' }, 'id', 1);
       if (existing.length) return Response.json({ success: true });
@@ -39,8 +38,7 @@ Deno.serve(async req => {
 
     if (body.action === 'block') {
       if (typeof body.match_id !== 'string' || body.confirm !== true) throw safetyError('Confirmation required');
-      const matches = await sr.Match.filter({ id: body.match_id }, 'id', 1);
-      const match = matches[0];
+      let match;try{match=await sr.Match.get(body.match_id);}catch(e){if(Number(e?.status??e?.response?.status)!==404)throw e;}
       let block;
       if (match) {
         if (![match.user1_id, match.user2_id].includes(user.id)) throw safetyError('Chat unavailable', 404);
@@ -118,7 +116,7 @@ Deno.serve(async req => {
 
     if (body.action === 'mark_read') {
       if (typeof body.message_id !== 'string') throw safetyError('Invalid message');
-      const message = (await sr.Message.filter({ id: body.message_id }, 'id', 1))[0];
+      const message = await sr.Message.get(body.message_id);
       if (!message) throw safetyError('Message unavailable', 404);
       await requireOpenChat(sr, message.match_id, user.id);
       if (message.sender_id === user.id) throw safetyError('Cannot mark own message read');

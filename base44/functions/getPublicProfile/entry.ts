@@ -47,6 +47,7 @@ export default async function (req: Request): Promise<Response> {
       budget_min: typeof profile.budget_min === 'number' ? profile.budget_min : 0,
       apartment_photos: Array.isArray(profile.apartment_photos) ? profile.apartment_photos.filter(Boolean) : [],
       is_verified: profile.is_verified === true,
+      region: profile.region || 'IL',
     };
 
     return Response.json(publicProfile);

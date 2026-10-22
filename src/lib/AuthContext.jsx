@@ -1,3 +1,4 @@
+import {roomAuthDestination} from './room-auth';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
@@ -257,7 +258,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoadingPublicSettings(false);
     await checkUserAuth();
     if (authRoutePaths.has(window.location.pathname)) {
-      window.location.replace('/');
+      window.location.replace(roomAuthDestination());
     }
   };
 
@@ -299,7 +300,7 @@ export const AuthProvider = ({ children }) => {
       if (isWebAuthSessionAvailable()) {
         const result = await signInWithWebAuthSession(provider, { onToken: handleNativeAuthToken });
         if (result?.handled && authRoutePaths.has(window.location.pathname)) {
-          window.location.replace('/');
+          window.location.replace(roomAuthDestination());
         }
         return;
       }

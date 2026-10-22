@@ -1,0 +1,18 @@
+import React,{useEffect,useState} from 'react';
+import {Link,useNavigate,useSearchParams} from 'react-router-dom';
+import {useAuth} from '@/lib/AuthContext';
+import {roomHub} from '@/api/roomHub';
+import {roomText as rt,roomDirection,useRoomLocale} from '@/lib/room-i18n';
+export default function RoomChat(){useRoomLocale();const {user}=useAuth();const [params]=useSearchParams(),navigate=useNavigate(),id=params.get('offerId');
+ const [data,setData]=useState(null),[text,setText]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[action,setAction]=useState(''),[reason,setReason]=useState('harassment'),[details,setDetails]=useState('');
+ useEffect(()=>{try{sessionStorage.removeItem('ruumr_room_chat_intent');}catch{}let active=true;const load=async()=>{if(document.hidden)return;try{const x=await roomHub('conversation',{offer_id:id});if(active){setData(x);await roomHub('read',{offer_id:id});}}catch(e){if(active){setData(null);setError(e.response?.data?.error||e.message||'hub.failed');}}};load();const timer=setInterval(load,15000);return()=>{active=false;clearInterval(timer);};},[id]);
+ async function run(fn){setBusy(true);setError('');try{await fn();}catch(e){setError(e.response?.data?.error||e.message||'hub.failed');}finally{setBusy(false);}}
+ const o=data?.offer,r=o?.room_snapshot;
+ return <section className="rr" dir={roomDirection()}><Link to="/Inbox">{rt('hub.back_messages')}</Link><h1>{rt('hub.room_conversation')}</h1>{error&&<p role="alert">{rt(error)}</p>}{data&&<><h2>{user?.id===o.owner_id?o.recipient_name:o.publisher_snapshot?.display_name}</h2>{o.publisher_snapshot?.photo&&<img className="rh-avatar" src={o.publisher_snapshot.photo} alt={o.publisher_snapshot.display_name}/>}
+ <article className="rr-card">{r.photos?.[0]&&<img className="rh-room-photo" src={r.photos[0]} alt={r.title}/>}<h3>{r.title}</h3><p>{rt(r.city)} · ₪{r.price}</p>{data.available?<Link to={'/Rooms?room='+encodeURIComponent(o.room_id)}>{rt('hub.view_room')}</Link>:<p>{rt('hub.closed')}</p>}</article>
+ <div className="rh-tabs"><button onClick={()=>setAction('report')}>{rt('hub.report')}</button><button onClick={()=>setAction('block')}>{rt('hub.block')}</button></div>
+ {action&&<div className="rr-card" role="dialog" aria-label={rt('hub.'+action)}>{action==='block'?<p>{rt('hub.block_warning')}</p>:<><label>{rt('hub.reason')}<select value={reason} onChange={e=>setReason(e.target.value)}>{['harassment','fake_profile','inappropriate_content','spam','other'].map(v=><option value={v} key={v}>{rt('hub.reason_'+v)}</option>)}</select></label><label>{rt('hub.details')}<textarea maxLength={2000} value={details} onChange={e=>setDetails(e.target.value)}/></label></>}
+ <button disabled={busy} onClick={()=>run(async()=>{await roomHub(action,{offer_id:id,confirm:true,reason,details});if(action==='block'){window.dispatchEvent(new Event('ruumrSafetyChanged'));navigate('/Inbox',{replace:true});}else{setAction('');setError('hub.report_sent');}})}>{rt('hub.confirm')}</button><button disabled={busy} onClick={()=>setAction('')}>{rt('hub.cancel')}</button></div>}
+ <div role="log" aria-label={rt('hub.messages')} aria-live="polite">{data.messages.map(m=><p className={m.sender_id===user?.id?'rh-message rh-mine':'rh-message'} key={m.id}>{m.content}</p>)}</div>
+ <form onSubmit={e=>{e.preventDefault();run(async()=>{const x=await roomHub('send',{offer_id:id,content:text});setData(old=>({...old,messages:[...old.messages,x.record]}));setText('');});}}><label>{rt('hub.write_message')}<textarea maxLength={10000} required value={text} onChange={e=>setText(e.target.value)}/></label><button className="rr-primary" disabled={busy||!text.trim()}>{rt('hub.send')}</button></form></>}</section>;
+}

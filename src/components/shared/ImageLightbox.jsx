@@ -16,11 +16,11 @@ export default function ImageLightbox({ src, onClose }) {
                     onClick={onClose}
                 >
                     <button
-                        className="absolute top-4 right-4 w-[44px] h-[44px] bg-white/20 rounded-full hover:bg-white/30 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0"
+                        className="absolute top-4 right-4 w-[44px] h-[44px] bg-white rounded-full hover:bg-gray-100 active:scale-95 transition-transform flex items-center justify-center flex-shrink-0 shadow-xl z-[20]"
                         onClick={onClose}
                         aria-label={t("close")}
                     >
-                        <X className="w-6 h-6 text-white" />
+                        <X className="w-6 h-6 text-gray-900" />
                     </button>
                     <motion.img
                         initial={{ scale: 0.9, opacity: 0 }}

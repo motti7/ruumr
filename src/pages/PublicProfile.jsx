@@ -83,6 +83,26 @@ export default function PublicProfile() {
   const dir = i18n.dir();
   const joinTo = userId ? `/register?invited_by_user_id=${encodeURIComponent(userId)}` : "/register";
 
+  // Localize Open Graph meta tags (used by WhatsApp / social link previews)
+  // based on the shared profile's region. IL → Hebrew, otherwise → English.
+  useEffect(() => {
+    if (!profile) return;
+    const isIL = profile.region === "IL";
+    const setMeta = (selector, content) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute("content", content);
+    };
+    if (isIL) {
+      document.title = "Ruumr - רומר";
+      setMeta('meta[property="og:title"]', "Ruumr - רומר");
+      setMeta('meta[property="og:description"]', "הטינדר של עולם השותפים - מוצאים שותפים לדירה בקלות");
+    } else {
+      document.title = "Ruumr";
+      setMeta('meta[property="og:title"]', "Ruumr");
+      setMeta('meta[property="og:description"]', "The Tinder for roommates - find your place to live");
+    }
+  }, [profile]);
+
   const photos = profile?.photos || [];
   const apartmentPhotos = profile?.apartment_photos || [];
   const interests = profile?.interests || [];

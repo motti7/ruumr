@@ -1,3 +1,4 @@
+import RoomOfferPreference from '@/components/rooms/RoomOfferPreference';
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Profile as ProfileEntity } from "@/entities/all";
@@ -12,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
 import CitySelect from "@/components/shared/CitySelect";
-import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical, CheckCircle } from "lucide-react";
+import { Save, Edit, Plus, Loader2, X, Home, ShieldCheck, AlertCircle, Instagram, Facebook, GripVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { SiTiktok } from "react-icons/si";
 import { createPageUrl } from '@/utils';
@@ -389,7 +390,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}>
+    <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}><RoomOfferPreference/>
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
       
