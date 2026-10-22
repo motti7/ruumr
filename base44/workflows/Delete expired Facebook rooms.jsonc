@@ -12,7 +12,7 @@
       "timezone": "Asia/Jerusalem",
       "interval_value": 24,
       "interval_unit": "hours",
-      "interval_anchor": "2026-10-22T00:00:00",
+      "interval_anchor": "2026-10-22T00:00:00Z",
       "ends_type": "never",
       "ends_on_date": null,
       "ends_after_count": null
