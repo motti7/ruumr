@@ -1,0 +1,3 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { createCleanupHandler } from './logic.js';
+Deno.serve(createCleanupHandler(createClientFromRequest));
