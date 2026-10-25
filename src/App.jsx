@@ -274,20 +274,13 @@ function App() {
       {writeBootMarker('app-render')}
       {!isNativePlatform && !splashDone && <SplashScreen onDone={handleSplashDone} />}
       {splashDone && !nativeBootstrapDone && isNativeWebView && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ backgroundColor: "#E8420A" }}>
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ backgroundColor: "#F14D16" }}>
           <div className="flex flex-col items-center gap-2">
-            <span
-              style={{
-                fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
-                fontWeight: 800,
-                fontSize: "72px",
-                color: "white",
-                letterSpacing: "-1px",
-                lineHeight: 1,
-              }}
-            >
-              ruumr
-            </span>
+            <img
+              src="/ruumr-wordmark-white.svg"
+              alt="ruumr"
+              style={{ width: "200px", height: "auto" }}
+            />
             <span
               style={{
                 fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
