@@ -378,7 +378,7 @@ export default function Layout({ children, currentPageName }) {
         {/* אמצע: כותרת רומר — תמיד במרכז מוחלט של המסך */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Link to={createPageUrl("Discover")} className="header-glow select-none pointer-events-auto">
-                 <h1 className="logo-pill">Ruumr</h1>
+                 <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-8 w-auto dark:invert" />
             </Link>
         </div>
 
