@@ -663,7 +663,7 @@
   "safety_chat_unavailable": "This conversation is unavailable.",
   "boost_title": "Give your profile a boost",
   "boost_description": "Share RUUMR with friends and give your profile priority in roommate discovery for 24 hours.",
-  "boost_limits": "Free. One boost every 7 days. Existing filters and blocks still apply. A boost does not guarantee views or matches.",
+  "boost_limits": "Free. One boost every 7 days.",
   "boost_active": "Your boost is active",
   "boost_until": "Active until {{date}}",
   "boost_next": "Your next boost is available on {{date}}",
