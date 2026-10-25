@@ -109,8 +109,6 @@ export function isRuumrSimulatorMode() {
   );
 }
 
-// Testing aid: when on, the simulator pretends the user has NO Plus entitlement
-// so the locked / upgrade experience can be exercised locally. No effect in prod.
 export function isRuumrNativeDemoSession() {
   if (typeof window === 'undefined') {
     return false;

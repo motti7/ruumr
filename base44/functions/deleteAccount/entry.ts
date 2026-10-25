@@ -161,12 +161,7 @@ Deno.serve(async (req) => {
         for (const pv of pageViews) await safeDelete(sr.PageView, pv.id);
         console.log(`  ✓ PageViews deleted: ${pageViews.length}`);
 
-        // 10. PendingSubscriptions
-        const pendingSubs = await sr.PendingSubscription.filter({ user_id: userId });
-        for (const ps of pendingSubs) await safeDelete(sr.PendingSubscription, ps.id);
-        console.log(`  ✓ PendingSubscriptions deleted: ${pendingSubs.length}`);
-
-        // 11. Delete the User record itself (removes from users list in dashboard)
+        // 10. Delete the User record itself (removes from users list in dashboard)
         await safeDelete(sr.User, userId);
         console.log(`  ✓ User record deleted`);
 
