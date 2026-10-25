@@ -1,0 +1,58 @@
+{
+  "name": "PendingSubscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Base44 user ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email used as webhook correlation key"
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for correlation"
+    },
+    "subscription_id": {
+      "type": "string",
+      "description": "Wix subscription ID from order approved webhook"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "canceled"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "checkout_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

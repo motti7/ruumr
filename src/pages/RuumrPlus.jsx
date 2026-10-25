@@ -57,7 +57,6 @@ export default function RuumrPlus() {
     {error === 'boost_profile_required' && <Link className="inline-block mt-4 underline" to="/Onboarding">{t('boost_create_profile')}</Link>}
    </>}
   </section>
-  <p className="text-sm text-gray-500 mt-6">{t('boost_privacy')}</p>
   <Link className="inline-block underline mt-6" to="/Discover?view=people">{t('boost_back')}</Link>
  </main>;
 }
