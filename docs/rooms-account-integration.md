@@ -12,7 +12,7 @@ Branch: `codex/scraping-ai-preview`. Keep this work on the review branch; do not
 - Close changes listing status, never deletes User or RoomPublisher. A new room gets a new listing identity. Editing is restricted to the owner of a currently published listing. Old room offers retain their original snapshot.
 - Saved rooms live in the header bookmark beside the account icon. Closed listings remain marked unavailable in saved lists.
 - Matches/LikesYou links redirect to Inbox chats/likes. Room offers are separately filtered in Inbox and use RoomChat, not Match or reciprocal swipes.
-- Rooms retain the center add button and a smaller Plus pill. Partners retain center Plus with no duplicate. Payment/AI product behavior is unchanged.
+- Rooms retain the center add button and a smaller Plus pill. Partners retain center Plus with no duplicate. The Plus destination now offers free profile boosts; paid recommendations have been retired.
 
 ## Server and safety rules
 

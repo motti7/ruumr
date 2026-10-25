@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     base44({
       // Support for legacy code that imports the base44 SDK with @/integrations, @/functions, etc.
-      // The app still relies on these (e.g. `@/functions/getSubscriptionStatus`, which the plugin
+      // The app still relies on these (e.g. `@/functions/handleSwipe`, which the plugin
       // maps to `base44.functions.invoke`), so this defaults ON to match Base44's cloud build —
       // without it the production build fails to resolve those imports. Real files (e.g.
       // `src/entities/*`) still take precedence, so only unresolved legacy imports hit the shim.

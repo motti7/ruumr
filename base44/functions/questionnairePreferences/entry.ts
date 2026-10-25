@@ -22,7 +22,7 @@ const WEIGHTS: Record<string, number> = {
   q_hosting: 1,
 };
 
-const SOURCES = new Set(['legacy_import', 'match_questionnaire', 'plus_activation', 'plus_edit']);
+const SOURCES = new Set(['legacy_import', 'match_questionnaire']);
 
 function normalizeAnswers(value: unknown) {
   const input = value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
       if (!isComplete(answers)) {
         return Response.json({ ok: false, error: 'questionnaire_incomplete' }, { status: 400 });
       }
-      const source = SOURCES.has(String(body.source)) ? String(body.source) : 'plus_edit';
+      const source = SOURCES.has(String(body.source)) ? String(body.source) : 'match_questionnaire';
       const before = await findCanonical(sr, String(currentUser.id));
       const completedAt = new Date(body.completed_at || Date.now()).toISOString();
       const saved = await upsertPreference(

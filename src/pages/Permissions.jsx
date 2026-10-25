@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import TinderSwitch from "../components/shared/TinderSwitch";
 import { User } from "@/entities/User";
 import { Profile } from "@/entities/Profile";
-import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
 /**
  * @param {any} props
@@ -63,11 +62,6 @@ export default function PermissionsPage() {
             const profiles = user ? await Profile.filter({ user_id: user.id }) : [];
             if (profiles.length > 0) {
                 await Profile.update(profiles[0].id, { is_visible: checked });
-                try {
-                    await syncCurrentProfileToRuumrPlus();
-                } catch (syncError) {
-                    console.error("Failed to sync visibility change to Ruumr Plus:", syncError);
-                }
             }
         } catch (e) {
             console.error("Failed to update profile visibility", e);

@@ -8,7 +8,6 @@ import { createPageUrl } from "@/utils";
 import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock, SlidersHorizontal } from "lucide-react";
 
-import RuumrPlusBanner from "./components/shared/RuumrPlusBanner";
 import LanguageToggle from "./components/shared/LanguageToggle";
 import { motion } from "framer-motion";
 
@@ -17,12 +16,9 @@ import { useState, useEffect, useRef } from "react";
 import useAndroidBackButton from "@/hooks/useAndroidBackButton";
 import useTabHistory from "@/hooks/useTabHistory";
 import useRuumrPlusShimmer from "@/hooks/useRuumrPlusShimmer";
-import { markRuumrPlusActivationIntent } from "@/lib/ruumrPlusActivation";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
-import { isPlusEntitled } from "@/lib/ruumrPlusEntitlement";
 import { isRuumrSimulatorMode } from "@/lib/simulatorMode";
 import { useOptionalAuth } from "@/lib/AuthContext";
-import { ensureBguPlusEntitlement } from "@/functions/ensureBguPlusEntitlement";
 
 function isDesktopBrowserContext() {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -107,19 +103,6 @@ export default function Layout({ children, currentPageName }) {
         const isBrowserWeb = typeof window !== 'undefined' && window.location.protocol.startsWith('http');
         const user = await UserEntity.me();
         setCurrentUser(user);
-
-        // Auto-grant Ruumr Plus for BGU students
-        try {
-          const email = String(user.email || '').trim().toLowerCase();
-          if (email.endsWith('@post.bgu.ac.il') && !user.is_ruumr_plus) {
-            ensureBguPlusEntitlement({}).then(() => {
-              // Refresh user data so is_ruumr_plus updates in context
-              UserEntity.me().then((fresh) => {
-                if (fresh) setCurrentUser(fresh);
-              }).catch(() => {});
-            }).catch(() => {});
-          }
-        } catch {}
 
         const browserNotificationsEnabled =
           notificationsSupported &&
@@ -290,9 +273,9 @@ export default function Layout({ children, currentPageName }) {
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
 
-  const shouldShowNav = !['Onboarding', 'Chat', 'RoomChat', 'ProfileView', 'Charter', 'Verification', 'Banned', 'RuumrPlusPricing', 'RuumrPlusCheckout'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'RoomChat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
-  
+
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
   useEffect(() => {
@@ -322,7 +305,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
-        {false && !['Onboarding', 'Banned', 'Verification'].includes(currentPageName) && <RuumrPlusBanner />}
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -387,7 +369,7 @@ export default function Layout({ children, currentPageName }) {
             כתיבת ביקורת ב-Matches. הם לעולם לא מופיעים יחד, כך שהקבוצה מכילה
             לכל היותר שני כפתורים ושום כפתור אחר לא זז בין הטאבים. */}
         <div className="flex items-center w-[120px] justify-end gap-1 pe-2 z-10">
-            
+
             {isRoomsContext
                 ? (hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>)
                 : (isPartnersTab && hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
@@ -431,14 +413,7 @@ export default function Layout({ children, currentPageName }) {
                                 e.preventDefault();
                                 // Track Plus nav button click
                                 trackMixpanel('Plus Nav Button Clicked', { source: currentPageName });
-                                // Entitled users go straight to Plus (and auto-activate);
-                                // everyone else sees the coming-soon screen.
-                                if (isPlusEntitled(currentUser)) {
-                                    markRuumrPlusActivationIntent({ source: "nav" });
-                                    navigate(createPageUrl("RuumrPlus"));
-                                } else {
-                                    navigate(createPageUrl("RuumrPlusPricing"));
-                                }
+                                navigate(createPageUrl('RuumrPlus'));
                                 return;
                             }
 

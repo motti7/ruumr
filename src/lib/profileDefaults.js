@@ -1,4 +1,4 @@
-import { HOUSEHOLD_PREFERENCE_DEFAULTS } from "./ruumrPlusFields";
+import { HOUSEHOLD_PREFERENCE_DEFAULTS } from "./householdPreferenceFields";
 
 const DEFAULT_PHOTOS = Array(6).fill(null);
 

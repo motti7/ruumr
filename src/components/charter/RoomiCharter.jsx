@@ -11,18 +11,15 @@ import {
   normalizeCharterAnswers,
 } from "@/lib/charterCompletion";
 import { saveQuestionnairePreference } from "@/api/questionnairePreferences";
-import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { base44 } from "@/api/base44Client";
 import { User } from "@/entities/User";
 import { trackMixpanel } from "@/lib/mixpanelTracking";
 
 export default function RoomiCharter({
   matchId = null,
-  mode = "match",
   initialAnswers = {},
   onClose,
   onComplete,
-  requirePlusSync = false,
 }) {
   const { t, i18n } = useTranslation();
   const initial = useMemo(() => normalizeCharterAnswers(initialAnswers), [initialAnswers]);
@@ -77,22 +74,12 @@ export default function RoomiCharter({
     setIsSaving(true);
     setError("");
     try {
-      const source = mode === "plus"
-        ? (Object.keys(initial).length ? "plus_edit" : "plus_activation")
-        : "match_questionnaire";
+      const source = "match_questionnaire";
       const result = await saveQuestionnairePreference({
         answers: completedAnswers,
         source,
         sourceMatchId: matchId,
       });
-
-      if (requirePlusSync) {
-        await syncCurrentProfileToRuumrPlus();
-      } else {
-        syncCurrentProfileToRuumrPlus().catch((syncError) => {
-          console.error("Questionnaire Plus sync failed:", syncError);
-        });
-      }
 
       trackMixpanel("Match Questionnaire Completed", { source });
       confetti({
@@ -105,11 +92,7 @@ export default function RoomiCharter({
       onComplete?.(result.preference);
     } catch (saveError) {
       console.error("Questionnaire save failed:", saveError);
-      setError(
-        requirePlusSync
-          ? t('charter_plus_sync_failed')
-          : t('charter_save_failed')
-      );
+      setError(t('charter_save_failed'));
     } finally {
       setIsSaving(false);
     }

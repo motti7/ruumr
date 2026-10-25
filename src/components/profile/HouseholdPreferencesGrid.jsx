@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/ruumrPlusFields";
-import { Sparkles } from "lucide-react";
+import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/householdPreferenceFields";
 
 export default function HouseholdPreferencesGrid({
   profile = {},
@@ -12,11 +11,10 @@ export default function HouseholdPreferencesGrid({
 }) {
   const { t } = useTranslation();
   const finalTitle = title === undefined ? t("home_habits") : title;
-  const profileData = /** @type {Record<string, any> & { ruumrPlus?: any; ruumr_plus?: any }} */ (profile);
-  const plusMeta = profileData.ruumrPlus || profileData.ruumr_plus || null;
+  const profileData = /** @type {Record<string, any>} */ (profile);
   const hasAnyValue = HOUSEHOLD_PREFERENCE_FIELDS.some(({ field }) => profileData[field] != null && profileData[field] !== "");
 
-  if (!hasAnyValue && !plusMeta) {
+  if (!hasAnyValue) {
     return null;
   }
 
@@ -44,20 +42,13 @@ export default function HouseholdPreferencesGrid({
 
   return (
     <div className={`${containerClassName} rounded-2xl p-4 ${className}`}>
-      {(finalTitle || description || plusMeta) && (
+      {(finalTitle || description) && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="text-start">
             {finalTitle && <h4 className={`font-bold text-lg ${variant === "dark" ? "text-white" : "text-gray-900"}`}>{finalTitle}</h4>}
             {description && <p className={`text-sm mt-1 ${variant === "dark" ? "text-white/70" : "text-gray-500"}`}>{description}</p>}
           </div>
-          {plusMeta && (
-            <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold ${
-              variant === "dark" ? "bg-white/15 text-white" : "bg-orange-50 text-[--theme-orange]"
-            }`}>
-              <Sparkles className="w-3.5 h-3.5" />
-              Ruumr Plus
-            </div>
-          )}
+
         </div>
       )}
 
