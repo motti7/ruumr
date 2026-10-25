@@ -4,6 +4,8 @@ const TRANZILA_TERMINAL_NAME = Deno.env.get("TRANZILA_TERMINAL_NAME");
 const TRANZILA_WEBHOOK_SECRET = Deno.env.get("TRANZILA_WEBHOOK_SECRET");
 
 Deno.serve(async (req) => {
+    // Reversible retirement guard: no new checkout sessions. Existing cancellation remains available.
+    return Response.json({ error: 'paid_checkout_retired' }, { status: 410 });
     try {
         const base44 = createClientFromRequest(req);
         const user = await base44.auth.me();
