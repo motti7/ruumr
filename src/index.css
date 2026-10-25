@@ -177,6 +177,19 @@ button:focus-visible {
     font-weight: 400;
   }
 
+  .logo-pill {
+    font-family: "Nunito", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    line-height: 1;
+    color: #FFFDF5;
+    background: var(--theme-orange);
+    padding: 5px 16px;
+    border-radius: 999px;
+    letter-spacing: -0.3px;
+    box-shadow: 0 2px 8px rgba(255, 87, 34, 0.25);
+  }
+
   .gradient-orange {
     background: linear-gradient(135deg, var(--theme-orange) 0%, var(--theme-orange-dark) 100%);
   }

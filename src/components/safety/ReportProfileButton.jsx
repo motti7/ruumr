@@ -25,7 +25,7 @@ export default function ReportProfileButton({ profileId }) {
   };
   return <>
     <button type="button" onClick={() => { setOpen(true); setError(false); }}
-      className="min-h-[44px] min-w-[44px] p-2 text-gray-600 rounded-full hover:bg-gray-100"
+      className="min-h-[44px] min-w-[44px] p-2 text-gray-600 rounded-full hover:bg-gray-100 flex items-center justify-center"
       aria-label={t('safety_report_profile')}><Flag className="w-5 h-5" /></button>
     <Dialog open={open} onOpenChange={value => { if (!pending) setOpen(value); }}>
       <DialogContent dir={i18n.dir()} className="z-[400] max-w-sm w-[calc(100%_-_2rem)] rounded-2xl" onClick={e => e.stopPropagation()}>
@@ -50,4 +50,3 @@ export default function ReportProfileButton({ profileId }) {
     </Dialog>
   </>;
 }
-

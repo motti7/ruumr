@@ -20,7 +20,7 @@ export default function SplashScreen({ onDone }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           className="fixed inset-0 z-[99999] flex items-center justify-center"
-          style={{ backgroundColor: "#E8420A" }}
+          style={{ backgroundColor: "#F14D16" }}
         >
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
@@ -29,18 +29,11 @@ export default function SplashScreen({ onDone }) {
             className="flex items-center gap-3"
           >
             <div className="flex flex-col items-center gap-2">
-              <span
-                style={{
-                  fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
-                  fontWeight: 800,
-                  fontSize: "72px",
-                  color: "white",
-                  letterSpacing: "-1px",
-                  lineHeight: 1,
-                }}
-              >
-                ruumr
-              </span>
+              <img
+                src="/ruumr-wordmark-white.svg"
+                alt="ruumr"
+                style={{ width: "200px", height: "auto" }}
+              />
               <span
                 style={{
                   fontFamily: "'Nunito', 'Varela Round', 'Quicksand', sans-serif",
