@@ -453,11 +453,7 @@ export default function Layout({ children, currentPageName }) {
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center transition-colors duration-200 select-none relative ${itemLocked ? 'opacity-40' : ''} ${
                                 isAddRoom
-                                    ? `min-h-[44px] rounded-full px-3 py-2 mx-1 ${
-                                        (isActive || isAddRoom)
-                                            ? 'bg-gradient-to-br from-[--theme-orange] to-[#FF7A45] text-white shadow-lg'
-                                            : 'bg-orange-50 text-[--theme-orange] border border-orange-200'
-                                      }`
+                                    ? `min-h-[44px] rounded-full px-3 py-2 mx-1 bg-orange-50 text-[--theme-orange] border border-orange-200 ${isActive ? 'ring-1 ring-orange-200' : ''}`
                                     : `py-2 px-3 min-h-[44px] ${
                                         isActive ? 'text-[--theme-orange]' : 'text-gray-400 dark:text-gray-500'
                                       }`
