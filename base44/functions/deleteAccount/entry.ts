@@ -161,6 +161,9 @@ Deno.serve(async (req) => {
         for (const pv of pageViews) await safeDelete(sr.PageView, pv.id);
         console.log(`  ✓ PageViews deleted: ${pageViews.length}`);
 
+        // Remove retained historical billing records when their owner deletes the account.
+        await drain(sr.PendingSubscription, { user_id: userId });
+
         // 10. Delete the User record itself (removes from users list in dashboard)
         await safeDelete(sr.User, userId);
         console.log(`  ✓ User record deleted`);
