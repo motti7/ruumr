@@ -36,11 +36,6 @@ resolveRegion();
 
 // Lazy-load heavy pages for route-based code splitting
 import OurStory from './pages/OurStory';
-import RuumrPlusComingSoon from './pages/RuumrPlusComingSoon';
-const RuumrPlusThankYou = lazy(() => import('./pages/RuumrPlusThankYou'));
-const TranzilaReturn = lazy(() => import('./pages/TranzilaReturn'));
-const ManageSubscription = lazy(() => import('./pages/ManageSubscription'));
-const AdminTools = lazy(() => import('./pages/AdminTools'));
 const Rooms = lazy(() => import('./pages/Rooms'));
 const RoomAccount = lazy(() => import('./pages/RoomAccount'));
 const SavedRooms = lazy(() => import('./pages/SavedRooms'));
@@ -65,26 +60,6 @@ const PageLoader = () => {
   </div>
   );
 };
-
-// Tranzila (web checkout) and Wix subscription management are web-only flows.
-// Any native app (iOS or Android) must go through RevenueCat instead, so both
-// platforms get redirected away from these routes back to the paywall, which
-// already knows how to trigger the native RevenueCat purchase.
-const NATIVE_PAYMENT_DISABLED_ROUTES = new Set([
-  'RuumrPlusCheckout',
-  'RuumrPlusThankYou',
-  'ManageSubscription',
-]);
-
-const NativePaymentUnavailableRedirect = ({ children }) => (
-  Capacitor.isNativePlatform() ? <Navigate to="/RuumrPlusPricing" replace /> : children
-);
-
-const wrapNativeIOSPaymentGuard = (currentPageName, element) => (
-  NATIVE_PAYMENT_DISABLED_ROUTES.has(currentPageName)
-    ? <NativePaymentUnavailableRedirect>{element}</NativePaymentUnavailableRedirect>
-    : element
-);
 
 const { Pages, Layout } = pagesConfig;
 
@@ -177,24 +152,19 @@ const AuthenticatedApp = () => {
             <Route
               key={path}
               path={`/${path}`}
-              element={wrapNativeIOSPaymentGuard(path,
+              element={
                 <PageTransition>
                   <LayoutWrapper currentPageName={path}>
                     <Page />
                   </LayoutWrapper>
                 </PageTransition>
-              )}
+              }
             />
           ))}
           <Route path="/OurStory" element={<PageTransition><LayoutWrapper currentPageName="OurStory"><OurStory /></LayoutWrapper></PageTransition>} />
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
-          <Route path="/AdminTools" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="AdminTools"><AdminTools /></LayoutWrapper></PageTransition></Suspense>} />
            <Route path="/ScrapingPilot" element={<Suspense fallback={<PageLoader />}><ScrapingPilot /></Suspense>} />
-          <Route path="/RuumrPlusComingSoon" element={<PageTransition><LayoutWrapper currentPageName="RuumrPlusComingSoon"><RuumrPlusComingSoon /></LayoutWrapper></PageTransition>} />
-          <Route path="/RuumrPlusThankYou" element={wrapNativeIOSPaymentGuard('RuumrPlusThankYou', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="RuumrPlusThankYou"><RuumrPlusThankYou /></LayoutWrapper></PageTransition></Suspense>)} />
-          <Route path="/TranzilaReturn" element={<Suspense fallback={<PageLoader />}><TranzilaReturn /></Suspense>} />
-          <Route path="/ManageSubscription" element={wrapNativeIOSPaymentGuard('ManageSubscription', <Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="ManageSubscription"><ManageSubscription /></LayoutWrapper></PageTransition></Suspense>)} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

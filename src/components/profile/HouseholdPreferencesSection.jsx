@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import BottomSheetSelect from "@/components/shared/BottomSheetSelect";
-import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/ruumrPlusFields";
+import { HOUSEHOLD_PREFERENCE_FIELDS } from "@/lib/householdPreferenceFields";
 
 export default function HouseholdPreferencesSection({
   values = {},

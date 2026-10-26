@@ -6,7 +6,6 @@ import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
 import { validatePhoto } from "@/functions/validatePhoto";
 import { validateImageDisplayable } from "@/lib/validateImageDisplayable";
-import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,11 +127,6 @@ export default function ProfilePage() {
         if (!dataToSave.budget_min) dataToSave.budget_min = 0;
         await ProfileEntity.update(profile.id, dataToSave);
       }
-      try {
-        await syncCurrentProfileToRuumrPlus();
-      } catch (syncError) {
-        console.error("Failed to sync profile changes to Ruumr Plus:", syncError);
-      }
       await loadProfile();
       setIsEditing(false);
       toast({ title: t("profile_saved"), duration: 3000 });
@@ -149,7 +143,7 @@ export default function ProfilePage() {
     const isHeif = file.type === 'image/heif' || file.type === 'image/heic' || 
                    file.name?.toLowerCase().endsWith('.heif') || file.name?.toLowerCase().endsWith('.heic');
     const needsConversion = isHeif || file.size >= 1024 * 1024;
-    
+
     if (!needsConversion) return file;
 
     return new Promise((resolve) => {
@@ -205,7 +199,7 @@ export default function ProfilePage() {
             const { file_url } = await UploadFile({ file });
             fileUrl = file_url;
         }
-        
+
         // AI moderation: profile photos must contain a real person (skip videos)
         if (!isVideo) {
             try {
@@ -262,7 +256,7 @@ export default function ProfilePage() {
     }
     setUploadingApartmentIndex(null);
   };
-  
+
   const triggerFileInput = (index) => {
     if (!isEditing) return;
     fileInputRef.current.onchange = (e) => handleImageUpload(e, index);
@@ -321,7 +315,7 @@ export default function ProfilePage() {
       try {
           const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(spotifySearch)}&media=music&limit=1&entity=song`);
           const data = await response.json();
-          
+
           if (data.results && data.results.length > 0) {
               const item = data.results[0];
               setFormData(prev => ({
@@ -374,7 +368,7 @@ export default function ProfilePage() {
       </div>
     );
   }
-  
+
   if (!profile) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -393,7 +387,7 @@ export default function ProfilePage() {
     <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}><RoomOfferPreference/>
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
-      
+
       <AnimatePresence>
         {selectedApartmentPhoto && (
           <motion.div
@@ -463,7 +457,7 @@ export default function ProfilePage() {
                  </div>
             </div>
         )}
-        
+
         <div className="px-2 pt-2 pb-2">
           {isEditing ? (
             <DragDropContext onDragEnd={(result) => {
@@ -604,7 +598,7 @@ export default function ProfilePage() {
                 </div>
             </div>
         </div>
-        
+
         <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
               <h3 className="font-bold text-gray-800 mb-3 text-start">{t("pets_section")}</h3>
@@ -727,14 +721,14 @@ export default function ProfilePage() {
               <Textarea disabled={!isEditing} value={formData.looking_for_description || ""} onChange={(e) => setFormField('looking_for_description', e.target.value)} className="mt-1 bg-white focus:ring-[--theme-orange] focus:border-[--theme-orange] border-gray-300 text-start" dir={i18n.dir()} />
             </div>
         </div>
-        
+
         <div className="space-y-4">
             {/* SONG SECTION - MOVED HERE */}
             <div className="w-full aspect-square max-w-[280px] mx-auto relative group">
                 <div className={`w-full h-full rounded-[2.5rem] bg-white p-6 shadow-2xl relative overflow-hidden border border-gray-200 flex flex-col items-center justify-center text-center transition-all duration-500 ${isEditing || !formData.song_name ? 'cursor-pointer hover:scale-[1.02]' : ''}`}
                      onClick={() => !isEditing && !formData.song_name && setIsEditing(true)}
                 >
-                    
+
                     {/* Vinyl Record Animation */}
                     <div className="relative w-32 h-32 mb-4">
                         <motion.div 
@@ -779,11 +773,11 @@ export default function ProfilePage() {
                         <div className="relative z-20 w-full">
                             <h3 className="text-bold font-black text-xl mb-1 truncate px-2">{formData.song_name || t("if_you_were_a_song")}</h3>
                             <p className="text-gray-700 text-sm truncate px-4">{formData.song_artist || t("what_song_are_you")}</p>
-                            
+
                             {formData.song_preview_url && (
                                 <audio controls src={formData.song_preview_url} className="mt-3 h-8 w-full" style={{filter: 'invert(1) hue-rotate(180deg)', accentColor: '#FF5722'}} />
                             )}
-                            
+
                             {!formData.song_name && !isEditing && (
                                 <div className="mt-3">
                                     <span className="inline-flex items-center gap-1 bg-[#FFE8E2] hover:bg-[#FFDDD0] text-[#FA3803] text-xs px-3 py-1.5 rounded-full transition-colors font-semibold">
@@ -803,7 +797,7 @@ export default function ProfilePage() {
                             <X className="w-5 h-5" />
                         </button>
                     )}
-                    
+
                     {/* Background decorations */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:20px_20px] opacity-50"></div>
@@ -1009,7 +1003,7 @@ export default function ProfilePage() {
                 <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")}</label>
                 <Input disabled={!isEditing} type="number" placeholder={t("budget_example_placeholder")} value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-start" dir={i18n.dir()} />
             </div>
-            
+
             <div>
                 <label className="block text-start text-sm font-bold text-gray-700 mb-2">{t("preferred_search_area")}</label>
                 <BottomSheetSelect
@@ -1026,7 +1020,7 @@ export default function ProfilePage() {
                     ]}
                 />
             </div>
-            
+
             <div>
                 <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("preferred_cities")}</label>
                 <CitySelect

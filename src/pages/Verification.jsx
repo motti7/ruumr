@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowRight, RefreshCw, Sparkles, Award } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 
 export default function VerificationPage() {
   const { t, i18n } = useTranslation();
@@ -21,7 +20,7 @@ export default function VerificationPage() {
   const [code, setCode] = useState(["", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
-  
+
   // Load user email on mount
   useEffect(() => {
       const loadUser = async () => {
@@ -69,18 +68,13 @@ export default function VerificationPage() {
   const verifyCode = async () => {
     setIsLoading(true);
     const inputCode = code.join("");
-    
+
     if (inputCode === generatedCode || inputCode === "11111") { // Backdoor for testing
       try {
         const user = await User.me();
         const profiles = await Profile.filter({ user_id: user.id });
         if (profiles.length > 0) {
             await Profile.update(profiles[0].id, { is_verified: true });
-        }
-        try {
-          await syncCurrentProfileToRuumrPlus();
-        } catch (syncError) {
-          console.error("Failed to sync verification update to Ruumr Plus:", syncError);
         }
         setStep(3);
         setTimeout(() => {
@@ -142,7 +136,7 @@ export default function VerificationPage() {
                                 <div className="w-full h-full bg-gradient-to-br from-[--theme-orange] via-orange-500 to-red-500 rounded-3xl shadow-2xl flex items-center justify-center relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.3)_0%,transparent_60%)]"></div>
                                     <Mail className="w-14 h-14 text-white relative z-10" strokeWidth={2.5} />
-                                    
+
                                     {/* Shine effect */}
                                     <motion.div
                                         className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-20"
@@ -150,7 +144,7 @@ export default function VerificationPage() {
                                         transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                                     />
                                 </div>
-                                
+
                                 {/* Flying sparkles */}
                                 {[0, 1, 2].map((i) => (
                                     <motion.div
@@ -178,7 +172,7 @@ export default function VerificationPage() {
                                         <Sparkles className="w-5 h-5 text-yellow-400" />
                                     </motion.div>
                                 ))}
-                                
+
                                 {/* Pulse ring */}
                                 <motion.div 
                                     className="absolute inset-0 border-4 border-[--theme-orange] rounded-3xl"
@@ -279,7 +273,7 @@ export default function VerificationPage() {
                             >
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.3)_0%,transparent_60%)]"></div>
                                 <Award className="w-16 h-16 text-white relative z-10" strokeWidth={2.5} />
-                                
+
                                 {/* Shine effect */}
                                 <motion.div
                                     className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-20"
@@ -287,7 +281,7 @@ export default function VerificationPage() {
                                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                                 />
                             </motion.div>
-                            
+
                             {/* Orbiting particles */}
                             {[0, 1, 2].map((i) => (
                                 <motion.div
@@ -313,7 +307,7 @@ export default function VerificationPage() {
                                     }}
                                 />
                             ))}
-                            
+
                             {/* Pulse rings */}
                             <motion.div 
                                 className="absolute inset-0 border-4 border-[--theme-orange] rounded-full"

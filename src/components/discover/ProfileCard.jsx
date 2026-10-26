@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, memo, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
-import { MapPin, Info, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, Sparkles, ArrowUp } from "lucide-react";
+import { MapPin, Dog, Cat, PawPrint, Home, X, CheckCircle2, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Music, Users, Star, ArrowUp } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { AnimatePresence } from "framer-motion";
 import SmartImage from '@/components/shared/SmartImage';
@@ -19,7 +19,6 @@ const ProfileDetail = ({ profile, onClose }) => {
   const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
   const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
   const vibeText = [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")];
-  const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const interests = normalizeInterestValues(profile.interests);
 
   const ensureProtocol = (url) => {
@@ -55,27 +54,17 @@ const ProfileDetail = ({ profile, onClose }) => {
         onClick={onClose}
         className="fixed top-[calc(112px+env(safe-area-inset-top,0px))] right-6 z-[300] min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label={t("close_details")}>
-        
+
                 <X className="text-white w-5 h-5 drop-shadow-lg" strokeWidth={2.5} />
             </button>
-            
+
             <div className="p-6 pt-[calc(116px+env(safe-area-inset-top,0px))] text-white space-y-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-end"><div className="rounded-full bg-white">
                     <ReportProfileButton key={profile.id} profileId={profile.id} />
                 </div></div>
                 <div className="text-center">
                     <h3 className="text-3xl font-bold" id="profile-header">{profile.name}, {profile.age}</h3>
-                    {plusMeta &&
-          <div className="mt-3 inline-flex items-center gap-2 bg-white/15 border border-white/10 px-4 py-2 rounded-full text-sm font-bold">
-                            <span className="text-[--theme-orange]">
-                                {t("match_percent", { percent: Math.round((Number(plusMeta.score) || 0) * 100) })}
-                            </span>
-                            <span className="text-white/70">·</span>
-                            <span className="text-white">
-                                {plusMeta.messageable ? t("messages_open") : t("chat_locked")}
-                            </span>
-                        </div>
-          }
+
                     <div className="flex items-center justify-center text-white/90 mt-3 text-base">
                         <MapPin className="w-5 h-5 ml-1" aria-hidden="true" />
                         <div className="flex flex-col items-center">
@@ -112,35 +101,13 @@ const ProfileDetail = ({ profile, onClose }) => {
                         </a>
           }
                 </div>
-                
+
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
                     <h4 className="font-bold mb-2 text-white text-lg" id="looking-section">{t("onb_looking_for_desc_label")}</h4>
                     <p className="text-base text-white/95 leading-relaxed" aria-describedby="looking-section">{profile.looking_for_description}</p>
                 </div>
 
-                {plusMeta && plusMeta.insight &&
-        <div className="bg-gradient-to-br from-[--theme-orange]/25 to-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
-                        <h4 className="font-bold mb-2 text-white text-lg flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-[--theme-orange]" />
-                            {t("why_plus_likes")}
-                        </h4>
-                        <p className="text-base text-white/95 leading-relaxed">{plusMeta.insight}</p>
-                        {plusMeta.reasons &&
-          <div className="flex flex-wrap gap-2 mt-3">
-                                {(plusMeta.reasons.shared_cities || []).map((city, i) =>
-            <span key={`city-${i}`} className="bg-white/15 px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/10">
-                                        {city}
-                                    </span>
-            )}
-                                {(plusMeta.reasons.shared_interests || []).map((interest, i) =>
-            <span key={`interest-${i}`} className="bg-white/15 px-3 py-1.5 rounded-full text-white text-xs font-medium border border-white/10">
-                                        {interestLabel(interest)}
-                                    </span>
-            )}
-                            </div>
-          }
-                    </div>
-        }
+
 
                 {interests.length > 0 &&
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl">
@@ -161,7 +128,7 @@ const ProfileDetail = ({ profile, onClose }) => {
           title={t("home_habits")}
           description={t("home_habits_desc")}
           className="mt-2" />
-        
+
 
                 <div className="grid grid-cols-2 gap-3" role="list">
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
@@ -231,7 +198,7 @@ const ProfileDetail = ({ profile, onClose }) => {
                                     <div
                 className="h-full bg-white rounded-full"
                 style={{ width: `${Math.min(100, (1 + (profile.team_members?.length || 0)) / profile.team_target * 100)}%` }} />
-              
+
                                 </div>
             }
                         </div>
@@ -271,7 +238,6 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [avgRating, setAvgRating] = useState(null);
-  const plusMeta = profile.ruumrPlus || profile.ruumr_plus || null;
   const interests = normalizeInterestValues(profile.interests);
 
   // Use a module-level singleton audio element to guarantee only one plays at a time
@@ -496,12 +462,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                                     {avgRating.toFixed(1)}
                                 </div>
               }
-                            {plusMeta &&
-              <div className="bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full text-white text-xs font-bold flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-[--theme-orange]" />
-                                    {Math.round((Number(plusMeta.score) || 0) * 100)}%
-                                </div>
-              }
+
                         </div>
 
                         {profile.social_link &&
@@ -511,7 +472,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="absolute bottom-32 left-4 z-20 bg-[--theme-orange] p-3 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-              
+
                                 {(() => {
                 const l = String(profile.social_link).toLowerCase();
                 if (l.includes('facebook')) return <Facebook className="w-5 h-5 text-white" />;
@@ -645,11 +606,11 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
         style={{ x, rotate, opacity }}
         whileTap={{ scale: 1.02 }}
         className={`absolute w-full h-full cursor-grab active:cursor-grabbing z-10`}>
-        
+
                 <div
           className={`relative w-full h-full overflow-hidden rounded-2xl bg-black ${profile.current_status === 'has_apartment' ? 'border-2 border-[--theme-orange]' : ''}`}
           onClick={handleTap}>
-          
+
                     <div className="absolute inset-0 bg-black">
                         {media.length > 0 ?
             media[currentPhotoIndex].type === 'video' ?
@@ -670,7 +631,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                 alt={profile.name}
                 className="w-full h-full"
                 priority={true} />
-              
+
                                 </div> :
 
 
@@ -722,7 +683,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
               onClick={handleMuteToggle}
               className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors"
               aria-label={isMuted ? t("unmute") : t("mute")}>
-              
+
                                  {isMuted ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-[--theme-orange]" />}
                              </button>
                         </div>
@@ -749,7 +710,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                     <motion.div
             style={{ opacity: likeOpacity }}
             className="absolute top-10 right-10 pointer-events-none z-30 transform rotate-12">
-            
+
                         <div className="border-4 border-red-500 text-red-500 text-4xl font-black px-4 py-2 rounded-xl bg-black/20 backdrop-blur-sm">
                             LIKE
                         </div>
@@ -758,7 +719,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                     <motion.div
             style={{ opacity: nopeOpacity }}
             className="absolute top-10 left-10 pointer-events-none z-30 transform -rotate-12">
-            
+
                         <div className="border-4 border-black text-black text-4xl font-black px-4 py-2 rounded-xl bg-white/40 backdrop-blur-sm">
                             NOPE
                         </div>

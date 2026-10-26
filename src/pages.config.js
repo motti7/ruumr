@@ -48,7 +48,6 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminCharter from './pages/AdminCharter';
-import AdminTools from './pages/AdminTools';
 import Banned from './pages/Banned';
 import Charter from './pages/Charter';
 import Chat from './pages/Chat';
@@ -63,8 +62,6 @@ import Onboarding from './pages/Onboarding';
 import Permissions from './pages/Permissions';
 import Privacy from './pages/Privacy';
 import RuumrPlus from './pages/RuumrPlus';
-import RuumrPlusPricing from './pages/RuumrPlusPricing';
-import RuumrPlusCheckout from './pages/RuumrPlusCheckout';
 import Profile from './pages/Profile';
 import ProfileView from './pages/ProfileView';
 import Settings from './pages/Settings';
@@ -75,7 +72,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "AdminCharter": AdminCharter,
-    "AdminTools": AdminTools,
     "Banned": Banned,
     "Charter": Charter,
     "Chat": Chat,
@@ -90,8 +86,6 @@ export const PAGES = {
     "Permissions": Permissions,
     "Privacy": Privacy,
     "RuumrPlus": RuumrPlus,
-    "RuumrPlusPricing": RuumrPlusPricing,
-    "RuumrPlusCheckout": RuumrPlusCheckout,
     "Profile": Profile,
     "ProfileView": ProfileView,
     "Settings": Settings,

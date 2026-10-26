@@ -14,13 +14,7 @@
       "format": "date-time"
     },
     "source": {
-      "type": "string",
-      "enum": [
-        "legacy_import",
-        "match_questionnaire",
-        "plus_activation",
-        "plus_edit"
-      ]
+      "type": "string"
     },
     "source_match_id": {
       "type": "string"
@@ -28,14 +22,62 @@
     "answers": {
       "type": "object",
       "properties": {
-        "q_smoking": { "type": "string", "enum": ["a", "b"] },
-        "q_partners": { "type": "string", "enum": ["a", "b"] },
-        "q_pets": { "type": "string", "enum": ["a", "b"] },
-        "q_cleaning_strictness": { "type": "string", "enum": ["a", "b"] },
-        "q_shopping": { "type": "string", "enum": ["a", "b"] },
-        "q_dishes": { "type": "string", "enum": ["a", "b"] },
-        "q_ac": { "type": "string", "enum": ["a", "b"] },
-        "q_hosting": { "type": "string", "enum": ["a", "b"] }
+        "q_smoking": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_partners": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_pets": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_cleaning_strictness": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_shopping": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_dishes": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_ac": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "q_hosting": {
+          "type": "string",
+          "enum": [
+            "a",
+            "b"
+          ]
+        }
       },
       "required": [
         "q_smoking",
@@ -62,20 +104,38 @@
     },
     "read": {
       "$or": [
-        { "data.user_id": "{{user.id}}" },
-        { "user_condition": { "role": "admin" } }
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
       ]
     },
     "update": {
       "$or": [
-        { "data.user_id": "{{user.id}}" },
-        { "user_condition": { "role": "admin" } }
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
       ]
     },
     "delete": {
       "$or": [
-        { "data.user_id": "{{user.id}}" },
-        { "user_condition": { "role": "admin" } }
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
       ]
     }
   }

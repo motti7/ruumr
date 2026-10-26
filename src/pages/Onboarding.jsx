@@ -10,10 +10,8 @@ import { UploadFile } from "@/integrations/Core";
 import { validatePhoto } from "@/functions/validatePhoto";
 import { validateImageDisplayable } from "@/lib/validateImageDisplayable";
 import { base44 } from "@/api/base44Client";
-import { syncCurrentProfileToRuumrPlus } from "@/api/ruumrPlus";
 import { createTeamInvite, claimTeamInvites } from "@/api/teamInvites";
-import InviteByEmail from "@/components/team/InviteByEmail";
-import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook, Dog, Cat } from 'lucide-react';
+import { ArrowRight, CheckCircle, Camera, X, Plus, Loader2, Home, Search, Music, Coffee, Beer, Book, Instagram, Facebook } from 'lucide-react';
 import { SiTiktok } from "react-icons/si";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,7 +59,7 @@ const Step = ({ children, step, currentStep, title }) =>
     exit={{ opacity: 0, x: -50 }}
     transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
     className="w-full flex flex-col h-full">
-    
+
         {title && <h2 className="text-3xl text-center mt-2 mb-3" style={{ color: '#FA3803', fontFamily: "'Google Sans', 'Inter', sans-serif", fontWeight: 'bold' }}>{title}</h2>}
         <div className="flex-1 overflow-y-auto custom-scrollbar px-1 py-2">
             {children}
@@ -486,12 +484,6 @@ export default function OnboardingPage() {
       }
       // Link invites others may have sent to this user's email before they signed up.
       try { await claimTeamInvites(); } catch (claimErr) { console.error("Claim team invites failed:", claimErr); }
-
-      try {
-        await syncCurrentProfileToRuumrPlus();
-      } catch (syncError) {
-        console.error("Failed to sync onboarding profile to Ruumr Plus:", syncError);
-      }
 
       trackMixpanel('Registration Completed');
       base44.analytics.track({
@@ -934,7 +926,7 @@ export default function OnboardingPage() {
                       textAlign: 'center',
                       fontWeight: 'normal'
                     }}>
-                    
+
                                {formData.budget_max.toLocaleString()}
                            </div>
                            <div className="h-6" />
@@ -961,7 +953,7 @@ export default function OnboardingPage() {
                     </div>
                 </div>
             </Step>
-            
+
             <Step step={3} currentStep={step} title={t("onb_step3_title")}>
                 <div className="flex flex-col justify-between h-full text-right gap-5">
                     {/* אני מחפש/ת */}
@@ -1006,7 +998,7 @@ export default function OnboardingPage() {
                   value={formData.shabbat_preference}
                   onChange={(v) => setFormField('shabbat_preference', v)}
                   options={[{ v: 'for', l: t('pref_for') }, { v: 'against', l: t('pref_against') }, { v: 'flow', l: t('pref_flexible') }]} />
-                
+
                     </div>
                     )}
 
@@ -1057,7 +1049,7 @@ export default function OnboardingPage() {
                                 <Input type="number" value={formData.apartment_total_budget} onChange={(e) => setFormField('apartment_total_budget', parseInt(e.target.value) || 0)} className="bg-white border-orange-200" />
                             </div>
                         </div>
-                        
+
                         <label className="text-base font-semibold mb-3 block" style={{ color: '#FA3803' }}>{t("onb_apartment_photos_label")}</label>
                         <div className="grid grid-cols-3 gap-2">
                             {formData.apartment_photos.map((_, i) =>
@@ -1065,7 +1057,7 @@ export default function OnboardingPage() {
                     key={i}
                     className="aspect-square bg-white rounded-xl flex items-center justify-center cursor-pointer border border-dashed border-orange-200 overflow-hidden relative"
                     onClick={() => triggerFileInput(i, true)}>
-                    
+
                                     {formData.apartment_photos?.[i] ?
                     <img src={formData.apartment_photos[i]} alt={t('onb_apartment_photo_alt', { number: i + 1 })} className="w-full h-full object-cover" /> :
 
@@ -1146,17 +1138,17 @@ export default function OnboardingPage() {
                     onClick={() => setLightboxSrc(formData.photos[i])}
                     loading="eager"
                     decoding="sync" />
-                  
+
                                     <button
                     className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => {e.stopPropagation();triggerFileInput(i);}}>
-                    
+
                                         <Camera className="w-4 h-4 text-gray-600" />
                                     </button>
                                     <button
                     className="absolute top-1 left-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => {e.stopPropagation();setFormData((prev) => {const newPhotos = [...prev.photos];newPhotos[i] = null;return { ...prev, photos: newPhotos };});}}>
-                    
+
                                         <X className="w-4 h-4 text-gray-600" />
                                     </button>
                                  </> :
@@ -1262,7 +1254,7 @@ export default function OnboardingPage() {
         <div className="h-20" /> /* spacer so content doesn't hide behind fixed button */
         }
       </div>
-      
+
       {/* Fixed bottom continue button */}
       {step < 7 &&
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-center pb-8 pt-3 bg-white px-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>

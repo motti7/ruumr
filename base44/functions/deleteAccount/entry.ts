@@ -41,13 +41,6 @@ Deno.serve(async (req) => {
             for (const room of rooms) { await drain(sr.SavedRoom,{room_id:room.id}); await sr.RoomListing.delete(room.id); }
         }
 
-        // Sync deletion to Ruumr Plus
-        try {
-            await base44.functions.invoke('ruumrPlusBridge', { action: 'profile.delete_current' });
-        } catch (syncError) {
-            console.error('⚠️ Failed to sync profile deletion to Ruumr Plus:', syncError);
-        }
-
         // 1. Profile — CRITICAL: fetch ALL profiles (high limit) to find user's records
         const allProfiles = await sr.Profile.list('-created_date', 2000);
         const myProfiles = allProfiles.filter(p => p.user_id === userId);

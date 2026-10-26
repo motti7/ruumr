@@ -18,7 +18,7 @@ function unwrap(raw) {
 /**
  * @typedef {Object} SaveQuestionnairePreferenceOptions
  * @property {Record<string, "a" | "b">} answers
- * @property {"legacy_import" | "match_questionnaire" | "plus_activation" | "plus_edit"} source
+ * @property {"legacy_import" | "match_questionnaire"} source
  * @property {string | null} [sourceMatchId]
  * @property {string | null} [completedAt]
  */

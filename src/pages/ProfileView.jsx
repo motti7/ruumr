@@ -6,7 +6,7 @@ import { Profile, Swipe, Match } from "@/entities/all";
 import { User } from "@/entities/User";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star, Sparkles } from "lucide-react";
+import { ArrowRight, MapPin, Dog, Cat, PawPrint, Home, Instagram, Link as LinkIcon, Facebook, Linkedin, Twitter, Volume2, VolumeX, Heart, X, Star } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +20,6 @@ import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
-import { loadRuumrPlusActivation } from '@/lib/ruumrPlusActivation';
 
 // Custom Audio Player Component with Fade In
 const AudioPlayer = ({ src }) => {
@@ -98,15 +97,6 @@ export default function ProfileViewPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isExMatch, setIsExMatch] = useState(false);
   const [exMatchId, setExMatchId] = useState(null);
-  const [plusMatch, setPlusMatch] = useState(null);
-  // Whether this profile should be liked through the Ruumr Plus match flow.
-  // Derived from the fromPlus=true param OR the cached Plus recommendations, so
-  // the AI-match flow survives even if the query param is dropped in navigation.
-  const [isPlusRec, setIsPlusRec] = useState(false);
-  // Plus match metadata: prefer anything on the profile, else the score/insight
-  // cached from the user's last Ruumr Plus activation for this profile.
-  const plusMeta = profile?.ruumrPlus || profile?.ruumr_plus || plusMatch || null;
-  const plusMatchPercent = plusMeta?.score != null ? Math.round((Number(plusMeta.score) || 0) * 100) : null;
   const interestOptions = normalizeInterestValues(profile?.interests ?? []).map((interest) => getInterestDisplayOption(interest));
   useEffect(() => {
     loadProfile();
@@ -145,24 +135,6 @@ export default function ProfileViewPage() {
       setProfile(profilesResult[0]);
       setUserProfile(myProfilesResult[0] || null);
 
-      // Pull the Plus match score/insight from the cached activation.
-      let inPlusCache = false;
-      try {
-        const activation = loadRuumrPlusActivation(user.id);
-        const matchRec = activation?.recommendations?.find(
-          (rec) => String(rec.user_id) === String(userId)
-        );
-        inPlusCache = Boolean(matchRec);
-        setPlusMatch(matchRec?.ruumrPlus || matchRec?.ruumr_plus || null);
-      } catch (_) {
-        setPlusMatch(null);
-      }
-
-      // Carry the Plus context through reliably: the URL param is the primary
-      // signal, the cached recommendation is the fallback when it is missing.
-      const isPlusRecommendation = urlParams.get("fromPlus") === 'true' || inPlusCache;
-      setIsPlusRec(isPlusRecommendation);
-
       // Check for existing match (to allow writing a review)
       try {
         const [m1, m2] = await Promise.all([
@@ -176,8 +148,8 @@ export default function ProfileViewPage() {
         }
       } catch(e) {}
 
-      // Show like/reject actions when arriving from Likes or Ruumr Plus, and not yet swiped.
-      if (fromLikes === 'true' || isPlusRecommendation) {
+      // Show actions for profiles not yet swiped.
+      if (fromLikes === 'true') {
         const existingSwipe = await Swipe.filter({ swiper_id: user.id, swiped_id: userId });
         setShowActions(existingSwipe.length === 0);
       }
@@ -186,20 +158,19 @@ export default function ProfileViewPage() {
     }
     setIsLoading(false);
   };
-  
+
   const handleSwipe = async (action) => {
     if (!currentUser || !profile) return;
-    
+
     setShowActions(false);
     setActionFeedback(action);
     setTimeout(() => setActionFeedback(null), 600);
 
     const swiperId = currentUser.id;
     const swipedId = profile.user_id;
-    const isPlusRecommendation = isPlusRec || new URLSearchParams(location.search).get("fromPlus") === "true";
 
     try {
-      if (action !== "like" || !isPlusRecommendation) {
+      {
         await Swipe.create({
           swiper_id: swiperId,
           swiper_name: userProfile?.name || currentUser.full_name,
@@ -221,7 +192,6 @@ export default function ProfileViewPage() {
             swipedId,
             action,
             origin: window.location.origin,
-            source: isPlusRecommendation ? "ruumr_plus" : "discover",
           });
 
           if (matchResult?.match) {
@@ -234,16 +204,13 @@ export default function ProfileViewPage() {
           }
         } catch (matchError) {
           console.error("❌ Error in match detection:", matchError);
-          if (isPlusRecommendation) {
-            throw matchError;
-          }
         }
       }
-      
+
       setTimeout(() => {
         navigate(createPageUrl('LikesYou'));
       }, didMatch ? 4000 : 1000);
-      
+
     } catch (error) { 
       console.error("❌ Swipe save failed:", error);
       setShowActions(true);
@@ -258,7 +225,7 @@ export default function ProfileViewPage() {
   // Calculate media safely (profile might be null)
   const regularPhotos = profile?.photos?.filter(p => p) || [];
   const apartmentPhotos = (profile?.current_status === 'has_apartment' && profile?.apartment_photos?.filter(p => p)) ? profile.apartment_photos.filter(p => p) : [];
-  
+
   const isVideoUrl = (url) => typeof url === 'string' && /\.(mp4|mov|webm|ogg)$/i.test(url);
 
   let allMedia = [...regularPhotos].map(item => {
@@ -271,15 +238,15 @@ export default function ProfileViewPage() {
   if (profile?.video_url) {
       allMedia.splice(1, 0, { type: 'video', url: profile.video_url });
   }
-  
+
   allMedia = [...allMedia, ...apartmentPhotos.map(p => ({ type: 'image', url: p }))];
-  
+
   const media = allMedia.length > 0 ? allMedia : [{ type: 'image', url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" }];
 
   // Prefetch next and prev photos
   useEffect(() => {
     if (!media || media.length === 0) return;
-    
+
     // Preload next
     if (currentPhotoIndex < media.length - 1 && media[currentPhotoIndex + 1].type === 'image') {
         const img = new Image();
@@ -402,7 +369,7 @@ export default function ProfileViewPage() {
                 priority={true}
               />
           )}
-          
+
           {currentPhotoIndex === 0 && profile.social_link && (
              <a 
                  href={ensureProtocol(profile.social_link)}
@@ -428,17 +395,12 @@ export default function ProfileViewPage() {
           </div>
         </div>
       </div>
-      
+
       <div className="p-4 space-y-4">
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h3 className="text-2xl font-bold">{profile.name}, {profile.age}</h3>
-            {plusMatchPercent != null && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-[--theme-orange] whitespace-nowrap">
-                <Sparkles className="w-4 h-4" />
-                {t("match_percent", { percent: plusMatchPercent })}
-              </span>
-            )}
+
           </div>
           <div className="flex items-start text-gray-600 mb-3">
             <MapPin className="w-4 h-4 ml-1 mt-1 flex-shrink-0" />
@@ -516,20 +478,7 @@ export default function ProfileViewPage() {
           <p className="text-gray-700 leading-relaxed">{profile.looking_for_description}</p>
         </div>
 
-        {plusMeta && plusMeta.insight && (
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
-            <h4 className="font-bold text-lg mb-2 flex items-center gap-2 text-[--theme-orange]">
-              <Sparkles className="w-5 h-5" />
-              Ruumr Plus
-            </h4>
-            <p className="text-gray-700 leading-relaxed">{plusMeta.insight}</p>
-            {plusMeta.messageable !== undefined && (
-              <div className="mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-[--theme-orange]">
-                {plusMeta.messageable ? t("messages_open") : t("chat_locked")}
-              </div>
-            )}
-          </div>
-        )}
+
 
         <ReviewsSection userId={profile.user_id} />
 
@@ -611,7 +560,7 @@ export default function ProfileViewPage() {
           description={t("home_habits_desc_light")}
         />
       </div>
-      
+
       {showActions && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
           <div className="max-w-md mx-auto flex items-center justify-center gap-6">

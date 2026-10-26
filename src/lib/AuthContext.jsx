@@ -18,8 +18,6 @@ import {
   registerNativeAuthCallbackHandler,
 } from '@/lib/nativeAuth';
 import { isWebAuthSessionAvailable, signInWithWebAuthSession } from '@/lib/webAuthSession';
-import { configureRevenueCat, getCustomerInfo, hasPlusEntitlement } from '@/lib/revenueCat';
-import { activateRevenueCatPlus } from '@/functions/activateRevenueCatPlus';
 
 const AuthContext = createContext(null);
 
@@ -77,24 +75,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Initializes RevenueCat for native users immediately on login (SDK init +
-  // .logIn via Purchases.configure), then checks the current entitlement so the
-  // UI can unlock instantly even if the async revenueCatWebhook hasn't landed yet.
-  const syncRevenueCatEntitlement = async (loggedInUser) => {
-    if (!isNativePlatform || !loggedInUser?.id) return;
-    try {
-      await configureRevenueCat(loggedInUser.id);
-      const customerInfo = await getCustomerInfo();
-      if (hasPlusEntitlement(customerInfo) && !loggedInUser.is_ruumr_plus) {
-        await activateRevenueCatPlus({});
-        setUser((prev) => (prev ? { ...prev, is_ruumr_plus: true } : prev));
-        console.log('[RevenueCat] Entitlement active on launch, unlocked Plus locally');
-      }
-    } catch (err) {
-      console.error('[RevenueCat] Entitlement sync on launch failed:', err?.message || err);
-    }
-  };
-
   const checkAppState = async () => {
     console.log('[ruumr] checkAppState: start, hasToken =', Boolean(appParams.token));
     try {
@@ -129,7 +109,7 @@ export const AuthProvider = ({ children }) => {
 
       setIsLoadingPublicSettings(true);
       setAuthError(null);
-      
+
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
@@ -140,11 +120,11 @@ export const AuthProvider = ({ children }) => {
         token: appParams.token, // Include token if available
         interceptResponses: true
       });
-      
+
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
-        
+
         // If we got the app public settings successfully, check if user is authenticated
         if (appParams.token) {
           await checkUserAuth();
@@ -155,7 +135,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
-        
+
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
@@ -231,7 +211,7 @@ export const AuthProvider = ({ children }) => {
           $email: currentUser.email || '',
           user_id: currentUser.id,
         });
-        syncRevenueCatEntitlement(currentUser);
+
       }
 
       setIsLoadingAuth(false);

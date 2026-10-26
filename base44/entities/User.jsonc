@@ -36,28 +36,6 @@
     "last_likes_notification_count": {
       "type": "number",
       "default": 0
-    },
-    "is_ruumr_plus": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether the user has Ruumr Plus access"
-    },
-    "ruumr_plus_source": {
-      "type": "string",
-      "enum": [
-        "none",
-        "admin_grant",
-        "bgu_free",
-        "wix_paid",
-        "apple_iap",
-        "revenuecat"
-      ],
-      "description": "How Ruumr Plus was granted. Native iOS only unlocks free/admin/IAP sources."
-    },
-    "ruumr_plus_expires_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "When the current Ruumr Plus pass (e.g. 3-month RevenueCat consumable) expires and access should be revoked."
     }
   },
   "rls": {

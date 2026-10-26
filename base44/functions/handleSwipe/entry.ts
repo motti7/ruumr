@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
             } else {
                 const existingMatch = existingMatches[0];
                 match_id = existingMatch.id;
-                if (existingMatch.match_type === 'ruumr_plus') {
+                if (existingMatch.match_type !== 'mutual') {
                     await base44.entities.Match.update(existingMatch.id, {
                         match_type: 'mutual',
                     });
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
             // Send push + email notifications to both users (respect notify_matches setting)
             console.log("🔔 Sending match notifications...");
-            
+
             if (user1?.notify_matches !== false) {
                 try {
                     await base44.functions.invoke('sendPushNotification', {

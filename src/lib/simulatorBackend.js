@@ -153,7 +153,6 @@ function createDemoProfile(options = {}) {
     createdOffsetDays = 0,
     apartmentPhotoCount = 3,
     photoCount = 3,
-    ruumrPlus = null,
     photos = null,
     apartmentPhotos = null,
     songPreviewUrl = null,
@@ -217,7 +216,6 @@ function createDemoProfile(options = {}) {
     video_url: videoUrl,
     created_date: createdDate,
     updated_date: createdDate,
-    ruumrPlus,
   };
 }
 
@@ -321,15 +319,7 @@ function createDemoState() {
       "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
     ],
-    ruumrPlus: {
-      score: 0.92,
-      insight: "יש כאן התאמה מצוינת לשיחות שקטות, בית מסודר ואיזון טוב בין שגרה לעשייה.",
-      reasons: {
-        shared_cities: ["תל אביב"],
-        shared_interests: ["plants", "reading"],
-      },
-      messageable: true,
-    },
+
     createdOffsetDays: 4,
   });
 
@@ -388,15 +378,7 @@ function createDemoState() {
     friendsAndParties: "4",
     photos: tamarPhotos,
     ...tamarSong,
-    ruumrPlus: {
-      score: 0.81,
-      insight: "יש הרבה חפיפה סביב יצירתיות, סדר יום וגישה חברתית מאוזנת.",
-      reasons: {
-        shared_cities: [],
-        shared_interests: ["music", "art"],
-      },
-      messageable: true,
-    },
+
     createdOffsetDays: 2,
   });
 
