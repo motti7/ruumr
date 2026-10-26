@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Maximize2 } from 'lucide-react';
-import { roomText as rt, roomLocale } from '@/lib/room-i18n';
+import { roomText as rt, roomLocale, roomDirection } from '@/lib/room-i18n';
 import RoomGalleryLightbox from './RoomGalleryLightbox';
 
 export default function RoomGallery({ photos = [], failed = {}, onFail }) {
@@ -44,10 +44,11 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const isRight = x > rect.width / 2;
-    // In RTL layouts the visual order is mirrored, so flip the direction.
-    const rtl = document.documentElement.dir === 'rtl';
-    const nextIndex = isRight ? active + 1 : active - 1;
-    goTo(rtl ? (isRight ? active - 1 : active + 1) : nextIndex);
+    // In RTL layouts the visual order is mirrored: images flow right-to-left,
+    // so the previous image sits on the right and the next image on the left.
+    // Tap right -> previous, tap left -> next.
+    const rtl = roomDirection() === 'rtl';
+    goTo(rtl ? (isRight ? active - 1 : active + 1) : (isRight ? active + 1 : active - 1));
   }, [active, count, goTo]);
 
   if (!count) return null;

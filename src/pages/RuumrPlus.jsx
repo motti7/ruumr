@@ -46,18 +46,17 @@ export default function RuumrPlus() {
   <h1 className="text-3xl font-bold mt-5">{t('boost_title')}</h1>
   <p className="text-gray-600 mt-4">{t('boost_description')}</p>
   <p className="text-sm text-gray-500 mt-3">{t('boost_limits')}</p>
-  <section className="rounded-3xl border border-orange-100 bg-white p-6 mt-7 shadow-sm" aria-busy={loading || busy}>
-   {loading ? <p role="status">{t('loading')}</p> : <>
-    {active && <div role="status"><CheckCircle2 className="mx-auto text-orange-600" aria-hidden="true" /><h2 className="font-bold mt-2">{t('boost_active')}</h2><p>{t('boost_until', { date: date(status.expiresAt) })}</p></div>}
-    {!eligible && status?.nextEligibleAt && <p className="text-sm mt-4">{t('boost_next', { date: date(status.nextEligibleAt) })}</p>}
-    {eligible && <button disabled={busy} onClick={share} className="rounded-full bg-orange-600 text-white px-6 py-3 w-full font-bold disabled:opacity-50"><Share2 className="inline-block me-2" size={20} aria-hidden="true" />{t(busy ? 'boost_working' : 'boost_share')}</button>}
+  {loading ? <p role="status" className="mt-7">{t('loading')}</p> : (
+   <>
+    {active && <div role="status" className="mt-7"><CheckCircle2 className="mx-auto text-orange-600" aria-hidden="true" /><h2 className="font-bold mt-2">{t('boost_active')}</h2><p>{t('boost_until', { date: date(status.expiresAt) })}</p></div>}
+    {!eligible && status?.nextEligibleAt && <p className="text-sm mt-7">{t('boost_next', { date: date(status.nextEligibleAt) })}</p>}
+    {eligible && <button disabled={busy} onClick={share} className="rounded-full bg-orange-600 text-white px-8 py-3 w-full max-w-sm mx-auto block font-bold disabled:opacity-50 mt-7 shadow-lg"><Share2 className="inline-block me-2" size={20} aria-hidden="true" />{t(busy ? 'boost_working' : 'boost_share')}</button>}
     {shared && eligible && <div className="mt-5" role="status"><p>{t(copied ? 'boost_copied' : 'boost_confirm_description')}</p><button disabled={busy} onClick={claim} className="mt-4 rounded-full bg-blue-700 text-white px-6 py-3 disabled:opacity-50">{t('boost_confirm')}</button></div>}
     {error && <p role="alert" className="text-red-700 mt-4">{t(error)}</p>}
     {error === 'boost_error' && !status && <button onClick={() => setRetry(value => value + 1)} className="mt-4 underline">{t('boost_retry')}</button>}
     {error === 'boost_profile_required' && <Link className="inline-block mt-4 underline" to="/Onboarding">{t('boost_create_profile')}</Link>}
-   </>}
-  </section>
-  <p className="text-sm text-gray-500 mt-6">{t('boost_privacy')}</p>
+   </>
+  )}
   <Link className="inline-block underline mt-6" to="/Discover?view=people">{t('boost_back')}</Link>
  </main>;
 }
