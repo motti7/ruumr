@@ -579,7 +579,7 @@ function DiscoverPeoplePage() {
   }
 
   return (
-    <div className="fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+    <div className="desktop-discover-stage fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
       {swipeSaveError && (
         <div
           className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
@@ -628,7 +628,7 @@ function DiscoverPeoplePage() {
 
       {/* Card — full screen from header to bottom nav */}
       <div
-        className="absolute left-0 right-0"
+        className="desktop-discover-card absolute left-0 right-0"
         style={{
           top: 'calc(100px + env(safe-area-inset-top, 0px))',
           bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
@@ -656,7 +656,7 @@ function DiscoverPeoplePage() {
 
       {/* Action buttons — floating above nav bar */}
       {hasProfiles && (
-        <div className="fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
+        <div className="desktop-discover-actions fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
           <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
         </div>
       )}

@@ -58,7 +58,7 @@ const ProfileDetail = ({ profile, onClose }) => {
                 <X className="text-white w-5 h-5 drop-shadow-lg" strokeWidth={2.5} />
             </button>
 
-            <div className="p-6 pt-[calc(116px+env(safe-area-inset-top,0px))] text-white space-y-6" onClick={(e) => e.stopPropagation()}>
+            <div className="desktop-profile-detail p-6 pt-[calc(116px+env(safe-area-inset-top,0px))] text-white space-y-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-end"><div className="rounded-full bg-white">
                     <ReportProfileButton key={profile.id} profileId={profile.id} />
                 </div></div>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { roomText as rt, roomLocale } from '@/lib/room-i18n';
 import RoomGalleryLightbox from './RoomGalleryLightbox';
 
@@ -85,6 +85,12 @@ export default function RoomGallery({ photos = [], failed = {}, onFail }) {
           <Maximize2 className="w-4 h-4 shrink-0" />
         </button>
 
+        {count > 1 && (
+          <div className="rf-gallery-controls">
+            <button type="button" disabled={active === 0} aria-label={rt('feed.prev_photo')} onClick={e=>{e.stopPropagation();goTo(active-1);}}><ChevronLeft/></button>
+            <button type="button" disabled={active === count-1} aria-label={rt('feed.next_photo')} onClick={e=>{e.stopPropagation();goTo(active+1);}}><ChevronRight/></button>
+          </div>
+        )}
         {count > 1 && (
           <div className="rf-dots" aria-hidden="true">
             {photos.map((url, i) => (

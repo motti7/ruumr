@@ -1,4 +1,5 @@
 import {roomHub} from '@/api/roomHub';
+import '@/styles/desktop.css';
 import {roomText as rt} from '@/lib/room-i18n';
 import { safetyRequest, blockedUserIds } from '@/api/userSafety';
 import React from "react";
@@ -389,7 +390,7 @@ export default function Layout({ children, currentPageName }) {
             </main>
 
             {shouldShowNav && (
-                <nav className="fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
+                <nav className="desktop-app-nav fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
                         if(item.spacer)return <div key="spacer" className="flex-1" aria-hidden="true"/>;
@@ -459,6 +460,7 @@ export default function Layout({ children, currentPageName }) {
                                     {item.messageBadge}
                                 </span>
                             )}
+                            <span className="hidden lg:block text-xs font-semibold mt-1">{item.name}</span>
                             {itemLocked && !isPlusItem && (
                                 <span className="absolute -top-1 right-2 w-[14px] h-[14px] bg-gray-400 text-white flex items-center justify-center rounded-full border border-white shadow-sm" aria-hidden="true">
                                     <Lock className="w-2 h-2" strokeWidth={3} />

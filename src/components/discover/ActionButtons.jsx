@@ -1,8 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { X, Heart, RotateCcw } from "lucide-react";
+import { X, Heart } from "lucide-react";
+import {roomText as rt,useRoomLocale} from '@/lib/room-i18n';
 
 export default function ActionButtons({ onDislike, onLike, onRewind, showButtons = true }) {
+  useRoomLocale();
   if (!showButtons) return null;
 
   const buttonVariants = {
@@ -12,7 +14,7 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
   };
 
   return (
-    <div className="flex justify-center items-center z-20 select-none gap-32" dir="ltr">
+    <div className="desktop-swipe-actions flex justify-center items-center z-20 select-none gap-32" dir="ltr">
       {/* Dislike — min 44px touch target */}
       {/* Dislike */}
       <motion.button
@@ -21,6 +23,8 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onDislike}
+        aria-label={rt('desktop.pass')}
+        title={rt('desktop.pass')}
         className="w-16 h-16 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg flex items-center justify-center touch-manipulation">
         
         <X className="w-8 h-8 pointer-events-none text-gray-800" strokeWidth={2.5} />
@@ -33,6 +37,8 @@ export default function ActionButtons({ onDislike, onLike, onRewind, showButtons
         whileHover="hover"
         whileTap="tap"
         onClick={onLike}
+        aria-label={rt('desktop.like')}
+        title={rt('desktop.like')}
         className="w-16 h-16 min-w-[44px] min-h-[44px] bg-red-500 rounded-full shadow-lg flex items-center justify-center touch-manipulation">
         
         <Heart className="w-8 h-8 pointer-events-none text-white" fill="white" />

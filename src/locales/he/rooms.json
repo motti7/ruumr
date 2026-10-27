@@ -355,5 +355,7 @@
   "feed.city_jerusalem": "ירושלים",
   "feed.city_haifa": "חיפה",
   "feed.city_beer_sheva": "באר שבע",
-  "feed.empty_city": "אין חדרים בעיר זו כרגע. אפשר לבחור עיר אחרת או לפרסם חדר."
+  "feed.empty_city": "אין חדרים בעיר זו כרגע. אפשר לבחור עיר אחרת או לפרסם חדר.",
+  "desktop.pass": "לא מתאים",
+  "desktop.like": "לייק"
   }
