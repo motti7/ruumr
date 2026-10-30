@@ -67,9 +67,30 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
   // Authenticated users without a Profile get locked bottom-nav tabs (they can
   // still reach Settings in the header so account deletion stays accessible).
-  const { hasProfile, isAuthenticated } = useOptionalAuth();
+  const { hasProfile, isAuthenticated, user: authUser } = useOptionalAuth();
   const tabsLocked = !isAuthenticated;
   const { active: shimmerActive, variant: shimmerVariant } = useRuumrPlusShimmer();
+  // Header avatar: when signed in, show the first profile photo so it is obvious
+  // at a glance which account is connected. Guests keep the generic icon.
+  const [accountPhoto, setAccountPhoto] = useState('');
+  useEffect(() => {
+    if (!isAuthenticated || !authUser?.id) {
+      setAccountPhoto('');
+      return;
+    }
+    let active = true;
+    import('@/api/base44Client')
+      .then(({ base44: b44 }) => b44.entities.Profile.filter({ user_id: authUser.id }))
+      .then((profiles) => {
+        if (!active) return;
+        const first = Array.isArray(profiles) ? profiles[0] : null;
+        setAccountPhoto((first?.photos || []).filter(Boolean)[0] || '');
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, authUser?.id, currentPageName]);
   const [offerUnread,setOfferUnread]=useState(0);
   useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>document.hidden?Promise.resolve():roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,60000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
@@ -374,7 +395,15 @@ export default function Layout({ children, currentPageName }) {
                 ? (hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>)
                 : (isPartnersTab && hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
             <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
-                <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+                {isAuthenticated && accountPhoto ? (
+                    <img
+                        src={accountPhoto}
+                        alt=""
+                        className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+                    />
+                ) : (
+                    <User className="w-6 h-6 text-gray-400 dark:text-gray-500"/>
+                )}
             </Link>
         </div>
 
