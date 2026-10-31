@@ -258,9 +258,12 @@ function App() {
                 fontSize: "16px",
                 color: "rgba(255,255,255,0.85)",
                 letterSpacing: "0.5px",
+                textAlign: "center",
               }}
             >
-              find your place with the right peoples
+              find your place.
+              <br />
+              with the right peoples.
             </span>
           </div>
         </div>
