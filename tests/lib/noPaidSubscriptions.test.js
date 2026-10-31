@@ -25,7 +25,7 @@ describe('retired paid subscriptions', () => {
    if (tombstoneFiles.has(normalized) || normalized === 'base44/entities/PendingSubscription.jsonc') return false;
    let content = fs.readFileSync(file, 'utf8');
    if (normalized === 'base44/functions/deleteAccount/entry.ts') {
-    content = content.replace('await drain(sr.PendingSubscription, { user_id: userId });', '');
+    content = content.replace("['PendingSubscription', { user_id: userId }],", '');
    }
    return retired.test(file) || retired.test(content);
   });
@@ -37,8 +37,8 @@ describe('retired paid subscriptions', () => {
    expect(schema.rls[operation]).toEqual({ user_condition: { role: 'admin' } });
   }
   const cleanup = fs.readFileSync('base44/functions/deleteAccount/entry.ts', 'utf8');
-  expect(cleanup).toContain('await drain(sr.PendingSubscription, { user_id: userId });');
-  expect(cleanup).toContain('await drain(sr.ProfileBoost, { user_id: userId });');
+  expect(cleanup).toContain("['PendingSubscription', { user_id: userId }],");
+  expect(cleanup).toContain("'ProfileBoost'");
  });
 
  it('does not install a payment SDK, including through the lockfile', () => {
