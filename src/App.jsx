@@ -262,9 +262,9 @@ function App() {
               }}
               dir="ltr"
             >
-              find your place.
+              find your place,
               <br />
-              with the right peoples.
+              with the right people.
             </span>
           </div>
         </div>

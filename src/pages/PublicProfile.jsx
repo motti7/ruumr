@@ -99,7 +99,7 @@ export default function PublicProfile() {
     } else {
       document.title = "Ruumr";
       setMeta('meta[property="og:title"]', "Ruumr");
-      setMeta('meta[property="og:description"]', "The Tinder for roommates - find your place. With the right peoples.");
+      setMeta('meta[property="og:description"]', "The Tinder for roommates - find your place, with the right people.");
     }
   }, [profile]);
 
