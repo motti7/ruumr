@@ -260,7 +260,7 @@ function App() {
                 letterSpacing: "0.5px",
               }}
             >
-              find your place
+              find your place with the right peoples
             </span>
           </div>
         </div>
