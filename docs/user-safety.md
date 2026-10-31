@@ -6,7 +6,7 @@
 - A block action is available only in an existing private chat. Confirmation explains that the conversation and messages are permanently deleted for both participants and that there is no in-app undo.
 - User accounts and profiles are not deleted. Reports are stored separately and survive chat deletion.
 - Blocked pairs are omitted from discovery, received/sent likes, and the conversation list. Direct profile-page navigation is also filtered. This is not a promise to hide public profiles from every possible external API.
-- Existing group conversations are unchanged. Plus recommendation generation and screens are unchanged; the shared private-message gateway still prevents a blocked pair from communicating if another feature creates a match record.
+- Existing group conversations are unchanged. The shared private-message gateway prevents a blocked pair from communicating, including through legacy match records.
 
 ## Base44 dashboard
 

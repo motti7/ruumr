@@ -1,0 +1,32 @@
+/* Desktop keeps mobile's actions and translations. */
+.rf-gallery-controls{position:absolute;inset-inline:12px;top:50%;display:flex;justify-content:space-between;pointer-events:none;transform:translateY(-50%);direction:ltr}
+.rf-gallery-controls button{pointer-events:auto;width:42px;height:42px;display:grid;place-items:center;padding:0;margin:0;background:#fff;color:#172238;border:1px solid #ddd;border-radius:50%;box-shadow:0 3px 12px #0002}
+.rf-gallery-controls button:disabled{opacity:.25;cursor:default}
+[dir=rtl] .rf-gallery-controls{direction:rtl}
+[dir=rtl] .rf-gallery-controls svg{transform:scaleX(-1)}
+@media(hover:none) and (pointer:coarse){.rf-gallery-controls{display:none}}
+@media(min-width:1024px){
+ .rr.rf-feed{max-width:1024px;padding:30px 28px 105px}
+ .rf-feed .rf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:25px}
+ .rf-feed:has(.rf-list>.rf-card:only-child) .rf-feed .rf-list{max-width:690px;margin:auto;grid-template-columns:1fr}
+ .rf-feed .rf-intro{display:flex;align-items:center;justify-content:space-between;gap:20px}
+ .rf-feed .rf-intro h1{font-size:32px}
+ .rf-feed .rf-slide img{height:310px}
+ .rf-feed .rcity-bar{flex-wrap:wrap;overflow:visible;padding-bottom:24px;touch-action:auto}
+ .rf-feed .rf-heading h2{font-size:21px}
+ .rf-feed .rf-content{padding:22px}
+ .desktop-app-nav{max-width:1024px;margin-inline:auto;border-inline:1px solid #e5e7eb;border-radius:20px 20px 0 0;box-shadow:0 -5px 22px #00000008}
+ .desktop-app-nav>div{max-width:720px}
+ .desktop-discover-stage{background:radial-gradient(ellipse at center,#fff7f0,#efefef)!important}
+ .desktop-discover-card{max-width:470px;margin-inline:auto;top:120px!important;bottom:90px!important}
+ .desktop-discover-actions{max-width:470px;inset-inline:0;margin-inline:auto;bottom:120px!important}
+ .desktop-swipe-actions{gap:180px}
+ .desktop-swipe-actions button:focus-visible{outline:3px solid #2054d6;outline-offset:5px}
+ .desktop-profile-detail{max-width:720px;margin-inline:auto}
+}
+@media(min-width:1024px) and (max-height:720px){
+ .desktop-discover-card{max-width:380px;top:105px!important}
+ .desktop-discover-actions{max-width:380px;bottom:108px!important}
+ .desktop-swipe-actions{gap:145px}
+ .desktop-swipe-actions button{width:52px;height:52px}
+}

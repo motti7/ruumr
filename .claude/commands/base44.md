@@ -279,7 +279,7 @@ base44 logs --function <name>
   - `sendMessageNotification` — chat message notifications
   - `uploadProfilePhoto` / `replacePhoto` — photo management
   - `searchSong` — Spotify song search
-  - `ruumrPlusBridge` — Ruumr Plus subscription logic
+  - `profileBoosts` — free sharing-based profile priority
   - `weeklyActivityReport` — activity reporting
   - `deleteAccount` — account deletion
   - `sendEmailToMotti` — internal email

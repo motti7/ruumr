@@ -1,5 +1,5 @@
 import {roomText as rt, useRoomLocale} from '@/lib/room-i18n';
-import {roomAuthDestination,rememberRoomAuth} from '@/lib/room-auth';
+import {roomAuthDestination,rememberRoomAuth,roomAuthLink} from '@/lib/room-auth';
 import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -63,7 +63,7 @@ export default function Login() {
       footer={
         <>
           Don't have an account?{" "}
-          <Link to={roomAuthDestination()==='/AddRoom'?'/register?next=AddRoom':roomAuthDestination()!=='/'?'/register?next=Partner':'/register'} className="text-primary font-medium hover:underline">
+          <Link to={roomAuthLink('register')} className="text-primary font-medium hover:underline">
             Create one
           </Link>
         </>

@@ -6,17 +6,19 @@ import {base44} from '@/api/base44Client';
 import {useAuth} from '@/lib/AuthContext';
 import RoomFeedCard from './RoomFeedCard';
 import RoomCityFilter from './RoomCityFilter';
+import {parseRoomCity,roomCityParams} from '@/lib/roomCity';
 
 import './rooms.css';
 export async function roomRequest(body){const response=await base44.functions.invoke('roomListings',body);if(response.data?.error)throw new Error(response.data.error);return response.data;}
 export default function RoomListings(){
- useRoomLocale();const {isAuthenticated,hasProfile}=useAuth();const [params]=useSearchParams();
+ useRoomLocale();const {isAuthenticated,hasProfile}=useAuth();const [params,setParams]=useSearchParams();
  const [savedIds,setSavedIds]=useState(new Set()),[shareLink,setShareLink]=useState(''),[revision,setRevision]=useState(0);
  const [rows,setRows]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[closing,setClosing]=useState(null);
  const roomId=params.get('room');
- const [city,setCity]=useState('all');
+ const city=parseRoomCity(params.get('city'));
+ const setCity=value=>setParams(previous=>roomCityParams(previous,value));
  useEffect(()=>{if(hasProfile)roomHub('saved').then(x=>setSavedIds(new Set(x.records.map(r=>r.id)))).catch(()=>{});else setSavedIds(new Set());},[hasProfile]);
- useEffect(()=>{let active=true;setLoading(true);setError('');roomRequest({action:'list',room_id:roomId||undefined}).then(data=>{if(active)setRows(data.records);}).catch(()=>{if(active)setError('לא הצלחנו לטעון את החדרים. נסה לרענן את המסך.');}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[roomId,revision]);
+ useEffect(()=>{let active=true;setLoading(true);setError('');roomRequest({action:'list',room_id:roomId||undefined}).then(data=>{if(active)setRows(data.records);}).catch(()=>{if(active)setError('לא הצלחנו לטעון את החדרים. נסה לרענן את המסך.');}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[roomId,revision,isAuthenticated]);
  async function share(r){const url=new URL('/Rooms?room='+encodeURIComponent(r.id),window.location.origin).toString();try{if(navigator.share)await navigator.share({title:r.title,url});else if(navigator.clipboard){await navigator.clipboard.writeText(url);setShareLink(url);}else setShareLink(url);}catch(e){if(e.name!=='AbortError')setShareLink(url);}}
  async function close(id){setClosing(id);setError('');try{await roomRequest({action:'close',id});setRows(old=>old.filter(r=>r.id!==id));}catch{setError('הסרת המודעה מהתצוגה נכשלה. נסה שוב.');}finally{setClosing(null);}}
  const visible=city==='all'?rows:rows.filter(r=>r.city===city);
