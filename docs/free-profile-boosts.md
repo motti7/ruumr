@@ -1,9 +1,13 @@
+## October 31 update: independent sharing and boost
+
+The sharing requirement has been removed in both UI and server. The blue sharing section is followed by an independent free-boost section. Native share delivery is not claimed or verified. Earlier deployment notes below are historical, not the current release status.
+
 # Free profile boosts and retirement of paid Plus
 
 ## Behavior
 
 - `/RuumrPlus` now offers a free 24-hour profile priority boost, claimable once every seven days.
-- Sharing uses the device share sheet, or copies the invitation where sharing is unavailable. The user must separately confirm they sent it. Cancelling the share sheet grants nothing. This is self-attestation, not verified delivery.
+- Sharing and boosting are independent. Sharing opens the device share sheet, falls back to clipboard, then to a selectable link. Sharing never claims a boost. The separate activation button requires no share action or assertion, and sharing remains available during cooldown or boost errors.
 - Server timestamps and authenticated identity determine eligibility. The UI cannot choose an account, duration or cooldown. Repeated claims do not extend an existing boost. Concurrent claims can create duplicate rows, but ranking is a set of user IDs, so boosts never stack.
 - Only visible, non-virtual roommate profiles qualify. Priority changes ordering only; visibility, blocks, preferences and previous swipe filters still apply. Matching still requires mutual likes. AI extraction of room listings is unchanged.
 - Hebrew/English strings, live errors and localized dates follow the existing language toggle.

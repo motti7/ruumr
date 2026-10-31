@@ -3,35 +3,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import i18n from '@/i18n';
-const { api } = vi.hoisted(() => ({ api: vi.fn() }));
-vi.mock('@/api/profileBoosts', () => ({ profileBoosts: api }));
+const {api}=vi.hoisted(()=>({api:vi.fn()}));
+vi.mock('@/api/profileBoosts',()=>({profileBoosts:api}));
 import RuumrPlus from '@/pages/RuumrPlus';
 const ready={active:false,eligible:true,expiresAt:null,nextEligibleAt:null};
-describe('sharing for a free boost', () => {
- beforeEach(async () => { api.mockReset(); api.mockResolvedValue(ready); await i18n.changeLanguage('en'); });
- const open=()=>render(<MemoryRouter><RuumrPlus /></MemoryRouter>);
- it('requires a separate confirmation after sharing', async () => {
-  Object.defineProperty(navigator,'share',{configurable:true,value:vi.fn().mockResolvedValue(undefined)});
-  open(); fireEvent.click(await screen.findByRole('button',{name:i18n.t('boost_share')}));
-  const confirm=await screen.findByRole('button',{name:i18n.t('boost_confirm')});
-  expect(api).toHaveBeenCalledTimes(1);
-  fireEvent.click(confirm);
-  await waitFor(()=>expect(api).toHaveBeenCalledWith('claim',{confirmedShared:true}));
- });
- it('cancelled sharing cannot activate a boost', async () => {
-  Object.defineProperty(navigator,'share',{configurable:true,value:vi.fn().mockRejectedValue(new DOMException('Cancelled','AbortError'))});
-  open(); fireEvent.click(await screen.findByRole('button',{name:i18n.t('boost_share')}));
-  await waitFor(()=>expect(screen.getByRole('button',{name:i18n.t('boost_share')})).not.toBeDisabled());
-  expect(screen.queryByRole('button',{name:i18n.t('boost_confirm')})).not.toBeInTheDocument();
-  expect(api).toHaveBeenCalledTimes(1);
- });
- it('translates an already-displayed error and switches direction without reloading', async () => {
-  api.mockRejectedValue(new Error('offline'));open();
-  expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('boost_error'));
-  await act(()=>i18n.changeLanguage('he'));
-  expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('boost_error'));
-  expect(screen.getByRole('main')).toHaveAttribute('dir','rtl');
-  await act(()=>i18n.changeLanguage('en'));
-  expect(screen.getByRole('main')).toHaveAttribute('dir','ltr');
- });
+const open=()=>render(<MemoryRouter><RuumrPlus/></MemoryRouter>);
+const nav=(key,value)=>Object.defineProperty(navigator,key,{configurable:true,value});
+describe('independent sharing and free boosts',()=>{
+ beforeEach(async()=>{api.mockReset();api.mockResolvedValue(ready);nav('share',undefined);nav('canShare',undefined);nav('clipboard',{writeText:vi.fn().mockResolvedValue()});await i18n.changeLanguage('en');});
+ it('activates immediately without sharing and sends no share assertion',async()=>{const share=vi.fn();nav('share',share);open();fireEvent.click(await screen.findByRole('button',{name:i18n.t('boost_confirm')}));await waitFor(()=>expect(api).toHaveBeenCalledWith('claim'));expect(share).not.toHaveBeenCalled();});
+ it('successful sharing sends the localized text and never claims a boost',async()=>{const share=vi.fn().mockResolvedValue();nav('share',share);open();fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));await screen.findByText(i18n.t('boost_share_done'));expect(share).toHaveBeenCalledWith({title:'RUUMR',text:i18n.t('boost_share_text'),url:'https://app.ruumrapp.com'});expect(api.mock.calls.every(x=>x[0]==='status')).toBe(true);});
+ it('cancellation leaves boost activation available',async()=>{nav('share',vi.fn().mockRejectedValue(new DOMException('Cancelled','AbortError')));open();fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));expect(await screen.findByRole('button',{name:i18n.t('boost_confirm')})).toBeEnabled();expect(api.mock.calls.every(x=>x[0]==='status')).toBe(true);});
+ it('keeps sharing available during the weekly cooldown',async()=>{api.mockResolvedValue({active:false,eligible:false,expiresAt:new Date(Date.now()-1000).toISOString(),nextEligibleAt:new Date(Date.now()+86400000).toISOString()});open();await screen.findByText(/Your next boost/);expect(screen.queryByRole('button',{name:i18n.t('boost_confirm')})).toBeNull();fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));await screen.findByText(i18n.t('boost_copied'));});
+ it('falls back to clipboard after native share fails',async()=>{nav('share',vi.fn().mockRejectedValue(new Error('unsupported')));open();fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));await screen.findByText(i18n.t('boost_copied'));expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('https://app.ruumrapp.com'));});
+ it('shows a selectable link if clipboard is denied',async()=>{nav('clipboard',{writeText:vi.fn().mockRejectedValue(new Error('denied'))});open();fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));expect(await screen.findByLabelText(i18n.t('boost_link_label'))).toHaveValue('https://app.ruumrapp.com');});
+ it('sharing works even if boost status fails, and displayed messages translate live',async()=>{api.mockRejectedValue(new Error('offline'));open();await screen.findByRole('alert');fireEvent.click(screen.getByRole('button',{name:i18n.t('boost_share')}));await screen.findByText(i18n.t('boost_copied'));await act(()=>i18n.changeLanguage('he'));expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('boost_error'));expect(screen.getByText(i18n.t('boost_copied'))).toBeVisible();expect(screen.getByRole('main')).toHaveAttribute('dir','rtl');await act(()=>i18n.changeLanguage('en'));expect(screen.getByRole('main')).toHaveAttribute('dir','ltr');});
 });

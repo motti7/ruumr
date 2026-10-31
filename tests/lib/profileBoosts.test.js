@@ -13,25 +13,25 @@ function setup({ user = { id: 'owner' }, profiles = [{ is_visible: true }], reco
 }
 describe('free profile boosts', () => {
  it('requires authentication and a visible roommate profile', async () => {
-  expect((await setup({ user: null }).call({ action: 'claim', confirmedShared: true })).status).toBe(401);
+  expect((await setup({ user: null }).call({ action: 'claim' })).status).toBe(401);
   for (const profiles of [[], [{ is_visible: false }], [{ is_virtual: true }]]) {
    const x = setup({ profiles });
-   expect((await x.call({ action: 'claim', confirmedShared: true })).status).toBe(403);
+   expect((await x.call({ action: 'claim' })).status).toBe(403);
    expect(x.create).not.toHaveBeenCalled();
   }
  });
- it('does not reward merely opening the share sheet', async () => {
-  const x=setup(); expect((await x.call({ action: 'claim' })).status).toBe(400);
-  expect(x.create).not.toHaveBeenCalled();
+ it('grants a boost without sharing or confirmation', async () => {
+  const x=setup(); expect((await x.call({ action: 'claim' })).status).toBe(200);
+  expect(x.create).toHaveBeenCalledTimes(1);
  });
  it('uses the authenticated account and server time, ignoring client overrides', async () => {
-  const x=setup(); const res=await x.call({ action: 'claim', confirmedShared: true, user_id: 'victim', expires_at: '2099-01-01' });
+  const x=setup(); const res=await x.call({ action: 'claim', user_id: 'victim', expires_at: '2099-01-01' });
   expect(x.create).toHaveBeenCalledWith({ user_id: 'owner', started_at: new Date(now).toISOString(), expires_at: new Date(now+BOOST_MS).toISOString() });
   expect(await res.json()).toMatchObject({ active: true, eligible: false });
  });
  it('repeated confirmation does not extend the boost or weekly cooldown', async () => {
   const x=setup({ records: [{ started_at: new Date(now-BOOST_MS*2).toISOString() }] });
-  const res=await x.call({ action: 'claim', confirmedShared: true });
+  const res=await x.call({ action: 'claim' });
   expect(await res.json()).toMatchObject({ active: false, eligible: false });
   expect(x.create).not.toHaveBeenCalled();
  });
@@ -49,4 +49,18 @@ describe('free profile boosts', () => {
   const x=setup({records:[{user_id:'a',started_at:new Date(now-1000).toISOString()},{user_id:'b',started_at:new Date(now-BOOST_MS).toISOString()}]});
   expect(await (await x.call({action:'active'})).json()).toEqual({userIds:['a']});
  });
+});
+
+it('enforces the full weekly lifecycle using persisted server records', async () => {
+ let time=now;const records=[];
+ const client={auth:{me:async()=>({id:'owner'})},entities:{Profile:{filter:async()=>[{is_visible:true}]}},asServiceRole:{entities:{ProfileBoost:{filter:async(q)=>q.user_id?records.slice(-1):records,create:async row=>{records.push(row);return row;}}}}};
+ const handler=createBoostHandler(()=>client,()=>time);
+ const call=async action=> (await handler(new Request('https://example.com',{method:'POST',body:JSON.stringify({action})}))).json();
+ expect(await call('claim')).toMatchObject({active:true,eligible:false});
+ expect(await call('active')).toEqual({userIds:['owner']});
+ await call('claim');expect(records).toHaveLength(1);
+ time=now+BOOST_MS;expect(await call('active')).toEqual({userIds:[]});
+ expect(await call('claim')).toMatchObject({active:false,eligible:false});expect(records).toHaveLength(1);
+ time=now+COOLDOWN_MS-1;await call('claim');expect(records).toHaveLength(1);
+ time=now+COOLDOWN_MS;expect(await call('claim')).toMatchObject({active:true,eligible:false});expect(records).toHaveLength(2);
 });

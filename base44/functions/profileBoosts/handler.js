@@ -29,8 +29,6 @@ export function createBoostHandler(createClient, clock = Date.now) {
    const records = await sr.ProfileBoost.filter({ user_id: user.id }, '-started_at', 1);
    const status = boostStatus(records[0], now);
    if (body.action === 'status' || !status.eligible) return Response.json(status);
-   // Self-attestation, not automatic proof of delivery to a recipient.
-   if (body.confirmedShared !== true) return Response.json({ error: 'confirmation_required' }, { status: 400 });
    const record = await sr.ProfileBoost.create({ user_id: user.id, started_at: new Date(now).toISOString(), expires_at: new Date(now + BOOST_MS).toISOString() });
    return Response.json(boostStatus(record, now));
   } catch (error) {
