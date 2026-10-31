@@ -260,6 +260,7 @@ function App() {
                 letterSpacing: "0.5px",
                 textAlign: "center",
               }}
+              dir="ltr"
             >
               find your place.
               <br />
