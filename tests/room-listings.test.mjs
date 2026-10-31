@@ -26,12 +26,12 @@ test('closing is scoped to authenticated ownership',async()=>{
 });
 test('feed excludes blocked owners in both directions and hides owner identifiers',async()=>{
   const handler=createHandler(()=>client({id:'me'},{filter:async()=>[{id:'a',owner_id:'blocked'},{id:'b',owner_id:'blocker'},{id:'c',owner_id:'me',created_by:'private@example.test'}]},[{blocker_id:'me',blocked_id:'blocked'},{blocker_id:'blocker',blocked_id:'me'}]));
-  const data=await (await handler(req({action:'list'}))).json();assert.deepEqual(data.records,[{id:'c',is_owner:true}]);
+  const data=await (await handler(req({action:'list'}))).json();assert.deepEqual(data.records,[{id:'c',contact_locked:false,is_owner:true}]);
 });
 test('guests can only list published room fields and cannot close or create',async()=>{
   let query;const handler=createHandler(()=>client(null,{filter:async q=>{query=q;return [{id:'one',title:'Room',owner_id:'owner',created_by:'private',internal_notes:'secret'}];}}));
   const data=await (await handler(req({action:'list'}))).json();
-  assert.deepEqual(query,{status:'published'});assert.deepEqual(data.records,[{id:'one',title:'Room',is_owner:false}]);
+  assert.deepEqual(query,{status:'published'});assert.deepEqual(data.records,[{id:'one',title:'Room',contact_locked:true,is_owner:false}]);
   for(const action of ['create','close'])assert.equal((await handler(req({action,room:room(),id:'one'}))).status,401);
 });
 
@@ -40,4 +40,17 @@ test('owner can close their own room and missing rooms return 404',async()=>{
  const handler=createHandler(()=>client({id:'a'},entity));
  assert.equal((await handler(req({action:'close',id:'mine'}))).status,200);assert.deepEqual(updated,{id:'mine',status:'closed'});
  entity.get=async()=>{throw new Error('missing');};assert.equal((await handler(req({action:'close',id:'missing'}))).status,404);
+});
+
+test('guest feed and direct room links redact contact fields and text; signed-in users retain them',async()=>{
+ const record={...room(),id:'one',status:'published',owner_id:'owner',description:'Call 050-000-0000 or +972 50 000 0000 https://wa.me/972500000000',price_options:[{label:'Phone 0500000000',amount:1500}]};
+ const entity={filter:async()=>[record],get:async()=>record};
+ for(const body of [{action:'list'},{action:'list',room_id:'one'}]){
+  const guest=await (await createHandler(()=>client(null,entity))(req(body))).json();
+  assert.equal(guest.records[0].phone,undefined);assert.equal(guest.records[0].contact_locked,true);
+  assert.equal(guest.records[0].title,record.title);assert.deepEqual(guest.records[0].photos,record.photos);
+  assert.ok(!JSON.stringify(guest).includes('050'));assert.ok(!JSON.stringify(guest).includes('972'));
+  const signedIn=await (await createHandler(()=>client({id:'viewer'},entity))(req(body))).json();
+  assert.equal(signedIn.records[0].phone,record.phone);assert.equal(signedIn.records[0].description,record.description);
+ }
 });

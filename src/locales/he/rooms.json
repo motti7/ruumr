@@ -357,5 +357,9 @@
   "feed.city_beer_sheva": "באר שבע",
   "feed.empty_city": "אין חדרים בעיר זו כרגע. אפשר לבחור עיר אחרת או לפרסם חדר.",
   "desktop.pass": "לא מתאים",
-  "desktop.like": "לייק"
-  }
+  "desktop.like": "לייק",
+  "feed.contact_signin": "כדי לראות את מספר הטלפון ולפנות בוואטסאפ, יש להתחבר.",
+  "feed.reveal_phone": "התחברות לצפייה במספר",
+  "feed.whatsapp_signin": "התחברות לפנייה בוואטסאפ",
+  "feed.contact_register": "אין לכם חשבון? הרשמה"
+}

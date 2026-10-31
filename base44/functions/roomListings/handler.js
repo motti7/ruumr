@@ -1,4 +1,12 @@
 const cities = ['תל אביב','ירושלים','חיפה','באר שבע'];
+// Public room previews must not expose contact details, including in free text.
+export function guestRoomValue(value) {
+  if (Array.isArray(value)) return value.map(guestRoomValue);
+  if (value && typeof value==='object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,guestRoomValue(v)]));
+  if (typeof value!=='string') return value;
+  return value.replace(/(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com|web\.whatsapp\.com)\/[^\s]+/gi,'')
+    .replace(/(?:\+?972[\s().-]*|0)(?:[\s().-]*\d){8,9}(?!\d)/g,'');
+}
 export function validateRoom(body) {
   const text = (key,max,required=true) => {
     const value=typeof body[key]==='string'?body[key].trim():'';
@@ -47,7 +55,8 @@ export function createHandler(createClient) { return async req=>{
       const blocked=new Set([...outgoing.map(r=>r.blocked_id),...incoming.map(r=>r.blocker_id)]);
       return Response.json({records:records.filter(r=>!blocked.has(r.owner_id) && !(r.source_kind==='facebook' && String(r.owner_id||'').startsWith('facebook:') && Date.parse(r.source_posted_at)<=Date.now()-21*86400000)).map(r=>{
         const fields=['id','title','city','address','price','entry_date','end_date','rental_type','roommates','furniture','description','phone','photos','publisher_name','publisher_photo','publisher_type','source_kind','source_posted_at','created_date','entry_text','end_text','bills_text','shabbat_policy','kosher_policy','price_options'];
-        return {...Object.fromEntries(fields.filter(k=>r[k]!==undefined).map(k=>[k,r[k]])),is_owner:!!user && r.owner_id===user.id};
+        const visible=Object.fromEntries(fields.filter(k=>r[k]!==undefined&&(user||k!=='phone')).map(k=>[k,!user&&k!=='photos'&&k!=='publisher_photo'&&k!=='id'?guestRoomValue(r[k]):r[k]]));
+        return {...visible,contact_locked:!user,is_owner:!!user && r.owner_id===user.id};
       })});
     }
     return Response.json({error:'פעולה לא מוכרת.'},{status:400});

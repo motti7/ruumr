@@ -357,5 +357,9 @@
   "feed.city_beer_sheva": "Be'er Sheva",
   "feed.empty_city": "No rooms in this city right now. Try another city or list a room.",
   "desktop.pass": "Pass",
-  "desktop.like": "Like"
-  }
+  "desktop.like": "Like",
+  "feed.contact_signin": "Sign in to see the phone number and contact the advertiser on WhatsApp.",
+  "feed.reveal_phone": "Sign in to see the number",
+  "feed.whatsapp_signin": "Sign in to contact on WhatsApp",
+  "feed.contact_register": "New here? Create an account"
+}

@@ -1,3 +1,4 @@
+import {useAuth} from '@/lib/AuthContext';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import '@/components/rooms/rooms.css';
 
 export default function RoomDetail() {
   useRoomLocale();
+  const {isAuthenticated}=useAuth();
   const { id } = useParams();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function RoomDetail() {
       .catch(() => { if (active) setError(rt('hub.room_not_found')); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [id]);
+  }, [id,isAuthenticated]);
 
   return (
     <section className="rr rf-feed" dir={roomDirection()} style={{ paddingTop: 16 }}>
