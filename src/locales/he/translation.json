@@ -662,7 +662,7 @@
   "safety_block_pending": "המשתמש נחסם. מחיקת ההודעות תושלם אוטומטית.",
   "safety_chat_unavailable": "השיחה אינה זמינה.",
   "boost_title": "תנו לפרופיל שלכם מקום מקדימה.",
-  "boost_description": "קדימות בכרטיסיות השותפים למשך 24 שעות. הפעילו כאן — בלי צורך לשתף.",
+  "boost_description": "קדימות בכרטיסיות השותפים למשך 24 שעות.",
   "boost_limits": "בוסט חינמי אחד בכל 7 ימים.",
   "boost_active": "הבוסט שלכם פעיל",
   "boost_until": "פעיל עד {{date}}",
@@ -687,6 +687,5 @@
   "boost_link_label": "קישור לשיתוף רומר",
   "boost_kicker": "הזמן שלכם לבלוט",
   "boost_duration": "24 שעות של קדימות",
-  "boost_frequency": "פעם בכל שבוע",
-  "boost_independent": "השיתוף לבחירתכם. הבוסט זמין גם בלי לשתף."
+  "boost_frequency": "בוסט אחד בכל שבוע"
 }

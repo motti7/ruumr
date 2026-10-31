@@ -662,7 +662,7 @@
   "safety_block_pending": "User blocked. Message deletion will finish automatically.",
   "safety_chat_unavailable": "This conversation is unavailable.",
   "boost_title": "Give your profile a head start.",
-  "boost_description": "Get priority in roommate discovery for 24 hours. Activate it here — no sharing required.",
+  "boost_description": "Get priority in roommate discovery for 24 hours.",
   "boost_limits": "One free boost every 7 days.",
   "boost_active": "Your boost is active",
   "boost_until": "Active until {{date}}",
@@ -687,6 +687,5 @@
   "boost_link_label": "Ruumr sharing link",
   "boost_kicker": "Your time to stand out",
   "boost_duration": "24 hours of priority",
-  "boost_frequency": "Once every week",
-  "boost_independent": "Sharing is optional. Your boost is available either way."
+  "boost_frequency": "One boost every week"
 }

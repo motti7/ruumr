@@ -41,6 +41,6 @@ export default function RuumrPlus() {
  {error==='boost_error'&&!status&&<button className="sb-retry" onClick={()=>setRetry(v=>v+1)}>{t('boost_retry')}</button>}
  {error==='boost_profile_required'&&<Link to="/Onboarding">{t('boost_create_profile')}</Link>}
  </>}
- <p className="sb-independent">{t('boost_independent')}</p></section>
+ </section>
  <Link className="sb-back" to="/Discover?view=people">{t('boost_back')}</Link></main>;
 }
