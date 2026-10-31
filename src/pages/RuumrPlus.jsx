@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Rocket, Share2, CheckCircle2, Home, Heart, Clock3 } from 'lucide-react';
 import { profileBoosts } from '@/api/profileBoosts';
 import '@/styles/share-boost.css';
-const SHARE_URL = 'https://app.ruumrapp.com';
 export default function RuumrPlus() {
  const { t, i18n } = useTranslation();
+ // Shared links go through a tiny server-rendered page so the link preview
+ // (WhatsApp, iMessage, Facebook) is written in the language the user shares in.
+ const SHARE_URL = `https://app.ruumrapp.com/functions/sharePreview?lang=${i18n.language?.startsWith('he') ? 'he' : 'en'}`;
  const [status,setStatus]=useState(null),[loading,setLoading]=useState(true),[claiming,setClaiming]=useState(false),[sharing,setSharing]=useState(false);
  const [error,setError]=useState(null),[shareMessage,setShareMessage]=useState(null),[manual,setManual]=useState(false),[now,setNow]=useState(Date.now()),[retry,setRetry]=useState(0);
  const claimLock=useRef(false),shareLock=useRef(false);
