@@ -293,7 +293,7 @@ export default function Layout({ children, currentPageName }) {
     isRoomsContext ? { id: "add-room", name: rt("הוספת חדר"), path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     isRoomsContext ? { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles } : null,
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
-  ].filter(item => item && item.id !== 'plus');
+  ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'RoomChat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";

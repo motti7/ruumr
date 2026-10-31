@@ -22,7 +22,7 @@ const handlers = {
 };
 
 describe("MatchCard match type", () => {
-  it("labels a one-sided Ruumr Plus match", () => {
+  it("keeps legacy conversations without advertising paid matching", () => {
     render(
       <MatchCard
         match={match}
@@ -32,9 +32,9 @@ describe("MatchCard match type", () => {
       />
     );
 
-    expect(screen.getByText("התאמת Ruumr Plus")).toBeInTheDocument();
+    expect(screen.queryByText("התאמת Ruumr Plus")).not.toBeInTheDocument();
     expect(screen.getByRole("article")).toHaveAccessibleName(
-      expect.stringContaining("התאמת Ruumr Plus")
+      expect.not.stringContaining("Ruumr Plus")
     );
   });
 

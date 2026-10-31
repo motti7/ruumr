@@ -9,10 +9,10 @@ const schema = JSON.parse(
 describe("Match schema", () => {
   it("stores the match origin while treating new ordinary matches as mutual", () => {
     expect(schema.properties.match_type).toMatchObject({
-      enum: ["mutual", "ruumr_plus"],
+      type: "string",
       default: "mutual",
     });
-    expect(schema.properties.plus_initiator_id.type).toBe("string");
+    expect(schema.properties.plus_initiator_id).toBeUndefined();
   });
 
   it("allows either participant to read the same differentiated match", () => {

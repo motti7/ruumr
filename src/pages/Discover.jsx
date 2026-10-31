@@ -1,3 +1,5 @@
+import { profileBoosts } from '@/api/profileBoosts';
+import { prioritizeBoostedProfiles } from '@/lib/profileBoostRanking';
 import PublisherDiscover from '@/components/rooms/PublisherDiscover';
 import {Link} from 'react-router-dom';
 import {roomHub} from '@/api/roomHub';
@@ -180,7 +182,7 @@ function DiscoverPeoplePage() {
       const currentUserProfile = userProfiles[0];
       setUserProfile(currentUserProfile);
       setCurrentUserId(user.id);
-      
+
       let allProfiles = [];
       try {
         allProfiles = await Profile.list("-created_date", 500);
@@ -190,6 +192,7 @@ function DiscoverPeoplePage() {
       }
       const blocked = await blockedUserIds();
       allProfiles = sortProfilesByCreatedDateDesc(allProfiles.filter(p => !blocked.has(p.user_id)));
+      try { const boosts = await profileBoosts('active'); allProfiles = prioritizeBoostedProfiles(allProfiles, boosts.userIds); } catch { /* Discovery remains available if boosting is unavailable. */ }
 
       let userSwipes = [];
       try {
@@ -199,7 +202,7 @@ function DiscoverPeoplePage() {
         userSwipes = simulatorState?.collections?.Swipe?.filter((swipe) => String(swipe.swiper_id) === String(user.id)) || [];
       }
       const swipedIds = userSwipes.map(s => String(s.swiped_id));
-      
+
       // Also include locally-seen IDs (catches cases where swipe save failed or app was in background)
       let localSeenIds = new Set();
       try {
@@ -207,7 +210,7 @@ function DiscoverPeoplePage() {
         if (saved) localSeenIds = new Set(JSON.parse(saved));
       } catch {}
       const allSwipedIds = new Set([...swipedIds, ...localSeenIds]);
-      
+
       let likedMeSwipes = [];
       try {
         likedMeSwipes = await Swipe.filter({ swiped_id: user.id, action: "like" });
@@ -238,7 +241,7 @@ function DiscoverPeoplePage() {
         if (!isAdminViewer) {
           const myGender = currentUserProfile.gender || 'male'; 
           const myPreference = currentUserProfile.looking_for_gender || 'any';
-          
+
           const theirGender = p.gender || 'male';
           const theirPreference = p.looking_for_gender || 'any';
 
@@ -259,12 +262,12 @@ function DiscoverPeoplePage() {
         // If anyone doesn't have budget set, we assume overlap.
         const myMin = currentUserProfile.budget_min || 0;
         const myMax = currentUserProfile.budget_max || 100000;
-        
+
         const theirMin = p.budget_min || 0;
         const theirMax = p.budget_max || 100000;
 
         const overlap = (theirMin <= myMax && theirMax >= myMin);
-        
+
         return overlap;
       });
 
@@ -324,13 +327,13 @@ function DiscoverPeoplePage() {
   }, [navigate, setHasProfile]);
 
   useEffect(() => { loadData(); }, [loadData]);
-  
+
   useEffect(() => {
     const handleOpenCharter = () => setShowCharterSelector(true);
     window.addEventListener('openCharter', handleOpenCharter);
     return () => window.removeEventListener('openCharter', handleOpenCharter);
   }, []);
-  
+
   // Aggressive Prefetch: Next 5 profiles
   useEffect(() => {
     if (!profiles || profiles.length === 0) return;
@@ -354,7 +357,7 @@ function DiscoverPeoplePage() {
         const img = new Image();
         img.src = currentProfile.photos[1];
     }
-    
+
     const nextProfile = profiles[currentIndex + 1];
     if (nextProfile?.photos?.[1]) {
         const img = new Image();
@@ -461,7 +464,7 @@ function DiscoverPeoplePage() {
         setSwipeSaveError(t("swipe_save_failed"));
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
-  
+
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
       setLastSwipes(prev => prev.slice(0, -1));

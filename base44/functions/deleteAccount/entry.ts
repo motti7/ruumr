@@ -41,6 +41,8 @@ Deno.serve(async (req) => {
             for (const room of rooms) { await drain(sr.SavedRoom,{room_id:room.id}); await sr.RoomListing.delete(room.id); }
         }
 
+        await drain(sr.ProfileBoost, { user_id: userId });
+
         // 1. Profile — CRITICAL: fetch ALL profiles (high limit) to find user's records
         const allProfiles = await sr.Profile.list('-created_date', 2000);
         const myProfiles = allProfiles.filter(p => p.user_id === userId);
@@ -159,12 +161,10 @@ Deno.serve(async (req) => {
         for (const pv of pageViews) await safeDelete(sr.PageView, pv.id);
         console.log(`  ✓ PageViews deleted: ${pageViews.length}`);
 
-        // 10. PendingSubscriptions
-        const pendingSubs = await sr.PendingSubscription.filter({ user_id: userId });
-        for (const ps of pendingSubs) await safeDelete(sr.PendingSubscription, ps.id);
-        console.log(`  ✓ PendingSubscriptions deleted: ${pendingSubs.length}`);
+        // Remove retained historical billing records when their owner deletes the account.
+        await drain(sr.PendingSubscription, { user_id: userId });
 
-        // 11. Delete the User record itself (removes from users list in dashboard)
+        // 10. Delete the User record itself (removes from users list in dashboard)
         await safeDelete(sr.User, userId);
         console.log(`  ✓ User record deleted`);
 
