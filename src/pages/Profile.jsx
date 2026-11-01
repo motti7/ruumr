@@ -383,7 +383,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}><a className="rr-add" href="/RoomAccount">{t('hub.manage_publisher',{ns:'rooms'})}</a>
+    <div className="bg-gray-50 min-h-screen pb-24" dir={i18n.dir()}>
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/mp4,video/quicktime,video/webm" />
       <input type="file" ref={apartmentFileInputRef} className="hidden" accept="image/*" />
 
