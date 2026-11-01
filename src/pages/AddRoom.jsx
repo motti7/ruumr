@@ -22,14 +22,14 @@ export default function AddRoom(){
   async function upload(event){
     const files=Array.from(event.target.files||[]);event.target.value='';
     if(!files.length)return;
-    if(files.length+room.photos.length>8||files.some(f=>!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>8*1024*1024)){setError(rt("אפשר להעלות עד 8 תמונות JPG, PNG או WebP, עד 8MB לתמונה."));return;}
+    if(files.length+room.photos.length>8||files.some(f=>!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>8*1024*1024)){setError("אפשר להעלות עד 8 תמונות JPG, PNG או WebP, עד 8MB לתמונה.");return;}
     setUploading(true);setError('');
     try{for(const file of files){const {file_url}=await base44.integrations.Core.UploadFile({file});if(!file_url)throw new Error(rt("העלאת התמונה לא הושלמה."));setRoom(old=>({...old,photos:[...old.photos,file_url]}));}}
-    catch{setError(rt("חלק מהתמונות לא הועלו. התמונות שכבר מופיעות נשמרו בטופס; נסה להעלות רק את החסרות."));}finally{setUploading(false);}
+    catch{setError("חלק מהתמונות לא הועלו. התמונות שכבר מופיעות נשמרו בטופס; נסה להעלות רק את החסרות.");}finally{setUploading(false);}
   }
   async function submit(e){e.preventDefault();if(lock.current||uploading)return;lock.current=true;setBusy(true);setError('');
     try{await roomRequest({action:editId?'update':'create',id:editId,room});navigate('/Discover?view=rooms&roomAdded=1');}
-    catch(e){setError(e.response?.data?.error||e.message||rt("הפרסום נכשל."));}finally{lock.current=false;setBusy(false);}
+    catch(e){setError(e.response?.data?.error||e.message||"הפרסום נכשל.");}finally{lock.current=false;setBusy(false);}
   }
   const input=(key,label,type='text',extra={})=><label>{label}<input required name={key} type={type} value={room[key]} onChange={e=>set(key,e.target.value)} {...extra}/></label>;
   return <section className="rr" dir={roomDirection()}><Link to="/Discover?view=rooms">{rt("← חזרה לחדרים")}</Link><h1>{rt(editId?"hub.edit_room":"הוספת חדר")}</h1>{partner&&<p>{rt("hub.partner_unchanged")}</p>}<p>{rt("מפרסמים חדר בדירת שותפים. אין צורך ליצור פרופיל שותף או להעלות תמונה אישית.")}</p>

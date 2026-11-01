@@ -40,7 +40,6 @@ const Rooms = lazy(() => import('./pages/Rooms'));
 const RoomAccount = lazy(() => import('./pages/RoomAccount'));
 const SavedRooms = lazy(() => import('./pages/SavedRooms'));
 const Inbox = lazy(() => import('./pages/Inbox'));
-const RoomChat = lazy(() => import('./pages/RoomChat'));
 const AddRoom = lazy(() => import('./pages/AddRoom'));
 const ScrapingPilot = lazy(() => import('./pages/ScrapingPilot'));
 const WriteExternalReview = lazy(() => import('./pages/WriteExternalReview'));
@@ -141,10 +140,10 @@ const AuthenticatedApp = () => {
         <Route path="/Discover" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Discover">{<Pages.Discover/>}</LayoutWrapper></Suspense>} />
         <Route path="/" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms/></LayoutWrapper></Suspense>} />
         <Route path="/LikesYou" element={<Navigate to="/Inbox?tab=likes" replace/>}/><Route path="/Matches" element={<Navigate to="/Inbox" replace/>}/><Route path="/AddRoom" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="AddRoom"><AddRoom/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
-        <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
+        <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
 <Route path="/SavedRooms" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="SavedRooms"><SavedRooms/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
 <Route path="/Inbox" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="Inbox"><Inbox/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
-<Route path="/RoomChat" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomChat"><RoomChat/></LayoutWrapper></Suspense>:<Navigate to={"/login?next=RoomChat&offerId="+encodeURIComponent(new URLSearchParams(location.search).get("offerId")||"")} replace/>}/>
+<Route path="/RoomChat" element={<Navigate to="/Discover?view=rooms" replace/>}/>
 {/* All protected routes */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
 
