@@ -141,7 +141,7 @@ const AuthenticatedApp = () => {
         {/* Home is the roommates (people) experience. It requires sign-in: guests
             get the partner gate with sign-in / registration links there. Room
             browsing stays public at /Rooms. */}
-        <Route path="/" element={<Navigate to="/Discover?view=people" replace />} />
+        <Route path="/" element={<Navigate to="/Rooms" replace />} />
         <Route path="/LikesYou" element={<Navigate to="/Inbox?tab=likes" replace/>}/><Route path="/Matches" element={<Navigate to="/Inbox" replace/>}/><Route path="/AddRoom" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="AddRoom"><AddRoom/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
         <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
 <Route path="/SavedRooms" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="SavedRooms"><SavedRooms/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
