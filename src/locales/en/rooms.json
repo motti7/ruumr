@@ -258,7 +258,7 @@
   "hub.manage_publisher": "Manage my room listings and publisher details",
   "hub.partner_gate": "Sign up to discover roommates.",
   "hub.account": "My account",
-  "hub.partner_unchanged": "Listing a room does not change your roommate profile.",
+  "hub.partner_unchanged": "If you already have a roommate profile, your publisher details will be added to your existing profile.",
   "hub.share": "Share",
   "hub.share_whatsapp": "Share on WhatsApp",
   "hub.share_copy": "Copy link",

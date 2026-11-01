@@ -258,7 +258,7 @@
   "hub.manage_publisher": "ניהול החדרים ופרטי המפרסם שלי",
   "hub.partner_gate": "כדי להמשיך ולגלות שותפים, צריך להירשם.",
   "hub.account": "החשבון שלי",
-  "hub.partner_unchanged": "פרסום חדר אינו משנה את פרופיל השותף שלך.",
+  "hub.partner_unchanged": "במידה ויש לך כבר פרופיל שותף, פרטי המפרסם יתווספו לפרופיל הקיים שלך.",
   "hub.share": "שיתוף",
   "hub.share_whatsapp": "שיתוף בוואטסאפ",
   "hub.share_copy": "העתקת קישור",
