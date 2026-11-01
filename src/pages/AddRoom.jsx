@@ -13,8 +13,8 @@ export default function AddRoom(){
   useEffect(()=>{try{sessionStorage.removeItem('ruumr_room_auth_intent');}catch{/* optional */}},[]);
   const navigate=useNavigate(),lock=useRef(false);
   const [params]=useSearchParams(),editId=params.get('edit');
-  const [ready,setReady]=useState(false),[partner,setPartner]=useState(false);
-  useEffect(()=>{roomHub('account').then(data=>{setPartner(data.has_profile);if(!data.publisher){navigate('/RoomAccount?next=AddRoom',{replace:true});return;}if(editId){const r=data.rooms.find(x=>x.id===editId&&x.status==='published');if(!r){setError('hub.unavailable');return;}setRoom({...r,owner_confirmation:true});}setReady(true);}).catch(()=>setError('hub.failed'));},[editId,navigate]);
+  const [ready,setReady]=useState(false);
+  useEffect(()=>{roomHub('account').then(data=>{if(!data.publisher){navigate('/RoomAccount?next=AddRoom',{replace:true});return;}if(editId){const r=data.rooms.find(x=>x.id===editId&&x.status==='published');if(!r){setError('hub.unavailable');return;}setRoom({...r,owner_confirmation:true});}setReady(true);}).catch(()=>setError('hub.failed'));},[editId,navigate]);
   const [room,setRoom]=useState({title:'',city:'',address:'',price:'',entry_date:'',end_date:'',rental_type:'regular',roommates:'0',furniture:'',description:'',phone:'',photos:[],owner_confirmation:false});
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[uploading,setUploading]=useState(false);
   const set=(key,value)=>setRoom(old=>({...old,[key]:value}));
@@ -32,7 +32,7 @@ export default function AddRoom(){
     catch(e){setError(e.response?.data?.error||e.message||"הפרסום נכשל.");}finally{lock.current=false;setBusy(false);}
   }
   const input=(key,label,type='text',extra={})=><label>{label}<input required name={key} type={type} value={room[key]} onChange={e=>set(key,e.target.value)} {...extra}/></label>;
-  return <section className="rr" dir={roomDirection()}><Link to="/Discover?view=rooms">{rt("← חזרה לחדרים")}</Link><h1>{rt(editId?"hub.edit_room":"הוספת חדר")}</h1>{partner&&<p>{rt("hub.partner_unchanged")}</p>}<p>{rt("מפרסמים חדר בדירת שותפים. אין צורך ליצור פרופיל שותף או להעלות תמונה אישית.")}</p>
+  return <section className="rr" dir={roomDirection()}><Link to="/Discover?view=rooms">{rt("← חזרה לחדרים")}</Link><h1>{rt(editId?"hub.edit_room":"הוספת חדר")}</h1>
     <form onSubmit={submit}><fieldset disabled={busy||uploading||!ready}><div className="rr-grid">
       <label>{rt("כותרת המודעה")}<input required name="title" type="text" maxLength={100} value={room.title} onChange={e=>set('title',e.target.value)} placeholder={titlePlaceholder}/></label>
       <label>{rt("עיר")}<select required value={room.city} onChange={e=>set('city',e.target.value)}><option value="">{rt("בחירת עיר")}</option>{['תל אביב','ירושלים','חיפה','באר שבע'].map(c=><option key={c} value={c}>{rt(c)}</option>)}</select></label>
