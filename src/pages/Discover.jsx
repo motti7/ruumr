@@ -542,8 +542,8 @@ function DiscoverPeoplePage() {
         <div
           className="absolute left-0 right-0"
           style={{
-            top: 'calc(100px + env(safe-area-inset-top, 0px))',
-            bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+            top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
           }}
         >
           <LockedProfilePreview onComplete={() => navigate(createPageUrl('Onboarding'))} />
@@ -629,8 +629,8 @@ function DiscoverPeoplePage() {
       <div
         className="desktop-discover-card absolute left-0 right-0"
         style={{
-          top: 'calc(100px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+          top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
         }}
       >
         <AnimatePresence mode="popLayout">

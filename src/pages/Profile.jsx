@@ -568,7 +568,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0 lg:items-start">
 
         <ShareReviewLinkButton userId={profile.user_id} />
 

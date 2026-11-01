@@ -293,7 +293,7 @@ export default function Layout({ children, currentPageName }) {
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
-  const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
+  const appShellWidthClass = "w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto";
 
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -362,10 +362,73 @@ export default function Layout({ children, currentPageName }) {
             tablet so iPad screens do not render as a narrow phone column. */}
         <div>
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:border-b lg:border-gray-100 lg:dark:border-gray-800" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+                {/* Desktop chrome: one full-width top bar with the brand, the main
+                    sections and the account controls. Replaces the bottom tab bar
+                    on wide screens so the app reads as a real desktop site. */}
+                <div dir="rtl" className="hidden lg:flex mx-auto h-16 w-full max-w-6xl items-center justify-between gap-6 px-6">
+                    <Link to="/" className="header-glow select-none flex items-center">
+                        <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-6 w-auto dark:invert" />
+                    </Link>
+
+                    <nav className="flex items-center gap-1">
+                        {navigationItems.map((item) => {
+                            const Icon = item.icon;
+                            const pathOnly = item.path.split('?')[0];
+                            const active = location.pathname === pathOnly ||
+                                (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
+                            const locked = tabsLocked && item.id === 'matches';
+                            return (
+                                <Link
+                                    key={item.id}
+                                    to={locked ? "/login" : item.path}
+                                    aria-label={item.name}
+                                    className={`relative flex items-center gap-2 min-h-[44px] rounded-full px-4 text-sm font-bold transition-colors ${
+                                        active
+                                            ? 'bg-orange-50 text-[--theme-orange]'
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                    <span>{item.name}</span>
+                                    {item.badgeCount > 0 && (
+                                        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center">
+                                            {item.badgeCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    <div className="flex items-center gap-1">
+                        {isPartnersTab && hasProfile && (
+                            <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation">
+                                <SlidersHorizontal className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
+                            </button>
+                        )}
+                        {isRoomsContext && hasProfile && (
+                            <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="header-glow w-11 h-11 flex items-center justify-center">
+                                <Bookmark className="w-5 h-5 text-gray-400"/>
+                            </Link>
+                        )}
+                        <LanguageToggle />
+                        <Link to={createPageUrl("Settings")} aria-label={t("settings")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
+                            <Settings className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
+                        </Link>
+                        <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
+                            {isAuthenticated && accountPhoto ? (
+                                <img src={accountPhoto} alt="" className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700" />
+                            ) : (
+                                <User className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
+                            )}
+                        </Link>
+                    </div>
+                </div>
+
                 {/* Pinned dir so the header controls keep fixed positions and don't
                     swap sides when the user switches language (logo stays centered). */}
-                <div dir="rtl" className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
+                <div dir="rtl" className={`${appShellWidthClass} lg:hidden flex items-center justify-between h-12 relative`}>
 
         {/* קבוצה ימין — קבועה בכל הטאבים (הגדרות + החלפת שפה) כדי שהכפתורים
             לא יזוזו ושיישאר מרווח מספק מהלוגו במרכז. */}
@@ -410,13 +473,13 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>
 
             {shouldShowNav && (
-                <nav className="desktop-app-nav fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
+                <nav className="desktop-app-nav lg:hidden fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
                         if(item.spacer)return <div key="spacer" className="flex-1" aria-hidden="true"/>;

@@ -92,7 +92,7 @@ export default function DiscoverFilters({ filters, onChange }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[300] flex items-end justify-center"
+            className="discover-filters-overlay fixed inset-0 bg-black/50 z-[300] flex items-end justify-center"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -100,7 +100,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-gray-50 rounded-t-3xl w-full max-w-md p-6 max-h-[85vh] overflow-y-auto"
+              className="discover-filters-sheet bg-gray-50 rounded-t-3xl w-full max-w-md p-6 max-h-[85vh] overflow-y-auto"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}

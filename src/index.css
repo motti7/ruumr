@@ -161,6 +161,21 @@ button:focus-visible {
 
 
 
+/* App chrome metric tokens — shared by Layout, the Discover tabs bar and the
+   fixed Discover/rooms panels so every offset stays in sync. Desktop uses a
+   taller top bar and no bottom tab bar. */
+:root {
+  --app-header-h: 48px;
+  --app-nav-h: 64px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-header-h: 64px;
+    --app-nav-h: 0px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
