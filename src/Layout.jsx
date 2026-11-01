@@ -1,4 +1,3 @@
-import {roomHub} from '@/api/roomHub';
 import '@/styles/desktop.css';
 import {roomText as rt} from '@/lib/room-i18n';
 import { safetyRequest, blockedUserIds } from '@/api/userSafety';
@@ -92,8 +91,6 @@ export default function Layout({ children, currentPageName }) {
       active = false;
     };
   }, [isAuthenticated, authUser?.id, currentPageName]);
-  const [offerUnread,setOfferUnread]=useState(0);
-  useEffect(()=>{if(!isAuthenticated)return;let active=true;const load=()=>document.hidden?Promise.resolve():roomHub('inbox').then(x=>{if(active)setOfferUnread(x.records.filter(o=>o.owner_id===currentUser?.id?!o.owner_read:!o.recipient_read).length);}).catch(()=>{});load();const timer=setInterval(load,60000);return()=>{active=false;clearInterval(timer);};},[isAuthenticated,currentUser?.id]);
   const isBrowserRuntime = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -289,13 +286,13 @@ export default function Layout({ children, currentPageName }) {
   const isPartnersTab = currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') === 'people';
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
-    { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount + offerUnread, messageBadge: unreadMessagesCount },
+    { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount, messageBadge: unreadMessagesCount },
     isRoomsContext ? { id: "add-room", name: rt("הוספת חדר"), path: isAuthenticated ? "/AddRoom" : "/register?next=AddRoom", icon: Plus } : { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles },
     isRoomsContext ? { id: "plus", name: "Plus", path: createPageUrl("RuumrPlus"), icon: Sparkles } : null,
     { id: "story", name: t("nav_our_story"), path: createPageUrl("OurStory"), icon: HeartHandshake }
   ].filter(Boolean);
 
-  const shouldShowNav = !['Onboarding', 'Chat', 'RoomChat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
+  const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
   const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
 
   // Check for bad photos (blob URLs) and prompt user
@@ -394,7 +391,7 @@ export default function Layout({ children, currentPageName }) {
 
             {isRoomsContext
                 ? (hasProfile && <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="w-11 h-11 flex items-center justify-center"><Bookmark className="w-6 h-6 text-gray-400"/></Link>)
-                : (isPartnersTab && hasProfile && new URLSearchParams(location.search).get('mode') !== 'publisher' && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
+                : (isPartnersTab && hasProfile && <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation"><SlidersHorizontal className="w-6 h-6 text-gray-400 dark:text-gray-500"/></button>)}
             <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow relative z-10 select-none flex items-center justify-center touch-manipulation w-11 h-11">
                 {isAuthenticated && accountPhoto ? (
                     <img

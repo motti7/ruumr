@@ -1,25 +1,25 @@
-import React,{useEffect,useState} from 'react';
-import {Link,useSearchParams} from 'react-router-dom';
+import React,{useEffect,useState,useRef} from 'react';
+import {Link,useSearchParams,useNavigate} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import {roomHub} from '@/api/roomHub';
 import {roomRequest} from '@/components/rooms/RoomListings';
 import {roomText as rt,roomDirection,useRoomLocale} from '@/lib/room-i18n';
 import '@/components/rooms/rooms.css';
 export default function RoomAccount(){
- useRoomLocale();const [params]=useSearchParams();
+ useRoomLocale();const [params]=useSearchParams();const navigate=useNavigate(),lock=useRef(false);
  const [data,setData]=useState(null),[publisher,setPublisher]=useState({display_name:'',photo:'',publisher_type:'owner'}),[busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState(false);
  const load=()=>{setError('');return roomHub('account').then(x=>{setData(x);if(x.publisher)setPublisher(x.publisher);});};
  useEffect(()=>{load().catch(()=>setError('hub.failed'));},[]);
- async function action(fn){setBusy(true);setError('');try{await fn();}catch(e){setError(e.response?.data?.error||e.message||'hub.failed');}finally{setBusy(false);}}
- async function photo(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){setError('hub.photo_error');return;}await action(async()=>{const result=await base44.integrations.Core.UploadFile({file});setPublisher(p=>({...p,photo:result.file_url}));});}
- return <section className="rr" dir={roomDirection()}><h1>{rt('hub.publisher_account')}</h1><p>{rt('hub.publisher_intro')}</p>{data?.has_profile&&<Link to="/Profile">{rt('hub.partner_account')}</Link>}
- <form onSubmit={e=>{e.preventDefault();action(async()=>{await roomHub('publisher',publisher);setSaved(true);await load();});}}><fieldset disabled={busy||!data}>
+ async function action(fn){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await fn();}catch(e){setError(String(e.response?.data?.error||e.message||'').startsWith('hub.')?(e.response?.data?.error||e.message):'hub.failed');}finally{lock.current=false;setBusy(false);}}
+ async function photo(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){setError('hub.photo_error');return;}await action(async()=>{const result=await base44.integrations.Core.UploadFile({file});if(!result.file_url)throw new Error('hub.photo_error');setSaved(false);setPublisher(p=>({...p,photo:result.file_url}));});}
+ return <section className="rr" dir={roomDirection()}><h1>{rt('hub.publisher_account')}</h1><p>{rt('hub.publisher_intro')}</p><p>{rt('hub.publisher_intro_note')}</p>{!data&&!error&&<p role="status">{rt('hub.loading_account')}</p>}{data?.has_profile&&<p>{rt('hub.partner_unchanged')}</p>}
+ <form onSubmit={e=>{e.preventDefault();action(async()=>{await roomHub('publisher',publisher);setSaved(true);if(params.get('next')==='AddRoom'){navigate('/AddRoom',{replace:true});return;}await load();});}}><fieldset disabled={busy||!data}>
  <label>{rt('hub.display_name')}<input required maxLength={80} value={publisher.display_name} onChange={e=>{setSaved(false);setPublisher(p=>({...p,display_name:e.target.value}));}}/></label>
  <label>{rt('hub.publisher_type')}<select value={publisher.publisher_type} onChange={e=>{setSaved(false);setPublisher(p=>({...p,publisher_type:e.target.value}));}}><option value="owner">{rt('hub.owner')}</option><option value="departing">{rt('hub.departing')}</option></select></label>
  <label>{rt('hub.optional_photo')}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={photo}/></label>{publisher.photo&&<><img className="rh-avatar" src={publisher.photo} alt={rt('hub.publisher_photo')}/><button type="button" onClick={()=>setPublisher(p=>({...p,photo:''}))}>{rt('hub.remove_photo')}</button></>}
- <button className="rr-primary" type="submit">{rt('hub.save_publisher')}</button></fieldset></form>
+ <button className="rr-primary rr-submit" type="submit">{rt(busy?'hub.saving':params.get('next')==='AddRoom'?'hub.save_continue':'hub.save_publisher')}</button></fieldset></form>
  {saved&&<p role="status">{rt('hub.publisher_saved')}</p>}{error&&<><p role="alert">{rt(error)}</p>{!data&&<button onClick={()=>load().catch(()=>setError("hub.failed"))}>{rt("hub.retry")}</button>}</>}
- {data?.publisher&&<><Link className="rr-add" to="/AddRoom">{rt(params.get('next')==='AddRoom'?'hub.continue_room':'hub.add_another')}</Link><Link className="rr-add" to="/Discover?view=people&mode=publisher">{rt('hub.find_tenants')}</Link></>}
- <h2>{rt('hub.my_rooms')}</h2>{data?.rooms.map(r=><article className="rr-card" key={r.id}><h3>{r.title}</h3><p>{rt(r.status==='published'?'hub.active':'hub.closed')}</p>{r.status==='published'&&<><Link className="rr-add" to={'/AddRoom?edit='+encodeURIComponent(r.id)}>{rt('hub.edit_room')}</Link><button disabled={busy} onClick={()=>action(async()=>{await roomRequest({action:'close',id:r.id});await load();})}>{rt('hub.close_room')}</button></>}</article>)}
- <p>{rt('hub.account_remains')}</p><Link to="/Settings">{rt('hub.settings')}</Link></section>;
+ {data?.publisher&&<><Link className="rr-add" to="/AddRoom">{rt(params.get('next')==='AddRoom'?'hub.continue_room':'hub.add_another')}</Link></>}
+ {data?.rooms?.length>0&&<><h2>{rt('hub.my_rooms')}</h2>{data.rooms.map(r=><article className="rr-card" key={r.id}><h3>{r.title}</h3><p>{rt(r.status==='published'?'hub.active':'hub.closed')}</p>{r.status==='published'&&<><Link className="rr-add" to={'/AddRoom?edit='+encodeURIComponent(r.id)}>{rt('hub.edit_room')}</Link><button disabled={busy} onClick={()=>action(async()=>{await roomRequest({action:'close',id:r.id});await load();})}>{rt('hub.close_room')}</button></>}</article>)}</>}
+ </section>;
 }

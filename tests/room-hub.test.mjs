@@ -30,38 +30,27 @@ test('saved rooms are private and retain unavailable listing identity',async()=>
  x.as('owner');assert.equal((await x.call('saved')).status,403);
  x.as('partner');await x.call('save',{room_id:'room',saved:false});assert.equal(x.db.SavedRoom.length,0);
 });
-test('room offers do not require a roommate profile for the publisher or create a mutual match',async()=>{
- const x=setup();const r=await x.call('offer',{room_id:'room',profile_id:'profile'});assert.equal(r.status,200);assert.equal(x.db.RoomOffer.length,1);assert.equal(x.notifications.length,1);assert.equal(x.db.Profile.length,1);
- const again=await x.call('offer',{room_id:'room',profile_id:'profile'});assert.equal(again.id,r.id);assert.equal(x.notifications.length,1);
-});
-test('offers reject somebody else’s room, a closed room, hidden profile and opted-out recipient',async()=>{
- for(const mutate of [x=>x.db.RoomListing[0].owner_id='other',x=>x.db.RoomListing[0].status='closed',x=>x.db.Profile[0].is_visible=false,x=>x.db.RoomPreference.push({user_id:'partner',accept_offers:false})]){
-  const x=setup();mutate(x);assert.equal((await x.call('offer',{room_id:'room',profile_id:'profile'})).status,403);assert.equal(x.notifications.length,0);assert.equal(x.db.RoomOffer.length,0);
+test('removed offer actions cannot read profiles or send messages, even with old conversation ids',async()=>{
+ const x=setup();
+ x.db.RoomOffer.push({id:'old',owner_id:'owner',recipient_id:'partner',room_id:'room'});
+ for(const user of ['owner','partner','stranger']){
+  x.as(user);
+  for(const action of ['candidates','offer','inbox','conversation','send','read','report','block','preference']){
+   const result=await x.call(action,{room_id:'room',profile_id:'profile',offer_id:'old',content:'hello',accept_offers:true,confirm:true});
+   assert.equal(result.status,400,action);assert.equal(result.records,undefined);
+  }
  }
+ assert.equal(x.notifications.length,0);assert.equal(x.db.RoomOfferMessage.length,0);assert.equal(x.db.RoomOffer.length,1);
 });
-test('room conversation reads, writes and reports reject a third party',async()=>{
- const x=setup();const {id}=await x.call('offer',{room_id:'room',profile_id:'profile'});x.as('stranger');
- for(const action of ['conversation','send','read','report','block'])assert.equal((await x.call(action,{offer_id:id,content:'hello',reason:'spam',details:'',confirm:true})).status,404);
- assert.equal((await x.call('inbox')).records.length,0);assert.equal(x.db.RoomOfferMessage.length,0);
+test('roommate adds publisher details in the same login without changing the roommate profile',async()=>{
+ const x=setup();x.as('partner');const before=structuredClone(x.db.Profile);
+ assert.equal((await x.call('publisher',{display_name:'Partner',publisher_type:'departing',photo:''})).status,200);
+ const account=await x.call('account');assert.equal(account.has_profile,true);assert.equal(account.publisher.display_name,'Partner');
+ assert.deepEqual(x.db.Profile,before);assert.equal('accept_offers' in account,false);
 });
-test('a global block prevents both chat types and hides room offers in both directions',async()=>{
- const x=setup();const {id}=await x.call('offer',{room_id:'room',profile_id:'profile'});
- x.as('partner');await x.call('block',{offer_id:id,confirm:true});assert.equal(x.db.UserBlock[0].cleanup_pending,true);
- for(const u of ['owner','partner']){x.as(u);for(const action of ['conversation','send'])assert.equal((await x.call(action,{offer_id:id,content:'blocked'})).status,403);assert.equal((await x.call('inbox')).records.length,0);}
-});
-test('ordinary messages update recipient unread state and do not alter the room snapshot',async()=>{
- const x=setup();const {id}=await x.call('offer',{room_id:'room',profile_id:'profile'});x.db.RoomListing[0].title='Edited';
- await x.call('send',{offer_id:id,content:'Hello'});x.as('partner');const chat=await x.call('conversation',{offer_id:id});assert.equal(chat.offer.room_snapshot.title,'Room');assert.equal(chat.messages[0].content,'Hello');
- await x.call('read',{offer_id:id});assert.equal(x.db.RoomOffer[0].recipient_read,true);await x.call('send',{offer_id:id,content:'Reply'});assert.equal(x.db.RoomOffer[0].owner_read,false);
-});
-test('report identifies the authenticated counterpart, not a user id supplied by the browser',async()=>{
- const x=setup();const {id}=await x.call('offer',{room_id:'room',profile_id:'profile'});x.as('partner');await x.call('report',{offer_id:id,reported_user_id:'innocent',reason:'spam',details:'Example'});assert.equal(x.db.UserReport[0].reported_user_id,'owner');
-});
-test('only a roommate profile can change its own offer preference',async()=>{
- const x=setup();assert.equal((await x.call('preference',{accept_offers:false})).status,403);x.as('partner');await x.call('preference',{user_id:'owner',accept_offers:false});assert.equal(x.db.RoomPreference[0].user_id,'partner');x.as('owner');assert.equal((await x.call('candidates')).records.length,0);
-});
-test('block during message creation is compensated before returning success',async()=>{
- const x=setup();const {id}=await x.call('offer',{room_id:'room',profile_id:'profile'});const create=x.entities.RoomOfferMessage.create;
- x.entities.RoomOfferMessage.create=async data=>{const r=await create(data);x.db.UserBlock.push({pair_key:JSON.stringify(['owner','partner'])});return r;};
- assert.equal((await x.call('send',{offer_id:id,content:'race'})).status,403);assert.equal(x.db.RoomOfferMessage.length,0);
+test('first time publisher needs no roommate profile and account remains after room closes',async()=>{
+ const x=setup();x.as('new-owner');
+ await x.call('publisher',{display_name:'New owner',publisher_type:'owner',photo:''});
+ const account=await x.call('account');assert.equal(account.has_profile,false);assert.deepEqual(account.rooms,[]);assert.equal(account.publisher.display_name,'New owner');
+ x.as('owner');x.db.RoomListing[0].status='closed';assert.equal((await x.call('account')).publisher.display_name,'Owner');
 });
