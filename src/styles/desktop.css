@@ -6,6 +6,37 @@
 [dir=rtl] .rf-gallery-controls svg{transform:scaleX(-1)}
 @media(hover:none) and (pointer:coarse){.rf-gallery-controls{display:none}}
 
+/* Saved rooms: stacked on a phone, two up as soon as there is room. */
+.rr-saved-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:10px}
+@media(min-width:641px){.rr-saved-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rr-saved-grid>.rr-card h2{font-size:18px;margin:10px 0 4px}
+
+/* ── Tablet (768–1023px) ──────────────────────────────────────────────── */
+/* The mobile chrome (header + bottom nav) stays exactly as on a phone, but
+   content is no longer one stretched phone column: card-based lists go two
+   up and the profile deck keeps a card-sized stage. */
+@media(min-width:768px) and (max-width:1023px){
+ /* Rooms feed — two rooms per row instead of one wide card per row. */
+ .rr.rf-feed{max-width:940px;padding:22px 22px 110px}
+ .rf-feed .rf-intro{display:flex;align-items:center;justify-content:space-between;gap:16px}
+ .rf-feed .rf-intro h1{font-size:26px;margin:10px 0}
+ .rf-feed .rf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:20px}
+ .rf-feed .rf-list>.rf-card:only-child{grid-column:1/-1;max-width:540px;margin-inline:auto}
+ .rf-feed .rf-slide img{height:250px}
+ .rf-feed .rf-content{padding:18px}
+ .rf-feed .rf-heading h2{font-size:20px}
+ .rf-feed .rf-price{font-size:20px}
+ .rf-feed .rcity-bar{flex-wrap:wrap;overflow:visible;touch-action:auto}
+
+ /* Profile deck — a centered card, not a full-bleed panel. */
+ .desktop-discover-card{max-width:440px;margin-inline:auto;top:calc(var(--app-header-h) + 58px)!important}
+ .desktop-profile-detail{max-width:680px;margin-inline:auto}
+
+ /* Filters open as a centered dialog rather than a full-width sheet. */
+ .discover-filters-overlay{align-items:center!important}
+ .discover-filters-sheet{border-radius:24px;max-width:520px;max-height:82vh}
+}
+
 /* ── Desktop (≥1024px): the app uses the full window width ─────────────── */
 @media(min-width:1024px){
  /* Rooms feed fills the width with a card grid instead of one phone column. */

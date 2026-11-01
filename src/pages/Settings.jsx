@@ -88,7 +88,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold text-gray-800">{t("settings")}</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {isAdmin && <div className="bg-white p-4 rounded-xl border border-orange-200">
             <SettingsItem icon={<Shield className="w-5 h-5 text-orange-500"/>} title="מעבדת מודעות — ניסוי סקרייפינג" action={<ChevronLeft className="text-gray-400"/>} isLink to={createPageUrl("ScrapingPilot")} />
           </div>}
