@@ -381,6 +381,22 @@ export default function Layout({ children, currentPageName }) {
                                 const active = location.pathname === pathOnly ||
                                     (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
                                 const locked = tabsLocked && item.id === 'matches';
+                                // "Add room" is the app's main call to action, so in
+                                // the desktop bar it reads as an orange button rather
+                                // than one more plain text link.
+                                if (item.id === 'add-room') {
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            to={item.path}
+                                            aria-label={item.name}
+                                            className="mx-3 inline-flex h-9 items-center gap-1.5 rounded-full bg-[--theme-orange] px-4 text-[14px] font-bold text-white shadow-sm transition hover:brightness-95"
+                                        >
+                                            <Plus className="h-4 w-4" strokeWidth={2.75} />
+                                            <span>{item.name}</span>
+                                        </Link>
+                                    );
+                                }
                                 return (
                                     <Link
                                         key={item.id}
