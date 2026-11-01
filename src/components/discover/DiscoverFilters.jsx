@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin, Home, Search } from "lucide-react";
@@ -85,7 +86,9 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   return (
     <>
-      {/* Bottom Sheet */}
+      {/* Bottom sheet, portaled to <body>: it must be sized by the screen and
+          never by the page container it is rendered inside. */}
+      {createPortal(
       <AnimatePresence>
         {open && (
           <motion.div
@@ -100,7 +103,7 @@ export default function DiscoverFilters({ filters, onChange }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="discover-filters-sheet bg-gray-50 rounded-t-3xl w-full max-w-md p-6 max-h-[85vh] overflow-y-auto"
+              className="discover-filters-sheet bg-gray-50 rounded-t-3xl w-screen max-w-md mx-auto p-5 sm:p-6 max-h-[85vh] overflow-y-auto overflow-x-hidden"
               style={{ paddingBottom: 'calc(1.5rem + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)' }}
               dir={i18n.dir()}
               onClick={e => e.stopPropagation()}
@@ -298,7 +301,9 @@ export default function DiscoverFilters({ filters, onChange }) {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </>
   );
 }
