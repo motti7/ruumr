@@ -381,24 +381,6 @@ export default function Layout({ children, currentPageName }) {
                                 const active = location.pathname === pathOnly ||
                                     (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
                                 const locked = tabsLocked && item.id === 'matches';
-
-                                // "Add room" is the header's single call to action, so
-                                // it renders as a filled pill instead of a plain text
-                                // link — the rest of the bar stays quiet around it.
-                                if (item.id === 'add-room') {
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            to={item.path}
-                                            aria-label={item.name}
-                                            className="mx-2 flex h-9 items-center gap-1.5 rounded-full bg-[--theme-orange] px-4 text-[15px] font-bold text-white shadow-md shadow-orange-500/25 transition-all hover:bg-[--theme-orange-dark] hover:shadow-lg active:scale-[0.97]"
-                                        >
-                                            <Plus className="h-[18px] w-[18px]" strokeWidth={2.5} />
-                                            <span>{item.name}</span>
-                                        </Link>
-                                    );
-                                }
-
                                 return (
                                     <Link
                                         key={item.id}
