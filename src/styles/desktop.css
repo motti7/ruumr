@@ -21,8 +21,15 @@
 
  /* Profile deck stage: a wide soft backdrop with the card centered and the
     pass / like controls sitting beside it, so the deck is not a phone column. */
+ /* The mobile/rooms switch sits inside the page instead of a full-width strip
+    glued to the header: a compact white pill floating on the soft backdrop. */
+ .discover-mode-bar{background:transparent!important;height:auto!important;padding:20px 16px 0!important;pointer-events:none}
+ .discover-mode-bar [role=tablist]{max-width:320px;background:#fff!important;box-shadow:0 8px 24px #00000012,0 1px 2px #0000000f!important;padding:5px!important;pointer-events:auto}
+ .discover-mode-bar [role=tab]{padding:9px 0}
+ .discover-rooms-panel{top:calc(var(--app-header-h) + 76px)!important}
+
  .desktop-discover-stage{background:radial-gradient(ellipse at 50% -10%,#fff7f0,#f2f0ed 55%,#e9e7e3)!important}
- .desktop-discover-card{max-width:480px;margin-inline:auto;top:calc(var(--app-header-h) + 68px)!important;bottom:28px!important}
+ .desktop-discover-card{max-width:480px;margin-inline:auto;top:calc(var(--app-header-h) + 80px)!important;bottom:28px!important}
  .desktop-discover-actions{inset-inline:0;margin-inline:auto;max-width:720px;top:50%!important;bottom:auto!important;height:0;align-items:center;pointer-events:none}
  .desktop-discover-actions .desktop-swipe-actions{width:100%;gap:0;justify-content:space-between;pointer-events:none}
  .desktop-discover-actions .desktop-swipe-actions button{pointer-events:auto;width:66px;height:66px;box-shadow:0 10px 26px #00000024}

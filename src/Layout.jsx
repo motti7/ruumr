@@ -9,6 +9,7 @@ import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock, SlidersHorizontal } from "lucide-react";
 
 import LanguageToggle from "./components/shared/LanguageToggle";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
 
 import { User as UserEntity } from "@/entities/User";
@@ -363,66 +364,101 @@ export default function Layout({ children, currentPageName }) {
         <div>
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:border-b lg:border-gray-100 lg:dark:border-gray-800" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                {/* Desktop chrome: one full-width top bar with the brand, the main
-                    sections and the account controls. Replaces the bottom tab bar
-                    on wide screens so the app reads as a real desktop site. */}
-                <div dir="rtl" className="hidden lg:flex mx-auto h-16 w-full max-w-6xl items-center justify-between gap-6 px-6">
-                    <Link to="/" className="header-glow select-none flex items-center">
-                        <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-6 w-auto dark:invert" />
-                    </Link>
+                {/* Desktop chrome: a single, calm top bar — brand on the reading
+                    start, plain text section links with an underline on the active
+                    one, and one tidy cluster of controls at the far end. Settings
+                    moved into the account menu so the bar is not a row of loose
+                    round icons. */}
+                <div dir="rtl" className="hidden lg:block">
+                    <div className="mx-auto flex h-[72px] w-full max-w-[1160px] items-center gap-10 px-8">
+                        <Link to="/" className="flex shrink-0 select-none items-center">
+                            <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-7 w-auto dark:invert" />
+                        </Link>
 
-                    <nav className="flex items-center gap-1">
-                        {navigationItems.map((item) => {
-                            const Icon = item.icon;
-                            const pathOnly = item.path.split('?')[0];
-                            const active = location.pathname === pathOnly ||
-                                (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
-                            const locked = tabsLocked && item.id === 'matches';
-                            return (
-                                <Link
-                                    key={item.id}
-                                    to={locked ? "/login" : item.path}
-                                    aria-label={item.name}
-                                    className={`relative flex items-center gap-2 min-h-[44px] rounded-full px-4 text-sm font-bold transition-colors ${
-                                        active
-                                            ? 'bg-orange-50 text-[--theme-orange]'
-                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
-                                    }`}
+                        <nav className="flex h-full items-center">
+                            {navigationItems.map((item) => {
+                                const pathOnly = item.path.split('?')[0];
+                                const active = location.pathname === pathOnly ||
+                                    (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
+                                const locked = tabsLocked && item.id === 'matches';
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        to={locked ? "/login" : item.path}
+                                        aria-label={item.name}
+                                        className={`relative flex h-full items-center gap-2 px-3.5 text-[15px] font-semibold transition-colors ${
+                                            active
+                                                ? 'text-[--theme-orange]'
+                                                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        <span>{item.name}</span>
+                                        {item.badgeCount > 0 && (
+                                            <span className="min-w-[18px] rounded-full bg-[--theme-orange] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                                                {item.badgeCount}
+                                            </span>
+                                        )}
+                                        <span
+                                            aria-hidden="true"
+                                            className={`absolute inset-x-3.5 bottom-0 h-[2px] rounded-full transition-opacity ${
+                                                active ? 'bg-[--theme-orange] opacity-100' : 'opacity-0'
+                                            }`}
+                                        />
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        <div className="ms-auto flex items-center gap-2">
+                            {isPartnersTab && hasProfile && (
+                                <button
+                                    type="button"
+                                    onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
+                                    className="flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13px] font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
                                 >
-                                    <Icon className="w-5 h-5" />
-                                    <span>{item.name}</span>
-                                    {item.badgeCount > 0 && (
-                                        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[--theme-orange] text-white text-[10px] font-bold flex items-center justify-center">
-                                            {item.badgeCount}
-                                        </span>
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-
-                    <div className="flex items-center gap-1">
-                        {isPartnersTab && hasProfile && (
-                            <button type="button" aria-label={rt('hub.filters')} onClick={()=>window.dispatchEvent(new Event('openDiscoverFilters'))} className="header-glow w-11 h-11 flex items-center justify-center touch-manipulation">
-                                <SlidersHorizontal className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
-                            </button>
-                        )}
-                        {isRoomsContext && hasProfile && (
-                            <Link to="/SavedRooms" aria-label={rt('hub.saved_rooms')} className="header-glow w-11 h-11 flex items-center justify-center">
-                                <Bookmark className="w-5 h-5 text-gray-400"/>
-                            </Link>
-                        )}
-                        <LanguageToggle />
-                        <Link to={createPageUrl("Settings")} aria-label={t("settings")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
-                            <Settings className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
-                        </Link>
-                        <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"} aria-label={rt("hub.account")} className="header-glow select-none flex items-center justify-center touch-manipulation w-11 h-11">
-                            {isAuthenticated && accountPhoto ? (
-                                <img src={accountPhoto} alt="" className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700" />
-                            ) : (
-                                <User className="w-5 h-5 text-gray-400 dark:text-gray-500"/>
+                                    <SlidersHorizontal className="h-4 w-4" />
+                                    <span>{rt('hub.filters')}</span>
+                                </button>
                             )}
-                        </Link>
+                            {isRoomsContext && hasProfile && (
+                                <Link
+                                    to="/SavedRooms"
+                                    className="flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13px] font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                >
+                                    <Bookmark className="h-4 w-4" />
+                                    <span>{rt('hub.saved_rooms')}</span>
+                                </Link>
+                            )}
+                            <span aria-hidden="true" className="mx-1 h-6 w-px bg-gray-200 dark:bg-gray-700" />
+                            <LanguageToggle />
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button type="button" aria-label={rt('hub.account')} className="flex items-center rounded-full">
+                                        {isAuthenticated && accountPhoto ? (
+                                            <img
+                                                src={accountPhoto}
+                                                alt=""
+                                                className="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+                                            />
+                                        ) : (
+                                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                                                <User className="h-5 w-5 text-gray-500" />
+                                            </span>
+                                        )}
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                    <DropdownMenuItem asChild>
+                                        <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"}>
+                                            {rt('hub.account')}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link to={createPageUrl("Settings")}>{t("settings")}</Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </div>
 

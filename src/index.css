@@ -171,7 +171,7 @@ button:focus-visible {
 
 @media (min-width: 1024px) {
   :root {
-    --app-header-h: 64px;
+    --app-header-h: 72px;
     --app-nav-h: 0px;
   }
 }
