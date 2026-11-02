@@ -76,7 +76,54 @@
 @media(min-width:1280px){
  .rr.rf-feed{max-width:1280px}
  .rf-feed .rf-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .rf-feed .rf-slide img{height:235px}
+ .rf-feed .rf-heading h2{font-size:19px}
+ .rf-feed .rf-price{font-size:19px}
  .desktop-discover-card{max-width:520px}
  .desktop-discover-actions{max-width:800px}
  .desktop-discover-actions .desktop-swipe-actions button{width:72px;height:72px}
+}
+
+/* ── Desktop site shell: page header, hero band, filter toolbar ─────────── */
+/* On desktop the rooms page stops being a feed strip and becomes a page:
+   a partner/rooms switch in the flow, a wide hero band, then a toolbar with
+   the city filters and the result count above a full card grid. */
+.rk-desk-switch{display:none}
+.rk-hero{display:none}
+.rk-toolbar-count{display:none}
+@media(min-width:1024px){
+ .rk-desk-switch{display:flex;justify-content:flex-start;max-width:1280px;margin:26px auto 0;padding:0 28px}
+ .rk-desk-switch [role=tablist]{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:#f1f0ec;box-shadow:inset 0 1px 2px #0000000a;animation:none}
+ .rk-desk-switch [role=tab]{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 22px;border-radius:999px;font-size:14px;font-weight:700;color:#71757a;text-decoration:none;transition:color .2s ease,background .2s ease,box-shadow .2s ease}
+ .rk-desk-switch [role=tab][aria-selected=true]{background:#fff;color:#e9532e;box-shadow:0 2px 8px #00000014,0 1px 2px #0000000f}
+ .rk-desk-switch [role=tab]:hover{color:#e9532e}
+
+ .rr.rf-feed{background:transparent}
+ .rf-feed::before,.rf-feed::after{display:none}
+
+ .rk-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:48px;overflow:hidden;margin:22px 0 26px;padding:44px 44px;border:1px solid #f0e6dc;border-radius:28px;background:linear-gradient(135deg,#fff6ef 0%,#fffaf6 45%,#f6f4ef 100%);box-shadow:0 18px 48px rgba(52,36,24,.07);animation:rf-rise .5s ease-out both}
+ .rk-hero::after{content:"";position:absolute;top:-120px;inset-inline-end:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(241,90,50,.18),rgba(241,90,50,0) 70%);pointer-events:none}
+ .rk-hero-copy{position:relative;z-index:1;max-width:660px}
+ .rk-hero-eyebrow{display:inline-flex;align-items:center;gap:7px;margin:0 0 14px;padding:6px 12px;border:1px solid #f2e3d6;border-radius:999px;background:#fff;color:#b44c23;font-size:12.5px;font-weight:800;letter-spacing:.2px}
+ .rk-hero-title{margin:0;font-size:clamp(32px,3.1vw,46px);line-height:1.08;font-weight:800;letter-spacing:-1.2px;color:#1d2a24}
+ .rk-hero-sub{margin:16px 0 0;max-width:58ch;font-size:16.5px;line-height:1.65;color:#6f665c}
+ .rk-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+ .rk-btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;font-size:15px;font-weight:800;text-decoration:none;transition:transform .15s ease,box-shadow .2s ease,background .2s ease}
+ .rk-btn:hover{transform:translateY(-1px)}
+ .rk-btn-primary{background:linear-gradient(135deg,var(--theme-orange),var(--theme-orange-dark));color:#fff;box-shadow:0 10px 24px rgba(241,90,50,.28)}
+ .rk-btn-ghost{border:1px solid #e6ded4;background:#fff;color:#2b3a33;box-shadow:0 4px 14px rgba(52,36,24,.06)}
+ .rk-hero-stats{position:relative;z-index:1;display:flex;align-items:center;gap:26px;padding:22px 26px;border:1px solid #f0e7dd;border-radius:20px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px)}
+ .rk-stat{display:flex;flex-direction:column;gap:2px;min-width:86px}
+ .rk-stat strong{font-size:30px;line-height:1;font-weight:800;color:#e9532e}
+ .rk-stat span{font-size:12px;font-weight:700;color:#8b8177;letter-spacing:.2px}
+ .rk-stat-divider{width:1px;height:40px;background:#ece2d7}
+
+ .rk-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:22px;padding:12px 18px 2px;border:1px solid #ece7e0;border-radius:18px;background:#fff;box-shadow:0 6px 20px rgba(52,36,24,.05)}
+ .rk-toolbar .rcity-bar{flex:1;margin:0;padding:0 0 10px;flex-wrap:wrap;overflow:visible;animation:none;touch-action:auto}
+ .rk-toolbar-count{display:block;margin:0 0 10px;white-space:nowrap;font-size:13px;font-weight:800;color:#8b8177}
+}
+
+@media(min-width:1280px){
+ .rk-hero{padding:52px 56px}
+ .rk-hero-stats{gap:32px;padding:26px 32px}
 }

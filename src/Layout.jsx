@@ -11,6 +11,7 @@ import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandsha
 import LanguageToggle from "./components/shared/LanguageToggle";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
+import SiteFooter from "./components/desktop/SiteFooter";
 
 import { User as UserEntity } from "@/entities/User";
 import { useState, useEffect, useRef } from "react";
@@ -294,7 +295,7 @@ export default function Layout({ children, currentPageName }) {
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
-  const appShellWidthClass = "w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto";
+  const appShellWidthClass = "w-full max-w-md md:max-w-3xl lg:max-w-[1280px] mx-auto";
 
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -324,7 +325,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 lg:bg-white antialiased overscroll-none flex flex-col" dir={i18n.dir()}>
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -361,7 +362,7 @@ export default function Layout({ children, currentPageName }) {
             Capacitor platform, so it fell into the wide-screen branch. The
             chrome is shared across sizes, while the content shell widens on
             tablet so iPad screens do not render as a narrow phone column. */}
-        <div>
+        <div className="flex min-h-[100dvh] flex-col">
             {shouldShowNav && (
                <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:border-b lg:border-gray-100 lg:dark:border-gray-800" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 {/* Desktop chrome: a single, calm top bar — brand on the reading
@@ -370,7 +371,7 @@ export default function Layout({ children, currentPageName }) {
                     moved into the account menu so the bar is not a row of loose
                     round icons. */}
                 <div dir="rtl" className="hidden lg:block">
-                    <div className="mx-auto flex h-[72px] w-full max-w-[1160px] items-center gap-10 px-8">
+                    <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center gap-10 px-8">
                         <Link to="/" className="flex shrink-0 select-none items-center">
                             <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-7 w-auto dark:invert" />
                         </Link>
@@ -525,10 +526,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-white`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>
+
+            {shouldShowNav && !['Discover'].includes(currentPageName) && <SiteFooter />}
 
             {shouldShowNav && (
                 <nav className="desktop-app-nav lg:hidden fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
