@@ -86,6 +86,33 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
   });
 };
 
+// One place for the city / budget / age / lifestyle filters that the user
+// chooses in the filter sheet, shared by the deck and the desktop grid.
+const matchesPartnerFilters = (profile, activeFilters) => {
+  const p = profile;
+  if (activeFilters.cities.length > 0) {
+    const profileCities = [];
+    if (Array.isArray(p.search_cities) && p.search_cities.length > 0) profileCities.push(...p.search_cities);
+    if (p.location && typeof p.location === 'string' && p.location.trim()) profileCities.push(p.location.trim());
+    if (!activeFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)))) return false;
+  }
+  // Neutral defaults (no budget cap, full age range) must not filter anything.
+  if (activeFilters.maxBudget < 10000 && p.budget_max && p.budget_max > activeFilters.maxBudget) return false;
+  if ((activeFilters.minAge > 18 || activeFilters.maxAge < 60) && p.age && (p.age < activeFilters.minAge || p.age > activeFilters.maxAge)) return false;
+  if (activeFilters.kosher && activeFilters.kosher !== 'all') {
+    if (activeFilters.kosher === 'for_or_flow' && p.kosher_preference === 'against') return false;
+    if (activeFilters.kosher === 'against' && p.kosher_preference !== 'against') return false;
+  }
+  if (activeFilters.shabbat && activeFilters.shabbat !== 'all') {
+    if (activeFilters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
+    if (activeFilters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
+  }
+  if (activeFilters.apartmentStatus && activeFilters.apartmentStatus !== 'all') {
+    if ((p.current_status || 'seeking_apartment') !== activeFilters.apartmentStatus) return false;
+  }
+  return true;
+};
+
 function DiscoverPeoplePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -107,6 +134,9 @@ function DiscoverPeoplePage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState(() => getDiscoverFilters() ?? getDefaultDiscoverFilters());
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
+  // Desktop directory: every visible profile in the user's region (not just the
+  // deck queue), so the partners page is not emptied by past swipes.
+  const [partnersPool, setPartnersPool] = useState([]);
   const [seenUserIds, setSeenUserIds] = useState(() => {
     try {
       const saved = localStorage.getItem('ruumr_seen_user_ids');
@@ -191,6 +221,15 @@ function DiscoverPeoplePage() {
       allProfiles = sortProfilesByCreatedDateDesc(allProfiles.filter(p => !blocked.has(p.user_id)));
       try { const boosts = await profileBoosts('active'); allProfiles = prioritizeBoostedProfiles(allProfiles, boosts.userIds); } catch { /* Discovery remains available if boosting is unavailable. */ }
 
+      // Directory pool for the desktop partners page: everyone visible in the
+      // same region, regardless of earlier swipes or the deck's matching rules.
+      const directoryRegion = currentUserProfile.region || 'IL';
+      setPartnersPool(allProfiles.filter(p =>
+        String(p.user_id) !== String(user.id) &&
+        (p.region || 'IL') === directoryRegion &&
+        p.is_visible !== false
+      ));
+
       let userSwipes = [];
       try {
         userSwipes = await Swipe.filter({ swiper_id: user.id });
@@ -273,32 +312,7 @@ function DiscoverPeoplePage() {
 
       setAllProfiles(availableProfiles);
       // החלה מחדש של פילטרים פעילים
-      let displayProfiles = availableProfiles;
-      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all') || (filters.apartmentStatus && filters.apartmentStatus !== 'all')) {
-        displayProfiles = availableProfiles.filter(p => {
-          if (filters.cities.length > 0) {
-            const profileCities = [];
-            if (Array.isArray(p.search_cities) && p.search_cities.length > 0) profileCities.push(...p.search_cities);
-            if (p.location && typeof p.location === 'string' && p.location.trim()) profileCities.push(p.location.trim());
-            if (!filters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)))) return false;
-          }
-          if (p.budget_max && p.budget_max > filters.maxBudget) return false;
-          if (p.age && (p.age < filters.minAge || p.age > filters.maxAge)) return false;
-          if (filters.kosher && filters.kosher !== 'all') {
-            if (filters.kosher === 'for_or_flow' && p.kosher_preference === 'against') return false;
-            if (filters.kosher === 'against' && p.kosher_preference !== 'against') return false;
-          }
-          if (filters.shabbat && filters.shabbat !== 'all') {
-            if (filters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
-            if (filters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
-          }
-          if (filters.apartmentStatus && filters.apartmentStatus !== 'all') {
-            if ((p.current_status || 'seeking_apartment') !== filters.apartmentStatus) return false;
-          }
-          return true;
-        });
-      }
-      setProfiles(displayProfiles);
+      setProfiles(availableProfiles.filter(p => matchesPartnerFilters(p, filters)));
       try {
         window.localStorage.setItem('ruumr_discover_marker', `discover-ready:${availableProfiles.length}`);
       } catch {
@@ -474,40 +488,7 @@ function DiscoverPeoplePage() {
     setFilters(newFilters);
     setDiscoverFilters(newFilters);
     setAllProfiles(currentAll => {
-      const filtered = currentAll.filter(p => {
-        if (newFilters.cities.length > 0) {
-          // איחוד search_cities ו-location למערך אחד — לא דורסים אחד את השני
-          const profileCities = [];
-          if (Array.isArray(p.search_cities) && p.search_cities.length > 0) {
-            profileCities.push(...p.search_cities);
-          }
-          if (p.location && typeof p.location === 'string' && p.location.trim()) {
-            profileCities.push(p.location.trim());
-          }
-          const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
-          if (!match) return false;
-        }
-        if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
-        if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
-        if (newFilters.kosher && newFilters.kosher !== 'all') {
-          if (newFilters.kosher === 'for_or_flow') {
-            if (p.kosher_preference && p.kosher_preference === 'against') return false;
-          } else if (newFilters.kosher === 'against') {
-            if (p.kosher_preference && p.kosher_preference !== 'against') return false;
-          }
-        }
-        if (newFilters.shabbat && newFilters.shabbat !== 'all') {
-          if (newFilters.shabbat === 'for_or_flow') {
-            if (p.shabbat_preference && p.shabbat_preference === 'against') return false;
-          } else if (newFilters.shabbat === 'against') {
-            if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
-          }
-        }
-        if (newFilters.apartmentStatus && newFilters.apartmentStatus !== 'all') {
-          if ((p.current_status || 'seeking_apartment') !== newFilters.apartmentStatus) return false;
-        }
-        return true;
-      });
+      const filtered = currentAll.filter(p => matchesPartnerFilters(p, newFilters));
       setCurrentIndex(0);
       setProfiles(filtered);
       return currentAll; // לא משנים את allProfiles עצמו בפילטור
@@ -585,7 +566,7 @@ function DiscoverPeoplePage() {
     <>
       <div className="hidden lg:block">
         <PartnersGrid
-          profiles={profiles}
+          profiles={partnersPool.filter(p => matchesPartnerFilters(p, filters))}
           onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }}
         />
       </div>

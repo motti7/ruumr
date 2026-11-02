@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, MapPin, SlidersHorizontal, UserRound, Wallet } from "lucide-react";
 import { roomText as rt, roomDirection } from "@/lib/room-i18n";
@@ -65,7 +65,17 @@ function PartnerAdCard({ profile }) {
 }
 
 // Desktop-only view of the roommates pool: a grid of ads instead of the deck.
+const PAGE_SIZE = 24;
+
 export default function PartnersGrid({ profiles = [], onRefresh }) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [profiles.length]);
+
+  const shown = profiles.slice(0, visibleCount);
+
   return (
     <section className="mx-auto w-full max-w-[1280px] px-8 pb-16 pt-8" dir={roomDirection()}>
       <header className="mb-7 flex flex-wrap items-end justify-between gap-6">
@@ -101,11 +111,27 @@ export default function PartnersGrid({ profiles = [], onRefresh }) {
       </header>
 
       {profiles.length > 0 ? (
-        <div className="grid grid-cols-2 gap-6 xl:grid-cols-3">
-          {profiles.slice(0, 30).map((profile, index) => (
-            <PartnerAdCard key={profile.id || profile.user_id || index} profile={profile} />
-          ))}
-        </div>
+        <>
+          <p className="mb-4 text-[13px] font-bold text-gray-500">
+            {rt("partners.count", { count: profiles.length })}
+          </p>
+          <div className="grid grid-cols-2 gap-6 xl:grid-cols-3">
+            {shown.map((profile, index) => (
+              <PartnerAdCard key={profile.id || profile.user_id || index} profile={profile} />
+            ))}
+          </div>
+          {profiles.length > shown.length && (
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                className="inline-flex h-11 items-center rounded-full border border-[#d6dff6] bg-white px-6 text-[14px] font-bold text-[--theme-blue] transition hover:bg-[#f2f5fd]"
+              >
+                {rt("partners.show_more")}
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <p className="rounded-3xl border border-warm-line bg-white px-6 py-10 text-center text-[15px] font-semibold text-gray-500">
           {rt("partners.empty")}
