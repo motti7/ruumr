@@ -203,6 +203,23 @@ button:focus-visible {
   }
 }
 
+/* Desktop is one continuous warm surface. Individual pages used to paint a
+   light gray wash (bg-gray-50 / bg-gray-900) over the whole page, which met the
+   cream header and footer with a hard horizontal seam. On desktop those
+   page-level washes become transparent so the canvas shows through from the
+   header all the way down to the footer; white cards stay white on top of it. */
+@media (min-width: 1024px) {
+  main .bg-gray-50,
+  main .bg-gray-100,
+  main .bg-slate-50 {
+    background-color: transparent;
+  }
+  .dark main .bg-gray-900,
+  .dark main .bg-slate-900 {
+    background-color: transparent;
+  }
+}
+
 @layer utilities {
   .logo-font {
     font-family: "Pacifico", cursive;
