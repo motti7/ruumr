@@ -137,6 +137,9 @@ function DiscoverPeoplePage() {
   // Desktop directory: every visible profile in the user's region (not just the
   // deck queue), so the partners page is not emptied by past swipes.
   const [partnersPool, setPartnersPool] = useState([]);
+  // Profiles the user already liked — the desktop grid keeps showing everyone,
+  // so those cards are marked as liked instead of being removed.
+  const [likedUserIds, setLikedUserIds] = useState(() => new Set());
   const [seenUserIds, setSeenUserIds] = useState(() => {
     try {
       const saved = localStorage.getItem('ruumr_seen_user_ids');
@@ -309,6 +312,7 @@ function DiscoverPeoplePage() {
 
       // Sync seenUserIds state with what was loaded (server swipes + local cache)
       setSeenUserIds(allSwipedIds);
+      setLikedUserIds(new Set(userSwipes.filter(s => s.action === 'like').map(s => String(s.swiped_id))));
 
       setAllProfiles(availableProfiles);
       // החלה מחדש של פילטרים פעילים
@@ -415,6 +419,9 @@ function DiscoverPeoplePage() {
       };
 
       await swipeMutation.mutateAsync(swipeData);
+      if (action === 'like') {
+        setLikedUserIds(prev => new Set([...prev, String(swipedProfile.user_id)]));
+      }
       base44.analytics.track({
         eventName: 'profile_swiped',
         properties: {
@@ -475,6 +482,62 @@ function DiscoverPeoplePage() {
         setSwipeSaveError(t("swipe_save_failed"));
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
+
+  // Desktop directory: one click on a card is a like. A mutual like is a match,
+  // exactly like a right swipe in the deck.
+  const handleGridLike = useCallback(async (profile) => {
+    const swiperId = currentUserId || userProfile?.user_id;
+    const targetId = profile?.user_id;
+    if (!swiperId || !targetId) return;
+    if (likedUserIds.has(String(targetId))) return;
+
+    setLikedUserIds(prev => new Set([...prev, String(targetId)]));
+    setSwipeSaveError(null);
+
+    try {
+      await Swipe.create({
+        swiper_id: swiperId,
+        swiper_name: userProfile?.name,
+        swiped_id: targetId,
+        swiped_name: profile.name,
+        action: 'like',
+      });
+      base44.analytics.track({
+        eventName: 'profile_swiped',
+        properties: { direction: 'right', target_profile_id: targetId },
+      });
+      trackMixpanel('Swipe', { direction: 'right', target_profile_id: targetId });
+
+      try {
+        const matchResult = await processSwipeMatch({
+          swiperId,
+          swipedId: targetId,
+          action: 'like',
+          origin: window.location.origin,
+        });
+
+        if (matchResult?.match) {
+          base44.analytics.track({
+            eventName: 'match_created',
+            properties: { matched_with_id: targetId },
+          });
+          trackMixpanel('Match Created', { matched_with_id: targetId });
+          setMatchData({ profile1: userProfile, profile2: profile });
+          window.dispatchEvent(new Event('ruumrMatchCreated'));
+        }
+      } catch (matchError) {
+        console.error("Failed to process swipe match:", matchError);
+      }
+    } catch (error) {
+      console.error("Swipe save failed:", error);
+      setLikedUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(String(targetId));
+        return next;
+      });
+      setSwipeSaveError(t("swipe_save_failed"));
+    }
+  }, [currentUserId, userProfile, likedUserIds, t]);
 
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
@@ -565,8 +628,18 @@ function DiscoverPeoplePage() {
   return (
     <>
       <div className="hidden lg:block">
+        {swipeSaveError && (
+          <div className="mx-auto mt-6 max-w-[520px] rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-sm" role="alert">
+            {swipeSaveError}
+          </div>
+        )}
+        <AnimatePresence>
+          {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
+        </AnimatePresence>
         <PartnersGrid
           profiles={partnersPool.filter(p => matchesPartnerFilters(p, filters))}
+          likedUserIds={likedUserIds}
+          onLike={handleGridLike}
           onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }}
         />
       </div>

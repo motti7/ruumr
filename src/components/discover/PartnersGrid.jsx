@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, SlidersHorizontal, UserRound, Wallet } from "lucide-react";
+import { Heart, MapPin, SlidersHorizontal, UserRound, Wallet } from "lucide-react";
 import { roomText as rt, roomDirection } from "@/lib/room-i18n";
 import { createPageUrl } from "@/utils";
 
 // One roommate ad. Structured like a listing (who, where, budget, what they
-// want) so the desktop view reads as ads rather than as a swipe deck.
-function PartnerAdCard({ profile }) {
+// want) so the desktop view reads as ads rather than as a swipe deck. On
+// desktop a like is a single click on the card instead of a swipe gesture.
+function PartnerAdCard({ profile, liked, onLike }) {
   const photo = (profile.photos || []).find(Boolean) || "";
   const city = (profile.search_cities || [])[0] || profile.location || "";
   const seeking = (profile.current_status || "seeking_apartment") === "seeking_apartment";
   const about = (profile.about_me || "").trim();
 
   return (
-    <Link
-      to={createPageUrl("ProfileView") + `?userId=${profile.user_id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-warm-line bg-white text-start shadow-[0_10px_30px_rgba(52,36,24,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(28,83,212,.12)]"
-    >
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-warm-line bg-white text-start shadow-[0_10px_30px_rgba(52,36,24,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(28,83,212,.12)]">
+      {/* The card opens the full profile; the like button sits above this layer. */}
+      <Link
+        to={createPageUrl("ProfileView") + `?userId=${profile.user_id}`}
+        className="absolute inset-0 z-[1]"
+        aria-label={`${profile.name} — ${rt("partners.open")}`}
+      />
+
       <div className="relative h-[210px] w-full overflow-hidden bg-warm-canvas">
         {photo ? (
           <img src={photo} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
@@ -54,20 +59,34 @@ function PartnerAdCard({ profile }) {
           ) : (
             <span />
           )}
-          <span className="inline-flex items-center gap-1 text-[13px] font-extrabold text-[--theme-blue]">
-            {rt("partners.open")}
-            <ArrowLeft className="h-4 w-4" />
-          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onLike?.(profile);
+            }}
+            disabled={liked}
+            aria-pressed={liked}
+            className={`relative z-[2] inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-[13.5px] font-extrabold transition ${
+              liked
+                ? 'cursor-default border border-[--theme-orange]/30 bg-orange-50 text-[--theme-orange]'
+                : 'bg-[--theme-orange] text-white shadow-[0_6px_16px_rgba(241,90,50,.28)] hover:brightness-95'
+            }`}
+          >
+            <Heart className="h-4 w-4" fill={liked ? 'currentColor' : 'none'} strokeWidth={2.5} />
+            {liked ? rt("partners.liked") : rt("partners.like")}
+          </button>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
 
 // Desktop-only view of the roommates pool: a grid of ads instead of the deck.
 const PAGE_SIZE = 24;
 
-export default function PartnersGrid({ profiles = [], onRefresh }) {
+export default function PartnersGrid({ profiles = [], likedUserIds, onLike, onRefresh }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
@@ -75,6 +94,7 @@ export default function PartnersGrid({ profiles = [], onRefresh }) {
   }, [profiles.length]);
 
   const shown = profiles.slice(0, visibleCount);
+  const isLiked = (profile) => Boolean(likedUserIds && likedUserIds.has(String(profile.user_id)));
 
   return (
     <section className="mx-auto w-full max-w-[1280px] px-8 pb-16 pt-8" dir={roomDirection()}>
@@ -117,7 +137,12 @@ export default function PartnersGrid({ profiles = [], onRefresh }) {
           </p>
           <div className="grid grid-cols-2 gap-6 xl:grid-cols-3">
             {shown.map((profile, index) => (
-              <PartnerAdCard key={profile.id || profile.user_id || index} profile={profile} />
+              <PartnerAdCard
+                key={profile.id || profile.user_id || index}
+                profile={profile}
+                liked={isLiked(profile)}
+                onLike={onLike}
+              />
             ))}
           </div>
           {profiles.length > shown.length && (

@@ -364,7 +364,7 @@ export default function Layout({ children, currentPageName }) {
             tablet so iPad screens do not render as a narrow phone column. */}
         <div className="flex min-h-[100dvh] flex-col">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:bg-warm-header lg:border-b lg:border-warm-line" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:bg-warm-header" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 {/* Desktop chrome: a single, calm top bar — brand on the reading
                     start, plain text section links with an underline on the active
                     one, and one tidy cluster of controls at the far end. Settings
@@ -507,12 +507,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-transparent`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:max-w-[1280px] lg:bg-warm-canvas`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>
 
-            {shouldShowNav && !['Discover'].includes(currentPageName) && <SiteFooter />}
+            {shouldShowNav && <SiteFooter />}
 
             {shouldShowNav && (
                 <nav className="desktop-app-nav lg:hidden fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>

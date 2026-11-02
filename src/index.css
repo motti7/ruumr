@@ -192,6 +192,15 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+  /* Desktop is one continuous warm surface: the page background matches the
+     header band and the footer, so content never meets a white block at the
+     top of the page (which read as a scroll pane starting mid-page). */
+  @media (min-width: 1024px) {
+    html,
+    body {
+      background-color: var(--warm-canvas);
+    }
+  }
 }
 
 @layer utilities {
