@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
@@ -21,7 +21,6 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
-import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
 import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
@@ -195,11 +194,10 @@ function App() {
 
   const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
   const isNativeWebView = isNativePlatform;
-  const [splashDone, setSplashDone] = useState(() => isNativeWebView);
+  // The branded splash is for the native apps only (they launch with it from the
+  // store build). The desktop/mobile web app boots straight into the UI.
+  const [splashDone] = useState(true);
   const [nativeBootstrapDone, setNativeBootstrapDone] = useState(() => !isNativeWebView);
-  const handleSplashDone = useCallback(() => {
-    setSplashDone(true);
-  }, []);
 
   useEffect(() => {
     if (!isNativeWebView) {
@@ -244,7 +242,6 @@ function App() {
   return (
     <>
       {writeBootMarker('app-render')}
-      {!isNativePlatform && !splashDone && <SplashScreen onDone={handleSplashDone} />}
       {splashDone && !nativeBootstrapDone && isNativeWebView && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ backgroundColor: "#F14D16" }}>
           <div className="flex flex-col items-center gap-2">
