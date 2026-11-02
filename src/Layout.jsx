@@ -507,7 +507,7 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-warm-surface`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-transparent`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>

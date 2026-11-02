@@ -27,7 +27,7 @@ export default function RoomListings(){
  return <section className="rr rf-feed" dir={roomDirection()}>
   {!roomId&&<RoomsDesktopHero isAuthenticated={isAuthenticated}/>}
   <header className={`rf-intro${roomId?'':' lg:hidden'}`}>{roomId&&<Link to="/SavedRooms" className="rr-add" style={{marginBottom:8}}>{rt('hub.back_to_saved')}</Link>}{!roomId&&<><h1>{rt('חדרים בדירות שותפים')}</h1><Link className="rr-add" to={isAuthenticated?'/AddRoom':'/register?next=AddRoom'}>{rt('hub.list_room')}</Link></>}</header>
-  {!roomId&&<div className="rk-toolbar"><RoomCityFilter selected={city} onSelect={setCity}/><p className="rk-toolbar-count">{rt('hero.results',{count:visible.length})}</p></div>}
+  {!roomId&&<div className="rk-toolbar"><RoomCityFilter selected={city} onSelect={setCity}/></div>}
   {shareLink&&<p role="status">{rt('hub.share_link')} <a href={shareLink}>{shareLink}</a></p>}{loading&&<p role="status">{rt('טוען חדרים…')}</p>}{error&&<p role="alert">{rt(error)} <button onClick={()=>setRevision(x=>x+1)}>{rt('feed.retry_load')}</button></p>}{!loading&&!error&&!visible.length&&<p>{city==='all'?rt('עדיין אין חדרים שפורסמו כאן. אפשר להוסיף את החדר הראשון.'):rt('feed.empty_city')}</p>}
   <div className="rf-list">{sorted.map(r=><RoomFeedCard key={r.id+savedIds.has(r.id)} room={r} saved={savedIds.has(r.id)} onShare={share} footer={r.is_owner&&<button disabled={closing!==null} onClick={()=>close(r.id)}>{rt(closing===r.id?'מסיר…':'החדר הושכר — הסרה מהתצוגה')}</button>}/>)}</div></section>;
 }

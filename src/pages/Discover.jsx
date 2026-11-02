@@ -22,6 +22,7 @@ import { Heart, X, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import EmptyDeckState from "../components/discover/EmptyDeckState";
+import PartnersGrid from "../components/discover/PartnersGrid";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
@@ -577,88 +578,98 @@ function DiscoverPeoplePage() {
     );
   }
 
+  // The filter sheet lives here so both the deck and the desktop grid can open it.
+  const filterSheet = <DiscoverFilters filters={filters} onChange={applyFilters} />;
+
   return (
-    <div className="desktop-discover-stage fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
-      {swipeSaveError && (
-        <div
-          className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
-          role="alert"
-        >
-          {swipeSaveError}
-        </div>
-      )}
-
-      <AnimatePresence>
-        {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
-      </AnimatePresence>
-
-      {showCharterSelector && (
-        <CharterMatchSelector onClose={() => setShowCharterSelector(false)} />
-      )}
-
-      <AnimatePresence>
-        {actionFeedback && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+    <>
+      <div className="hidden lg:block">
+        <PartnersGrid
+          profiles={profiles}
+          onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }}
+        />
+      </div>
+      {filterSheet}
+      <div className="desktop-discover-stage fixed inset-0 w-full overflow-hidden lg:hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+        {swipeSaveError && (
+          <div
+            className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
+            role="alert"
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 0.5 }}
-              className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
-                actionFeedback === 'like' 
-                  ? 'bg-red-500' 
-                  : 'bg-black'
-              }`}
-            >
-              {actionFeedback === 'like' ? (
-                <Heart className="w-16 h-16 text-white" fill="white" />
-              ) : (
-                <X className="w-16 h-16 text-white" strokeWidth={4} />
-              )}
-            </motion.div>
-          </motion.div>
+            {swipeSaveError}
+          </div>
         )}
-      </AnimatePresence>
 
-      <DiscoverFilters filters={filters} onChange={applyFilters} />
+        <AnimatePresence>
+          {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
+        </AnimatePresence>
 
-      {/* Card — full screen from header to bottom nav */}
-      <div
-        className="desktop-discover-card absolute left-0 right-0"
-        style={{
-          top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
-        }}
-      >
-        <AnimatePresence mode="popLayout">
-          {hasProfiles ? (
-            profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
-              <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
-                <div className="absolute inset-0">
-                  <ProfileCard
-                    profile={profile}
-                    onSwipe={handleSwipe}
-                    onSwipeIntent={handleSwipeIntent}
-                    isActive={true}
-                  />
-                </div>
-              </ErrorBoundary>
-            ))
-          ) : (
-            <EmptyDeckState onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} />
+        {showCharterSelector && (
+          <CharterMatchSelector onClose={() => setShowCharterSelector(false)} />
+        )}
+
+        <AnimatePresence>
+          {actionFeedback && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+            >
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+                className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
+                  actionFeedback === 'like' 
+                    ? 'bg-red-500' 
+                    : 'bg-black'
+                }`}
+              >
+                {actionFeedback === 'like' ? (
+                  <Heart className="w-16 h-16 text-white" fill="white" />
+                ) : (
+                  <X className="w-16 h-16 text-white" strokeWidth={4} />
+                )}
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
-      </div>
 
-      {/* Action buttons — floating above nav bar */}
-      {hasProfiles && (
-        <div className="desktop-discover-actions fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
-          <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
+        {/* Card — full screen from header to bottom nav */}
+        <div
+          className="desktop-discover-card absolute left-0 right-0"
+          style={{
+            top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+          }}
+        >
+          <AnimatePresence mode="popLayout">
+            {hasProfiles ? (
+              profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
+                <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
+                  <div className="absolute inset-0">
+                    <ProfileCard
+                      profile={profile}
+                      onSwipe={handleSwipe}
+                      onSwipeIntent={handleSwipeIntent}
+                      isActive={true}
+                    />
+                  </div>
+                </ErrorBoundary>
+              ))
+            ) : (
+              <EmptyDeckState onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} />
+            )}
+          </AnimatePresence>
         </div>
-      )}
-    </div>
+
+        {/* Action buttons — floating above nav bar */}
+        {hasProfiles && (
+          <div className="desktop-discover-actions fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
+            <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

@@ -80,10 +80,10 @@ button:focus-visible {
     --theme-orange-dark: #E64A19;
     --theme-blue: #1c53d4;
     /* Warm desktop canvas: keeps the site from reading as flat white. */
-    --warm-canvas: #f2e9df;
-    --warm-surface: #fbf7f2;
-    --warm-header: #fffdfa;
-    --warm-line: #ebe0d2;
+    --warm-canvas: #f6f1ea;
+    --warm-surface: #fdfaf6;
+    --warm-header: #f6f1ea;
+    --warm-line: #e8ded1;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
