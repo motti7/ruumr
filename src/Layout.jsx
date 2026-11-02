@@ -325,7 +325,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 lg:bg-white antialiased overscroll-none flex flex-col" dir={i18n.dir()}>
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 lg:bg-warm-canvas antialiased overscroll-none flex flex-col" dir={i18n.dir()}>
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -364,49 +364,36 @@ export default function Layout({ children, currentPageName }) {
             tablet so iPad screens do not render as a narrow phone column. */}
         <div className="flex min-h-[100dvh] flex-col">
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:border-b lg:border-gray-100 lg:dark:border-gray-800" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:bg-warm-header lg:border-b lg:border-warm-line" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 {/* Desktop chrome: a single, calm top bar — brand on the reading
                     start, plain text section links with an underline on the active
                     one, and one tidy cluster of controls at the far end. Settings
                     moved into the account menu so the bar is not a row of loose
                     round icons. */}
                 <div dir="rtl" className="hidden lg:block">
-                    <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center gap-10 px-8">
+                    <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center gap-7 px-8">
                         <Link to="/" className="flex shrink-0 select-none items-center">
                             <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-7 w-auto dark:invert" />
                         </Link>
 
-                        <nav className="flex h-full items-center">
-                            {navigationItems.map((item) => {
+                        {/* One nav row: only the destinations that matter. Everything
+                            secondary lives in the account menu, so the bar reads as
+                            brand → sections → one action → account. */}
+                        <nav className="flex items-center gap-1">
+                            {navigationItems.filter((item) => item.id !== 'plus' && item.id !== 'add-room').map((item) => {
                                 const pathOnly = item.path.split('?')[0];
                                 const active = location.pathname === pathOnly ||
                                     (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
                                 const locked = tabsLocked && item.id === 'matches';
-                                // "Add room" is the app's main call to action, so in
-                                // the desktop bar it reads as an orange button rather
-                                // than one more plain text link.
-                                if (item.id === 'add-room') {
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            to={item.path}
-                                            aria-label={item.name}
-                                            className="mx-3 inline-flex h-9 items-center gap-1.5 rounded-full bg-[--theme-orange] px-4 text-[14px] font-bold text-white shadow-sm transition hover:brightness-95"
-                                        >
-                                            <Plus className="h-4 w-4" strokeWidth={2.75} />
-                                            <span>{item.name}</span>
-                                        </Link>
-                                    );
-                                }
                                 return (
                                     <Link
                                         key={item.id}
                                         to={locked ? "/login" : item.path}
                                         aria-label={item.name}
-                                        className={`relative flex h-full items-center gap-2 px-3.5 text-[15px] font-semibold transition-colors ${
+                                        className={`relative inline-flex h-9 items-center gap-2 rounded-full px-4 text-[15px] font-semibold transition-colors ${
                                             active
-                                                ? 'text-[--theme-orange]'
-                                                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                                                ? 'bg-white text-[--theme-orange] shadow-sm dark:bg-gray-800'
+                                                : 'text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
                                         }`}
                                     >
                                         <span>{item.name}</span>
@@ -415,39 +402,20 @@ export default function Layout({ children, currentPageName }) {
                                                 {item.badgeCount}
                                             </span>
                                         )}
-                                        <span
-                                            aria-hidden="true"
-                                            className={`absolute inset-x-3.5 bottom-0 h-[2px] rounded-full transition-opacity ${
-                                                active ? 'bg-[--theme-orange] opacity-100' : 'opacity-0'
-                                            }`}
-                                        />
                                     </Link>
                                 );
                             })}
                         </nav>
 
                         <div className="ms-auto flex items-center gap-2">
-                            {isPartnersTab && hasProfile && (
-                                <button
-                                    type="button"
-                                    onClick={() => window.dispatchEvent(new Event('openDiscoverFilters'))}
-                                    className="flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13px] font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                >
-                                    <SlidersHorizontal className="h-4 w-4" />
-                                    <span>{rt('hub.filters')}</span>
-                                </button>
-                            )}
-                            {isRoomsContext && hasProfile && (
-                                <Link
-                                    to="/SavedRooms"
-                                    className="flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13px] font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                                >
-                                    <Bookmark className="h-4 w-4" />
-                                    <span>{rt('hub.saved_rooms')}</span>
-                                </Link>
-                            )}
-                            <span aria-hidden="true" className="mx-1 h-6 w-px bg-gray-200 dark:bg-gray-700" />
                             <LanguageToggle />
+                            <Link
+                                to={isAuthenticated ? "/AddRoom" : "/register?next=AddRoom"}
+                                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[--theme-orange] px-5 text-[14.5px] font-bold text-white shadow-sm transition hover:brightness-95"
+                            >
+                                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                                <span>{rt('הוספת חדר')}</span>
+                            </Link>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <button type="button" aria-label={rt('hub.account')} className="flex items-center rounded-full">
@@ -458,18 +426,31 @@ export default function Layout({ children, currentPageName }) {
                                                 className="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
                                             />
                                         ) : (
-                                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
                                                 <User className="h-5 w-5 text-gray-500" />
                                             </span>
                                         )}
                                     </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuContent align="end" className="w-48">
                                     <DropdownMenuItem asChild>
                                         <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"}>
                                             {rt('hub.account')}
                                         </Link>
                                     </DropdownMenuItem>
+                                    {hasProfile && (
+                                        <DropdownMenuItem asChild>
+                                            <Link to="/SavedRooms">{rt('hub.saved_rooms')}</Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem asChild>
+                                        <Link to={createPageUrl("RuumrPlus")}>Ruumr Plus</Link>
+                                    </DropdownMenuItem>
+                                    {isPartnersTab && hasProfile && (
+                                        <DropdownMenuItem onSelect={() => window.dispatchEvent(new Event('openDiscoverFilters'))}>
+                                            {rt('hub.filters')}
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem asChild>
                                         <Link to={createPageUrl("Settings")}>{t("settings")}</Link>
                                     </DropdownMenuItem>
@@ -526,7 +507,7 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-white`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:bg-warm-surface`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>

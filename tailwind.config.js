@@ -10,6 +10,12 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			warm: {
+  				canvas: 'var(--warm-canvas)',
+  				surface: 'var(--warm-surface)',
+  				header: 'var(--warm-header)',
+  				line: 'var(--warm-line)'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

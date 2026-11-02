@@ -79,6 +79,11 @@ button:focus-visible {
     --theme-orange: #FF5722;
     --theme-orange-dark: #E64A19;
     --theme-blue: #1c53d4;
+    /* Warm desktop canvas: keeps the site from reading as flat white. */
+    --warm-canvas: #f2e9df;
+    --warm-surface: #fbf7f2;
+    --warm-header: #fffdfa;
+    --warm-line: #ebe0d2;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -121,6 +126,10 @@ button:focus-visible {
     --theme-orange: #FF7043;
     --theme-orange-dark: #F4511E;
     --theme-blue: #1c53d4;
+    --warm-canvas: #10161c;
+    --warm-surface: #151b22;
+    --warm-header: #12181f;
+    --warm-line: #23303b;
   }
 
   .dark {

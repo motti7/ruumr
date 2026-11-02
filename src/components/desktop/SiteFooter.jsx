@@ -43,7 +43,7 @@ export default function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer dir={i18n.dir()} className="hidden border-t border-gray-100 bg-white lg:block">
+    <footer dir={i18n.dir()} className="hidden border-t border-warm-line bg-warm-header lg:block">
       <div className="mx-auto grid w-full max-w-[1280px] grid-cols-[1.6fr_1fr_1fr_1fr] gap-12 px-8 py-14">
         <div>
           <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-7 w-auto dark:invert" />

@@ -2,11 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Plus, Users } from "lucide-react";
 import { roomText as rt, roomDirection } from "@/lib/room-i18n";
-import { ROOM_CITIES } from "@/lib/roomCity";
 
 // Desktop-only opening band for the rooms feed: headline, two clear actions and
-// a small snapshot of what is currently listed.
-export default function RoomsDesktopHero({ count, isAuthenticated }) {
+// three honest value points.
+export default function RoomsDesktopHero({ isAuthenticated }) {
   return (
     <section className="rk-hero" dir={roomDirection()}>
       <div className="rk-hero-copy">
@@ -36,13 +35,18 @@ export default function RoomsDesktopHero({ count, isAuthenticated }) {
 
       <div className="rk-hero-stats">
         <div className="rk-stat">
-          <strong>{count}</strong>
-          <span>{rt("hero.stat_rooms")}</span>
+          <strong>{rt("hero.stat_fee_value")}</strong>
+          <span>{rt("hero.stat_fee_label")}</span>
         </div>
         <span className="rk-stat-divider" aria-hidden="true" />
         <div className="rk-stat">
-          <strong>{ROOM_CITIES.length}</strong>
-          <span>{rt("hero.stat_cities")}</span>
+          <strong>{rt("hero.stat_time_value")}</strong>
+          <span>{rt("hero.stat_time_label")}</span>
+        </div>
+        <span className="rk-stat-divider" aria-hidden="true" />
+        <div className="rk-stat">
+          <strong>{rt("hero.stat_direct_value")}</strong>
+          <span>{rt("hero.stat_direct_label")}</span>
         </div>
       </div>
     </section>
