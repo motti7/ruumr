@@ -19,7 +19,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
 import ShareReviewLinkButton from '@/components/reviews/ShareReviewLinkButton';
 import { createProfileDefaults } from '@/lib/profileDefaults';
-import { showsReligiousPreferences } from '@/lib/userRegion';
+import { getMarketRegion, showsReligiousPreferences } from '@/lib/userRegion';
+import { getCurrencySymbol } from '@/lib/marketCurrency';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 
@@ -62,6 +63,9 @@ export default function ProfilePage() {
   const { toast } = useToast();
   // Religion / kosher / Shabbat exist in the Israeli marketplace only.
   const showsReligion = showsReligiousPreferences();
+  // Hebrew search areas (north / center / south) are Israel-only.
+  const isIsraelMarket = getMarketRegion() === 'IL';
+  const currency = getCurrencySymbol();
   const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -1006,10 +1010,11 @@ export default function ProfilePage() {
             )}
 
             <div>
-                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")}</label>
+                <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("monthly_rent_budget")} ({currency})</label>
                 <Input disabled={!isEditing} type="number" placeholder={t("budget_example_placeholder")} value={formData.budget_max} onChange={e => setFormField('budget_max', parseInt(e.target.value) || 0)} className="bg-white border-gray-300 text-start" dir={i18n.dir()} />
             </div>
 
+            {isIsraelMarket && (
             <div>
                 <label className="block text-start text-sm font-bold text-gray-700 mb-2">{t("preferred_search_area")}</label>
                 <BottomSheetSelect
@@ -1026,6 +1031,7 @@ export default function ProfilePage() {
                     ]}
                 />
             </div>
+            )}
 
             <div>
                 <label className="block text-start text-sm font-bold text-gray-700 mb-1">{t("preferred_cities")}</label>

@@ -2,11 +2,12 @@
 // session (survives navigation between screens) and clears when the app is
 // closed or refreshed — intentionally NOT persisted to localStorage so filters
 // don't stick across launches.
+import { getBudgetConfig } from './marketCurrency';
 
 export const getDefaultDiscoverFilters = () => ({
   cities: [],
   minBudget: 0,
-  maxBudget: 10000,
+  maxBudget: getBudgetConfig().max,
   minAge: 18,
   maxAge: 60,
   kosher: 'all',

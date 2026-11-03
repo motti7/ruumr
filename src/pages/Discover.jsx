@@ -30,9 +30,13 @@ import { processSwipeMatch } from "@/lib/swipeMatchProcessing";
 import { trackMixpanel } from '@/lib/mixpanelTracking';
 import { useOptionalAuth } from "@/lib/AuthContext";
 import { getDiscoverFilters, setDiscoverFilters, getDefaultDiscoverFilters } from "@/lib/discoverFiltersSession";
+import { getBudgetConfig } from '@/lib/marketCurrency';
 import '../components/scrapingPilot/discover-tabs.css';
 
 const RoomsPreview = lazy(() => import('./ScrapingPilot'));
+
+// Budget ceiling of the current marketplace (₪10,000 in Israel, $5,000 in the US).
+const MARKET_BUDGET = getBudgetConfig();
 
 export default function DiscoverPage() {
   useRoomLocale();
@@ -273,7 +277,7 @@ function DiscoverPeoplePage() {
       setAllProfiles(availableProfiles);
       // החלה מחדש של פילטרים פעילים
       let displayProfiles = availableProfiles;
-      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all') || (filters.apartmentStatus && filters.apartmentStatus !== 'all')) {
+      if (filters.cities.length > 0 || filters.maxBudget < MARKET_BUDGET.max || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all') || (filters.apartmentStatus && filters.apartmentStatus !== 'all')) {
         displayProfiles = availableProfiles.filter(p => {
           if (filters.cities.length > 0) {
             const profileCities = [];

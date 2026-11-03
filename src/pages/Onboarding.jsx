@@ -35,7 +35,8 @@ import {
   isRuumrSimulatorMode } from
 '@/lib/simulatorMode';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
-import { isUKRegion, showsReligiousPreferences } from '@/lib/userRegion';
+import { getMarketRegion, showsReligiousPreferences } from '@/lib/userRegion';
+import { getBudgetConfig, getCurrencySymbol } from '@/lib/marketCurrency';
 import LanguageToggle from '@/components/shared/LanguageToggle';
 
 const TOTAL_STEPS = 7;
@@ -87,16 +88,23 @@ export default function OnboardingPage() {
   const appleNameRetryDelaysMs = [250, 500, 1000];
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
-  const isUK = isUKRegion();
+  // Country marketplace (IL / GB / US): sets the city list, the budget scale
+  // and the currency shown while filling the form.
+  const market = getMarketRegion();
+  const budget = getBudgetConfig();
+  const currency = getCurrencySymbol();
   // Religion / kosher / Shabbat are asked in Israel only.
   const showsReligion = showsReligiousPreferences();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => (/** @type {any} */
-  createProfileDefaults(
-    initialIsAppleUser ?
-    { name: initialAppleSnapshot.displayName } :
-    { name: authUser?.full_name || '' }
-  ))
+  createProfileDefaults({
+    name: initialIsAppleUser ? initialAppleSnapshot.displayName : authUser?.full_name || '',
+    // Budgets start on the current market's scale (₪ in Israel, $ in the US).
+    budget_max: budget.default,
+    apartment_total_budget: budget.apartmentDefault,
+    // Hebrew search areas are Israel-only.
+    search_area: market === 'IL' ? 'מרכז' : '',
+  }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingInvites, setPendingInvites] = useState([]);
@@ -451,7 +459,7 @@ export default function OnboardingPage() {
         allow_instagram_promotion: wantsRuumrPromotion,
         // Stamp the user's country marketplace based on the detected region.
         // Existing profiles (no region field) are treated as IL downstream.
-        region: isUK ? 'GB' : 'IL',
+        region: market,
       };
 
       // If user already has a profile (e.g. navigated back), update instead of create
@@ -922,33 +930,33 @@ export default function OnboardingPage() {
                            <div
                     className="absolute text-sm text-black"
                     style={{
-                      left: `calc(${(formData.budget_max - 1000) / (10000 - 1000) * 100}% - 20px)`,
+                      left: `calc(${(formData.budget_max - budget.min) / (budget.max - budget.min) * 100}% - 20px)`,
                       bottom: 0,
                       minWidth: '40px',
                       textAlign: 'center',
                       fontWeight: 'normal'
                     }}>
 
-                               {formData.budget_max.toLocaleString()}
+                               {currency}{formData.budget_max.toLocaleString()}
                            </div>
                            <div className="h-6" />
                        </div>
                        <Slider
                   dir="ltr"
                   value={[formData.budget_max]}
-                  min={1000}
-                  max={10000}
-                  step={100}
+                  min={budget.min}
+                  max={budget.max}
+                  step={budget.step}
                   onValueChange={(v) => setFormField('budget_max', v[0])}
                   className="py-0" />
-                       {/* Min / Max labels — explicitly LTR: 1,000 left, 10,000 right */}
+                       {/* Min / Max labels — explicitly LTR: min left, max right */}
                        <div className="flex justify-between text-xs text-gray-400 mt-1" dir="ltr">
                            <div className="flex flex-col items-start">
-                               <span>1,000</span>
+                               <span>{currency}{budget.min.toLocaleString()}</span>
                                <span>min</span>
                            </div>
                            <div className="flex flex-col items-end">
-                               <span>10,000</span>
+                               <span>{currency}{budget.max.toLocaleString()}</span>
                                <span>max</span>
                            </div>
                        </div>
@@ -1049,7 +1057,7 @@ export default function OnboardingPage() {
                                 <Input type="number" value={formData.existing_roommates} onChange={(e) => setFormField('existing_roommates', parseInt(e.target.value) || 0)} className="bg-white border-orange-200" />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-500 mb-1 block">{t("onb_total_rent")}</label>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">{t("onb_total_rent")} ({currency})</label>
                                 <Input type="number" value={formData.apartment_total_budget} onChange={(e) => setFormField('apartment_total_budget', parseInt(e.target.value) || 0)} className="bg-white border-orange-200" />
                             </div>
                         </div>

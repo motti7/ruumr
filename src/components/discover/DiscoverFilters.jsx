@@ -4,21 +4,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin, Home, Search } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { showsReligiousPreferences } from "@/lib/userRegion";
+import { getMarketFilterCities } from "@/lib/marketCities";
+import { getBudgetConfig, getCurrencySymbol } from "@/lib/marketCurrency";
 
 // Religion / kosher / Shabbat filters exist in the Israeli marketplace only.
 const SHOW_RELIGIOUS_FILTERS = showsReligiousPreferences();
 
-const ISRAEL_CITIES = [
-  "תל אביב", "ירושלים", "חיפה", "ראשון לציון", "פתח תקווה", "אשדוד", "נתניה", "באר שבע",
-  "בני ברק", "חולון", "רמת גן", "אשקלון", "רחובות", "בת ים", "בית שמש", "כפר סבא",
-  "הרצליה", "חדרה", "מודיעין", "לוד", "נס ציונה", "רמלה", "רעננה", "פ\"ת", "גבעתיים",
-  "קריית גת", "אילת", "נהריה", "עפולה", "רהט", "קריית ביאליק", "קריית ים", "קריית מוצקין",
-  "אום אל פחם", "הוד השרון", "טבריה", "קריית אתא", "קריית שמונה", "יבנה", "גבעת שמואל",
-  "ראש העין", "נצרת", "נצרת עילית", "עכו", "כפר יונה", "אור יהודה", "מזכרת בתיה",
-  "קרית אונו", "גדרה", "מעלה אדומים"
-];
+// City suggestions and the budget scale follow the current marketplace
+// (shekels in Israel, dollars in the US).
+const CITY_SUGGESTIONS = getMarketFilterCities();
+const BUDGET = getBudgetConfig();
+const CURRENCY = getCurrencySymbol();
 
-const DEFAULT_FILTERS = { cities: [], minBudget: 0, maxBudget: 10000, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' };
+const DEFAULT_FILTERS = { cities: [], minBudget: 0, maxBudget: BUDGET.max, minAge: 18, maxAge: 60, kosher: 'all', shabbat: 'all', apartmentStatus: 'all' };
 
 export default function DiscoverFilters({ filters, onChange }) {
   const { t, i18n } = useTranslation();
@@ -35,7 +33,7 @@ export default function DiscoverFilters({ filters, onChange }) {
 
   const activeCount = [
     local.cities?.length > 0,
-    local.maxBudget < 10000,
+    local.maxBudget < BUDGET.max,
     local.minAge > 18 || local.maxAge < 50,
     SHOW_RELIGIOUS_FILTERS && local.kosher && local.kosher !== 'all',
     SHOW_RELIGIOUS_FILTERS && local.shabbat && local.shabbat !== 'all',
@@ -74,7 +72,7 @@ export default function DiscoverFilters({ filters, onChange }) {
     const val = e.target.value;
     setCityInput(val);
     if (val.trim().length >= 1) {
-      const matches = ISRAEL_CITIES.filter(c => c.includes(val.trim()) && !local.cities.includes(c));
+      const matches = CITY_SUGGESTIONS.filter(c => c.includes(val.trim()) && !local.cities.includes(c));
       setCitySuggestions(matches.slice(0, 5));
     } else {
       setCitySuggestions([]);
@@ -179,20 +177,20 @@ export default function DiscoverFilters({ filters, onChange }) {
               {/* Budget */}
               <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-1 block">
-                  {t("max_budget")} <span className="text-[--theme-orange]">₪{local.maxBudget.toLocaleString()}</span>
+                  {t("max_budget")} <span className="text-[--theme-orange]">{CURRENCY}{local.maxBudget.toLocaleString()}</span>
                 </label>
                 <div dir="ltr">
                   <Slider
                     value={[local.maxBudget]}
-                    min={1000}
-                    max={10000}
-                    step={100}
+                    min={BUDGET.min}
+                    max={BUDGET.max}
+                    step={BUDGET.step}
                     onValueChange={([v]) => setLocal(prev => ({ ...prev, maxBudget: v }))}
                     className="py-3"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>₪1,000</span>
-                    <span>₪10,000</span>
+                    <span>{CURRENCY}{BUDGET.min.toLocaleString()}</span>
+                    <span>{CURRENCY}{BUDGET.max.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

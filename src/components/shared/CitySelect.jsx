@@ -2,34 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, ChevronDown } from 'lucide-react';
-import { isUKRegion } from '@/lib/userRegion';
+import { getMarketCities } from '@/lib/marketCities';
 
-const ISRAEL_CITIES = [
-"תל אביב-יפו", "ירושלים", "חיפה", "ראשון לציון", "פתח תקווה", "אשדוד", "נתניה", "באר שבע", "בני ברק", "חולון",
-"רמת גן", "אשקלון", "רחובות", "בת ים", "הרצליה", "כפר סבא", "חדרה", "מודיעין-מכבים-רעות", "לוד", "רעננה",
-"רמלה", "נצרת", "בית שמש", "נהריה", "קריית אתא", "גבעתיים", "קריית גת", "אילת", "עכו", "הוד השרון",
-"כרמיאל", "טבריה", "עפולה", "נס ציונה", "קריית מוצקין", "ראש העין", "קריית ים", "קריית ביאליק", "רמת השרון",
-"דימונה", "יבנה", "אור יהודה", "נתיבות", "יהוד-מונוסון", "צפת", "קריית אונו", "מגדל העמק", "ערד", "טמרה",
-"קצרין", "קריית שמונה", "סח'נין", "נשר", "מעלות-תרשיחא", "אופקים", "שדרות", "גבעת שמואל", "טירה", "טייבה"].
-sort();
-
-// Major UK cities shown when a connected user is detected as being from the
-// UK (see userRegion.resolveRegion). Mirrors the Israel city list in scope so
-// UK users get the same multi-city picker experience.
-const UK_CITIES = [
-"London", "Manchester", "Birmingham", "Leeds", "Glasgow", "Edinburgh", "Liverpool",
-"Bristol", "Sheffield", "Newcastle upon Tyne", "Nottingham", "Cardiff", "Belfast",
-"Leicester", "Coventry", "Brighton and Hove", "Kingston upon Hull", "Plymouth",
-"Stoke-on-Trent", "Derby", "Southampton", "York", "Oxford", "Cambridge", "Reading",
-"Sunderland", "Aberdeen", "Bath", "Swansea", "Newport", "Middlesbrough",
-"Bournemouth", "Portsmouth", "Luton", "Watford", "Milton Keynes", "Exeter",
-"Gloucester", "Chester", "Dundee", "Inverness", "Wolverhampton", "Wakefield",
-"Bolton", "Bradford", "Oldham", "Rochdale", "Salford", "Stockport", "Blackpool",
-"Preston", "Wigan", "Burnley", "St Albans", "Chelmsford", "Norwich", "Canterbury",
-"Winchester", "Salisbury", "Durham", "Lincoln", "Carlisle"
-].sort();
-
-const CITIES = isUKRegion() ? UK_CITIES : ISRAEL_CITIES;
+// City list for the current marketplace (Israel, UK or the US) — see
+// marketCities.js.
+const CITIES = getMarketCities();
 
 export default function CitySelect({ selectedCities = [], onChange, disabled = false }) {
   const { t, i18n } = useTranslation();
