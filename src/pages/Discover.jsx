@@ -22,7 +22,6 @@ import { Heart, X, Puzzle } from "lucide-react";
 import CharterMatchSelector from "../components/charter/CharterMatchSelector";
 import DiscoverFilters from "../components/discover/DiscoverFilters";
 import EmptyDeckState from "../components/discover/EmptyDeckState";
-import PartnersGrid from "../components/discover/PartnersGrid";
 import { useMutationWithOptimistic } from "@/hooks/useMutationWithOptimistic";
 import { base44 } from "@/api/base44Client";
 import { enableSimulatorBackend, getSimulatorBackendState } from "@/lib/simulatorBackend";
@@ -86,33 +85,6 @@ const sortProfilesByCreatedDateDesc = (records = []) => {
   });
 };
 
-// One place for the city / budget / age / lifestyle filters that the user
-// chooses in the filter sheet, shared by the deck and the desktop grid.
-const matchesPartnerFilters = (profile, activeFilters) => {
-  const p = profile;
-  if (activeFilters.cities.length > 0) {
-    const profileCities = [];
-    if (Array.isArray(p.search_cities) && p.search_cities.length > 0) profileCities.push(...p.search_cities);
-    if (p.location && typeof p.location === 'string' && p.location.trim()) profileCities.push(p.location.trim());
-    if (!activeFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)))) return false;
-  }
-  // Neutral defaults (no budget cap, full age range) must not filter anything.
-  if (activeFilters.maxBudget < 10000 && p.budget_max && p.budget_max > activeFilters.maxBudget) return false;
-  if ((activeFilters.minAge > 18 || activeFilters.maxAge < 60) && p.age && (p.age < activeFilters.minAge || p.age > activeFilters.maxAge)) return false;
-  if (activeFilters.kosher && activeFilters.kosher !== 'all') {
-    if (activeFilters.kosher === 'for_or_flow' && p.kosher_preference === 'against') return false;
-    if (activeFilters.kosher === 'against' && p.kosher_preference !== 'against') return false;
-  }
-  if (activeFilters.shabbat && activeFilters.shabbat !== 'all') {
-    if (activeFilters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
-    if (activeFilters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
-  }
-  if (activeFilters.apartmentStatus && activeFilters.apartmentStatus !== 'all') {
-    if ((p.current_status || 'seeking_apartment') !== activeFilters.apartmentStatus) return false;
-  }
-  return true;
-};
-
 function DiscoverPeoplePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -134,12 +106,6 @@ function DiscoverPeoplePage() {
   const [showCharterSelector, setShowCharterSelector] = useState(false);
   const [filters, setFilters] = useState(() => getDiscoverFilters() ?? getDefaultDiscoverFilters());
   const [allProfiles, setAllProfiles] = useState([]); // כל הזמינים שטרם נראו - מתעדכן בכל swipe
-  // Desktop directory: every visible profile in the user's region (not just the
-  // deck queue), so the partners page is not emptied by past swipes.
-  const [partnersPool, setPartnersPool] = useState([]);
-  // Profiles the user already liked — the desktop grid keeps showing everyone,
-  // so those cards are marked as liked instead of being removed.
-  const [likedUserIds, setLikedUserIds] = useState(() => new Set());
   const [seenUserIds, setSeenUserIds] = useState(() => {
     try {
       const saved = localStorage.getItem('ruumr_seen_user_ids');
@@ -224,15 +190,6 @@ function DiscoverPeoplePage() {
       allProfiles = sortProfilesByCreatedDateDesc(allProfiles.filter(p => !blocked.has(p.user_id)));
       try { const boosts = await profileBoosts('active'); allProfiles = prioritizeBoostedProfiles(allProfiles, boosts.userIds); } catch { /* Discovery remains available if boosting is unavailable. */ }
 
-      // Directory pool for the desktop partners page: everyone visible in the
-      // same region, regardless of earlier swipes or the deck's matching rules.
-      const directoryRegion = currentUserProfile.region || 'IL';
-      setPartnersPool(allProfiles.filter(p =>
-        String(p.user_id) !== String(user.id) &&
-        (p.region || 'IL') === directoryRegion &&
-        p.is_visible !== false
-      ));
-
       let userSwipes = [];
       try {
         userSwipes = await Swipe.filter({ swiper_id: user.id });
@@ -312,11 +269,35 @@ function DiscoverPeoplePage() {
 
       // Sync seenUserIds state with what was loaded (server swipes + local cache)
       setSeenUserIds(allSwipedIds);
-      setLikedUserIds(new Set(userSwipes.filter(s => s.action === 'like').map(s => String(s.swiped_id))));
 
       setAllProfiles(availableProfiles);
       // החלה מחדש של פילטרים פעילים
-      setProfiles(availableProfiles.filter(p => matchesPartnerFilters(p, filters)));
+      let displayProfiles = availableProfiles;
+      if (filters.cities.length > 0 || filters.maxBudget < 10000 || filters.minAge > 18 || filters.maxAge < 60 || (filters.kosher && filters.kosher !== 'all') || (filters.shabbat && filters.shabbat !== 'all') || (filters.apartmentStatus && filters.apartmentStatus !== 'all')) {
+        displayProfiles = availableProfiles.filter(p => {
+          if (filters.cities.length > 0) {
+            const profileCities = [];
+            if (Array.isArray(p.search_cities) && p.search_cities.length > 0) profileCities.push(...p.search_cities);
+            if (p.location && typeof p.location === 'string' && p.location.trim()) profileCities.push(p.location.trim());
+            if (!filters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)))) return false;
+          }
+          if (p.budget_max && p.budget_max > filters.maxBudget) return false;
+          if (p.age && (p.age < filters.minAge || p.age > filters.maxAge)) return false;
+          if (filters.kosher && filters.kosher !== 'all') {
+            if (filters.kosher === 'for_or_flow' && p.kosher_preference === 'against') return false;
+            if (filters.kosher === 'against' && p.kosher_preference !== 'against') return false;
+          }
+          if (filters.shabbat && filters.shabbat !== 'all') {
+            if (filters.shabbat === 'for_or_flow' && p.shabbat_preference === 'against') return false;
+            if (filters.shabbat === 'against' && p.shabbat_preference !== 'against') return false;
+          }
+          if (filters.apartmentStatus && filters.apartmentStatus !== 'all') {
+            if ((p.current_status || 'seeking_apartment') !== filters.apartmentStatus) return false;
+          }
+          return true;
+        });
+      }
+      setProfiles(displayProfiles);
       try {
         window.localStorage.setItem('ruumr_discover_marker', `discover-ready:${availableProfiles.length}`);
       } catch {
@@ -419,9 +400,6 @@ function DiscoverPeoplePage() {
       };
 
       await swipeMutation.mutateAsync(swipeData);
-      if (action === 'like') {
-        setLikedUserIds(prev => new Set([...prev, String(swipedProfile.user_id)]));
-      }
       base44.analytics.track({
         eventName: 'profile_swiped',
         properties: {
@@ -483,62 +461,6 @@ function DiscoverPeoplePage() {
     }
   }, [currentIndex, profiles, userProfile, currentUserId, swipeMutation]);
 
-  // Desktop directory: one click on a card is a like. A mutual like is a match,
-  // exactly like a right swipe in the deck.
-  const handleGridLike = useCallback(async (profile) => {
-    const swiperId = currentUserId || userProfile?.user_id;
-    const targetId = profile?.user_id;
-    if (!swiperId || !targetId) return;
-    if (likedUserIds.has(String(targetId))) return;
-
-    setLikedUserIds(prev => new Set([...prev, String(targetId)]));
-    setSwipeSaveError(null);
-
-    try {
-      await Swipe.create({
-        swiper_id: swiperId,
-        swiper_name: userProfile?.name,
-        swiped_id: targetId,
-        swiped_name: profile.name,
-        action: 'like',
-      });
-      base44.analytics.track({
-        eventName: 'profile_swiped',
-        properties: { direction: 'right', target_profile_id: targetId },
-      });
-      trackMixpanel('Swipe', { direction: 'right', target_profile_id: targetId });
-
-      try {
-        const matchResult = await processSwipeMatch({
-          swiperId,
-          swipedId: targetId,
-          action: 'like',
-          origin: window.location.origin,
-        });
-
-        if (matchResult?.match) {
-          base44.analytics.track({
-            eventName: 'match_created',
-            properties: { matched_with_id: targetId },
-          });
-          trackMixpanel('Match Created', { matched_with_id: targetId });
-          setMatchData({ profile1: userProfile, profile2: profile });
-          window.dispatchEvent(new Event('ruumrMatchCreated'));
-        }
-      } catch (matchError) {
-        console.error("Failed to process swipe match:", matchError);
-      }
-    } catch (error) {
-      console.error("Swipe save failed:", error);
-      setLikedUserIds(prev => {
-        const next = new Set(prev);
-        next.delete(String(targetId));
-        return next;
-      });
-      setSwipeSaveError(t("swipe_save_failed"));
-    }
-  }, [currentUserId, userProfile, likedUserIds, t]);
-
   const handleRewind = () => {
     if (currentIndex > 0 && lastSwipes.length > 0) {
       setLastSwipes(prev => prev.slice(0, -1));
@@ -551,7 +473,40 @@ function DiscoverPeoplePage() {
     setFilters(newFilters);
     setDiscoverFilters(newFilters);
     setAllProfiles(currentAll => {
-      const filtered = currentAll.filter(p => matchesPartnerFilters(p, newFilters));
+      const filtered = currentAll.filter(p => {
+        if (newFilters.cities.length > 0) {
+          // איחוד search_cities ו-location למערך אחד — לא דורסים אחד את השני
+          const profileCities = [];
+          if (Array.isArray(p.search_cities) && p.search_cities.length > 0) {
+            profileCities.push(...p.search_cities);
+          }
+          if (p.location && typeof p.location === 'string' && p.location.trim()) {
+            profileCities.push(p.location.trim());
+          }
+          const match = newFilters.cities.some(c => profileCities.some(pc => pc.includes(c) || c.includes(pc)));
+          if (!match) return false;
+        }
+        if (p.budget_max && p.budget_max > newFilters.maxBudget) return false;
+        if (p.age && (p.age < newFilters.minAge || p.age > newFilters.maxAge)) return false;
+        if (newFilters.kosher && newFilters.kosher !== 'all') {
+          if (newFilters.kosher === 'for_or_flow') {
+            if (p.kosher_preference && p.kosher_preference === 'against') return false;
+          } else if (newFilters.kosher === 'against') {
+            if (p.kosher_preference && p.kosher_preference !== 'against') return false;
+          }
+        }
+        if (newFilters.shabbat && newFilters.shabbat !== 'all') {
+          if (newFilters.shabbat === 'for_or_flow') {
+            if (p.shabbat_preference && p.shabbat_preference === 'against') return false;
+          } else if (newFilters.shabbat === 'against') {
+            if (p.shabbat_preference && p.shabbat_preference !== 'against') return false;
+          }
+        }
+        if (newFilters.apartmentStatus && newFilters.apartmentStatus !== 'all') {
+          if ((p.current_status || 'seeking_apartment') !== newFilters.apartmentStatus) return false;
+        }
+        return true;
+      });
       setCurrentIndex(0);
       setProfiles(filtered);
       return currentAll; // לא משנים את allProfiles עצמו בפילטור
@@ -587,8 +542,8 @@ function DiscoverPeoplePage() {
         <div
           className="absolute left-0 right-0"
           style={{
-            top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
-            bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+            top: 'calc(100px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
           }}
         >
           <LockedProfilePreview onComplete={() => navigate(createPageUrl('Onboarding'))} />
@@ -622,108 +577,88 @@ function DiscoverPeoplePage() {
     );
   }
 
-  // The filter sheet lives here so both the deck and the desktop grid can open it.
-  const filterSheet = <DiscoverFilters filters={filters} onChange={applyFilters} />;
-
   return (
-    <>
-      <div className="hidden lg:block">
-        {swipeSaveError && (
-          <div className="mx-auto mt-6 max-w-[520px] rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-sm" role="alert">
-            {swipeSaveError}
-          </div>
-        )}
-        <AnimatePresence>
-          {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
-        </AnimatePresence>
-        <PartnersGrid
-          profiles={partnersPool.filter(p => matchesPartnerFilters(p, filters))}
-          likedUserIds={likedUserIds}
-          onLike={handleGridLike}
-          onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }}
-        />
-      </div>
-      {filterSheet}
-      <div className="desktop-discover-stage fixed inset-0 w-full overflow-hidden lg:hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
-        {swipeSaveError && (
-          <div
-            className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
-            role="alert"
+    <div className="desktop-discover-stage fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+      {swipeSaveError && (
+        <div
+          className="fixed top-20 left-4 right-4 z-[160] mx-auto max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700 shadow-lg"
+          role="alert"
+        >
+          {swipeSaveError}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
+      </AnimatePresence>
+
+      {showCharterSelector && (
+        <CharterMatchSelector onClose={() => setShowCharterSelector(false)} />
+      )}
+
+      <AnimatePresence>
+        {actionFeedback && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
           >
-            {swipeSaveError}
-          </div>
-        )}
-
-        <AnimatePresence>
-          {matchData && <MatchAnimation {...matchData} onDismiss={() => setMatchData(null)} />}
-        </AnimatePresence>
-
-        {showCharterSelector && (
-          <CharterMatchSelector onClose={() => setShowCharterSelector(false)} />
-        )}
-
-        <AnimatePresence>
-          {actionFeedback && (
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[150]"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+              className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
+                actionFeedback === 'like' 
+                  ? 'bg-red-500' 
+                  : 'bg-black'
+              }`}
             >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5 }}
-                className={`w-32 h-32 rounded-full flex items-center justify-center shadow-2xl ${
-                  actionFeedback === 'like' 
-                    ? 'bg-red-500' 
-                    : 'bg-black'
-                }`}
-              >
-                {actionFeedback === 'like' ? (
-                  <Heart className="w-16 h-16 text-white" fill="white" />
-                ) : (
-                  <X className="w-16 h-16 text-white" strokeWidth={4} />
-                )}
-              </motion.div>
+              {actionFeedback === 'like' ? (
+                <Heart className="w-16 h-16 text-white" fill="white" />
+              ) : (
+                <X className="w-16 h-16 text-white" strokeWidth={4} />
+              )}
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <DiscoverFilters filters={filters} onChange={applyFilters} />
+
+      {/* Card — full screen from header to bottom nav */}
+      <div
+        className="desktop-discover-card absolute left-0 right-0"
+        style={{
+          top: 'calc(100px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+        }}
+      >
+        <AnimatePresence mode="popLayout">
+          {hasProfiles ? (
+            profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
+              <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
+                <div className="absolute inset-0">
+                  <ProfileCard
+                    profile={profile}
+                    onSwipe={handleSwipe}
+                    onSwipeIntent={handleSwipeIntent}
+                    isActive={true}
+                  />
+                </div>
+              </ErrorBoundary>
+            ))
+          ) : (
+            <EmptyDeckState onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} />
           )}
         </AnimatePresence>
-
-        {/* Card — full screen from header to bottom nav */}
-        <div
-          className="desktop-discover-card absolute left-0 right-0"
-          style={{
-            top: 'calc(var(--app-header-h) + 52px + env(safe-area-inset-top, 0px))',
-            bottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
-          }}
-        >
-          <AnimatePresence mode="popLayout">
-            {hasProfiles ? (
-              profiles.slice(currentIndex, currentIndex + 1).map((profile) => (
-                <ErrorBoundary key={`${profile.id || profile.user_id}-${currentIndex}`} onSkip={() => handleSwipe('dislike')}>
-                  <div className="absolute inset-0">
-                    <ProfileCard
-                      profile={profile}
-                      onSwipe={handleSwipe}
-                      onSwipeIntent={handleSwipeIntent}
-                      isActive={true}
-                    />
-                  </div>
-                </ErrorBoundary>
-              ))
-            ) : (
-              <EmptyDeckState onRefresh={() => { try { localStorage.removeItem('ruumr_seen_user_ids'); } catch {} loadData(); }} />
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Action buttons — floating above nav bar */}
-        {hasProfiles && (
-          <div className="desktop-discover-actions fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
-            <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
-          </div>
-        )}
       </div>
-    </>
+
+      {/* Action buttons — floating above nav bar */}
+      {hasProfiles && (
+        <div className="desktop-discover-actions fixed w-full flex justify-center z-20" style={{ bottom: 'calc(max(16px, var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))) + 100px)' }}>
+          <ActionButtons onDislike={() => handleSwipe("dislike")} onLike={() => handleSwipe("like")} onRewind={handleRewind} />
+        </div>
+      )}
+    </div>
   );
 }

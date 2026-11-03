@@ -9,9 +9,7 @@ import { Capacitor } from "@capacitor/core";
 import { User, Settings, Home, Smartphone, Bookmark, MessageCircle, HeartHandshake, Sparkles, Plus, Lock, SlidersHorizontal } from "lucide-react";
 
 import LanguageToggle from "./components/shared/LanguageToggle";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
-import SiteFooter from "./components/desktop/SiteFooter";
 
 import { User as UserEntity } from "@/entities/User";
 import { useState, useEffect, useRef } from "react";
@@ -295,7 +293,7 @@ export default function Layout({ children, currentPageName }) {
   ].filter(Boolean);
 
   const shouldShowNav = !['Onboarding', 'Chat', 'ProfileView', 'Charter', 'Verification', 'Banned'].includes(currentPageName);
-  const appShellWidthClass = "w-full max-w-md md:max-w-3xl lg:max-w-[1280px] mx-auto";
+  const appShellWidthClass = "w-full max-w-md md:max-w-5xl mx-auto";
 
   // Check for bad photos (blob URLs) and prompt user
   const [showPhotoError, setShowPhotoError] = useState(false);
@@ -325,7 +323,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 lg:bg-warm-canvas antialiased overscroll-none flex flex-col" dir={i18n.dir()}>
+    <div className="min-h-[100dvh] bg-gray-100 dark:bg-gray-900 antialiased overscroll-none" dir={i18n.dir()}>
         {showPhotoError && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm text-center shadow-2xl">
@@ -362,107 +360,12 @@ export default function Layout({ children, currentPageName }) {
             Capacitor platform, so it fell into the wide-screen branch. The
             chrome is shared across sizes, while the content shell widens on
             tablet so iPad screens do not render as a narrow phone column. */}
-        <div className="flex min-h-[100dvh] flex-col">
+        <div>
             {shouldShowNav && (
-               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60] lg:bg-warm-header" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-                {/* Desktop chrome: a single, calm top bar — brand on the reading
-                    start, plain text section links with an underline on the active
-                    one, and one tidy cluster of controls at the far end. Settings
-                    moved into the account menu so the bar is not a row of loose
-                    round icons. */}
-                <div dir="rtl" className="hidden lg:block">
-                    <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center gap-7 px-8">
-                        <Link to="/" className="flex shrink-0 select-none items-center">
-                            <img src="/ruumr-wordmark.svg" alt="Ruumr" className="h-7 w-auto dark:invert" />
-                        </Link>
-
-                        {/* One nav row: only the destinations that matter. Everything
-                            secondary lives in the account menu, so the bar reads as
-                            brand → sections → one action → account. */}
-                        <nav className="flex items-center gap-1">
-                            {navigationItems.filter((item) => item.id !== 'plus' && item.id !== 'add-room').map((item) => {
-                                const pathOnly = item.path.split('?')[0];
-                                const active = location.pathname === pathOnly ||
-                                    (item.id === 'discover' && (location.pathname === '/' || currentPageName === 'Discover'));
-                                const locked = tabsLocked && item.id === 'matches';
-                                return (
-                                    <Link
-                                        key={item.id}
-                                        to={locked ? "/login" : item.path}
-                                        aria-label={item.name}
-                                        className={`relative inline-flex h-9 items-center gap-2 rounded-full px-4 text-[15px] font-semibold transition-colors ${
-                                            active
-                                                ? 'bg-white text-[--theme-orange] shadow-sm dark:bg-gray-800'
-                                                : 'text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                                        }`}
-                                    >
-                                        <span>{item.name}</span>
-                                        {item.badgeCount > 0 && (
-                                            <span className="min-w-[18px] rounded-full bg-[--theme-orange] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                                                {item.badgeCount}
-                                            </span>
-                                        )}
-                                    </Link>
-                                );
-                            })}
-                        </nav>
-
-                        <div className="ms-auto flex items-center gap-2">
-                            <LanguageToggle />
-                            <Link
-                                to={isAuthenticated ? "/AddRoom" : "/register?next=AddRoom"}
-                                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[--theme-orange] px-5 text-[14.5px] font-bold text-white shadow-sm transition hover:brightness-95"
-                            >
-                                <Plus className="h-4 w-4" strokeWidth={2.75} />
-                                <span>{rt('הוספת חדר')}</span>
-                            </Link>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button type="button" aria-label={rt('hub.account')} className="flex items-center rounded-full">
-                                        {isAuthenticated && accountPhoto ? (
-                                            <img
-                                                src={accountPhoto}
-                                                alt=""
-                                                className="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
-                                            />
-                                        ) : (
-                                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
-                                                <User className="h-5 w-5 text-gray-500" />
-                                            </span>
-                                        )}
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem asChild>
-                                        <Link to={!isAuthenticated?"/login":hasProfile?"/Profile":"/RoomAccount"}>
-                                            {rt('hub.account')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    {hasProfile && (
-                                        <DropdownMenuItem asChild>
-                                            <Link to="/SavedRooms">{rt('hub.saved_rooms')}</Link>
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem asChild>
-                                        <Link to={createPageUrl("RuumrPlus")}>Ruumr Plus</Link>
-                                    </DropdownMenuItem>
-                                    {isPartnersTab && hasProfile && (
-                                        <DropdownMenuItem onSelect={() => window.dispatchEvent(new Event('openDiscoverFilters'))}>
-                                            {rt('hub.filters')}
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem asChild>
-                                        <Link to={createPageUrl("Settings")}>{t("settings")}</Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </div>
-                </div>
-
+               <header className="bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
                 {/* Pinned dir so the header controls keep fixed positions and don't
                     swap sides when the user switches language (logo stays centered). */}
-                <div dir="rtl" className={`${appShellWidthClass} lg:hidden flex items-center justify-between h-12 relative`}>
+                <div dir="rtl" className={`${appShellWidthClass} flex items-center justify-between h-12 relative`}>
 
         {/* קבוצה ימין — קבועה בכל הטאבים (הגדרות + החלפת שפה) כדי שהכפתורים
             לא יזוזו ושיישאר מרווח מספק מהלוגו במרכז. */}
@@ -507,15 +410,13 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* 4. הקטנו את הריווח העליון של המיין כדי שהתמונה תעלה למעלה */}
-            <main className={`${appShellWidthClass} flex-1 bg-gray-50 dark:bg-gray-900 lg:max-w-[1280px] lg:bg-warm-canvas`} style={shouldShowNav ? { paddingTop: 'calc(var(--app-header-h) + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(var(--app-nav-h) + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
+            <main className={`${appShellWidthClass} bg-gray-50 dark:bg-gray-900`} style={shouldShowNav ? { paddingTop: 'calc(48px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))' } : undefined}>
 
                 {children}
             </main>
 
-            {shouldShowNav && <SiteFooter />}
-
             {shouldShowNav && (
-                <nav className="desktop-app-nav lg:hidden fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
+                <nav className="desktop-app-nav fixed left-0 right-0 bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-50 border-t border-gray-100 dark:border-gray-800" style={{ paddingBottom: 'var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px))' }}>
                     <div className={`${appShellWidthClass} flex items-center justify-around py-2`}>
                     {navigationItems.map((item) => {
                         if(item.spacer)return <div key="spacer" className="flex-1" aria-hidden="true"/>;

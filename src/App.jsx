@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import './App.css'
@@ -21,6 +21,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
 import { isRuumrNativeDemoSession } from '@/lib/simulatorMode';
@@ -140,7 +141,7 @@ const AuthenticatedApp = () => {
         {/* Home is the roommates (people) experience. It requires sign-in: guests
             get the partner gate with sign-in / registration links there. Room
             browsing stays public at /Rooms. */}
-        <Route path="/" element={<Navigate to="/Rooms" replace />} />
+        <Route path="/" element={<Navigate to="/Discover?view=people" replace />} />
         <Route path="/LikesYou" element={<Navigate to="/Inbox?tab=likes" replace/>}/><Route path="/Matches" element={<Navigate to="/Inbox" replace/>}/><Route path="/AddRoom" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="AddRoom"><AddRoom/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
         <Route path="/RoomAccount" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="RoomAccount"><RoomAccount/></LayoutWrapper></Suspense>:<Navigate to="/register?next=AddRoom" replace/>}/>
 <Route path="/SavedRooms" element={isAuthenticated?<Suspense fallback={<PageLoader/>}><LayoutWrapper currentPageName="SavedRooms"><SavedRooms/></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>}/>
@@ -194,10 +195,11 @@ function App() {
 
   const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform();
   const isNativeWebView = isNativePlatform;
-  // The branded splash is for the native apps only (they launch with it from the
-  // store build). The desktop/mobile web app boots straight into the UI.
-  const [splashDone] = useState(true);
+  const [splashDone, setSplashDone] = useState(() => isNativeWebView);
   const [nativeBootstrapDone, setNativeBootstrapDone] = useState(() => !isNativeWebView);
+  const handleSplashDone = useCallback(() => {
+    setSplashDone(true);
+  }, []);
 
   useEffect(() => {
     if (!isNativeWebView) {
@@ -242,6 +244,7 @@ function App() {
   return (
     <>
       {writeBootMarker('app-render')}
+      {!isNativePlatform && !splashDone && <SplashScreen onDone={handleSplashDone} />}
       {splashDone && !nativeBootstrapDone && isNativeWebView && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ backgroundColor: "#F14D16" }}>
           <div className="flex flex-col items-center gap-2">
