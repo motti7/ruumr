@@ -21,6 +21,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import Unsubscribe from '@/pages/Unsubscribe';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
@@ -106,7 +107,7 @@ const AuthenticatedApp = () => {
 
   // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered' && !['/','/Rooms','/Discover','/login','/register'].includes(location.pathname)) {
+    if (authError.type === 'user_not_registered' && !['/','/Rooms','/Discover','/login','/register','/unsubscribe'].includes(location.pathname)) {
       writeBootMarker('authenticated-app-user-not-registered');
       return <UserNotRegisteredError />;
     }
@@ -131,6 +132,8 @@ const AuthenticatedApp = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Public email unsubscribe page — reached signed out from an email footer link */}
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
         {/* Public review link — external, non-registered reviewers land here without logging in */}
         <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
         <Route path="/PublicProfile" element={<Suspense fallback={<PageLoader />}><PublicProfile /></Suspense>} />
