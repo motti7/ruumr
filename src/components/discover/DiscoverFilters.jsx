@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, MapPin, Home, Search } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { showsReligiousPreferences } from "@/lib/userRegion";
+
+// Religion / kosher / Shabbat filters exist in the Israeli marketplace only.
+const SHOW_RELIGIOUS_FILTERS = showsReligiousPreferences();
 
 const ISRAEL_CITIES = [
   "תל אביב", "ירושלים", "חיפה", "ראשון לציון", "פתח תקווה", "אשדוד", "נתניה", "באר שבע",
@@ -33,8 +37,8 @@ export default function DiscoverFilters({ filters, onChange }) {
     local.cities?.length > 0,
     local.maxBudget < 10000,
     local.minAge > 18 || local.maxAge < 50,
-    local.kosher && local.kosher !== 'all',
-    local.shabbat && local.shabbat !== 'all',
+    SHOW_RELIGIOUS_FILTERS && local.kosher && local.kosher !== 'all',
+    SHOW_RELIGIOUS_FILTERS && local.shabbat && local.shabbat !== 'all',
     local.apartmentStatus && local.apartmentStatus !== 'all',
   ].filter(Boolean).length;
 
@@ -193,7 +197,9 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </div>
               </div>
 
-              {/* Kosher */}
+              {/* Kosher + Shabbat — Israeli marketplace only */}
+              {SHOW_RELIGIOUS_FILTERS && (
+              <>
               <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-2 block">{t("onb_kosher_label")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
@@ -213,7 +219,6 @@ export default function DiscoverFilters({ filters, onChange }) {
                 </div>
               </div>
 
-              {/* Shabbat */}
               <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">
                 <label className="text-sm font-bold text-gray-700 mb-2 block">{t("shabbat_observance")}</label>
                 <div className="flex bg-gray-100 p-1 rounded-xl">
@@ -232,6 +237,8 @@ export default function DiscoverFilters({ filters, onChange }) {
                   ))}
                 </div>
               </div>
+              </>
+              )}
 
               {/* Age Range */}
               <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 mb-4">

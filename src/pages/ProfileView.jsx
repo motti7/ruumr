@@ -17,6 +17,7 @@ import WriteReviewModal from '../components/reviews/WriteReviewModal';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
+import { showsReligiousPreferences } from '@/lib/userRegion';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
@@ -218,6 +219,8 @@ export default function ProfileViewPage() {
     }
   };
 
+  // Religion / kosher / Shabbat are Israeli-marketplace fields.
+  const showsReligion = showsReligiousPreferences();
   const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
   const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
   const vibeText = [t("vibe_lvl_quiet"), t("vibe_lvl_relaxed"), t("vibe_balanced"), t("vibe_lvl_social"), t("vibe_lvl_lively")];
@@ -517,22 +520,28 @@ export default function ProfileViewPage() {
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <h4 className="font-bold text-lg mb-3">{t("more_details")}</h4>
           <div className="grid grid-cols-2 gap-3">
+            {showsReligion && (
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("religion_short")}</span>
               <span className="font-semibold text-gray-900">{profile.religion ? religionText[profile.religion] : '-'}</span>
             </div>
+            )}
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("vibe_label_short")}</span>
               <span className="font-semibold text-gray-900">{profile.vibe_level ? vibeText[profile.vibe_level - 1] : '-'}</span>
             </div>
+            {showsReligion && (
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("onb_kosher_label")}</span>
               <span className="font-semibold text-gray-900">{profile.kosher_preference ? preferenceText[profile.kosher_preference] : '-'}</span>
             </div>
+            )}
+            {showsReligion && (
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("shabbat_short")}</span>
               <span className="font-semibold text-gray-900">{profile.shabbat_preference ? preferenceText[profile.shabbat_preference] : '-'}</span>
             </div>
+            )}
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("budget_word")}</span>
               <span className="font-semibold text-[--theme-orange]">{profile.budget_max != null ? `₪${profile.budget_max.toLocaleString()}` : '-'}</span>

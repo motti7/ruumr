@@ -35,7 +35,7 @@ import {
   isRuumrSimulatorMode } from
 '@/lib/simulatorMode';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
-import { isUKRegion } from '@/lib/userRegion';
+import { isUKRegion, showsReligiousPreferences } from '@/lib/userRegion';
 import LanguageToggle from '@/components/shared/LanguageToggle';
 
 const TOTAL_STEPS = 7;
@@ -88,6 +88,8 @@ export default function OnboardingPage() {
   const appleNameBackgroundDelaysMs = [8000, 16000, 30000];
   const simulatorMode = isRuumrSimulatorMode();
   const isUK = isUKRegion();
+  // Religion / kosher / Shabbat are asked in Israel only.
+  const showsReligion = showsReligiousPreferences();
   const [step, setStep] = useState(() => location.state?.resumeStep ?? 1);
   const [formData, setFormData] = useState(() => (/** @type {any} */
   createProfileDefaults(
@@ -406,8 +408,8 @@ export default function OnboardingPage() {
         // silent fail - tracking is non-critical
       }};trackStep();}, [step]);const canProceed = () => {switch (step) {case 1:{// Basic Info + Vibe
           const hasName = !!(formData.name.trim() || appleDisplayName.trim());const hasAge = Number(formData.age) >= 18;const hasGender = !!formData.gender;const hasVibe = !!formData.vibe_level;console.log('[onboarding] step1 canProceed:', { hasName, hasAge, hasVibe, hasGender, name: formData.name, age: formData.age, gender: formData.gender, vibe_level: formData.vibe_level });return hasName && hasAge && hasGender && hasVibe;}case 2: // Status + Location + Budget (combined)
-        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged) — kosher & Shabbat are Israel-only preferences
-        return formData.looking_for_gender && formData.religion && (!isUK ? (formData.kosher_preference && formData.shabbat_preference) : true) && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
+        return formData.current_status !== '' && formData.search_cities.length > 0 && formData.budget_max > 0;case 3: // Preferences + Pets (merged) — religion, kosher & Shabbat are Israel-only
+        return formData.looking_for_gender && (!showsReligion || (formData.religion && formData.kosher_preference && formData.shabbat_preference)) && formData.pet_type && (formData.pet_type !== 'other' || formData.pet_other_description.trim());case 4: // Apartment Details - Conditional
         if (simulatorMode) {return true;}if (formData.current_status === 'has_apartment') {const apartmentPhotoCount = formData.apartment_photos?.filter((p) => p).length || 0;return apartmentPhotoCount >= 3 && formData.existing_roommates >= 0 && formData.apartment_total_budget > 0;}return true;case 5: // Interests + About + Looking For — typing in "About me" is enough to proceed
         return formData.about_me.trim();case 6: // Photos
         if (simulatorMode) {return true;}return formData.photos.filter((p) => p).length >= 2;case 7: // Final step
@@ -969,7 +971,8 @@ export default function OnboardingPage() {
                         </div>
                     </div>
 
-                    {/* זיקה לדת */}
+                    {/* זיקה לדת — Israel-only */}
+                    {showsReligion && (
                     <div>
                         <CustomSelect
                   label={t("onb_religion_label")}
@@ -983,9 +986,10 @@ export default function OnboardingPage() {
                   { v: 'haredi', l: t('religion_haredi') }]
                   } />
                     </div>
+                    )}
 
-                    {/* כשרות + שבת — Israel-only, hidden for UK users */}
-                    {isUK ? null : (
+                    {/* כשרות + שבת — Israel-only */}
+                    {showsReligion && (
                     <div className="grid grid-cols-2 gap-4">
                         <CustomSelect
                   label={t("onb_kosher_label")}

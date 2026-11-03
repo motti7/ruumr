@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import SmartImage from '@/components/shared/SmartImage';
 import ShareReviewLinkButton from '@/components/reviews/ShareReviewLinkButton';
 import { createProfileDefaults } from '@/lib/profileDefaults';
+import { showsReligiousPreferences } from '@/lib/userRegion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { INTEREST_OPTIONS, normalizeInterestValues } from '@/lib/interests';
 
@@ -59,6 +60,8 @@ function normalizeProfileCities(profile = {}) {
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  // Religion / kosher / Shabbat exist in the Israeli marketplace only.
+  const showsReligion = showsReligiousPreferences();
   const [profile, setProfile] = useState(/** @type {any} */ (null));
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -630,6 +633,8 @@ export default function ProfilePage() {
                   )}
               </div>
 
+              {showsReligion && (
+              <>
               <h3 className="font-bold text-gray-800 mb-3 text-start">{t("religion_tradition_section")}</h3>
               <div className="space-y-3">
                   <div>
@@ -682,6 +687,8 @@ export default function ProfilePage() {
                       </div>
                   </div>
               </div>
+              </>
+              )}
             </div>
 
             <div>

@@ -12,9 +12,12 @@ import { preloadImages } from '@/lib/imageCache';
 import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesGrid';
 import { getInterestLabel, getInterestLabelKey, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
+import { showsReligiousPreferences } from '@/lib/userRegion';
 
 const ProfileDetail = ({ profile, onClose }) => {
   const { t } = useTranslation();
+  // Religion / kosher / Shabbat are Israeli-marketplace fields.
+  const showsReligion = showsReligiousPreferences();
   const interestLabel = (v) => { const k = getInterestLabelKey(v); return k ? t(k) : getInterestLabel(v); };
   const religionText = { secular: t("religion_secular"), traditional: t("religion_traditional"), national_religious: t("religion_national_religious"), religious: t("religion_religious"), haredi: t("religion_haredi") };
   const preferenceText = { for: t("pref_for"), against: t("pref_against"), flow: t("pref_flexible") };
@@ -131,22 +134,28 @@ const ProfileDetail = ({ profile, onClose }) => {
 
 
                 <div className="grid grid-cols-2 gap-3" role="list">
+                    {showsReligion && (
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">{t("religion_short")}</span>
                         <span className="font-bold text-white text-base" aria-label={t("religiosity_aria", { value: religionText[profile.religion] || t("not_specified") })}>{religionText[profile.religion] || '-'}</span>
                     </div>
+                    )}
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">{t("vibe_label_short")}</span>
                         <span className="font-bold text-white text-base" aria-label={t("vibe_aria", { value: vibeText[profile.vibe_level - 1] || t("not_specified") })}>{vibeText[profile.vibe_level - 1] || '-'}</span>
                     </div>
+                    {showsReligion && (
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">{t("onb_kosher_label")}</span>
                         <span className="font-bold text-white text-base" aria-label={t("kosher_aria", { value: preferenceText[profile.kosher_preference] || t("not_specified") })}>{preferenceText[profile.kosher_preference] || '-'}</span>
                     </div>
+                    )}
+                    {showsReligion && (
                     <div className="bg-white/15 backdrop-blur-sm p-4 rounded-xl" role="listitem">
                         <span className="text-white/70 block text-sm mb-1">{t("shabbat_short")}</span>
                         <span className="font-bold text-white text-base" aria-label={t("shabbat_aria", { value: preferenceText[profile.shabbat_preference] || t("not_specified") })}>{preferenceText[profile.shabbat_preference] || '-'}</span>
                     </div>
+                    )}
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl flex items-center justify-between">

@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { getPublicProfile } from "@/functions/getPublicProfile";
 import { INTEREST_OPTIONS } from "@/lib/interests";
+import { showsReligiousPreferences } from "@/lib/userRegion";
 
 const VIBE_LABELS = [
   "vibe_lvl_quiet",
@@ -48,6 +49,8 @@ function PrefChip({ label, value }) {
 
 export default function PublicProfile() {
   const { t, i18n } = useTranslation();
+  // Religion / kosher / Shabbat are Israeli-marketplace fields.
+  const showsReligion = showsReligiousPreferences();
   const [userId, setUserId] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -245,13 +248,13 @@ export default function PublicProfile() {
         <section className="px-4 mt-5">
           <h3 className="text-sm font-bold text-gray-500 mb-2">{t("public_home_habits")}</h3>
           <div className="grid grid-cols-2 gap-2">
-            {profile.religion && (
+            {showsReligion && profile.religion && (
               <PrefChip label={t("onb_religion_label")} value={t(RELIGION_LABELS[profile.religion] || "not_specified")} />
             )}
-            {profile.kosher_preference && (
+            {showsReligion && profile.kosher_preference && (
               <PrefChip label={t("onb_kosher_label")} value={profile.kosher_preference === "for" ? t("pref_for") : profile.kosher_preference === "against" ? t("pref_against") : t("pref_flexible")} />
             )}
-            {profile.shabbat_preference && (
+            {showsReligion && profile.shabbat_preference && (
               <PrefChip label={t("shabbat_observance")} value={profile.shabbat_preference === "for" ? t("pref_for") : profile.shabbat_preference === "against" ? t("pref_against") : t("pref_flexible")} />
             )}
             {profile.pet_type && profile.pet_type !== "none" && (

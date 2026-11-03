@@ -14,14 +14,21 @@ export const REGIONS = {
   ISRAEL: 'IL',
   UK: 'GB',
   IRELAND: 'IE',
+  // Any market without its own configuration yet (e.g. the United States).
+  // Treated as "not Israel": English defaults, no religion/kosher/Shabbat.
+  INTERNATIONAL: 'INTL',
 };
 
 export function detectRegion() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (!tz) return null;
     if (tz === 'Asia/Jerusalem') return REGIONS.ISRAEL;
     if (tz === 'Europe/London') return REGIONS.UK;
     if (tz === 'Europe/Dublin') return REGIONS.IRELAND;
+    // A real timezone that is none of the above means the user is outside
+    // Israel — never assume the Israeli marketplace for them.
+    return REGIONS.INTERNATIONAL;
   } catch {
     // Timezone API unavailable; fall back below.
   }
@@ -34,6 +41,7 @@ export function getStoredRegion() {
     if (v === REGIONS.UK) return REGIONS.UK;
     if (v === REGIONS.ISRAEL) return REGIONS.ISRAEL;
     if (v === REGIONS.IRELAND) return REGIONS.IRELAND;
+    if (v === REGIONS.INTERNATIONAL) return REGIONS.INTERNATIONAL;
   } catch {
     // Storage unavailable; fall back to detection.
   }
@@ -69,5 +77,11 @@ export function isIrelandRegion() {
 }
 
 export function isIsraelRegion() {
+  return resolveRegion() === REGIONS.ISRAEL;
+}
+
+// Religion, kosher and Shabbat preferences belong to the Israeli marketplace
+// only. Every other market (UK, Ireland, US, everywhere else) hides them.
+export function showsReligiousPreferences() {
   return resolveRegion() === REGIONS.ISRAEL;
 }
