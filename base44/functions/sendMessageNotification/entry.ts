@@ -1,6 +1,24 @@
 import { isBlocked } from '../../shared/userSafety.ts';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { sendServerPush } from '../../shared/serverPush.ts';
+import { resolveRecipientLanguage } from '../../shared/recipientLanguage.ts';
+
+// Copy for both languages. Emails and pushes go out in the receiver's language.
+function buildMessageCopy(lang, { senderName, content }) {
+  if (lang === 'en') {
+    return {
+      pushTitle: `💬 New message from ${senderName}`,
+      subject: `💬 New message from ${senderName} on Ruumr`,
+      body: `Hi!<br><br>${senderName} sent you a message on Ruumr:<br><br><strong>"${content.substring(0, 200)}"</strong><br><br>Open the app to reply 🏠<br><br>The Ruumr team`,
+    };
+  }
+
+  return {
+    pushTitle: `💬 הודעה חדשה מ-${senderName}`,
+    subject: `💬 הודעה חדשה מ-${senderName} ב-Ruumr`,
+    body: `שלום!<br><br>${senderName} שלח/ה לך הודעה ב-Ruumr:<br><br><strong>"${content.substring(0, 200)}"</strong><br><br>היכנס/י לאפליקציה כדי לענות 🏠<br><br>צוות Ruumr`,
+  };
+}
 
 Deno.serve(async (req) => {
     try {
@@ -75,9 +93,15 @@ Deno.serve(async (req) => {
             }
         }
 
+        // Receiver profile drives the notification language (their saved choice,
+        // otherwise their marketplace: Israel = Hebrew, everywhere else = English).
+        const receiverProfiles = await base44.asServiceRole.entities.Profile.filter({ user_id: receiver_id });
+        const receiverProfile = receiverProfiles[0];
+        const lang = resolveRecipientLanguage(receiverProfile);
+
         // Get sender profile for name
         const senderProfiles = await base44.asServiceRole.entities.Profile.filter({ user_id: sender_id });
-        const senderName = senderProfiles[0]?.name || 'מישהו';
+        const senderName = senderProfiles[0]?.name || (lang === 'en' ? 'Someone' : 'מישהו');
 
         // Get receiver email
         const allUsers = await base44.asServiceRole.entities.User.list();
@@ -89,12 +113,14 @@ Deno.serve(async (req) => {
             return Response.json({ success: true, skipped: true });
         }
 
+        const copy = buildMessageCopy(lang, { senderName, content });
+
         // Send push notification (platform built-in SendPushNotification)
         try {
             await sendServerPush(
                 base44,
                 receiver_id,
-                `💬 הודעה חדשה מ-${senderName}`,
+                copy.pushTitle,
                 content.substring(0, 100)
             );
         } catch (e) {
@@ -106,10 +132,10 @@ Deno.serve(async (req) => {
             try {
                 await base44.asServiceRole.integrations.Core.SendEmail({
                     to: receiverUser.email,
-                    subject: `💬 הודעה חדשה מ-${senderName} ב-Ruumr`,
-                    body: `שלום!<br><br>${senderName} שלח/ה לך הודעה ב-Ruumr:<br><br><strong>"${content.substring(0, 200)}"</strong><br><br>היכנס/י לאפליקציה כדי לענות 🏠<br><br>צוות Ruumr`
+                    subject: copy.subject,
+                    body: copy.body
                 });
-                console.log(`✅ Email notification sent to ${receiverUser.email}`);
+                console.log(`✅ Email notification sent to ${receiverUser.email} (lang=${lang})`);
             } catch (e) {
                 console.error(`❌ Failed to send email:`, e);
             }

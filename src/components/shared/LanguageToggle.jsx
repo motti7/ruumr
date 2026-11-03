@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { persistLanguagePreference } from "@/lib/languagePreference";
 
 // Compact header control that flips the app between Hebrew and English.
 // The label shows the language the user will switch *to*, matching the common
@@ -12,6 +13,9 @@ export default function LanguageToggle({ className = "" }) {
 
   const handleToggle = () => {
     i18n.changeLanguage(nextLang);
+    // Remember the choice on the profile so emails and push notifications go
+    // out in the same language the app is used in.
+    void persistLanguagePreference(nextLang);
   };
 
   return (

@@ -36,34 +36,12 @@ export const UK_CITIES = [
   "Winchester", "Salisbury", "Durham", "Lincoln", "Carlisle"
 ].sort();
 
-// Major US metros, NYC boroughs and the college towns roommates search most.
+// The US marketplace launches with a focused list of major metros. The same
+// list backs the onboarding city picker, the profile edit picker and the
+// Discover city filter, so "search area" stays consistent everywhere.
 export const US_CITIES = [
-  "New York", "Brooklyn", "Queens", "Manhattan", "Bronx", "Jersey City", "Hoboken",
-  "Los Angeles", "San Francisco", "San Diego", "San Jose", "Oakland", "Berkeley",
-  "Sacramento", "Fresno", "Long Beach", "Santa Monica", "Pasadena", "Irvine",
-  "Anaheim", "Riverside", "Santa Ana", "Chula Vista", "Stockton", "Modesto",
-  "Chicago", "Evanston", "Naperville", "Houston", "Austin", "Dallas", "Fort Worth",
-  "Arlington", "Plano", "Irving", "Garland", "San Antonio", "El Paso", "Corpus Christi",
-  "Laredo", "College Station", "Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale",
-  "Gilbert", "Glendale", "Tempe", "Philadelphia", "Pittsburgh", "Allentown",
-  "Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg", "Tallahassee",
-  "Gainesville", "Hialeah", "Fort Lauderdale", "Columbus", "Cleveland", "Cincinnati",
-  "Toledo", "Indianapolis", "Fort Wayne", "Seattle", "Spokane", "Tacoma", "Denver",
-  "Boulder", "Colorado Springs", "Aurora", "Washington", "Arlington", "Boston",
-  "Cambridge", "Somerville", "Worcester", "Baltimore", "Annapolis", "Nashville",
-  "Memphis", "Knoxville", "Chattanooga", "Louisville", "Lexington", "Detroit",
-  "Ann Arbor", "Grand Rapids", "Lansing", "Milwaukee", "Madison", "Minneapolis",
-  "Saint Paul", "Oklahoma City", "Tulsa", "Portland", "Eugene", "Las Vegas",
-  "Henderson", "Reno", "Albuquerque", "Santa Fe", "Salt Lake City", "Provo",
-  "Atlanta", "Athens", "Savannah", "Charlotte", "Raleigh", "Durham", "Greensboro",
-  "Chapel Hill", "Asheville", "Richmond", "Virginia Beach", "Norfolk", "New Orleans",
-  "Baton Rouge", "Birmingham", "Huntsville", "Kansas City", "St. Louis", "Omaha",
-  "Lincoln", "Des Moines", "Wichita", "Boise", "Honolulu", "Anchorage", "Buffalo",
-  "Rochester", "Syracuse", "Albany", "Newark", "New Haven", "Hartford",
-  "Providence", "Portland", "Burlington", "Wilmington", "Charleston", "Columbia",
-  "Little Rock", "Jackson", "Jacksonville", "Fayetteville", "Greenville",
-  "Colorado Springs", "Fort Collins", "Sioux Falls", "Fargo", "Billings",
-  "Cheyenne", "Vancouver", "Salem", "Bakersfield", "Oxnard", "Fontana"
+  "Boston", "Los Angeles", "Chicago", "Washington DC", "Austin", "San Diego",
+  "Miami", "Philadelphia", "Atlanta", "Seattle", "Denver", "Phoenix"
 ].sort();
 
 const CITY_LISTS = {

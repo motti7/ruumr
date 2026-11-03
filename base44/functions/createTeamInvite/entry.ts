@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { isBlocked } from '../../shared/userSafety.ts';
+import { resolveRecipientLanguage } from '../../shared/recipientLanguage.ts';
 
 const APP_URL = 'https://app.ruumrapp.com';
 const TEAM_URL = `${APP_URL}/GroupTracker`;
@@ -52,31 +53,45 @@ async function sendPush({ userId, title, message, data }) {
     }
 }
 
-function buildInviteEmailHtml({ inviterName, inviteeName }) {
-    return `<!doctype html><html dir="rtl"><body style="font-family:Arial,sans-serif;background:#f9fafb;padding:24px;">
+function buildInviteEmailHtml({ inviterName, inviteeName, lang }) {
+    const dir = lang === 'en' ? 'ltr' : 'rtl';
+    const heading = lang === 'en'
+        ? `${inviterName} wants you on their team! 🏠`
+        : `${inviterName} רוצה אותך בצוות! 🏠`;
+    const body = lang === 'en'
+        ? `Hi ${inviteeName || ''}, ${inviterName} is looking for an apartment on Ruumr and would like you to be roommates. Join Ruumr to approve and find a place together.`
+        : `היי ${inviteeName || ''}, ${inviterName} מחפש/ת דירה ב-Ruumr ורוצה שתהיו שותפים. הצטרף/י ל-Ruumr כדי לאשר ולמצוא דירה ביחד.`;
+    const cta = lang === 'en' ? 'Join Ruumr' : 'הצטרף/י ל-Ruumr';
+
+    return `<!doctype html><html dir="${dir}" lang="${lang}"><body style="font-family:Arial,sans-serif;background:#f9fafb;padding:24px;">
   <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;text-align:center;">
-    <h1 style="color:#FA3803;margin:0 0 12px;">${inviterName} רוצה אותך בצוות! 🏠</h1>
+    <h1 style="color:#FA3803;margin:0 0 12px;">${heading}</h1>
     <p style="color:#374151;font-size:16px;line-height:1.6;">
-      היי ${inviteeName || ''}, ${inviterName} מחפש/ת דירה ב-Ruumr ורוצה שתהיו שותפים.
-      הצטרף/י ל-Ruumr כדי לאשר ולמצוא דירה ביחד.
+      ${body}
     </p>
     <a href="${APP_URL}" style="display:inline-block;margin-top:16px;background:#FA3803;color:#fff;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;">
-      הצטרף/י ל-Ruumr
+      ${cta}
     </a>
   </div>
 </body></html>`;
 }
 
-function buildRequestEmailHtml({ inviterName, inviteeName }) {
-    return `<!doctype html><html dir="rtl"><body style="font-family:Arial,sans-serif;background:#f9fafb;padding:24px;">
+function buildRequestEmailHtml({ inviterName, inviteeName, lang }) {
+    const dir = lang === 'en' ? 'ltr' : 'rtl';
+    const heading = lang === 'en' ? 'New team request 🤝' : 'בקשה חדשה לצוות 🤝';
+    const body = lang === 'en'
+        ? `Hi ${inviteeName || ''}, ${inviterName} wants to add you to their team on Ruumr. Open the app to approve or decline.`
+        : `היי ${inviteeName || ''}, ${inviterName} רוצה להוסיף אותך לצוות שלו/ה ב-Ruumr. פתח/י את האפליקציה כדי לאשר או לדחות.`;
+    const cta = lang === 'en' ? 'View request' : 'צפה/י בבקשה';
+
+    return `<!doctype html><html dir="${dir}" lang="${lang}"><body style="font-family:Arial,sans-serif;background:#f9fafb;padding:24px;">
   <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;text-align:center;">
-    <h1 style="color:#FA3803;margin:0 0 12px;">בקשה חדשה לצוות 🤝</h1>
+    <h1 style="color:#FA3803;margin:0 0 12px;">${heading}</h1>
     <p style="color:#374151;font-size:16px;line-height:1.6;">
-      היי ${inviteeName || ''}, ${inviterName} רוצה להוסיף אותך לצוות שלו/ה ב-Ruumr.
-      פתח/י את האפליקציה כדי לאשר או לדחות.
+      ${body}
     </p>
     <a href="${TEAM_URL}" style="display:inline-block;margin-top:16px;background:#FA3803;color:#fff;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;">
-      צפה/י בבקשה
+      ${cta}
     </a>
   </div>
 </body></html>`;
@@ -162,10 +177,16 @@ Deno.serve(async (req) => {
                 status: 'pending_approval',
             });
 
+            // The recipient's own language drives their push and email.
+            const inviteeProfiles = await sr.Profile.filter({ user_id: existingUser.id });
+            const inviteeLang = resolveRecipientLanguage(inviteeProfiles[0]);
+
             await sendPush({
                 userId: existingUser.id,
-                title: '🤝 בקשה חדשה לצוות',
-                message: `${inviterName} רוצה להוסיף אותך לצוות`,
+                title: inviteeLang === 'en' ? '🤝 New team request' : '🤝 בקשה חדשה לצוות',
+                message: inviteeLang === 'en'
+                    ? `${inviterName} wants to add you to their team`
+                    : `${inviterName} רוצה להוסיף אותך לצוות`,
                 data: { type: 'team_invite', invite_id: invite.id },
             });
 
@@ -174,8 +195,10 @@ Deno.serve(async (req) => {
                     await base44.asServiceRole.integrations.Core.SendEmail({
                         to: existingUser.email,
                         from_name: 'Ruumr 🏠',
-                        subject: `${inviterName} רוצה אותך בצוות ב-Ruumr`,
-                        body: buildRequestEmailHtml({ inviterName, inviteeName }),
+                        subject: inviteeLang === 'en'
+                            ? `${inviterName} wants you on their team on Ruumr`
+                            : `${inviterName} רוצה אותך בצוות ב-Ruumr`,
+                        body: buildRequestEmailHtml({ inviterName, inviteeName, lang: inviteeLang }),
                     });
                 } catch (err) {
                     console.error('Team request email failed:', err?.message);
@@ -225,12 +248,18 @@ Deno.serve(async (req) => {
             await sr.Profile.update(inviterProfile.id, { team_members: members });
         }
 
+        // The invited friend has no profile yet, so the invite follows the
+        // inviter's language (their saved choice, otherwise their marketplace).
+        const inviteLang = resolveRecipientLanguage(inviterProfile);
+
         try {
             await base44.asServiceRole.integrations.Core.SendEmail({
                 to: inviteeEmail,
                 from_name: 'Ruumr 🏠',
-                subject: `${inviterName} רוצה אותך בצוות ב-Ruumr`,
-                body: buildInviteEmailHtml({ inviterName, inviteeName }),
+                subject: inviteLang === 'en'
+                    ? `${inviterName} wants you on their team on Ruumr`
+                    : `${inviterName} רוצה אותך בצוות ב-Ruumr`,
+                body: buildInviteEmailHtml({ inviterName, inviteeName, lang: inviteLang }),
             });
         } catch (err) {
             console.error('Team invite email failed:', err?.message);

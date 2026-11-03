@@ -38,6 +38,14 @@
       "default": "IL",
       "description": "User's country marketplace. IL = Israel, GB = UK and Ireland, US = United States and every other country. Discovery is isolated by this field so users only see profiles from their own marketplace, and it sets the currency (\u20aa or $) and city list. Existing profiles created before this field default to IL."
     },
+    "language": {
+      "type": "string",
+      "enum": [
+        "he",
+        "en"
+      ],
+      "description": "Language the user picked in the app. Emails and push notifications are sent in this language; when empty they follow the marketplace region (IL = Hebrew, every other region = English)."
+    },
     "about_me": {
       "type": "string"
     },
