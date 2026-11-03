@@ -136,3 +136,9 @@ export function getMarketRegion() {
 export function showsReligiousPreferences() {
   return resolveRegion() === REGIONS.ISRAEL;
 }
+
+// The rooms feed is not live in the US marketplace yet: visitors there see
+// only the roommate feed (people who post rooms still appear as people).
+export function showsRoomFeed() {
+  return getMarketRegion() !== REGIONS.US;
+}

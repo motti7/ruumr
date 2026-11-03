@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { REGIONS, detectRegion, getMarketRegion } from '../src/lib/userRegion';
-import { getMarketCities, US_CITIES, ISRAEL_CITIES } from '../src/lib/marketCities';
-import { getBudgetConfig, getCurrencySymbol, getProfileCurrency, formatBudget, US_BUDGET, ISRAEL_BUDGET } from '../src/lib/marketCurrency';
+import { REGIONS, detectRegion, getMarketRegion, showsRoomFeed } from '../../src/lib/userRegion';
+import { getMarketCities, US_CITIES, ISRAEL_CITIES } from '../../src/lib/marketCities';
+import { getBudgetConfig, getCurrencySymbol, getProfileCurrency, formatBudget, US_BUDGET, ISRAEL_BUDGET } from '../../src/lib/marketCurrency';
 
 const setTimezone = (timeZone, language = 'en-US') => {
   const original = Intl.DateTimeFormat;
@@ -65,6 +65,20 @@ describe('US marketplace', () => {
     setTimezone('Asia/Jerusalem', 'he-IL');
     expect(getBudgetConfig()).toEqual(ISRAEL_BUDGET);
     expect(getCurrencySymbol()).toBe('₪');
+  });
+
+  it('hides the rooms feed in the US market and keeps it elsewhere', () => {
+    window.localStorage.clear();
+    setTimezone('America/Los_Angeles');
+    expect(showsRoomFeed()).toBe(false);
+
+    window.localStorage.clear();
+    setTimezone('Asia/Jerusalem', 'he-IL');
+    expect(showsRoomFeed()).toBe(true);
+
+    window.localStorage.clear();
+    setTimezone('Europe/Dublin', 'en-IE');
+    expect(showsRoomFeed()).toBe(true);
   });
 
   it('renders a profile budget in that profile market currency', () => {
