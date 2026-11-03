@@ -1,4 +1,6 @@
-const cities = ['תל אביב','ירושלים','חיפה','באר שבע'];
+// Mirrors getRoomCityOptions in src/lib/marketCities.js: the Israeli launch
+// cities plus the US marketplace cities.
+const cities = ['תל אביב','ירושלים','חיפה','באר שבע','Atlanta','Austin','Boston','Chicago','Denver','Los Angeles','Miami','Philadelphia','Phoenix','San Diego','Seattle','Washington DC'];
 // Public room previews must not expose contact details, including in free text.
 export function guestRoomValue(value) {
   if (Array.isArray(value)) return value.map(guestRoomValue);
@@ -19,7 +21,7 @@ export function validateRoom(body) {
   const date=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s;
   if(!cities.includes(body.city)||!['regular','sublet'].includes(body.rental_type))throw new Error('יש לבחור עיר וסוג שכירות.');
   if(!Number.isFinite(price)||price<1||price>100000||!Number.isInteger(roommates)||roommates<0||roommates>30)throw new Error('יש להזין מחיר ומספר שותפים תקינים.');
-  if(!/^0(?:5\d|7\d|[23489])\d{7}$/.test(phone))throw new Error('יש להזין מספר טלפון ישראלי תקין.');
+  if(!/^\+?\d{7,15}$/.test(phone))throw new Error('יש להזין מספר טלפון תקין.');
   if(!date(entry)||(body.rental_type==='sublet'&&(!date(end)||end<=entry)))throw new Error('יש לבחור תאריכים תקינים; בסאבלט תאריך הסיום חייב להיות אחרי הכניסה.');
   if(!Array.isArray(body.photos)||body.photos.length<1||body.photos.length>8||body.photos.some(p=>{try{const u=new URL(p);return typeof p!=='string'||p.length>3000||u.protocol!=='https:'||!!u.username||!!u.password;}catch{return true;}}))throw new Error('נדרשת לפחות תמונה אחת, ועד 8 תמונות.');
   if(body.owner_confirmation!==true)throw new Error('יש לאשר הרשאה לפרסום החדר ופרטי הקשר.');

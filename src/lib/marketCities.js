@@ -36,35 +36,13 @@ export const UK_CITIES = [
   "Winchester", "Salisbury", "Durham", "Lincoln", "Carlisle"
 ].sort();
 
-// Major US metros, NYC boroughs and the college towns roommates search most.
+// The US marketplace launches with a focused list of metros rather than every
+// city: the profile search area, the Discover filter and the room publisher form
+// all offer exactly these.
 export const US_CITIES = [
-  "New York", "Brooklyn", "Queens", "Manhattan", "Bronx", "Jersey City", "Hoboken",
-  "Los Angeles", "San Francisco", "San Diego", "San Jose", "Oakland", "Berkeley",
-  "Sacramento", "Fresno", "Long Beach", "Santa Monica", "Pasadena", "Irvine",
-  "Anaheim", "Riverside", "Santa Ana", "Chula Vista", "Stockton", "Modesto",
-  "Chicago", "Evanston", "Naperville", "Houston", "Austin", "Dallas", "Fort Worth",
-  "Arlington", "Plano", "Irving", "Garland", "San Antonio", "El Paso", "Corpus Christi",
-  "Laredo", "College Station", "Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale",
-  "Gilbert", "Glendale", "Tempe", "Philadelphia", "Pittsburgh", "Allentown",
-  "Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg", "Tallahassee",
-  "Gainesville", "Hialeah", "Fort Lauderdale", "Columbus", "Cleveland", "Cincinnati",
-  "Toledo", "Indianapolis", "Fort Wayne", "Seattle", "Spokane", "Tacoma", "Denver",
-  "Boulder", "Colorado Springs", "Aurora", "Washington", "Arlington", "Boston",
-  "Cambridge", "Somerville", "Worcester", "Baltimore", "Annapolis", "Nashville",
-  "Memphis", "Knoxville", "Chattanooga", "Louisville", "Lexington", "Detroit",
-  "Ann Arbor", "Grand Rapids", "Lansing", "Milwaukee", "Madison", "Minneapolis",
-  "Saint Paul", "Oklahoma City", "Tulsa", "Portland", "Eugene", "Las Vegas",
-  "Henderson", "Reno", "Albuquerque", "Santa Fe", "Salt Lake City", "Provo",
-  "Atlanta", "Athens", "Savannah", "Charlotte", "Raleigh", "Durham", "Greensboro",
-  "Chapel Hill", "Asheville", "Richmond", "Virginia Beach", "Norfolk", "New Orleans",
-  "Baton Rouge", "Birmingham", "Huntsville", "Kansas City", "St. Louis", "Omaha",
-  "Lincoln", "Des Moines", "Wichita", "Boise", "Honolulu", "Anchorage", "Buffalo",
-  "Rochester", "Syracuse", "Albany", "Newark", "New Haven", "Hartford",
-  "Providence", "Portland", "Burlington", "Wilmington", "Charleston", "Columbia",
-  "Little Rock", "Jackson", "Jacksonville", "Fayetteville", "Greenville",
-  "Colorado Springs", "Fort Collins", "Sioux Falls", "Fargo", "Billings",
-  "Cheyenne", "Vancouver", "Salem", "Bakersfield", "Oxnard", "Fontana"
-].sort();
+  "Atlanta", "Austin", "Boston", "Chicago", "Denver", "Los Angeles", "Miami",
+  "Philadelphia", "Phoenix", "San Diego", "Seattle", "Washington DC"
+];
 
 const CITY_LISTS = {
   [REGIONS.ISRAEL]: ISRAEL_CITIES,
@@ -84,4 +62,12 @@ export function getMarketCities(market = getMarketRegion()) {
 export function getMarketFilterCities(region = resolveRegion()) {
   if (region === REGIONS.ISRAEL) return ISRAEL_FILTER_CITIES;
   return getMarketCities(getMarketRegion());
+}
+
+// Cities a room listing can be published in. The backend validates against the
+// same two sets, so keep them in sync with validateRoom in roomListings.
+export const ISRAEL_ROOM_CITIES = ["תל אביב", "ירושלים", "חיפה", "באר שבע"];
+
+export function getRoomCityOptions(market = getMarketRegion()) {
+  return market === REGIONS.US ? US_CITIES : ISRAEL_ROOM_CITIES;
 }
