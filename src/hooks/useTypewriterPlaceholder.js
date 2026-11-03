@@ -32,8 +32,19 @@ const EXAMPLES_DUBLIN_EN = [
   'Corner room in a flatshare in Stoneybatter',
 ];
 
+const EXAMPLES_US_EN = [
+  'Bright room in a shared apartment',
+  'Spacious room with a balcony in Brooklyn',
+  'Quiet room in a 3-bedroom in Chicago',
+  'Large room near campus in Austin',
+  'Room in a sunny apartment in Los Angeles',
+  'Furnished room in a house in Seattle',
+  'Corner room in a shared place in Denver',
+];
+
 function pickExamples(region, language) {
   if (region === 'IE') return EXAMPLES_DUBLIN_EN;
+  if (region === 'US' || region === 'INTL') return EXAMPLES_US_EN;
   return language === 'he' ? EXAMPLES_ISRAEL_HE : EXAMPLES_ISRAEL_EN;
 }
 

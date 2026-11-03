@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getPublicProfile } from "@/functions/getPublicProfile";
 import { INTEREST_OPTIONS } from "@/lib/interests";
 import { showsReligiousPreferences } from "@/lib/userRegion";
+import { formatBudget, getProfileCurrency } from "@/lib/marketCurrency";
 
 const VIBE_LABELS = [
   "vibe_lvl_quiet",
@@ -308,7 +309,7 @@ export default function PublicProfile() {
             {typeof profile.budget_max === "number" && profile.budget_max > 0 && (
               <div className="flex items-center gap-2 text-gray-800">
                 <span className="text-sm font-bold text-gray-500">{t("public_budget")}:</span>
-                <span className="font-bold">₪{profile.budget_max.toLocaleString()} / {t("per_month_slash").replace("/", "").trim()}</span>
+                <span className="font-bold">{formatBudget(profile.budget_max, getProfileCurrency(profile.region))} / {t("per_month_slash").replace("/", "").trim()}</span>
               </div>
             )}
             {cities.length > 0 && (

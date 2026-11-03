@@ -18,6 +18,7 @@ import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesG
 import { getInterestDisplayOption, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { showsReligiousPreferences } from '@/lib/userRegion';
+import { formatBudget, getProfileCurrency } from '@/lib/marketCurrency';
 import { base44 } from '@/api/base44Client';
 import { processSwipeMatch } from '@/lib/swipeMatchProcessing';
 import { trackMixpanel } from '@/lib/mixpanelTracking';
@@ -544,7 +545,7 @@ export default function ProfileViewPage() {
             )}
             <div>
               <span className="text-gray-500 text-sm block mb-1">{t("budget_word")}</span>
-              <span className="font-semibold text-[--theme-orange]">{profile.budget_max != null ? `₪${profile.budget_max.toLocaleString()}` : '-'}</span>
+              <span className="font-semibold text-[--theme-orange]">{formatBudget(profile.budget_max, getProfileCurrency(profile.region))}</span>
             </div>
             {profile.pet_type !== 'none' && (
               <div>

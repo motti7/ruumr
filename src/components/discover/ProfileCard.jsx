@@ -13,6 +13,7 @@ import HouseholdPreferencesGrid from '@/components/profile/HouseholdPreferencesG
 import { getInterestLabel, getInterestLabelKey, normalizeInterestValues } from '@/lib/interests';
 import { getCitiesRegion, translateRegion } from '@/lib/cityToRegion';
 import { showsReligiousPreferences } from '@/lib/userRegion';
+import { getProfileCurrency } from '@/lib/marketCurrency';
 
 const ProfileDetail = ({ profile, onClose }) => {
   const { t } = useTranslation();
@@ -543,7 +544,7 @@ const ProfileCard = /** @type {any} */memo(function ProfileCard({ profile, onSwi
                             </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-5 pointer-events-none pb-36">
-                            <span className="text-white text-xl font-bold">{t("budget_per_month", { amount: profile.budget_max?.toLocaleString() })}</span>
+                            <span className="text-white text-xl font-bold">{t("budget_per_month", { amount: profile.budget_max?.toLocaleString(), currency: getProfileCurrency(profile.region) })}</span>
                             {interests.length > 0 &&
                                 <div className="flex flex-wrap gap-2 mt-3">
                                     {interests.slice(0, 4).map((interest) =>

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, MessageCircle, Trash2, X, Check } from "lucide-react";
 import SmartImage from '@/components/shared/SmartImage';
+import { getCurrencySymbol } from '@/lib/marketCurrency';
 
 const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline, onClickProfile, onClickChat, onClickCharter, matchId, matchType = "mutual", onDelete, isOpened, unreadCount = 0 }) {
   const { t, i18n } = useTranslation();
@@ -71,7 +72,7 @@ const MatchCard = /** @type {any} */ (memo(function MatchCard({ match, isOnline,
           </div>
 
           <div className="flex items-center text-gray-500 text-sm">
-            <span id={`match-budget-${matchId}`}>{t("budget_label_short", { amount: match.budget_max?.toLocaleString() })}</span>
+            <span id={`match-budget-${matchId}`}>{t("budget_label_short", { amount: match.budget_max?.toLocaleString(), currency: getCurrencySymbol() })}</span>
           </div>
         </div>
 

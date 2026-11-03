@@ -199,6 +199,9 @@ Deno.serve(async (req) => {
                 is_visible: false,
                 invite_email: inviteeEmail,
                 invited_by_user_id: inviter.id,
+                // Keep the virtual identity in the inviter's marketplace
+                // (IL / GB / US) so it surfaces in the same Discovery pool.
+                region: inviterProfile?.region || 'IL',
             });
         }
 
@@ -239,4 +242,3 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
-
