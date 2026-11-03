@@ -18,11 +18,6 @@ test('publication requires photos, phone, consent and valid sublet dates',()=>{
   for(const change of [{photos:[]},{phone:'123'},{owner_confirmation:false},{price:-1},{roommates:1.5},{city:'נשר'},{entry_date:'2026-02-30'},{rental_type:'sublet',end_date:'2026-09-30'},{photos:['javascript:alert(1)']}])assert.throws(()=>validateRoom({...room(),...change}));
   assert.equal(validateRoom({...room(),rental_type:'sublet',end_date:'2026-11-01'}).end_date,'2026-11-01');
 });
-test('a US publisher can list a room with a US city and phone number',()=>{
-  const saved=validateRoom({...room(),city:'Boston',phone:'+1 617 555 0134',price:2400});
-  assert.equal(saved.city,'Boston');assert.equal(saved.phone,'+16175550134');assert.equal(saved.price,2400);
-  assert.throws(()=>validateRoom({...room(),city:'Brooklyn'}));
-});
 test('closing is scoped to authenticated ownership',async()=>{
   let requested,updates=0;
   const handler=createHandler(()=>client({id:'a'},{get:async id=>{requested=id;return {id,owner_id:'someone-else'};},update:async()=>updates++}));

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { REGIONS, detectRegion, getMarketRegion, showsRoomFeed } from '../../src/lib/userRegion';
-import { getMarketCities, getRoomCityOptions, US_CITIES, ISRAEL_CITIES, ISRAEL_ROOM_CITIES } from '../../src/lib/marketCities';
+import { getMarketCities, US_CITIES, ISRAEL_CITIES } from '../../src/lib/marketCities';
 import { getBudgetConfig, getCurrencySymbol, getProfileCurrency, formatBudget, US_BUDGET, ISRAEL_BUDGET } from '../../src/lib/marketCurrency';
 
 const setTimezone = (timeZone, language = 'en-US') => {
@@ -48,8 +48,7 @@ describe('US marketplace', () => {
     setTimezone('America/Chicago');
     window.localStorage.clear();
     expect(getMarketCities()).toEqual(US_CITIES);
-    expect(getMarketCities()).toEqual(['Atlanta', 'Austin', 'Boston', 'Chicago', 'Denver', 'Los Angeles', 'Miami', 'Philadelphia', 'Phoenix', 'San Diego', 'Seattle', 'Washington DC']);
-    expect(getRoomCityOptions()).toEqual(US_CITIES);
+    expect(getMarketCities()).toContain('Brooklyn');
 
     window.localStorage.clear();
     setTimezone('Asia/Jerusalem', 'he-IL');

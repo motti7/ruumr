@@ -47,9 +47,6 @@ const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const RoomDetail = lazy(() => import('./pages/RoomDetail'));
 const GroupCompatibility = lazy(() => import('./pages/GroupCompatibility'));
 const GroupChat = lazy(() => import('./pages/GroupChat'));
-// Public landing page for room publishers (external link), works even while
-// the rooms feed itself is closed.
-const ListYourRoom = lazy(() => import('./pages/ListYourRoom'));
 
 const PageLoader = () => {
   const { t } = useTranslation();
@@ -109,7 +106,7 @@ const AuthenticatedApp = () => {
 
   // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered' && !['/','/Rooms','/Discover','/login','/register','/AddRoom','/RoomAccount','/ListYourRoom'].includes(location.pathname)) {
+    if (authError.type === 'user_not_registered' && !['/','/Rooms','/Discover','/login','/register'].includes(location.pathname)) {
       writeBootMarker('authenticated-app-user-not-registered');
       return <UserNotRegisteredError />;
     }
@@ -137,7 +134,6 @@ const AuthenticatedApp = () => {
         {/* Public review link — external, non-registered reviewers land here without logging in */}
         <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
         <Route path="/PublicProfile" element={<Suspense fallback={<PageLoader />}><PublicProfile /></Suspense>} />
-        <Route path="/ListYourRoom" element={<Suspense fallback={<PageLoader />}><ListYourRoom /></Suspense>} />
         <Route path="/Room/:id" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="RoomDetail"><RoomDetail /></LayoutWrapper></Suspense>} />
 
         <Route path="/Rooms" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms /></LayoutWrapper></Suspense>} />
