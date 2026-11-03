@@ -508,7 +508,7 @@ export default function OnboardingPage() {
       if (shouldVerify) {
         navigate(createPageUrl('Verification'), { state: { fromOnboarding: true } });
       } else {
-        navigate(createPageUrl('Discover'));
+        navigate(`${createPageUrl('Discover')}?view=people`);
       }
     } catch (error) {
       console.error("Failed to create profile:", error);

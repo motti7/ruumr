@@ -44,7 +44,8 @@ export default function DiscoverPage() {
   const [params, setParams] = useSearchParams();
   // The rooms feed is hidden in the US marketplace: only roommates are shown there.
   const roomFeedAvailable = showsRoomFeed();
-  const rooms = roomFeedAvailable && params.get('view') !== 'people';
+  // Roommates are the app's default view; rooms open only when explicitly chosen.
+  const rooms = roomFeedAvailable && params.get('view') === 'rooms';
   const {isAuthenticated}=useOptionalAuth();
   useEffect(()=>{if(isAuthenticated)try{sessionStorage.removeItem('ruumr_partner_auth_intent');}catch{}},[isAuthenticated]);
   const [openedRooms, setOpenedRooms] = useState(rooms);

@@ -282,8 +282,8 @@ export default function Layout({ children, currentPageName }) {
   const seenSet = new Set(seenLikeIds);
   const unseenLikesCount = pendingLikerUserIds.filter(id => !seenSet.has(id)).length;
 
-  const isRoomsContext = ['Rooms','AddRoom','RoomAccount','SavedRooms'].includes(currentPageName) || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') !== 'people');
-  const isPartnersTab = currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') === 'people';
+  const isRoomsContext = ['Rooms','AddRoom','RoomAccount','SavedRooms'].includes(currentPageName) || ((currentPageName === 'Discover' || location.pathname === '/') && new URLSearchParams(location.search).get('view') === 'rooms');
+  const isPartnersTab = currentPageName === 'Discover' && new URLSearchParams(location.search).get('view') !== 'rooms';
   const navigationItems = [
     { id: "discover", name: t("nav_discover"), path: isRoomsContext ? "/Rooms" : "/Discover?view=people", icon: Home },
     { id: "matches", name: rt("hub.messages"), path: "/Inbox", icon: MessageCircle, badgeCount: unseenMatchesCount + unseenLikesCount, messageBadge: unreadMessagesCount },
