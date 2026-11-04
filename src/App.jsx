@@ -137,9 +137,10 @@ const AuthenticatedApp = () => {
         {/* Public review link — external, non-registered reviewers land here without logging in */}
         <Route path="/WriteExternalReview" element={<Suspense fallback={<PageLoader />}><WriteExternalReview /></Suspense>} />
         <Route path="/PublicProfile" element={<Suspense fallback={<PageLoader />}><PublicProfile /></Suspense>} />
-        <Route path="/Room/:id" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="RoomDetail"><RoomDetail /></LayoutWrapper></Suspense>} />
+        {/* Rooms are behind sign-in too: a guest is sent back to the locked Discover feed. */}
+        <Route path="/Room/:id" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="RoomDetail"><RoomDetail /></LayoutWrapper></Suspense>:<Navigate to="/login" replace/>} />
 
-        <Route path="/Rooms" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms /></LayoutWrapper></Suspense>} />
+        <Route path="/Rooms" element={isAuthenticated?<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Rooms"><Rooms /></LayoutWrapper></Suspense>:<Navigate to="/Discover?view=people" replace/>} />
         <Route path="/Discover" element={<Suspense fallback={<PageLoader />}><LayoutWrapper currentPageName="Discover">{<Pages.Discover/>}</LayoutWrapper></Suspense>} />
         {/* Home is the roommates (people) experience. It requires sign-in: guests
             get the partner gate with sign-in / registration links there. Room

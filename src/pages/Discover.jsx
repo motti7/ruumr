@@ -1,7 +1,6 @@
 import RoommateAccess from '@/components/rooms/RoommateAccess';
 import { profileBoosts } from '@/api/profileBoosts';
 import { prioritizeBoostedProfiles } from '@/lib/profileBoostRanking';
-import {Link} from 'react-router-dom';
 import {roomText as rt, roomDirection, useRoomLocale} from '@/lib/room-i18n';
 import { blockedUserIds } from '@/api/userSafety';
 import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
@@ -12,6 +11,7 @@ import { User } from "@/entities/User";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileCard from "../components/discover/ProfileCard";
 import LockedProfilePreview from "../components/discover/LockedProfilePreview";
+import LockedFeedPreview from "../components/discover/LockedFeedPreview";
 import ActionButtons from "../components/discover/ActionButtons";
 import MatchAnimation from "../components/discover/MatchAnimation";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
@@ -67,12 +67,30 @@ export default function DiscoverPage() {
     event.preventDefault(); select(value);
     document.getElementById(`discover-${value}-tab`)?.focus();
   };
+  // Signed out: the whole app is closed behind sign-in. Guests get the blurred
+  // roommate feed as the very first screen, with no tabs and no rooms feed.
+  if (!isAuthenticated) {
+    return <div className="discover-with-rooms" dir={roomDirection()}>
+      <div className="fixed inset-0 w-full overflow-hidden" style={{ backgroundColor: '#EFEFEF', height: '100dvh' }}>
+        <div
+          className="absolute left-0 right-0"
+          style={{
+            top: 'calc(100px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(64px + var(--app-safe-area-bottom, env(safe-area-inset-bottom, 0px)))',
+          }}
+        >
+          <LockedFeedPreview />
+        </div>
+      </div>
+    </div>;
+  }
+
   return <div className="discover-with-rooms" dir={roomDirection()}>
     {roomFeedAvailable && <div className="discover-mode-bar"><div role="tablist" aria-label={rt("שותפים וחדרים")} onKeyDown={keyboard}>
       <button id="discover-people-tab" role="tab" aria-selected={!rooms} aria-controls="discover-people-panel" tabIndex={rooms ? -1 : 0} onClick={() => select('people')}>{rt("שותפים")}</button>
       <button id="discover-rooms-tab" role="tab" aria-selected={rooms} aria-controls="discover-rooms-panel" tabIndex={rooms ? 0 : -1} onClick={() => select('rooms')}>{rt("חדרים")}</button>
     </div></div>}
-    <section id="discover-people-panel" role="tabpanel" aria-labelledby="discover-people-tab" hidden={rooms}>{!rooms && (isAuthenticated ? <RoommateAccess><DiscoverPeoplePage/></RoommateAccess> : <div className="rr" style={{paddingTop:80}}><p>{rt('hub.partner_gate')}</p><Link className="rr-add" to="/register?next=Partner">{rt('hub.create_partner')}</Link><Link to="/login?next=Partner">{rt('hub.sign_in')}</Link></div>)}</section>
+    <section id="discover-people-panel" role="tabpanel" aria-labelledby="discover-people-tab" hidden={rooms}>{!rooms && <RoommateAccess><DiscoverPeoplePage/></RoommateAccess>}</section>
     {roomFeedAvailable && <section id="discover-rooms-panel" className="discover-rooms-panel" role="tabpanel" aria-labelledby="discover-rooms-tab" hidden={!rooms}>
       {(openedRooms || rooms) && <Suspense fallback={<p className="p-8 text-center">{rt("טוען חדרים…")}</p>}><RoomsPreview embedded /></Suspense>}
     </section>}
