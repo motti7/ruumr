@@ -22,6 +22,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Unsubscribe from '@/pages/Unsubscribe';
+import ProfileCampaign from '@/pages/ProfileCampaign';
 import SplashScreen from './components/SplashScreen';
 import PageTransition from './components/shared/PageTransition';
 import { enableSimulatorBackend } from '@/lib/simulatorBackend';
@@ -168,6 +169,7 @@ const AuthenticatedApp = () => {
             />
           ))}
           <Route path="/OurStory" element={<PageTransition><LayoutWrapper currentPageName="OurStory"><OurStory /></LayoutWrapper></PageTransition>} />
+          <Route path="/ProfileCampaign" element={<PageTransition><LayoutWrapper currentPageName="ProfileCampaign"><ProfileCampaign /></LayoutWrapper></PageTransition>} />
           <Route path="/GroupCompatibility" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupCompatibility"><GroupCompatibility /></LayoutWrapper></PageTransition></Suspense>} />
           <Route path="/GroupChat" element={<Suspense fallback={<PageLoader />}><PageTransition><LayoutWrapper currentPageName="GroupChat"><GroupChat /></LayoutWrapper></PageTransition></Suspense>} />
            <Route path="/ScrapingPilot" element={<Suspense fallback={<PageLoader />}><ScrapingPilot /></Suspense>} />
