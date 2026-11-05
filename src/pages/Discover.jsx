@@ -255,7 +255,9 @@ function DiscoverPeoplePage() {
         // classified correctly.
         const myRegion = currentUserProfile.region || 'IL';
         const theirRegion = p.region || 'IL';
-        if (myRegion !== theirRegion) return false;
+        // The app owner reviews every marketplace, so the region isolation is
+        // skipped for them (their swipes on other markets are ignored below).
+        if (!isAdminViewer && myRegion !== theirRegion) return false;
 
         // 2. Visibility Check (Default to true if undefined)
         if (p.is_visible === false) return false;
@@ -277,7 +279,7 @@ function DiscoverPeoplePage() {
         // 4. Status Matching
         // Only block if BOTH clearly have an apartment (searching for roommate for THEIR apartment)
         // If data is missing, allow.
-        if (currentUserProfile.current_status === 'has_apartment' && p.current_status === 'has_apartment') {
+        if (!isAdminViewer && currentUserProfile.current_status === 'has_apartment' && p.current_status === 'has_apartment') {
             return false;
         }
 
@@ -290,6 +292,10 @@ function DiscoverPeoplePage() {
         const theirMax = p.budget_max || 100000;
 
         const overlap = (theirMin <= myMax && theirMax >= myMin);
+
+        // A different marketplace uses a different currency and budget scale,
+        // so budget overlap is meaningless for the owner reviewing other markets.
+        if (isAdminViewer && myRegion !== theirRegion) return true;
 
         return overlap;
       });
@@ -398,6 +404,16 @@ function DiscoverPeoplePage() {
     if (currentIndex >= profiles.length || !userProfile) return;
 
     const swipedProfile = profiles[currentIndex];
+
+    // Profiles from another marketplace are shown to the app owner for review
+    // only: a swipe records nothing and creates no match, the card just moves on.
+    if ((swipedProfile.region || 'IL') !== (userProfile.region || 'IL')) {
+      setCurrentIndex(prev => prev + 1);
+      setActionFeedback(action);
+      setTimeout(() => setActionFeedback(null), 600);
+      return;
+    }
+
     const prevIndex = currentIndex;
     const swiperId = currentUserId || userProfile.user_id;
     const optimisticSwipe = { swiper_id: swiperId, swiped_id: swipedProfile.user_id, action };
